@@ -182,4 +182,4 @@ This project is built on top of [Qiskit](https://github.com/Qiskit/qiskit) which
 
 ## License
 
-[Apache 2.0 license](https://github.com/JooNiv/CircuitKnitting/blob/main/LICENSE)
+[Apache 2.0 license](https://github.com/JooNiv/QCut/blob/main/LICENSE)
