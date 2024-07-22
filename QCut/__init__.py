@@ -26,7 +26,7 @@ __all__ = ["run_and_expectation_value", "transpile_experiments", "estimate_expec
             "get_pauli_list", "insert_meassure_prepare_channel", "run", "run_cut_circuit", "run_experiments",
             "separate_sub_circuits", "cut_wire", "identity_qpd"]
 
-VERSION = 0.1
+VERSION = "0.0.1"
 
 
 

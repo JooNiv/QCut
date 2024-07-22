@@ -6,8 +6,7 @@ from qiskit import QuantumCircuit, transpile
 from qiskit_experiments.library import LocalReadoutError
 
 
-
-def transpile_experiments(experiment_circuits: list, backend) -> list:
+def transpile_experiments(experiment_circuits: list, backend) -> list:  # noqa: ANN001
     """Transpile experiment circuits.
 
     Args:
@@ -30,8 +29,9 @@ def transpile_experiments(experiment_circuits: list, backend) -> list:
 
     return transpiled_experiments
 
-def run_and_expectation_value(circuit: QuantumCircuit, backend, observables: list, shots: int, mitigate = False) -> tuple[dict, list]:  # noqa: ANN001
-    """Run circuit and calculate expectation value
+def run_and_expectation_value(circuit: QuantumCircuit, backend, observables: list, shots: int,  # noqa: ANN001
+                              mitigate = False) -> tuple[dict, list]:  # noqa: ANN001, FBT002
+    """Run circuit and calculate expectation value.
 
     Args:
     ----
@@ -63,14 +63,14 @@ def run_and_expectation_value(circuit: QuantumCircuit, backend, observables: lis
 
     return counts, exps
 
-def expectation_values(counts: dict, observables: list, shots: int) -> list:  # noqa: FBT001, FBT002
+def expectation_values(counts: dict, observables: list, shots: int) -> list:
     """Calculate expectration values.
 
     Args:
     ----
         counts: counts obtained from circuit run
         observables: observables to calculate expectation values for
-        shost: number of shots
+        shots: number of shots
         probs
 
     Returns:
@@ -100,7 +100,7 @@ def run_on_backend(circuit: QuantumCircuit, backend, shots: int) -> dict:  # noq
     ----
         circuit: a quantum circuit to be executed
         backend: backend to use for executing circuit
-        shost: number of shots
+        shots: number of shots
         probs
 
     Returns:

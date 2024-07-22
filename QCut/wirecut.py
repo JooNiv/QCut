@@ -14,8 +14,8 @@ from qiskit.transpiler.passes import RemoveBarriers
 from qiskit_aer import AerSimulator
 from qiskit_experiments.library import LocalReadoutError
 
-from CircuitKnitting.helmi_wirecut import transpile_experiments
-from CircuitKnitting.identity_QPD import identity_qpd as identity_QPD  # noqa: N812
+from .helmi_wirecut import transpile_experiments
+from .identity_QPD import identity_qpd as identity_QPD  # noqa: N812
 
 #Class for storing results from single sub-circuit run
 

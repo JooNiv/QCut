@@ -1,7 +1,7 @@
 """Helper finctions for circuit knitting."""
 
 import numpy as np
-from openqaoa.qaoa_components import Hamiltonian
+#from openqaoa.qaoa_components import Hamiltonian
 from qiskit.quantum_info import PauliList
 
 
@@ -29,8 +29,8 @@ def relative_error(actual: list, approx: list) -> list:
 
     return abs(approx-actual)/(abs(actual))
 
-def hamiltonian_to_strings(hamiltonian: Hamiltonian, length: int) -> dict:
-    """Convert openQAOA hamiltonian to a convenient form."""
+"""def hamiltonian_to_strings(hamiltonian: Hamiltonian, length: int) -> dict:
+    Convert openQAOA hamiltonian to a convenient form.
     terms = str(hamiltonian).split("+")
     new_string = []
     coefs = []
@@ -53,4 +53,4 @@ def hamiltonian_to_strings(hamiltonian: Hamiltonian, length: int) -> dict:
         else:
             const += float(term[:4])
 
-    return {"paulis":PauliList(new_string), "coefs": coefs, "const": const}
+    return {"paulis":PauliList(new_string), "coefs": coefs, "const": const}"""
