@@ -2,7 +2,7 @@
 
 QCut is a quantum circuit knitting package for performing wire cuts especially designed to not use reset gates or mid-circuit since on early NISQ devices they pose significant errors, if they are even available.
 
-QCut has been designed to work with IQM's qpus and tested with a IQM Adonis 5-qubit qpu. Additionally QCut is built on top of Qiskit 0.45.3 which is the current supported Qiskit version of IQM's Qiskit fork iqm\_qiskit.
+QCut has been designed to work with IQM's qpus, and therefore on the Finnish Quantum Computing Infrastructure ([FiQCI](https://fiqci.fi/)), and tested with an IQM Adonis 5-qubit qpu. Additionally, QCut is built on top of Qiskit 0.45.3 which is the current supported Qiskit version of IQM's Qiskit fork iqm\_qiskit.
 
 QCut was built as a part of a summer internship at CSC - IT Center for Science (Finnish IT Center for Science).
 
@@ -152,6 +152,29 @@ error = 0.03
 
 estimated_expectation_values = ck.run(cut_circuit, observables, error, backend, mitigate=True)
 ```
+
+## Running on IQM fake backends
+
+To use QCut with IQM's fake backends it is required to install [Qiskit IQM](https://github.com/iqm-finland/qiskit-on-iqm). QCut supports version 13.7. Installation can be done with pip:
+
+```python
+pip install qiskit-iqm
+```
+
+After installation just import the backend you want to use:
+
+```python
+from iqm.qiskit_iqm import IQMFakeAdonis()
+backend = IQMFakeAdonis()
+```
+
+## Running on FiQCI
+
+For running on real IQM hardware through the Lumi supercomputer's FiQCI partition follow the instructions [here](https://docs.csc.fi/computing/quantum-computing/helmi/running-on-helmi/). If you are used to using Qiskit on jupyter notebooks it is recommended to use the [Lumi web interface](https://docs.lumi-supercomputer.eu/runjobs/webui/).
+
+## Running on other hardware
+
+Running on other providers such as IBM is untested at the moment but as long as the hardware can be accessed with Qiskit version \< 1.0 the QCut should be compatible.
 
 ## Acknowledgements
 
