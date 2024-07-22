@@ -23,5 +23,6 @@ setup(
         "qiskit == 0.45.3",
         "numpy < 2.0.0",
         "qiskit_aer == 0.13.3",
+        "qiskit_experiments == 0.7.0",
     ],
 )
