@@ -6,13 +6,10 @@
 version: 2
 
 # Set the OS, Python version and other tools you might need
-build:
-  os: ubuntu-22.04
-  tools:
-    python: 
-      version: "3.12"
-      install:
-      - requirements: requirements.txt
+python: 
+  version: "3.12"
+  install:
+  - requirements: requirements.txt
     # You can also specify other tool versions:
     # nodejs: "19"
     # rust: "1.64"
