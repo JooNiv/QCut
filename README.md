@@ -100,7 +100,7 @@ Since QCut is a circuit knitting package the results are approximations of the a
 ```python
 backend = AerSimulator()
 error = 0.03
-results = ck.run_experiments(experiment_circuits, cut_locations, id_meas, error=error, backend=backend, mitigate=True)
+results = ck.run_experiments(experiment_circuits, cut_locations, id_meas, error=error, backend=backend)
 ```
 
 **7\. Define observables and calculate expectation values**
@@ -152,7 +152,7 @@ backend = AerSimulator()
 observables = [0,1,2, [0,2]]
 error = 0.03
 
-estimated_expectation_values = ck.run(cut_circuit, observables, error, backend, mitigate=True)
+estimated_expectation_values = ck.run(cut_circuit, observables, error, backend)
 ```
 
 ## Running on IQM fake backends
