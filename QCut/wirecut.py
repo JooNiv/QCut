@@ -544,7 +544,21 @@ def estimate_expectation_values(results: list,
                                 cut_locations: list,
                                 observables: list,
                                 error: float = 0.05) -> list:
-    """Info."""
+    """Calculate the estimated expectation values.
+
+    Args:
+    ----
+        results: results from experiment circuits
+        coefficients: list of coefficients for each subcircuit group
+        cut_locations: cut locations
+        observables: observables to calculate expectation values for
+        error: accepted error in estimation
+
+    Returns:
+    -------
+        list: expectations as a list of floats list of floats
+
+    """
     cuts = len(cut_locations)
     #number of samples neede
     samples = int(np.power(4, (2)*cuts)/np.power(error,2))
