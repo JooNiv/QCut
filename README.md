@@ -6,7 +6,7 @@ QCut has been designed to work with IQM's qpus, and therefore on the Finnish Qua
 
 QCut was built as a part of a summer internship at CSC - IT Center for Science (Finnish IT Center for Science).
 
-Check out [qcut.readthedocs.io](qcut.readthedocs.io) for documentation and more examples.
+Check out [qcut.readthedocs.io](https://qcut.readthedocs.io/en/latest/) for documentation and more examples.
 
 ## Installation
 
