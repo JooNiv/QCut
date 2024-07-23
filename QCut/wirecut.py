@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from copy import deepcopy
-from itertools import groupby, product
+from itertools import product
 from typing import Any
 
 import numpy as np
@@ -88,8 +88,8 @@ def get_cut_location(circuit: QuantumCircuit) -> list[Any, int]:
         index += 1
     return cut_locations
 
-def get_bounds(cut_locations: list) -> list:
-    """Get the bounds for subcircuits as qubit indices.
+"""def get_bounds(cut_locations: list) -> list:
+    Get the bounds for subcircuits as qubit indices.
 
     Args:
     ----
@@ -98,10 +98,6 @@ def get_bounds(cut_locations: list) -> list:
     Returns:
     -------
         Bounds as a list.
-
-    """
-    # remember exactly how this works again xd rename varibales to
-    # be more descriptive
 
     inds = ([([x[0][0][1], x[0][1][1]], x[1]) for x in cut_locations])
     inds_new = []
@@ -117,6 +113,45 @@ def get_bounds(cut_locations: list) -> list:
     bounds = []
     for i in test_list:
         bounds.append(max([min(x[0]) for x in i[0][1]]))  # noqa: PERF401
+
+    return bounds"""
+
+#Placeholder function that works for now for the test cases i could think of.
+#Probably not universal and can be made better.
+def get_bounds(cut_locations: list) -> list:
+    """Get the bounds for subcircuits as qubit indices.
+
+    Args:
+    ----
+        cut_locations: Locations of the cuts as a list.
+
+    Returns:
+    -------
+        Bounds as a list.
+
+    """
+    inds = ([([x[0][0][1], x[0][1][1]], x[1]) for x in cut_locations])
+
+    inds_new = inds
+
+    test = []
+    count = 0
+    for i, num in enumerate(inds_new):
+        if i == 0:
+            test.append([inds_new[i][0]])
+            count += 1
+        elif ((num[0][0] > inds_new[i-1][0][1] and num[0][1] == inds_new[i-1][0][0]) or
+            (num[0][0] == inds_new[i-1][0][1] and num[0][1] > inds_new[i-1][0][0]) or
+            (num[0][0] > inds_new[i-1][0][0] and num[0][0] < inds_new[i-1][0][1] and num[0][1] > inds_new[i-1][0][1]) or
+            (num[0][0] < inds_new[i-1][0][0] and num[0][0] > inds_new[i-1][0][1] and num[0][1] < inds_new[i-1][0][1])):
+            test[count-1].append(num[0])
+        else:
+            test.append([num[0]])
+            count += 1
+
+    bounds = []
+    for i in test:
+        bounds.append(max([min(x) for x in i]))  # noqa: PERF401
 
     return bounds
 

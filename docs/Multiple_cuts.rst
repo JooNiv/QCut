@@ -31,3 +31,8 @@ automatically handled by QCut.
    error = 0.03
 
    estimated_expectation_values = ck.run(cut_circuit, observables, error, backend)
+
+More examples on how the cuts should be placed.
+------------
+
+
