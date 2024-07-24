@@ -7,6 +7,7 @@ be careful to properly allocate the extra qubits needed by wire-cutting.
 **1: Define the circuit we want to cut**
 
 .. code:: python
+
     circuit = QuantumCircuit(4)
     circuit.h(0)
     circuit.cx(0,1)
@@ -15,6 +16,8 @@ be careful to properly allocate the extra qubits needed by wire-cutting.
     circuit.measure_all()
 
     circuit.draw("mpl")
+
+.. image:: /images/circ6.png
 
 Now let's say we want to cut this circuit into two pieces with two cuts.
 
@@ -53,6 +56,7 @@ More examples on how the cuts should be placed.
 Initial circuit:
 
 .. code:: python
+
     circuit = QuantumCircuit(4)
     circuit.h(0)
     circuit.cx(0,1)
@@ -63,9 +67,12 @@ Initial circuit:
 
     circuit.draw("mpl")
 
+.. image:: /images/circ9.png
+
 Circuit with cuts:
 
 .. code:: python
+
     cut_circuit = QuantumCircuit(6)
     cut_circuit.h(0)
     cut_circuit.cx(0,1)
@@ -77,6 +84,8 @@ Circuit with cuts:
 
     cut_circuit.draw("mpl")
 
+.. image:: /images/circ10.png
+
 **2: Two cosequent cuts on same wire**
 
 Under construction. Once done the cuts should be placed as follows:
@@ -84,6 +93,7 @@ Under construction. Once done the cuts should be placed as follows:
 Initial cirucit:
 
 .. code:: python
+
     circuit = QuantumCircuit(3)
     circuit.h(0)
     circuit.cx(0,1)
@@ -93,9 +103,12 @@ Initial cirucit:
 
     circuit.draw("mpl")
 
+.. image:: /images/circ7.png
+
 Circuit with cuts:
 
 .. code:: python
+
     cut_circuit = QuantumCircuit(5)
     cut_circuit.h(0)
     cut_circuit.cx(0,1)
@@ -105,3 +118,5 @@ Circuit with cuts:
     cut_circuit.cx(0,2)
 
     cut_circuit.draw("mpl")
+
+.. image:: /images/circ8.png
