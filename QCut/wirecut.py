@@ -264,7 +264,7 @@ def build_subcircuit(current_bound: int,
     qr = QuantumRegister(current_bound - previous_bound + 1)
 
     #define classical registers for obsrvable - and qpd - measurements
-    crqpd = ClassicalRegister(clbits, "c")
+    crqpd = ClassicalRegister(clbits, "qpd")
     cr = ClassicalRegister(current_bound - previous_bound + 1 - clbits, "meas")
 
     subcircuit = QuantumCircuit(qr, crqpd, cr) #initialize the subcircuit
@@ -323,7 +323,7 @@ def separate_sub_circuits(circuit: QuantumCircuit, sub_circuit_qubit_bounds: lis
             qr = QuantumRegister(sub_circuit_qubit_bounds[current_subcircuit] - previous_bound)
 
             #define classical registers for obsrvable - and qpd - measurement
-            crqpd = ClassicalRegister(clbits, "c")
+            crqpd = ClassicalRegister(clbits, "qpd")
             cr = ClassicalRegister(sub_circuit_qubit_bounds[current_subcircuit] - previous_bound - clbits, "meas")
 
             subcircuit = QuantumCircuit(qr, crqpd, cr) #initialize the subcircuit
