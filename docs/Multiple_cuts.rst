@@ -4,6 +4,9 @@ Multiple cuts
 Performing multiple cuts works the exact same way as a single cut. Since eats cut introduces an extra qubit one just has to 
 be careful to properly allocate the extra qubits needed by wire-cutting.
 
+Cutting to more than two parts
+------------
+
 **1: Define the circuit we want to cut**
 
 .. code:: python

@@ -1,3 +1,4 @@
+"""Config."""  # noqa: INP001
 # Configuration file for the Sphinx documentation builder.
 #
 # For the full list of built-in configuration values, see the documentation:
@@ -9,10 +10,10 @@
 import os
 import sys
 
-sys.path.insert(0, os.path.abspath(".."))
+sys.path.insert(0, os.path.abspath(".."))  # noqa: PTH100
 
 project = "QCut"
-copyright = "2024, Joonas Nivala"
+copyright = "2024, Joonas Nivala"  # noqa: A001
 author = "Joonas Nivala"
 release = "0.0.6"
 
