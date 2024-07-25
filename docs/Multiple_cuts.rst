@@ -91,8 +91,6 @@ Circuit with cuts:
 
 **2: Two cosequent cuts on same wire**
 
-Under construction. Once done the cuts should be placed as follows:
-
 Initial cirucit:
 
 .. code:: python

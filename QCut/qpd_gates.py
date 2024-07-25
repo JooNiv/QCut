@@ -1,4 +1,4 @@
-"""Helper gates for circuit knitting."""  # noqa: N999
+"""Helper gates for circuit knitting."""
 
 from qiskit import QuantumCircuit
 

@@ -1,8 +1,9 @@
 """Helper finctions for circuit knitting."""
 
 import numpy as np
-#from openqaoa.qaoa_components import Hamiltonian
-from qiskit.quantum_info import PauliList
+
+#from openqaoa.qaoa_components import Hamiltonian  # noqa: ERA001
+#from qiskit.quantum_info import PauliList  # noqa: ERA001
 
 
 def isclose(a: float, b: float) -> bool:

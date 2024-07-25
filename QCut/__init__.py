@@ -1,11 +1,11 @@
 """Init circuit knitting."""  # noqa: N999
 
-from .helmi_wirecut import (
+from .backend_utility import (
     run_and_expectation_value,
     transpile_experiments,
 )
-from .helperGates import cut_wire
-from .identity_QPD import identity_qpd
+from .identity_qpd import identity_qpd
+from .qpd_gates import cut_wire
 from .wirecut import (
     estimate_expectation_values,
     get_bounds,
