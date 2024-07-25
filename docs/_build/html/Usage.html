@@ -243,6 +243,12 @@ version 13.7. Installation can be done with pip:</p>
 <span class="n">backend</span> <span class="o">=</span> <span class="n">IQMFakeAdonis</span><span class="p">()</span>
 </pre></div>
 </div>
+<p>To tranpile experiment circuits to the backend one can either manually call qiskit
+transpile in a loop or use QCut’s <code class="docutils literal notranslate"><span class="pre">transpile_experiments()</span></code> function:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">transpiled_experiments</span> <span class="o">=</span> <span class="n">ck</span><span class="o">.</span><span class="n">transpile_experiments</span><span class="p">(</span><span class="n">experiment_circuits</span><span class="p">,</span> <span class="n">backend</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Now one can proceed like before.</p>
 </section>
 <section id="running-on-fiqci">
 <h2>Running on FiQCI<a class="headerlink" href="#running-on-fiqci" title="Link to this heading"></a></h2>

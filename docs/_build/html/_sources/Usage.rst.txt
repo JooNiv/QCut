@@ -203,6 +203,15 @@ After installation just import the backend you want to use:
    from iqm.qiskit_iqm import IQMFakeAdonis()
    backend = IQMFakeAdonis()
 
+To tranpile experiment circuits to the backend one can either manually call qiskit
+transpile in a loop or use QCut's ``transpile_experiments()`` function:
+
+.. code:: python
+
+   transpiled_experiments = ck.transpile_experiments(experiment_circuits, backend)
+
+Now one can proceed like before.
+
 Running on FiQCI
 ----------------
 
