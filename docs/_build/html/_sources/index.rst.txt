@@ -14,6 +14,6 @@ A package for performing circuit knitting with wire cuts on hardware with no res
 
    Usage
    Examples
-   modules
+   source/modules
    Acknowledgement
    License

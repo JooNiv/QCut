@@ -45,7 +45,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../Usage.html">Usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../Examples.html">Examples on using QCut</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../QCut.html">Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../source/modules.html">QCut</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../Acknowledgement.html">Acknowledgements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../License.html">License</a></li>
 </ul>
@@ -84,7 +84,7 @@
 
 
 <div class="viewcode-block" id="transpile_experiments">
-<a class="viewcode-back" href="../../QCut.html#QCut.backend_utility.transpile_experiments">[docs]</a>
+<a class="viewcode-back" href="../../source/QCut.html#QCut.backend_utility.transpile_experiments">[docs]</a>
 <span class="k">def</span> <span class="nf">transpile_experiments</span><span class="p">(</span><span class="n">experiment_circuits</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">backend</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>  <span class="c1"># noqa: ANN001</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Transpile experiment circuits.</span>
 
@@ -110,7 +110,7 @@
 
 
 <div class="viewcode-block" id="run_and_expectation_value">
-<a class="viewcode-back" href="../../QCut.html#QCut.backend_utility.run_and_expectation_value">[docs]</a>
+<a class="viewcode-back" href="../../source/QCut.html#QCut.backend_utility.run_and_expectation_value">[docs]</a>
 <span class="k">def</span> <span class="nf">run_and_expectation_value</span><span class="p">(</span><span class="n">circuit</span><span class="p">:</span> <span class="n">QuantumCircuit</span><span class="p">,</span> <span class="n">backend</span><span class="p">,</span> <span class="n">observables</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">shots</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>  <span class="c1"># noqa: ANN001</span>
                               <span class="n">mitigate</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">dict</span><span class="p">,</span> <span class="nb">list</span><span class="p">]:</span>  <span class="c1"># noqa: ANN001, FBT002</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Run circuit and calculate expectation value.</span>
@@ -147,7 +147,7 @@
 
 
 <div class="viewcode-block" id="expectation_values">
-<a class="viewcode-back" href="../../QCut.html#QCut.backend_utility.expectation_values">[docs]</a>
+<a class="viewcode-back" href="../../source/QCut.html#QCut.backend_utility.expectation_values">[docs]</a>
 <span class="k">def</span> <span class="nf">expectation_values</span><span class="p">(</span><span class="n">counts</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">observables</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">shots</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate expectration values.</span>
 
@@ -180,7 +180,7 @@
 
 
 <div class="viewcode-block" id="run_on_backend">
-<a class="viewcode-back" href="../../QCut.html#QCut.backend_utility.run_on_backend">[docs]</a>
+<a class="viewcode-back" href="../../source/QCut.html#QCut.backend_utility.run_on_backend">[docs]</a>
 <span class="k">def</span> <span class="nf">run_on_backend</span><span class="p">(</span><span class="n">circuit</span><span class="p">:</span> <span class="n">QuantumCircuit</span><span class="p">,</span> <span class="n">backend</span><span class="p">,</span> <span class="n">shots</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>  <span class="c1"># noqa: ANN001</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Run circuit on backend.</span>
 

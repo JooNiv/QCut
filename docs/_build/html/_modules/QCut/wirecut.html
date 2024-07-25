@@ -45,7 +45,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../Usage.html">Usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../Examples.html">Examples on using QCut</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../QCut.html">Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../source/modules.html">QCut</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../Acknowledgement.html">Acknowledgements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../License.html">License</a></li>
 </ul>
@@ -97,7 +97,7 @@
 <span class="c1">#Class for storing results from single sub-circuit run</span>
 
 <div class="viewcode-block" id="SubResult">
-<a class="viewcode-back" href="../../QCut.html#QCut.wirecut.SubResult">[docs]</a>
+<a class="viewcode-back" href="../../source/QCut.html#QCut.wirecut.SubResult">[docs]</a>
 <span class="k">class</span> <span class="nc">SubResult</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Storage class for easier storage/access to the results of a subcircuit.&quot;&quot;&quot;</span>
 
@@ -118,7 +118,7 @@
 
 <span class="c1">#Store total results of all sub-circuits (two for now)</span>
 <div class="viewcode-block" id="TotalResult">
-<a class="viewcode-back" href="../../QCut.html#QCut.wirecut.TotalResult">[docs]</a>
+<a class="viewcode-back" href="../../source/QCut.html#QCut.wirecut.TotalResult">[docs]</a>
 <span class="k">class</span> <span class="nc">TotalResult</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Storage class for easier access to the results of a subcircuit group.&quot;&quot;&quot;</span>
 
@@ -140,7 +140,7 @@
 
 
 <div class="viewcode-block" id="get_cut_location">
-<a class="viewcode-back" href="../../QCut.html#QCut.wirecut.get_cut_location">[docs]</a>
+<a class="viewcode-back" href="../../source/QCut.html#QCut.wirecut.get_cut_location">[docs]</a>
 <span class="k">def</span> <span class="nf">get_cut_location</span><span class="p">(</span><span class="n">circuit</span><span class="p">:</span> <span class="n">QuantumCircuit</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the locations of the cuts in the circuit.</span>
 
@@ -205,7 +205,7 @@
 <span class="c1">#Placeholder function that works for now for the test cases i could think of.</span>
 <span class="c1">#Probably not universal and can be made better.</span>
 <div class="viewcode-block" id="get_bounds">
-<a class="viewcode-back" href="../../QCut.html#QCut.wirecut.get_bounds">[docs]</a>
+<a class="viewcode-back" href="../../source/QCut.html#QCut.wirecut.get_bounds">[docs]</a>
 <span class="k">def</span> <span class="nf">get_bounds</span><span class="p">(</span><span class="n">cut_locations</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the bounds for subcircuits as qubit indices.</span>
 
@@ -245,7 +245,7 @@
 
 
 <div class="viewcode-block" id="get_locations_and_bounds">
-<a class="viewcode-back" href="../../QCut.html#QCut.wirecut.get_locations_and_bounds">[docs]</a>
+<a class="viewcode-back" href="../../source/QCut.html#QCut.wirecut.get_locations_and_bounds">[docs]</a>
 <span class="k">def</span> <span class="nf">get_locations_and_bounds</span><span class="p">(</span><span class="n">circuit</span><span class="p">:</span> <span class="n">QuantumCircuit</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">,</span> <span class="nb">list</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the locations of the cuts in the circuit and the subcircuit bounds.</span>
 
@@ -274,7 +274,7 @@
 
 <span class="c1">#Insert placeholders to the cut locations</span>
 <div class="viewcode-block" id="insert_meassure_prepare_channel">
-<a class="viewcode-back" href="../../QCut.html#QCut.wirecut.insert_meassure_prepare_channel">[docs]</a>
+<a class="viewcode-back" href="../../source/QCut.html#QCut.wirecut.insert_meassure_prepare_channel">[docs]</a>
 <span class="k">def</span> <span class="nf">insert_meassure_prepare_channel</span><span class="p">(</span><span class="n">circuit</span><span class="p">:</span> <span class="n">QuantumCircuit</span><span class="p">,</span> <span class="n">cut_locations</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">QuantumCircuit</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Insert the measure and initialize node at the cut locations.</span>
 
@@ -313,7 +313,7 @@
 
 
 <div class="viewcode-block" id="get_locations_and_bounds_and_insert_meassure_prepare_channel">
-<a class="viewcode-back" href="../../QCut.html#QCut.wirecut.get_locations_and_bounds_and_insert_meassure_prepare_channel">[docs]</a>
+<a class="viewcode-back" href="../../source/QCut.html#QCut.wirecut.get_locations_and_bounds_and_insert_meassure_prepare_channel">[docs]</a>
 <span class="k">def</span> <span class="nf">get_locations_and_bounds_and_insert_meassure_prepare_channel</span><span class="p">(</span>
         <span class="n">circuit</span><span class="p">:</span> <span class="n">QuantumCircuit</span><span class="p">,</span>
         <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">,</span> <span class="nb">list</span><span class="p">,</span> <span class="n">QuantumCircuit</span><span class="p">]:</span>
@@ -338,7 +338,7 @@
 
 
 <div class="viewcode-block" id="build_subcircuit">
-<a class="viewcode-back" href="../../QCut.html#QCut.wirecut.build_subcircuit">[docs]</a>
+<a class="viewcode-back" href="../../source/QCut.html#QCut.wirecut.build_subcircuit">[docs]</a>
 <span class="k">def</span> <span class="nf">build_subcircuit</span><span class="p">(</span><span class="n">current_bound</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
                      <span class="n">previous_bound</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
                      <span class="n">clbits</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
@@ -382,7 +382,7 @@
 
 <span class="c1">#Cuts the given circuit into two at the location of the cut marker</span>
 <div class="viewcode-block" id="separate_sub_circuits">
-<a class="viewcode-back" href="../../QCut.html#QCut.wirecut.separate_sub_circuits">[docs]</a>
+<a class="viewcode-back" href="../../source/QCut.html#QCut.wirecut.separate_sub_circuits">[docs]</a>
 <span class="k">def</span> <span class="nf">separate_sub_circuits</span><span class="p">(</span><span class="n">circuit</span><span class="p">:</span> <span class="n">QuantumCircuit</span><span class="p">,</span> <span class="n">sub_circuit_qubit_bounds</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">QuantumCircuit</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Split the circuit with measure and prepare channels into separate subcircuits.</span>
 
@@ -462,7 +462,7 @@
 
 
 <div class="viewcode-block" id="get_qpd_combinations">
-<a class="viewcode-back" href="../../QCut.html#QCut.wirecut.get_qpd_combinations">[docs]</a>
+<a class="viewcode-back" href="../../source/QCut.html#QCut.wirecut.get_qpd_combinations">[docs]</a>
 <span class="k">def</span> <span class="nf">get_qpd_combinations</span><span class="p">(</span><span class="n">cut_locations</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get all possible combinations of the QPD operations so that each combination has len(cutLocations) elements.</span>
 
@@ -478,7 +478,7 @@
 
 
 <div class="viewcode-block" id="get_qpd_insert_order">
-<a class="viewcode-back" href="../../QCut.html#QCut.wirecut.get_qpd_insert_order">[docs]</a>
+<a class="viewcode-back" href="../../source/QCut.html#QCut.wirecut.get_qpd_insert_order">[docs]</a>
 <span class="k">def</span> <span class="nf">get_qpd_insert_order</span><span class="p">(</span><span class="n">cut_locations</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the order in which to insert qpd operations.</span>
 
@@ -501,7 +501,7 @@
 
 
 <div class="viewcode-block" id="get_experiment_circuits">
-<a class="viewcode-back" href="../../QCut.html#QCut.wirecut.get_experiment_circuits">[docs]</a>
+<a class="viewcode-back" href="../../source/QCut.html#QCut.wirecut.get_experiment_circuits">[docs]</a>
 <span class="k">def</span> <span class="nf">get_experiment_circuits</span><span class="p">(</span><span class="n">subcircuits</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">QuantumCircuit</span><span class="p">],</span> <span class="n">cut_locations</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">,</span> <span class="nb">list</span><span class="p">,</span> <span class="nb">list</span><span class="p">]:</span>  <span class="c1"># noqa: C901, PLR0912, PLR0915</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate all possible experiment circuits by inserting QPD operations on measure/initialize nodes.</span>
 
@@ -617,7 +617,7 @@
 
 
 <div class="viewcode-block" id="run_experiments">
-<a class="viewcode-back" href="../../QCut.html#QCut.wirecut.run_experiments">[docs]</a>
+<a class="viewcode-back" href="../../source/QCut.html#QCut.wirecut.run_experiments">[docs]</a>
 <span class="k">def</span> <span class="nf">run_experiments</span><span class="p">(</span><span class="n">experiment_circuits</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>  <span class="c1"># noqa: PLR0913</span>
                     <span class="n">cut_locations</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
                     <span class="n">id_meas</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
@@ -677,7 +677,7 @@
 
 
 <div class="viewcode-block" id="process_results">
-<a class="viewcode-back" href="../../QCut.html#QCut.wirecut.process_results">[docs]</a>
+<a class="viewcode-back" href="../../source/QCut.html#QCut.wirecut.process_results">[docs]</a>
 <span class="k">def</span> <span class="nf">process_results</span><span class="p">(</span><span class="n">results</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">id_meas</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Transform results with post processing function {0,1} -&gt; [-1, 1].</span>
 
@@ -720,7 +720,7 @@
 <span class="c1">#Calculate the approx expectation values for the original circuit</span>
 <span class="c1">#Soon hopefully more than Z-observables</span>
 <div class="viewcode-block" id="estimate_expectation_values">
-<a class="viewcode-back" href="../../QCut.html#QCut.wirecut.estimate_expectation_values">[docs]</a>
+<a class="viewcode-back" href="../../source/QCut.html#QCut.wirecut.estimate_expectation_values">[docs]</a>
 <span class="k">def</span> <span class="nf">estimate_expectation_values</span><span class="p">(</span><span class="n">results</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
                                 <span class="n">coefficients</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
                                 <span class="n">cut_locations</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
@@ -760,7 +760,7 @@
 
 
 <div class="viewcode-block" id="get_sub_expectation_values">
-<a class="viewcode-back" href="../../QCut.html#QCut.wirecut.get_sub_expectation_values">[docs]</a>
+<a class="viewcode-back" href="../../source/QCut.html#QCut.wirecut.get_sub_expectation_values">[docs]</a>
 <span class="k">def</span> <span class="nf">get_sub_expectation_values</span><span class="p">(</span><span class="n">experiment_run</span><span class="p">:</span> <span class="n">TotalResult</span><span class="p">,</span> <span class="n">observables</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">shots</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate sub expectation value for the result.</span>
 
@@ -809,7 +809,7 @@
 
 
 <div class="viewcode-block" id="get_locations_and_subcircuits">
-<a class="viewcode-back" href="../../QCut.html#QCut.wirecut.get_locations_and_subcircuits">[docs]</a>
+<a class="viewcode-back" href="../../source/QCut.html#QCut.wirecut.get_locations_and_subcircuits">[docs]</a>
 <span class="k">def</span> <span class="nf">get_locations_and_subcircuits</span><span class="p">(</span><span class="n">circuit</span><span class="p">:</span> <span class="n">QuantumCircuit</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">,</span> <span class="nb">list</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get cut locations and subcircuits with placeholder operations.</span>
 
@@ -832,7 +832,7 @@
 
 
 <div class="viewcode-block" id="run_cut_circuit">
-<a class="viewcode-back" href="../../QCut.html#QCut.wirecut.run_cut_circuit">[docs]</a>
+<a class="viewcode-back" href="../../source/QCut.html#QCut.wirecut.run_cut_circuit">[docs]</a>
 <span class="k">def</span> <span class="nf">run_cut_circuit</span><span class="p">(</span><span class="n">subcircuits</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>  <span class="c1"># noqa: PLR0913</span>
                     <span class="n">cut_locations</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
                     <span class="n">observables</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
@@ -865,7 +865,7 @@
 
 
 <div class="viewcode-block" id="get_pauli_list">
-<a class="viewcode-back" href="../../QCut.html#QCut.wirecut.get_pauli_list">[docs]</a>
+<a class="viewcode-back" href="../../source/QCut.html#QCut.wirecut.get_pauli_list">[docs]</a>
 <span class="k">def</span> <span class="nf">get_pauli_list</span><span class="p">(</span><span class="n">input_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PauliList</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Transform list of observable indices to Paulilist of Z observables.</span>
 
@@ -895,7 +895,7 @@
 
 
 <div class="viewcode-block" id="run">
-<a class="viewcode-back" href="../../QCut.html#QCut.wirecut.run">[docs]</a>
+<a class="viewcode-back" href="../../source/QCut.html#QCut.wirecut.run">[docs]</a>
 <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="n">circuit</span><span class="p">:</span> <span class="n">QuantumCircuit</span><span class="p">,</span>
         <span class="n">observables</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
         <span class="n">error</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.05</span><span class="p">,</span>
