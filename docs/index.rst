@@ -12,4 +12,7 @@ A package for performing circuit knitting with wire cuts on hardware with no res
    :maxdepth: 2
    :caption: Contents:
 
-   source/modules
+   Usage
+   Examples
+   Acknowledgement
+   License
