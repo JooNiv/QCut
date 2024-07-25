@@ -1,7 +1,7 @@
-QCut
+Modules
 ====
 
 .. toctree::
    :maxdepth: 4
 
-   README
+   QCut

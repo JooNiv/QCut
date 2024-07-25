@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Methods &mdash; QCut 0.0.7 documentation</title>
+  <title>QCut &mdash; QCut 0.0.7 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
@@ -22,7 +22,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Acknowledgements" href="Acknowledgement.html" />
-    <link rel="prev" title="Readout error mitigation" href="REM.html" /> 
+    <link rel="prev" title="Modules" href="modules.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -48,60 +48,63 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="Usage.html">Usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Examples.html">Examples on using QCut</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Methods</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#submodules">Submodules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-QCut.backend_utility">QCut.backend_utility module</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#QCut.backend_utility.expectation_values"><code class="docutils literal notranslate"><span class="pre">expectation_values()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#QCut.backend_utility.run_and_expectation_value"><code class="docutils literal notranslate"><span class="pre">run_and_expectation_value()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#QCut.backend_utility.run_on_backend"><code class="docutils literal notranslate"><span class="pre">run_on_backend()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#QCut.backend_utility.transpile_experiments"><code class="docutils literal notranslate"><span class="pre">transpile_experiments()</span></code></a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">Modules</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">QCut</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-QCut.backend_utility">QCut.backend_utility module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#QCut.backend_utility.expectation_values"><code class="docutils literal notranslate"><span class="pre">expectation_values()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#QCut.backend_utility.run_and_expectation_value"><code class="docutils literal notranslate"><span class="pre">run_and_expectation_value()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#QCut.backend_utility.run_on_backend"><code class="docutils literal notranslate"><span class="pre">run_on_backend()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#QCut.backend_utility.transpile_experiments"><code class="docutils literal notranslate"><span class="pre">transpile_experiments()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#module-QCut.helper">QCut.helper module</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#QCut.helper.isclose"><code class="docutils literal notranslate"><span class="pre">isclose()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#QCut.helper.relative_error"><code class="docutils literal notranslate"><span class="pre">relative_error()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-QCut.helper">QCut.helper module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#QCut.helper.isclose"><code class="docutils literal notranslate"><span class="pre">isclose()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#QCut.helper.relative_error"><code class="docutils literal notranslate"><span class="pre">relative_error()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#module-QCut.qpd_gates">QCut.qpd_gates module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-QCut.identity_qpd">QCut.identity_qpd module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-QCut.wirecut">QCut.wirecut module</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#QCut.wirecut.SubResult"><code class="docutils literal notranslate"><span class="pre">SubResult</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#QCut.wirecut.TotalResult"><code class="docutils literal notranslate"><span class="pre">TotalResult</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#QCut.wirecut.build_subcircuit"><code class="docutils literal notranslate"><span class="pre">build_subcircuit()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#QCut.wirecut.estimate_expectation_values"><code class="docutils literal notranslate"><span class="pre">estimate_expectation_values()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#QCut.wirecut.get_bounds"><code class="docutils literal notranslate"><span class="pre">get_bounds()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#QCut.wirecut.get_cut_location"><code class="docutils literal notranslate"><span class="pre">get_cut_location()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#QCut.wirecut.get_experiment_circuits"><code class="docutils literal notranslate"><span class="pre">get_experiment_circuits()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#QCut.wirecut.get_locations_and_bounds"><code class="docutils literal notranslate"><span class="pre">get_locations_and_bounds()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#QCut.wirecut.get_locations_and_bounds_and_insert_meassure_prepare_channel"><code class="docutils literal notranslate"><span class="pre">get_locations_and_bounds_and_insert_meassure_prepare_channel()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#QCut.wirecut.get_locations_and_subcircuits"><code class="docutils literal notranslate"><span class="pre">get_locations_and_subcircuits()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#QCut.wirecut.get_pauli_list"><code class="docutils literal notranslate"><span class="pre">get_pauli_list()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#QCut.wirecut.get_qpd_combinations"><code class="docutils literal notranslate"><span class="pre">get_qpd_combinations()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#QCut.wirecut.get_qpd_insert_order"><code class="docutils literal notranslate"><span class="pre">get_qpd_insert_order()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#QCut.wirecut.get_sub_expectation_values"><code class="docutils literal notranslate"><span class="pre">get_sub_expectation_values()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#QCut.wirecut.insert_meassure_prepare_channel"><code class="docutils literal notranslate"><span class="pre">insert_meassure_prepare_channel()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#QCut.wirecut.process_results"><code class="docutils literal notranslate"><span class="pre">process_results()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#QCut.wirecut.run"><code class="docutils literal notranslate"><span class="pre">run()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#QCut.wirecut.run_cut_circuit"><code class="docutils literal notranslate"><span class="pre">run_cut_circuit()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#QCut.wirecut.run_experiments"><code class="docutils literal notranslate"><span class="pre">run_experiments()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#QCut.wirecut.separate_sub_circuits"><code class="docutils literal notranslate"><span class="pre">separate_sub_circuits()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-QCut.qpd_gates">QCut.qpd_gates module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-QCut.identity_qpd">QCut.identity_qpd module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-QCut.wirecut">QCut.wirecut module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#QCut.wirecut.SubResult"><code class="docutils literal notranslate"><span class="pre">SubResult</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#QCut.wirecut.TotalResult"><code class="docutils literal notranslate"><span class="pre">TotalResult</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#QCut.wirecut.build_subcircuit"><code class="docutils literal notranslate"><span class="pre">build_subcircuit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#QCut.wirecut.estimate_expectation_values"><code class="docutils literal notranslate"><span class="pre">estimate_expectation_values()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#QCut.wirecut.get_bounds"><code class="docutils literal notranslate"><span class="pre">get_bounds()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#QCut.wirecut.get_cut_location"><code class="docutils literal notranslate"><span class="pre">get_cut_location()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#QCut.wirecut.get_experiment_circuits"><code class="docutils literal notranslate"><span class="pre">get_experiment_circuits()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#QCut.wirecut.get_locations_and_bounds"><code class="docutils literal notranslate"><span class="pre">get_locations_and_bounds()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#QCut.wirecut.get_locations_and_bounds_and_insert_meassure_prepare_channel"><code class="docutils literal notranslate"><span class="pre">get_locations_and_bounds_and_insert_meassure_prepare_channel()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#QCut.wirecut.get_locations_and_subcircuits"><code class="docutils literal notranslate"><span class="pre">get_locations_and_subcircuits()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#QCut.wirecut.get_pauli_list"><code class="docutils literal notranslate"><span class="pre">get_pauli_list()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#QCut.wirecut.get_qpd_combinations"><code class="docutils literal notranslate"><span class="pre">get_qpd_combinations()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#QCut.wirecut.get_qpd_insert_order"><code class="docutils literal notranslate"><span class="pre">get_qpd_insert_order()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#QCut.wirecut.get_sub_expectation_values"><code class="docutils literal notranslate"><span class="pre">get_sub_expectation_values()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#QCut.wirecut.insert_meassure_prepare_channel"><code class="docutils literal notranslate"><span class="pre">insert_meassure_prepare_channel()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#QCut.wirecut.process_results"><code class="docutils literal notranslate"><span class="pre">process_results()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#QCut.wirecut.run"><code class="docutils literal notranslate"><span class="pre">run()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#QCut.wirecut.run_cut_circuit"><code class="docutils literal notranslate"><span class="pre">run_cut_circuit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#QCut.wirecut.run_experiments"><code class="docutils literal notranslate"><span class="pre">run_experiments()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#QCut.wirecut.separate_sub_circuits"><code class="docutils literal notranslate"><span class="pre">separate_sub_circuits()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#module-QCut">Module contents</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#QCut.estimate_expectation_values"><code class="docutils literal notranslate"><span class="pre">estimate_expectation_values()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#QCut.get_bounds"><code class="docutils literal notranslate"><span class="pre">get_bounds()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#QCut.get_cut_location"><code class="docutils literal notranslate"><span class="pre">get_cut_location()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#QCut.get_experiment_circuits"><code class="docutils literal notranslate"><span class="pre">get_experiment_circuits()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#QCut.get_locations_and_bounds"><code class="docutils literal notranslate"><span class="pre">get_locations_and_bounds()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#QCut.get_locations_and_subcircuits"><code class="docutils literal notranslate"><span class="pre">get_locations_and_subcircuits()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#QCut.get_pauli_list"><code class="docutils literal notranslate"><span class="pre">get_pauli_list()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#QCut.insert_meassure_prepare_channel"><code class="docutils literal notranslate"><span class="pre">insert_meassure_prepare_channel()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#QCut.run"><code class="docutils literal notranslate"><span class="pre">run()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#QCut.run_and_expectation_value"><code class="docutils literal notranslate"><span class="pre">run_and_expectation_value()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#QCut.run_cut_circuit"><code class="docutils literal notranslate"><span class="pre">run_cut_circuit()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#QCut.run_experiments"><code class="docutils literal notranslate"><span class="pre">run_experiments()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#QCut.separate_sub_circuits"><code class="docutils literal notranslate"><span class="pre">separate_sub_circuits()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#QCut.transpile_experiments"><code class="docutils literal notranslate"><span class="pre">transpile_experiments()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-QCut">Module contents</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#QCut.estimate_expectation_values"><code class="docutils literal notranslate"><span class="pre">estimate_expectation_values()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#QCut.get_bounds"><code class="docutils literal notranslate"><span class="pre">get_bounds()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#QCut.get_cut_location"><code class="docutils literal notranslate"><span class="pre">get_cut_location()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#QCut.get_experiment_circuits"><code class="docutils literal notranslate"><span class="pre">get_experiment_circuits()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#QCut.get_locations_and_bounds"><code class="docutils literal notranslate"><span class="pre">get_locations_and_bounds()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#QCut.get_locations_and_subcircuits"><code class="docutils literal notranslate"><span class="pre">get_locations_and_subcircuits()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#QCut.get_pauli_list"><code class="docutils literal notranslate"><span class="pre">get_pauli_list()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#QCut.insert_meassure_prepare_channel"><code class="docutils literal notranslate"><span class="pre">insert_meassure_prepare_channel()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#QCut.run"><code class="docutils literal notranslate"><span class="pre">run()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#QCut.run_and_expectation_value"><code class="docutils literal notranslate"><span class="pre">run_and_expectation_value()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#QCut.run_cut_circuit"><code class="docutils literal notranslate"><span class="pre">run_cut_circuit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#QCut.run_experiments"><code class="docutils literal notranslate"><span class="pre">run_experiments()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#QCut.separate_sub_circuits"><code class="docutils literal notranslate"><span class="pre">separate_sub_circuits()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#QCut.transpile_experiments"><code class="docutils literal notranslate"><span class="pre">transpile_experiments()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -124,7 +127,8 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Methods</li>
+          <li class="breadcrumb-item"><a href="modules.html">Modules</a></li>
+      <li class="breadcrumb-item active">QCut</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/QCut.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -134,8 +138,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="methods">
-<h1>Methods<a class="headerlink" href="#methods" title="Link to this heading"></a></h1>
+  <section id="qcut">
+<h1>QCut<a class="headerlink" href="#qcut" title="Link to this heading"></a></h1>
 <section id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
 </section>
@@ -939,7 +943,7 @@ backend: backend to transpile to</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="REM.html" class="btn btn-neutral float-left" title="Readout error mitigation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="modules.html" class="btn btn-neutral float-left" title="Modules" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="Acknowledgement.html" class="btn btn-neutral float-right" title="Acknowledgements" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
