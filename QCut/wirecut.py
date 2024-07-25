@@ -403,7 +403,7 @@ def get_experiment_circuits(subcircuits: list[QuantumCircuit], cut_locations: li
         experimentCircuits: list of experiment circuits.
         coefficients: sign coefficients for each circuit.
         id_meas: list of index pointers to results that need additional post-processing due to
-                dentity basis measurement.
+        identity basis measurement.
 
     """
     qpd_combinations = get_qpd_combinations(cut_locations) #generate the QPD operation combinations

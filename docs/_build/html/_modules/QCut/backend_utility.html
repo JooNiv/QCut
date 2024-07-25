@@ -84,7 +84,7 @@
 
 
 <div class="viewcode-block" id="transpile_experiments">
-<a class="viewcode-back" href="../../QCut.html#QCut.transpile_experiments">[docs]</a>
+<a class="viewcode-back" href="../../QCut.html#QCut.backend_utility.transpile_experiments">[docs]</a>
 <span class="k">def</span> <span class="nf">transpile_experiments</span><span class="p">(</span><span class="n">experiment_circuits</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">backend</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>  <span class="c1"># noqa: ANN001</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Transpile experiment circuits.</span>
 
@@ -110,7 +110,7 @@
 
 
 <div class="viewcode-block" id="run_and_expectation_value">
-<a class="viewcode-back" href="../../QCut.html#QCut.run_and_expectation_value">[docs]</a>
+<a class="viewcode-back" href="../../QCut.html#QCut.backend_utility.run_and_expectation_value">[docs]</a>
 <span class="k">def</span> <span class="nf">run_and_expectation_value</span><span class="p">(</span><span class="n">circuit</span><span class="p">:</span> <span class="n">QuantumCircuit</span><span class="p">,</span> <span class="n">backend</span><span class="p">,</span> <span class="n">observables</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">shots</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>  <span class="c1"># noqa: ANN001</span>
                               <span class="n">mitigate</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">dict</span><span class="p">,</span> <span class="nb">list</span><span class="p">]:</span>  <span class="c1"># noqa: ANN001, FBT002</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Run circuit and calculate expectation value.</span>
@@ -146,6 +146,8 @@
     <span class="k">return</span> <span class="n">counts</span><span class="p">,</span> <span class="n">exps</span></div>
 
 
+<div class="viewcode-block" id="expectation_values">
+<a class="viewcode-back" href="../../QCut.html#QCut.backend_utility.expectation_values">[docs]</a>
 <span class="k">def</span> <span class="nf">expectation_values</span><span class="p">(</span><span class="n">counts</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">observables</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">shots</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate expectration values.</span>
 
@@ -174,8 +176,11 @@
                 <span class="n">exps</span><span class="p">[</span><span class="n">sub</span><span class="p">]</span> <span class="o">+=</span> <span class="n">i</span><span class="p">[</span><span class="s2">&quot;meas&quot;</span><span class="p">][</span><span class="n">z</span><span class="p">]</span><span class="o">*</span><span class="n">i</span><span class="p">[</span><span class="s2">&quot;count&quot;</span><span class="p">]</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">exps</span><span class="p">[</span><span class="n">sub</span><span class="p">]</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">([</span><span class="n">i</span><span class="p">[</span><span class="s2">&quot;meas&quot;</span><span class="p">][</span><span class="n">zi</span><span class="p">]</span> <span class="k">for</span> <span class="n">zi</span> <span class="ow">in</span> <span class="n">z</span><span class="p">])</span><span class="o">*</span><span class="n">i</span><span class="p">[</span><span class="s2">&quot;count&quot;</span><span class="p">]</span>
-    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">exps</span><span class="p">)</span> <span class="o">/</span> <span class="n">shots</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">exps</span><span class="p">)</span> <span class="o">/</span> <span class="n">shots</span></div>
 
+
+<div class="viewcode-block" id="run_on_backend">
+<a class="viewcode-back" href="../../QCut.html#QCut.backend_utility.run_on_backend">[docs]</a>
 <span class="k">def</span> <span class="nf">run_on_backend</span><span class="p">(</span><span class="n">circuit</span><span class="p">:</span> <span class="n">QuantumCircuit</span><span class="p">,</span> <span class="n">backend</span><span class="p">,</span> <span class="n">shots</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>  <span class="c1"># noqa: ANN001</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Run circuit on backend.</span>
 
@@ -193,7 +198,8 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">job</span> <span class="o">=</span> <span class="n">backend</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">circuit</span><span class="p">,</span> <span class="n">shots</span><span class="o">=</span><span class="n">shots</span><span class="p">)</span>
     <span class="n">result</span> <span class="o">=</span> <span class="n">job</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
-    <span class="k">return</span> <span class="n">result</span><span class="o">.</span><span class="n">get_counts</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">result</span><span class="o">.</span><span class="n">get_counts</span><span class="p">()</span></div>
+
 </pre></div>
 
            </div>

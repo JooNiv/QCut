@@ -4,8 +4,8 @@ Methods
 Submodules
 ----------
 
-QCut.helmi\_wirecut module
---------------------------
+QCut.backend\_utility module
+-----------------------------
 
 .. automodule:: QCut.backend_utility
    :members:
@@ -20,7 +20,7 @@ QCut.helper module
    :undoc-members:
    :show-inheritance:
 
-QCut.helperGates module
+QCut.qpd\_gates module
 -----------------------
 
 .. automodule:: QCut.qpd_gates
@@ -28,7 +28,7 @@ QCut.helperGates module
    :undoc-members:
    :show-inheritance:
 
-QCut.identity\_QPD module
+QCut.identity\_qpd module
 -------------------------
 
 .. automodule:: QCut.identity_qpd
