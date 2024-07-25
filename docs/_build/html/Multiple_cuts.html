@@ -56,7 +56,6 @@
 <li class="toctree-l2"><a class="reference internal" href="REM.html">Readout error mitigation</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="source/modules.html">QCut</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Acknowledgement.html">Acknowledgements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="License.html">License</a></li>
 </ul>
@@ -104,7 +103,7 @@ be careful to properly allocate the extra qubits needed by wire-cutting.</p>
 </pre></div>
 </div>
 <img alt="_images/circ6.png" src="_images/circ6.png" />
-<p>Now let’s say we want to cut this circuit into two pieces with two cuts.</p>
+<p>Now let’s say we want to cut this circuit into three pieces with two cuts.</p>
 <p><strong>2: Insert cut_wire operations to the circuit to denote where we want
 to cut the circuit</strong></p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cut_circuit</span> <span class="o">=</span> <span class="n">QuantumCircuit</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span>
@@ -127,10 +126,11 @@ to cut the circuit</strong></p>
 <span class="n">estimated_expectation_values</span> <span class="o">=</span> <span class="n">ck</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">cut_circuit</span><span class="p">,</span> <span class="n">observables</span><span class="p">,</span> <span class="n">error</span><span class="p">,</span> <span class="n">backend</span><span class="p">)</span>
 </pre></div>
 </div>
+<p>Click <a class="reference download internal" download="" href="_downloads/48618ca34154d5871c546d331486c237/QCutCutToThreeParts.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">here</span></code></a> to download example notebook.</p>
 </section>
 <section id="more-examples-on-how-the-cuts-should-be-placed">
 <h2>More examples on how the cuts should be placed.<a class="headerlink" href="#more-examples-on-how-the-cuts-should-be-placed" title="Link to this heading"></a></h2>
-<p><strong>1: Cutting two consequent wires</strong></p>
+<p><strong>1: Cutting two subsequent wires</strong></p>
 <p>Initial circuit:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">circuit</span> <span class="o">=</span> <span class="n">QuantumCircuit</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
 <span class="n">circuit</span><span class="o">.</span><span class="n">h</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
@@ -158,6 +158,7 @@ to cut the circuit</strong></p>
 </pre></div>
 </div>
 <img alt="_images/circ10.png" src="_images/circ10.png" />
+<p>Click <a class="reference download internal" download="" href="_downloads/b51d77b13183c9aae3004abf6f7904d9/QCutCutSubsequentWires.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">here</span></code></a> to download example notebook.</p>
 <p><strong>2: Two consequent cuts on the same wire</strong></p>
 <p>Initial cirucit:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">circuit</span> <span class="o">=</span> <span class="n">QuantumCircuit</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
@@ -184,6 +185,7 @@ to cut the circuit</strong></p>
 </pre></div>
 </div>
 <img alt="_images/circ8.png" src="_images/circ8.png" />
+<p>Click <a class="reference download internal" download="" href="_downloads/3757eb81f1df3a8aa0c22cbbf078e3a6/QCutMultipleCutsOnSingleWire.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">here</span></code></a> to download example notebook.</p>
 </section>
 </section>
 

@@ -22,7 +22,7 @@ Cutting to more than two parts
 
 .. image:: /images/circ6.png
 
-Now let's say we want to cut this circuit into two pieces with two cuts.
+Now let's say we want to cut this circuit into three pieces with two cuts.
 
 **2: Insert cut_wire operations to the circuit to denote where we want
 to cut the circuit**
@@ -51,10 +51,12 @@ to cut the circuit**
 
    estimated_expectation_values = ck.run(cut_circuit, observables, error, backend)
 
+Click :download:`here </_static/QCutCutToThreeParts.ipynb>` to download example notebook.
+
 More examples on how the cuts should be placed.
 ------------
 
-**1: Cutting two consequent wires**
+**1: Cutting two subsequent wires**
 
 Initial circuit:
 
@@ -89,6 +91,8 @@ Circuit with cuts:
 
 .. image:: /images/circ10.png
 
+Click :download:`here </_static/QCutCutSubsequentWires.ipynb>` to download example notebook.
+
 **2: Two consequent cuts on the same wire**
 
 Initial cirucit:
@@ -121,3 +125,5 @@ Circuit with cuts:
     cut_circuit.draw("mpl")
 
 .. image:: /images/circ8.png
+
+Click :download:`here </_static/QCutMultipleCutsOnSingleWire.ipynb>` to download example notebook.

@@ -165,9 +165,7 @@ As we can see QCut is able to accurately reconstruct the expectation
 values. (Note that since this is a probabilistic method the results vary
 a bit each run)
 
-To download the Jupyter Notebook file, click the link below:
-
-:download:`Download notebook.ipynb </_static/QCutBasicUsage.ipynb>`
+Click :download:`here </_static/QCutBasicUsage.ipynb>` to download example notebook.
 
 
 Basic usage shorthand
