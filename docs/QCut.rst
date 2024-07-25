@@ -1,4 +1,4 @@
-QCut
+Methods
 ============
 
 Submodules

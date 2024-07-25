@@ -89,7 +89,7 @@ Circuit with cuts:
 
 .. image:: /images/circ10.png
 
-**2: Two cosequent cuts on same wire**
+**2: Two consequent cuts on the same wire**
 
 Initial cirucit:
 
