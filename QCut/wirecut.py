@@ -534,31 +534,36 @@ def run_experiments(experiment_circuits: list,  # noqa: PLR0913
 
     results = [0]*(len(experiment_circuits))
 
-    count = -1
-    for subcircuit_group in experiment_circuits:
-        count += 1
-        sub_result = []
+    for count, subcircuit_group in enumerate(experiment_circuits):
+        sub_result = [backend.run(i, shots=samples).result().get_counts() for i in subcircuit_group]
         if mitigate:
-            for circ in subcircuit_group:
-                counts = backend.run(circ, shots=samples).result().get_counts()
-                q = list(counts.keys())
+            qss = set()
+            for res in sub_result:
+                q = list(res.keys())
+                qs = len(q[0].replace(" ", ""))
+                qss.add(qs)
+
+            mitigators = {qs: LocalReadoutError(list(range(qs))).run(backend)
+                          .analysis_results("Local Readout Mitigator").value
+                          for qs in qss}
+
+            for ind, res in enumerate(sub_result):
+                q = list(res.keys())
                 qs = list(range(len(q[0].replace(" ", ""))))
-                exp = LocalReadoutError(qs)
-                exp.analysis.set_options(verbose=False)
-                result = exp.run(backend)
-                mitigator = result.analysis_results("Local Readout Mitigator").value
-                meas_bits = len(circ.cregs[1]) if len(circ.cregs) > 1 else len(circ.cregs[0])
-                mitigated_quasi_probs = mitigator.quasi_probabilities(counts)
+                mitigator = mitigators[len(qs)]
+                meas_bits = len(q[0].split(" ")[0])
+                mitigated_quasi_probs = mitigator.quasi_probabilities(res)
                 probs_test = {f"{int(old_key):0{len(qs)}b}"[::-1][:meas_bits] + " " +
                               f"{int(old_key):0{len(qs)}b}"[::-1][meas_bits:]:
                               mitigated_quasi_probs[old_key]*samples if mitigated_quasi_probs[old_key] > 0 else 0
                                     for old_key in mitigated_quasi_probs}
-                sub_result.append(probs_test)
-        else:
-            sub_result = [backend.run(i, shots=samples).result().get_counts() for i in subcircuit_group]
+                sub_result[ind] = probs_test
 
         results[count] = sub_result
+
+        sub_result = []
     return process_results(results, id_meas)
+
 
 def process_results(results: list, id_meas: list) -> list:
     """Transform results with post processing function {0,1} -> [-1, 1].
