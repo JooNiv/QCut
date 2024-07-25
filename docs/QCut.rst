@@ -7,7 +7,7 @@ Submodules
 QCut.helmi\_wirecut module
 --------------------------
 
-.. automodule:: QCut.helmi_wirecut
+.. automodule:: QCut.backend_utility
    :members:
    :undoc-members:
    :show-inheritance:
@@ -23,7 +23,7 @@ QCut.helper module
 QCut.helperGates module
 -----------------------
 
-.. automodule:: QCut.helperGates
+.. automodule:: QCut.qpd_gates
    :members:
    :undoc-members:
    :show-inheritance:
@@ -31,7 +31,7 @@ QCut.helperGates module
 QCut.identity\_QPD module
 -------------------------
 
-.. automodule:: QCut.identity_QPD
+.. automodule:: QCut.identity_qpd
    :members:
    :undoc-members:
    :show-inheritance:

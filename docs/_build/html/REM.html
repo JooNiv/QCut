@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>License &mdash; QCut 0.0.7 documentation</title>
+  <title>Readout error mitigation &mdash; QCut 0.0.7 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
@@ -21,7 +21,8 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="prev" title="Acknowledgements" href="Acknowledgement.html" /> 
+    <link rel="next" title="Methods" href="QCut.html" />
+    <link rel="prev" title="Multiple cuts" href="Multiple_cuts.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -46,10 +47,14 @@
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="Usage.html">Usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Examples.html">Examples on using QCut</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="Examples.html">Examples on using QCut</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Multiple_cuts.html">Multiple cuts</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Readout error mitigation</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="QCut.html">Methods</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Acknowledgement.html">Acknowledgements</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="License.html">License</a></li>
 </ul>
 
         </div>
@@ -66,9 +71,10 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">License</li>
+          <li class="breadcrumb-item"><a href="Examples.html">Examples on using QCut</a></li>
+      <li class="breadcrumb-item active">Readout error mitigation</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="_sources/License.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/REM.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -76,17 +82,26 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="license">
-<h1>License<a class="headerlink" href="#license" title="Link to this heading"></a></h1>
-<p><a class="reference external" href="https://github.com/JooNiv/QCut/blob/main/LICENSE">Apache 2.0
-license</a></p>
+  <section id="readout-error-mitigation">
+<h1>Readout error mitigation<a class="headerlink" href="#readout-error-mitigation" title="Link to this heading"></a></h1>
+<p>QCut comes with an optional readout error mitigation flag for <code class="docutils literal notranslate"><span class="pre">run_experiments()</span></code>.
+To use readout error mitigation one only needs to set <code class="docutils literal notranslate"><span class="pre">mitgate=True</span></code>.</p>
+<p>Now the mitigated circuit knitting sequence can be executed with:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">backend</span> <span class="o">=</span> <span class="n">AerSimulator</span><span class="p">()</span>
+<span class="n">observables</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">]]</span>
+<span class="n">error</span> <span class="o">=</span> <span class="mf">0.03</span>
+
+<span class="n">estimated_expectation_values</span> <span class="o">=</span> <span class="n">ck</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">cut_circuit</span><span class="p">,</span> <span class="n">observables</span><span class="p">,</span> <span class="n">error</span><span class="p">,</span> <span class="n">backend</span><span class="p">,</span> <span class="n">mitigate</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
 </section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="Acknowledgement.html" class="btn btn-neutral float-left" title="Acknowledgements" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Multiple_cuts.html" class="btn btn-neutral float-left" title="Multiple cuts" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="QCut.html" class="btn btn-neutral float-right" title="Methods" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

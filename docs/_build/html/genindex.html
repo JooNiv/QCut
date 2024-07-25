@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Index &mdash; QCut 0.0.5 documentation</title>
+  <title>Index &mdash; QCut 0.0.7 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
@@ -14,7 +14,7 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=282f96c0"></script>
+        <script src="_static/documentation_options.js?v=bbaf98b3"></script>
         <script src="_static/doctools.js?v=9a2dae69"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -44,7 +44,8 @@
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="Usage.html">Usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples.html">Examples on using QCut</a></li>
+<li class="toctree-l1"><a class="reference internal" href="QCut.html">Methods</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Acknowledgement.html">Acknowledgements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="License.html">License</a></li>
 </ul>
@@ -107,7 +108,7 @@
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="QCut.html#QCut.helmi_wirecut.expectation_values">expectation_values() (in module QCut.helmi_wirecut)</a>
+      <li><a href="QCut.html#QCut.backend_utility.expectation_values">expectation_values() (in module QCut.backend_utility)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -157,6 +158,8 @@
       </ul></li>
       <li><a href="QCut.html#QCut.wirecut.get_qpd_combinations">get_qpd_combinations() (in module QCut.wirecut)</a>
 </li>
+      <li><a href="QCut.html#QCut.wirecut.get_qpd_insert_order">get_qpd_insert_order() (in module QCut.wirecut)</a>
+</li>
       <li><a href="QCut.html#QCut.wirecut.get_sub_expectation_values">get_sub_expectation_values() (in module QCut.wirecut)</a>
 </li>
   </ul></td>
@@ -187,13 +190,13 @@
       <ul>
         <li><a href="QCut.html#module-QCut">QCut</a>
 </li>
-        <li><a href="QCut.html#module-QCut.helmi_wirecut">QCut.helmi_wirecut</a>
+        <li><a href="QCut.html#module-QCut.backend_utility">QCut.backend_utility</a>
 </li>
         <li><a href="QCut.html#module-QCut.helper">QCut.helper</a>
 </li>
-        <li><a href="QCut.html#module-QCut.helperGates">QCut.helperGates</a>
+        <li><a href="QCut.html#module-QCut.identity_qpd">QCut.identity_qpd</a>
 </li>
-        <li><a href="QCut.html#module-QCut.identity_QPD">QCut.identity_QPD</a>
+        <li><a href="QCut.html#module-QCut.qpd_gates">QCut.qpd_gates</a>
 </li>
         <li><a href="QCut.html#module-QCut.wirecut">QCut.wirecut</a>
 </li>
@@ -220,10 +223,10 @@
 </li>
       </ul></li>
       <li>
-    QCut.helmi_wirecut
+    QCut.backend_utility
 
       <ul>
-        <li><a href="QCut.html#module-QCut.helmi_wirecut">module</a>
+        <li><a href="QCut.html#module-QCut.backend_utility">module</a>
 </li>
       </ul></li>
       <li>
@@ -236,17 +239,17 @@
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li>
-    QCut.helperGates
+    QCut.identity_qpd
 
       <ul>
-        <li><a href="QCut.html#module-QCut.helperGates">module</a>
+        <li><a href="QCut.html#module-QCut.identity_qpd">module</a>
 </li>
       </ul></li>
       <li>
-    QCut.identity_QPD
+    QCut.qpd_gates
 
       <ul>
-        <li><a href="QCut.html#module-QCut.identity_QPD">module</a>
+        <li><a href="QCut.html#module-QCut.qpd_gates">module</a>
 </li>
       </ul></li>
       <li>
@@ -273,7 +276,7 @@
       <li><a href="QCut.html#QCut.run_and_expectation_value">run_and_expectation_value() (in module QCut)</a>
 
       <ul>
-        <li><a href="QCut.html#QCut.helmi_wirecut.run_and_expectation_value">(in module QCut.helmi_wirecut)</a>
+        <li><a href="QCut.html#QCut.backend_utility.run_and_expectation_value">(in module QCut.backend_utility)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -290,7 +293,7 @@
         <li><a href="QCut.html#QCut.wirecut.run_experiments">(in module QCut.wirecut)</a>
 </li>
       </ul></li>
-      <li><a href="QCut.html#QCut.helmi_wirecut.run_on_backend">run_on_backend() (in module QCut.helmi_wirecut)</a>
+      <li><a href="QCut.html#QCut.backend_utility.run_on_backend">run_on_backend() (in module QCut.backend_utility)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -321,7 +324,7 @@
       <li><a href="QCut.html#QCut.transpile_experiments">transpile_experiments() (in module QCut)</a>
 
       <ul>
-        <li><a href="QCut.html#QCut.helmi_wirecut.transpile_experiments">(in module QCut.helmi_wirecut)</a>
+        <li><a href="QCut.html#QCut.backend_utility.transpile_experiments">(in module QCut.backend_utility)</a>
 </li>
       </ul></li>
   </ul></td>
