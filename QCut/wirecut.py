@@ -444,7 +444,7 @@ def get_experiment_circuits(subcircuits: list[QuantumCircuit], cut_locations: li
                     qpd_qubits.append(qubit_index) #store index
                     qubits_for_operation = tuple(Qubit(subcircuit.qregs[0], qubit_index) for x in i.qubits)
 
-                    if qpd[inserted_meas_operations]["op"].name == "id-meas": #if identity measure channel
+                    if qpd[qpd_order[inserted_operations]]["op"].name == "id-meas": #if identity measure channel
 
                         #store indices
                         id_meas.append([id_meas_eperiment_index, id_meas_subcircuit_index, id_meas_bit])
@@ -469,7 +469,7 @@ def get_experiment_circuits(subcircuits: list[QuantumCircuit], cut_locations: li
                                                                        qubits=qubits_for_operation,
                                                                        clbits=[subcircuit.cregs[0][classical_bit_index]]))
 
-                        #increment classical bit counter and update coefficient
+                        #increment classical bit counter
                         classical_bit_index += 1
 
                     inserted_meas_operations += 1
