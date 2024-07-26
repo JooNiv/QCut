@@ -9,6 +9,7 @@ Further, if one wants to calculate expectation values on multiple bases for a si
 This may change in a future release.
 
 **1: X observable expectation values**
+
 .. code:: python
 
     circuit_x = QuantumCircuit(3)
@@ -63,7 +64,7 @@ In addition to the circuits above let's define the "normal" Z basis circuits.
     cut_circuit_z.draw("mpl")
 
 .. code:: python
-    
+
     observables_x = [2]
 
 Now to get expectation values for both X and Z basis for qubit 2 the QCut circuit knitting sequence can be executed on both Z and X basis circuits.
