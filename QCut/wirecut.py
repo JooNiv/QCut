@@ -16,6 +16,7 @@ from qiskit_experiments.library import LocalReadoutError
 from .backend_utility import transpile_experiments
 from .identity_qpd import identity_qpd
 
+ERROR = 0.000000000000000001
 
 class QCutError(Exception):
     """Exception raised for custom error conditions.
@@ -548,7 +549,7 @@ def get_experiment_circuits(subcircuits: list[QuantumCircuit], # noqa: C901, PLR
 def run_experiments(experiment_circuits: list,  # noqa: PLR0913
                     cut_locations: list[CutLocation],
                     id_meas: list,
-                    error: float = 0.05,
+                    shots: int = 2**12,
                     backend: int | None = None,
                     mitigate: bool = False) -> list:  # noqa: FBT001, FBT002
     """Run experiment circuits.
@@ -558,7 +559,7 @@ def run_experiments(experiment_circuits: list,  # noqa: PLR0913
         experiment_circuits: experiment circuits
         cut_locations: list of cut locations
         id_meas: list of identity basis measurement locations
-        error: accpeted error in estimation (optional)
+        shots: number of shots per circuit run (optional)
         backend: backend used for running the circuits (optional)
         mitigate: wether to use readout error mitigation or not (optional)
 
@@ -569,7 +570,7 @@ def run_experiments(experiment_circuits: list,  # noqa: PLR0913
     """
     cuts = len(cut_locations)
     #number of samples neede
-    samples = int(np.power(4, (2)*cuts)/np.power(error,2))
+    samples = int(np.power(4, (2)*cuts)/np.power(ERROR,2))
     samples = int(samples / len(experiment_circuits))
     if backend is None:
         backend = AerSimulator()
@@ -577,7 +578,7 @@ def run_experiments(experiment_circuits: list,  # noqa: PLR0913
     results = [0]*(len(experiment_circuits))
 
     for count, subcircuit_group in enumerate(experiment_circuits):
-        sub_result = [backend.run(i, shots=samples).result().get_counts() for i in subcircuit_group]
+        sub_result = [backend.run(i, shots=shots).result().get_counts() for i in subcircuit_group]
         if mitigate:
             qss = set()
             for res in sub_result:
@@ -604,16 +605,18 @@ def run_experiments(experiment_circuits: list,  # noqa: PLR0913
         results[count] = sub_result
 
         sub_result = []
-    return process_results(results, id_meas)
+    return process_results(results, id_meas, shots, samples)
 
 
-def process_results(results: list, id_meas: list) -> list:
+def process_results(results: list, id_meas: list, shots: int, samples: int) -> list:
     """Transform results with post processing function {0,1} -> [-1, 1].
 
     Args:
     ----
         results: results from experiment circuits
         id_meas: locations of identity basis measurements
+        shots: number of shots per circuit run
+        samples: number of needed samples
 
     Returns:
     -------
@@ -633,7 +636,7 @@ def process_results(results: list, id_meas: list) -> list:
 
                 #map to eigenvalues
                 result_eigenvalues = [np.array([-1 if x == "0" else 1 for x in i]) for i in separate_measurements]
-                circuit_results.append(SubResult(result_eigenvalues, count))
+                circuit_results.append(SubResult(result_eigenvalues, count/shots*samples))
             experiment_run_results.append(circuit_results)
         preocessed_results.append(TotalResult(experiment_run_results))
 
@@ -650,8 +653,7 @@ def process_results(results: list, id_meas: list) -> list:
 def estimate_expectation_values(results: list[TotalResult],
                                 coefficients: list[int],
                                 cut_locations: list[CutLocation],
-                                observables: list,
-                                error: float = 0.05) -> list:
+                                observables: list) -> list:
     """Calculate the estimated expectation values.
 
     Args:
@@ -660,7 +662,6 @@ def estimate_expectation_values(results: list[TotalResult],
         coefficients: list of coefficients for each subcircuit group
         cut_locations: cut locations
         observables: observables to calculate expectation values for
-        error: accepted error in estimation
 
     Returns:
     -------
@@ -669,7 +670,7 @@ def estimate_expectation_values(results: list[TotalResult],
     """
     cuts = len(cut_locations)
     #number of samples neede
-    samples = int(np.power(4, (2)*cuts)/np.power(error,2))
+    samples = int(np.power(4, (2)*cuts)/np.power(ERROR,2))
     shots = int(samples / len(results))
 
     #ininialize apprix expectation values of an array of ones
@@ -754,10 +755,9 @@ def get_locations_and_subcircuits(circuit: QuantumCircuit) -> tuple[list, list]:
 
     return cut_locations, subcircuits
 
-def run_cut_circuit(subcircuits: list,  # noqa: PLR0913
+def run_cut_circuit(subcircuits: list,
                     cut_locations: list,
                     observables: list,
-                    error: float = 0.05,
                     backend=AerSimulator(),  # noqa: ANN001, B008
                     mitigate: bool = False) -> list:  # noqa: FBT001, FBT002
     """After splitting the circuit run the rest of the circuit knitting sequence.
@@ -767,7 +767,6 @@ def run_cut_circuit(subcircuits: list,  # noqa: PLR0913
         subcircuits: subcircuits containing the placeholder operations
         cut_locations: list of cut locations
         observables: list of observables as qubit indices (Z observable)
-        error: allowed error in approximation (optional)
         backend: backend to use for running experiment circuits (optional)
         mitigate: wether or not to use readout error mitigation (optional)
 
@@ -779,10 +778,10 @@ def run_cut_circuit(subcircuits: list,  # noqa: PLR0913
     subexperiments, coefs, id_meas = get_experiment_circuits(subcircuits, cut_locations)
     if backend is not AerSimulator():
         subexperiments = transpile_experiments(subexperiments, backend)
-    results = run_experiments(subexperiments, cut_locations, id_meas=id_meas, error=error,
+    results = run_experiments(subexperiments, cut_locations, id_meas=id_meas,
                               backend=backend, mitigate=mitigate)
 
-    return estimate_expectation_values(results, coefs, cut_locations, observables, error)
+    return estimate_expectation_values(results, coefs, cut_locations, observables)
 
 def get_pauli_list(input_list: list, length: int) -> PauliList:
     """Transform list of observable indices to Paulilist of Z observables.
@@ -813,7 +812,6 @@ def get_pauli_list(input_list: list, length: int) -> PauliList:
 
 def run(circuit: QuantumCircuit,
         observables: list,
-        error: float = 0.05,
         backend = AerSimulator(),  # noqa: ANN001, B008
         mitigate: bool = False) -> list:  # noqa: FBT001, FBT002
     """Run the whole circuit knitting sequence with one function call.
@@ -822,7 +820,6 @@ def run(circuit: QuantumCircuit,
     ----
         circuit: circuit with cut experiments
         observables: list of observbles in the form of qubit indices (Z-obsevable).
-        error: allowed error in approximation (optional)
         backend: backend to use for running experiment circuits (optional)
         mitigate: wether or not to use readout error mitigation (optional)
 
@@ -834,5 +831,5 @@ def run(circuit: QuantumCircuit,
     circuit = circuit.copy()
     qss, circs = get_locations_and_subcircuits(circuit)
 
-    return run_cut_circuit(circs, qss, observables, error, backend, mitigate)
+    return run_cut_circuit(circs, qss, observables, backend, mitigate)
 
