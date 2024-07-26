@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Multiple cuts &mdash; QCut 0.0.7 documentation</title>
+  <title>Multiple cuts &mdash; QCut 0.0.8 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
@@ -15,7 +15,7 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=bbaf98b3"></script>
+        <script src="_static/documentation_options.js?v=53b53b71"></script>
         <script src="_static/doctools.js?v=9a2dae69"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -54,6 +54,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="REM.html">Readout error mitigation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="OtherObservables.html">Other than Z observables</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="Acknowledgement.html">Acknowledgements</a></li>
@@ -121,9 +122,8 @@ to cut the circuit</strong></p>
 <p><strong>3: Continue like with single cut</strong></p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">backend</span> <span class="o">=</span> <span class="n">AerSimulator</span><span class="p">()</span>
 <span class="n">observables</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">]]</span>
-<span class="n">error</span> <span class="o">=</span> <span class="mf">0.03</span>
 
-<span class="n">estimated_expectation_values</span> <span class="o">=</span> <span class="n">ck</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">cut_circuit</span><span class="p">,</span> <span class="n">observables</span><span class="p">,</span> <span class="n">error</span><span class="p">,</span> <span class="n">backend</span><span class="p">)</span>
+<span class="n">estimated_expectation_values</span> <span class="o">=</span> <span class="n">ck</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">cut_circuit</span><span class="p">,</span> <span class="n">observables</span><span class="p">,</span> <span class="n">backend</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Click <a class="reference download internal" download="" href="_downloads/48618ca34154d5871c546d331486c237/QCutCutToThreeParts.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">here</span></code></a> to download example notebook.</p>

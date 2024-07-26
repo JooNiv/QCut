@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>QCut &mdash; QCut 0.0.7 documentation</title>
+  <title>QCut &mdash; QCut 0.0.8 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
@@ -15,7 +15,7 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=bbaf98b3"></script>
+        <script src="_static/documentation_options.js?v=53b53b71"></script>
         <script src="_static/doctools.js?v=9a2dae69"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -208,6 +208,40 @@ a: float to be compared.</p>
 <span id="qcut-wirecut-module"></span><h2>QCut.wirecut module<a class="headerlink" href="#module-QCut.wirecut" title="Link to this heading"></a></h2>
 <p>Circuit knitting wire cut functionality.</p>
 <dl class="py class">
+<dt class="sig sig-object py" id="QCut.wirecut.CutLocation">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">QCut.wirecut.</span></span><span class="sig-name descname"><span class="pre">CutLocation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cut_location</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QCut/wirecut.html#CutLocation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.wirecut.CutLocation" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Storage class for storing cut locations.</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="QCut.wirecut.QCutError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">QCut.wirecut.</span></span><span class="sig-name descname"><span class="pre">QCutError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'An</span> <span class="pre">error</span> <span class="pre">occurred'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">code</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QCut/wirecut.html#QCutError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.wirecut.QCutError" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+<p>Exception raised for custom error conditions.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="QCut.wirecut.QCutError.message">
+<span class="sig-name descname"><span class="pre">message</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#QCut.wirecut.QCutError.message" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Explanation of the error.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="QCut.wirecut.QCutError.code">
+<span class="sig-name descname"><span class="pre">code</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optional</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#QCut.wirecut.QCutError.code" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Error code representing the error type.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="QCut.wirecut.SubResult">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">QCut.wirecut.</span></span><span class="sig-name descname"><span class="pre">SubResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">measurements</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">count</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QCut/wirecut.html#SubResult"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.wirecut.SubResult" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
@@ -246,7 +280,7 @@ subcircuit_operations: operations for subcircuit to be built.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="QCut.wirecut.estimate_expectation_values">
-<span class="sig-prename descclassname"><span class="pre">QCut.wirecut.</span></span><span class="sig-name descname"><span class="pre">estimate_expectation_values</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coefficients</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cut_locations</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">observables</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.05</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="_modules/QCut/wirecut.html#estimate_expectation_values"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.wirecut.estimate_expectation_values" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">QCut.wirecut.</span></span><span class="sig-name descname"><span class="pre">estimate_expectation_values</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="source/QCut.html#QCut.wirecut.TotalResult" title="QCut.wirecut.TotalResult"><span class="pre">TotalResult</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coefficients</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cut_locations</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="source/QCut.html#QCut.wirecut.CutLocation" title="QCut.wirecut.CutLocation"><span class="pre">CutLocation</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">observables</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="_modules/QCut/wirecut.html#estimate_expectation_values"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.wirecut.estimate_expectation_values" title="Link to this definition"></a></dt>
 <dd><p>Calculate the estimated expectation values.</p>
 <section id="id11">
 <h3>Args:<a class="headerlink" href="#id11" title="Link to this heading"></a></h3>
@@ -254,8 +288,7 @@ subcircuit_operations: operations for subcircuit to be built.</p>
 <div><p>results: results from experiment circuits
 coefficients: list of coefficients for each subcircuit group
 cut_locations: cut locations
-observables: observables to calculate expectation values for
-error: accepted error in estimation</p>
+observables: observables to calculate expectation values for</p>
 </div></blockquote>
 </section>
 <section id="id12">
@@ -268,7 +301,7 @@ error: accepted error in estimation</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="QCut.wirecut.get_bounds">
-<span class="sig-prename descclassname"><span class="pre">QCut.wirecut.</span></span><span class="sig-name descname"><span class="pre">get_bounds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cut_locations</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="_modules/QCut/wirecut.html#get_bounds"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.wirecut.get_bounds" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">QCut.wirecut.</span></span><span class="sig-name descname"><span class="pre">get_bounds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cut_locations</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="source/QCut.html#QCut.wirecut.CutLocation" title="QCut.wirecut.CutLocation"><span class="pre">CutLocation</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="_modules/QCut/wirecut.html#get_bounds"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.wirecut.get_bounds" title="Link to this definition"></a></dt>
 <dd><p>Get the bounds for subcircuits as qubit indices.</p>
 <section id="id13">
 <h3>Args:<a class="headerlink" href="#id13" title="Link to this heading"></a></h3>
@@ -286,8 +319,16 @@ error: accepted error in estimation</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="QCut.wirecut.get_cut_location">
-<span class="sig-prename descclassname"><span class="pre">QCut.wirecut.</span></span><span class="sig-name descname"><span class="pre">get_cut_location</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">circuit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">QuantumCircuit</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/QCut/wirecut.html#get_cut_location"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.wirecut.get_cut_location" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">QCut.wirecut.</span></span><span class="sig-name descname"><span class="pre">get_cut_location</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">circuit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">QuantumCircuit</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="source/QCut.html#QCut.wirecut.CutLocation" title="QCut.wirecut.CutLocation"><span class="pre">CutLocation</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/QCut/wirecut.html#get_cut_location"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.wirecut.get_cut_location" title="Link to this definition"></a></dt>
 <dd><p>Get the locations of the cuts in the circuit.</p>
+<section id="note">
+<h3>Note:<a class="headerlink" href="#note" title="Link to this heading"></a></h3>
+<blockquote>
+<div><p>get_cut_location modifies the circuit passed as an argument by removing cut_wire gates. Therefore trying to run
+it multiple times in a row on the same circuit will fail. To avoid this it is not recommended to run
+this function by itself. Instead use get_locations_and_subcircuits().</p>
+</div></blockquote>
+</section>
 <section id="id15">
 <h3>Args:<a class="headerlink" href="#id15" title="Link to this heading"></a></h3>
 <blockquote>
@@ -304,7 +345,7 @@ error: accepted error in estimation</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="QCut.wirecut.get_experiment_circuits">
-<span class="sig-prename descclassname"><span class="pre">QCut.wirecut.</span></span><span class="sig-name descname"><span class="pre">get_experiment_circuits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subcircuits</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">QuantumCircuit</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cut_locations</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/QCut/wirecut.html#get_experiment_circuits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.wirecut.get_experiment_circuits" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">QCut.wirecut.</span></span><span class="sig-name descname"><span class="pre">get_experiment_circuits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subcircuits</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">QuantumCircuit</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cut_locations</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="source/QCut.html#QCut.wirecut.CutLocation" title="QCut.wirecut.CutLocation"><span class="pre">CutLocation</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/QCut/wirecut.html#get_experiment_circuits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.wirecut.get_experiment_circuits" title="Link to this definition"></a></dt>
 <dd><p>Generate all possible experiment circuits by inserting QPD operations on measure/initialize nodes.</p>
 <section id="id17">
 <h3>Args:<a class="headerlink" href="#id17" title="Link to this heading"></a></h3>
@@ -403,7 +444,7 @@ length: number of qubits in the circuit</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="QCut.wirecut.get_qpd_combinations">
-<span class="sig-prename descclassname"><span class="pre">QCut.wirecut.</span></span><span class="sig-name descname"><span class="pre">get_qpd_combinations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cut_locations</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="_modules/QCut/wirecut.html#get_qpd_combinations"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.wirecut.get_qpd_combinations" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">QCut.wirecut.</span></span><span class="sig-name descname"><span class="pre">get_qpd_combinations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cut_locations</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="source/QCut.html#QCut.wirecut.CutLocation" title="QCut.wirecut.CutLocation"><span class="pre">CutLocation</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="_modules/QCut/wirecut.html#get_qpd_combinations"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.wirecut.get_qpd_combinations" title="Link to this definition"></a></dt>
 <dd><p>Get all possible combinations of the QPD operations so that each combination has len(cutLocations) elements.</p>
 <section id="id27">
 <h3>Args:<a class="headerlink" href="#id27" title="Link to this heading"></a></h3>
@@ -458,7 +499,7 @@ shots: number of shots</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="QCut.wirecut.insert_meassure_prepare_channel">
-<span class="sig-prename descclassname"><span class="pre">QCut.wirecut.</span></span><span class="sig-name descname"><span class="pre">insert_meassure_prepare_channel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">circuit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">QuantumCircuit</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cut_locations</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">QuantumCircuit</span></span></span><a class="reference internal" href="_modules/QCut/wirecut.html#insert_meassure_prepare_channel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.wirecut.insert_meassure_prepare_channel" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">QCut.wirecut.</span></span><span class="sig-name descname"><span class="pre">insert_meassure_prepare_channel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">circuit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">QuantumCircuit</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cut_locations</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="source/QCut.html#QCut.wirecut.CutLocation" title="QCut.wirecut.CutLocation"><span class="pre">CutLocation</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">QuantumCircuit</span></span></span><a class="reference internal" href="_modules/QCut/wirecut.html#insert_meassure_prepare_channel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.wirecut.insert_meassure_prepare_channel" title="Link to this definition"></a></dt>
 <dd><p>Insert the measure and initialize node at the cut locations.</p>
 <section id="id31">
 <h3>Args:<a class="headerlink" href="#id31" title="Link to this heading"></a></h3>
@@ -478,13 +519,15 @@ cut_locations: Locations of the cuts as a list.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="QCut.wirecut.process_results">
-<span class="sig-prename descclassname"><span class="pre">QCut.wirecut.</span></span><span class="sig-name descname"><span class="pre">process_results</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_meas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="_modules/QCut/wirecut.html#process_results"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.wirecut.process_results" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">QCut.wirecut.</span></span><span class="sig-name descname"><span class="pre">process_results</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_meas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shots</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">samples</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="_modules/QCut/wirecut.html#process_results"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.wirecut.process_results" title="Link to this definition"></a></dt>
 <dd><p>Transform results with post processing function {0,1} -&gt; [-1, 1].</p>
 <section id="id33">
 <h3>Args:<a class="headerlink" href="#id33" title="Link to this heading"></a></h3>
 <blockquote>
 <div><p>results: results from experiment circuits
-id_meas: locations of identity basis measurements</p>
+id_meas: locations of identity basis measurements
+shots: number of shots per circuit run
+samples: number of needed samples</p>
 </div></blockquote>
 </section>
 <section id="id34">
@@ -497,14 +540,13 @@ id_meas: locations of identity basis measurements</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="QCut.wirecut.run">
-<span class="sig-prename descclassname"><span class="pre">QCut.wirecut.</span></span><span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">circuit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">QuantumCircuit</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">observables</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">AerSimulator('aer_simulator')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mitigate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="_modules/QCut/wirecut.html#run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.wirecut.run" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">QCut.wirecut.</span></span><span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">circuit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">QuantumCircuit</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">observables</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">AerSimulator('aer_simulator')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mitigate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="_modules/QCut/wirecut.html#run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.wirecut.run" title="Link to this definition"></a></dt>
 <dd><p>Run the whole circuit knitting sequence with one function call.</p>
 <section id="id35">
 <h3>Args:<a class="headerlink" href="#id35" title="Link to this heading"></a></h3>
 <blockquote>
 <div><p>circuit: circuit with cut experiments
 observables: list of observbles in the form of qubit indices (Z-obsevable).
-error: allowed error in approximation (optional)
 backend: backend to use for running experiment circuits (optional)
 mitigate: wether or not to use readout error mitigation (optional)</p>
 </div></blockquote>
@@ -519,7 +561,7 @@ mitigate: wether or not to use readout error mitigation (optional)</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="QCut.wirecut.run_cut_circuit">
-<span class="sig-prename descclassname"><span class="pre">QCut.wirecut.</span></span><span class="sig-name descname"><span class="pre">run_cut_circuit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subcircuits</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cut_locations</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">observables</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">AerSimulator('aer_simulator')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mitigate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="_modules/QCut/wirecut.html#run_cut_circuit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.wirecut.run_cut_circuit" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">QCut.wirecut.</span></span><span class="sig-name descname"><span class="pre">run_cut_circuit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subcircuits</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cut_locations</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">observables</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">AerSimulator('aer_simulator')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mitigate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="_modules/QCut/wirecut.html#run_cut_circuit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.wirecut.run_cut_circuit" title="Link to this definition"></a></dt>
 <dd><p>After splitting the circuit run the rest of the circuit knitting sequence.</p>
 <section id="id37">
 <h3>Args:<a class="headerlink" href="#id37" title="Link to this heading"></a></h3>
@@ -527,7 +569,6 @@ mitigate: wether or not to use readout error mitigation (optional)</p>
 <div><p>subcircuits: subcircuits containing the placeholder operations
 cut_locations: list of cut locations
 observables: list of observables as qubit indices (Z observable)
-error: allowed error in approximation (optional)
 backend: backend to use for running experiment circuits (optional)
 mitigate: wether or not to use readout error mitigation (optional)</p>
 </div></blockquote>
@@ -542,7 +583,7 @@ mitigate: wether or not to use readout error mitigation (optional)</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="QCut.wirecut.run_experiments">
-<span class="sig-prename descclassname"><span class="pre">QCut.wirecut.</span></span><span class="sig-name descname"><span class="pre">run_experiments</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">experiment_circuits</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cut_locations</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_meas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backend</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mitigate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="_modules/QCut/wirecut.html#run_experiments"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.wirecut.run_experiments" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">QCut.wirecut.</span></span><span class="sig-name descname"><span class="pre">run_experiments</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">experiment_circuits</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cut_locations</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="source/QCut.html#QCut.wirecut.CutLocation" title="QCut.wirecut.CutLocation"><span class="pre">CutLocation</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_meas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shots</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">4096</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backend</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mitigate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="_modules/QCut/wirecut.html#run_experiments"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.wirecut.run_experiments" title="Link to this definition"></a></dt>
 <dd><p>Run experiment circuits.</p>
 <section id="id39">
 <h3>Args:<a class="headerlink" href="#id39" title="Link to this heading"></a></h3>
@@ -550,7 +591,7 @@ mitigate: wether or not to use readout error mitigation (optional)</p>
 <div><p>experiment_circuits: experiment circuits
 cut_locations: list of cut locations
 id_meas: list of identity basis measurement locations
-error: accpeted error in estimation (optional)
+shots: number of shots per circuit run (optional)
 backend: backend used for running the circuits (optional)
 mitigate: wether to use readout error mitigation or not (optional)</p>
 </div></blockquote>
@@ -589,7 +630,7 @@ sub_circuit_qubit_bounds: Bounds for subcircuits as list of qubit indices.</p>
 <p>Init circuit knitting.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="QCut.estimate_expectation_values">
-<span class="sig-prename descclassname"><span class="pre">QCut.</span></span><span class="sig-name descname"><span class="pre">estimate_expectation_values</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coefficients</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cut_locations</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">observables</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.05</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="_modules/QCut/wirecut.html#estimate_expectation_values"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.estimate_expectation_values" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">QCut.</span></span><span class="sig-name descname"><span class="pre">estimate_expectation_values</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="source/QCut.html#QCut.wirecut.TotalResult" title="QCut.wirecut.TotalResult"><span class="pre">TotalResult</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coefficients</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cut_locations</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="source/QCut.html#QCut.wirecut.CutLocation" title="QCut.wirecut.CutLocation"><span class="pre">CutLocation</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">observables</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="_modules/QCut/wirecut.html#estimate_expectation_values"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.estimate_expectation_values" title="Link to this definition"></a></dt>
 <dd><p>Calculate the estimated expectation values.</p>
 <section id="id43">
 <h3>Args:<a class="headerlink" href="#id43" title="Link to this heading"></a></h3>
@@ -597,8 +638,7 @@ sub_circuit_qubit_bounds: Bounds for subcircuits as list of qubit indices.</p>
 <div><p>results: results from experiment circuits
 coefficients: list of coefficients for each subcircuit group
 cut_locations: cut locations
-observables: observables to calculate expectation values for
-error: accepted error in estimation</p>
+observables: observables to calculate expectation values for</p>
 </div></blockquote>
 </section>
 <section id="id44">
@@ -610,54 +650,18 @@ error: accepted error in estimation</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="QCut.get_bounds">
-<span class="sig-prename descclassname"><span class="pre">QCut.</span></span><span class="sig-name descname"><span class="pre">get_bounds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cut_locations</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="_modules/QCut/wirecut.html#get_bounds"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.get_bounds" title="Link to this definition"></a></dt>
-<dd><p>Get the bounds for subcircuits as qubit indices.</p>
+<dt class="sig sig-object py" id="QCut.get_experiment_circuits">
+<span class="sig-prename descclassname"><span class="pre">QCut.</span></span><span class="sig-name descname"><span class="pre">get_experiment_circuits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subcircuits</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">QuantumCircuit</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cut_locations</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="source/QCut.html#QCut.wirecut.CutLocation" title="QCut.wirecut.CutLocation"><span class="pre">CutLocation</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/QCut/wirecut.html#get_experiment_circuits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.get_experiment_circuits" title="Link to this definition"></a></dt>
+<dd><p>Generate all possible experiment circuits by inserting QPD operations on measure/initialize nodes.</p>
 <section id="id45">
 <h3>Args:<a class="headerlink" href="#id45" title="Link to this heading"></a></h3>
-<blockquote>
-<div><p>cut_locations: Locations of the cuts as a list.</p>
-</div></blockquote>
-</section>
-<section id="id46">
-<h3>Returns:<a class="headerlink" href="#id46" title="Link to this heading"></a></h3>
-<blockquote>
-<div><p>Bounds as a list.</p>
-</div></blockquote>
-</section>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="QCut.get_cut_location">
-<span class="sig-prename descclassname"><span class="pre">QCut.</span></span><span class="sig-name descname"><span class="pre">get_cut_location</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">circuit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">QuantumCircuit</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/QCut/wirecut.html#get_cut_location"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.get_cut_location" title="Link to this definition"></a></dt>
-<dd><p>Get the locations of the cuts in the circuit.</p>
-<section id="id47">
-<h3>Args:<a class="headerlink" href="#id47" title="Link to this heading"></a></h3>
-<blockquote>
-<div><p>circuit: Quantum circuit with Move() operations.</p>
-</div></blockquote>
-</section>
-<section id="id48">
-<h3>Returns:<a class="headerlink" href="#id48" title="Link to this heading"></a></h3>
-<blockquote>
-<div><p>Locations of the cuts as a list.</p>
-</div></blockquote>
-</section>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="QCut.get_experiment_circuits">
-<span class="sig-prename descclassname"><span class="pre">QCut.</span></span><span class="sig-name descname"><span class="pre">get_experiment_circuits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subcircuits</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">QuantumCircuit</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cut_locations</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/QCut/wirecut.html#get_experiment_circuits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.get_experiment_circuits" title="Link to this definition"></a></dt>
-<dd><p>Generate all possible experiment circuits by inserting QPD operations on measure/initialize nodes.</p>
-<section id="id49">
-<h3>Args:<a class="headerlink" href="#id49" title="Link to this heading"></a></h3>
 <blockquote>
 <div><p>subcircuits: subcircuits with measure/initialize nodes.
 cut_locations: cut locations.</p>
 </div></blockquote>
 </section>
-<section id="id50">
-<h3>Returns:<a class="headerlink" href="#id50" title="Link to this heading"></a></h3>
+<section id="id46">
+<h3>Returns:<a class="headerlink" href="#id46" title="Link to this heading"></a></h3>
 <blockquote>
 <div><p>experimentCircuits: list of experiment circuits.
 coefficients: sign coefficients for each circuit.
@@ -668,35 +672,17 @@ identity basis measurement.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="QCut.get_locations_and_bounds">
-<span class="sig-prename descclassname"><span class="pre">QCut.</span></span><span class="sig-name descname"><span class="pre">get_locations_and_bounds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">circuit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">QuantumCircuit</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/QCut/wirecut.html#get_locations_and_bounds"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.get_locations_and_bounds" title="Link to this definition"></a></dt>
-<dd><p>Get the locations of the cuts in the circuit and the subcircuit bounds.</p>
-<section id="id51">
-<h3>Args:<a class="headerlink" href="#id51" title="Link to this heading"></a></h3>
-<blockquote>
-<div><p>circuit: Quantum circuit with Move() operations.</p>
-</div></blockquote>
-</section>
-<section id="id52">
-<h3>Returns:<a class="headerlink" href="#id52" title="Link to this heading"></a></h3>
-<blockquote>
-<div><p>Locations of the cuts and bounds as a list.</p>
-</div></blockquote>
-</section>
-</dd></dl>
-
-<dl class="py function">
 <dt class="sig sig-object py" id="QCut.get_locations_and_subcircuits">
 <span class="sig-prename descclassname"><span class="pre">QCut.</span></span><span class="sig-name descname"><span class="pre">get_locations_and_subcircuits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">circuit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">QuantumCircuit</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/QCut/wirecut.html#get_locations_and_subcircuits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.get_locations_and_subcircuits" title="Link to this definition"></a></dt>
 <dd><p>Get cut locations and subcircuits with placeholder operations.</p>
-<section id="id53">
-<h3>Args:<a class="headerlink" href="#id53" title="Link to this heading"></a></h3>
+<section id="id47">
+<h3>Args:<a class="headerlink" href="#id47" title="Link to this heading"></a></h3>
 <blockquote>
 <div><p>circuit: circuit with cuts inserted</p>
 </div></blockquote>
 </section>
-<section id="id54">
-<h3>Returns:<a class="headerlink" href="#id54" title="Link to this heading"></a></h3>
+<section id="id48">
+<h3>Returns:<a class="headerlink" href="#id48" title="Link to this heading"></a></h3>
 <blockquote>
 <div><p>cut_locations: a list of cut locations
 subcircuits: subcircuits with placeholder operations</p>
@@ -708,15 +694,15 @@ subcircuits: subcircuits with placeholder operations</p>
 <dt class="sig sig-object py" id="QCut.get_pauli_list">
 <span class="sig-prename descclassname"><span class="pre">QCut.</span></span><span class="sig-name descname"><span class="pre">get_pauli_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">PauliList</span></span></span><a class="reference internal" href="_modules/QCut/wirecut.html#get_pauli_list"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.get_pauli_list" title="Link to this definition"></a></dt>
 <dd><p>Transform list of observable indices to Paulilist of Z observables.</p>
-<section id="id55">
-<h3>Args:<a class="headerlink" href="#id55" title="Link to this heading"></a></h3>
+<section id="id49">
+<h3>Args:<a class="headerlink" href="#id49" title="Link to this heading"></a></h3>
 <blockquote>
 <div><p>input_list: lits of observables as qubit indices
 length: number of qubits in the circuit</p>
 </div></blockquote>
 </section>
-<section id="id56">
-<h3>Returns:<a class="headerlink" href="#id56" title="Link to this heading"></a></h3>
+<section id="id50">
+<h3>Returns:<a class="headerlink" href="#id50" title="Link to this heading"></a></h3>
 <blockquote>
 <div><p>PauliList: a PauliList of Z observables</p>
 </div></blockquote>
@@ -724,41 +710,20 @@ length: number of qubits in the circuit</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="QCut.insert_meassure_prepare_channel">
-<span class="sig-prename descclassname"><span class="pre">QCut.</span></span><span class="sig-name descname"><span class="pre">insert_meassure_prepare_channel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">circuit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">QuantumCircuit</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cut_locations</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">QuantumCircuit</span></span></span><a class="reference internal" href="_modules/QCut/wirecut.html#insert_meassure_prepare_channel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.insert_meassure_prepare_channel" title="Link to this definition"></a></dt>
-<dd><p>Insert the measure and initialize node at the cut locations.</p>
-<section id="id57">
-<h3>Args:<a class="headerlink" href="#id57" title="Link to this heading"></a></h3>
-<blockquote>
-<div><p>circuit: Quantum circuit with Move() operations.
-cut_locations: Locations of the cuts as a list.</p>
-</div></blockquote>
-</section>
-<section id="id58">
-<h3>Returns:<a class="headerlink" href="#id58" title="Link to this heading"></a></h3>
-<blockquote>
-<div><p>circuit with measure and initialize nodes inserted</p>
-</div></blockquote>
-<p>Raises:</p>
-</section>
-</dd></dl>
-
-<dl class="py function">
 <dt class="sig sig-object py" id="QCut.run">
-<span class="sig-prename descclassname"><span class="pre">QCut.</span></span><span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">circuit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">QuantumCircuit</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">observables</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">AerSimulator('aer_simulator')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mitigate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="_modules/QCut/wirecut.html#run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.run" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">QCut.</span></span><span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">circuit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">QuantumCircuit</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">observables</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">AerSimulator('aer_simulator')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mitigate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="_modules/QCut/wirecut.html#run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.run" title="Link to this definition"></a></dt>
 <dd><p>Run the whole circuit knitting sequence with one function call.</p>
-<section id="id59">
-<h3>Args:<a class="headerlink" href="#id59" title="Link to this heading"></a></h3>
+<section id="id51">
+<h3>Args:<a class="headerlink" href="#id51" title="Link to this heading"></a></h3>
 <blockquote>
 <div><p>circuit: circuit with cut experiments
 observables: list of observbles in the form of qubit indices (Z-obsevable).
-error: allowed error in approximation (optional)
 backend: backend to use for running experiment circuits (optional)
 mitigate: wether or not to use readout error mitigation (optional)</p>
 </div></blockquote>
 </section>
-<section id="id60">
-<h3>Returns:<a class="headerlink" href="#id60" title="Link to this heading"></a></h3>
+<section id="id52">
+<h3>Returns:<a class="headerlink" href="#id52" title="Link to this heading"></a></h3>
 <blockquote>
 <div><p>list: a list of expectation values</p>
 </div></blockquote>
@@ -769,8 +734,8 @@ mitigate: wether or not to use readout error mitigation (optional)</p>
 <dt class="sig sig-object py" id="QCut.run_and_expectation_value">
 <span class="sig-prename descclassname"><span class="pre">QCut.</span></span><span class="sig-name descname"><span class="pre">run_and_expectation_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">circuit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">QuantumCircuit</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backend</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">observables</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shots</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mitigate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/QCut/backend_utility.html#run_and_expectation_value"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.run_and_expectation_value" title="Link to this definition"></a></dt>
 <dd><p>Run circuit and calculate expectation value.</p>
-<section id="id61">
-<h3>Args:<a class="headerlink" href="#id61" title="Link to this heading"></a></h3>
+<section id="id53">
+<h3>Args:<a class="headerlink" href="#id53" title="Link to this heading"></a></h3>
 <blockquote>
 <div><p>circuit: a quantum circuit
 backend: backend to run circuit on
@@ -779,8 +744,8 @@ shots: number of shots
 mitigate: if True use readout error mitigation</p>
 </div></blockquote>
 </section>
-<section id="id62">
-<h3>Returns:<a class="headerlink" href="#id62" title="Link to this heading"></a></h3>
+<section id="id54">
+<h3>Returns:<a class="headerlink" href="#id54" title="Link to this heading"></a></h3>
 <blockquote>
 <div><p>expectation_values: a list of expectation values</p>
 </div></blockquote>
@@ -789,21 +754,20 @@ mitigate: if True use readout error mitigation</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="QCut.run_cut_circuit">
-<span class="sig-prename descclassname"><span class="pre">QCut.</span></span><span class="sig-name descname"><span class="pre">run_cut_circuit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subcircuits</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cut_locations</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">observables</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">AerSimulator('aer_simulator')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mitigate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="_modules/QCut/wirecut.html#run_cut_circuit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.run_cut_circuit" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">QCut.</span></span><span class="sig-name descname"><span class="pre">run_cut_circuit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subcircuits</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cut_locations</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">observables</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">AerSimulator('aer_simulator')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mitigate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="_modules/QCut/wirecut.html#run_cut_circuit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.run_cut_circuit" title="Link to this definition"></a></dt>
 <dd><p>After splitting the circuit run the rest of the circuit knitting sequence.</p>
-<section id="id63">
-<h3>Args:<a class="headerlink" href="#id63" title="Link to this heading"></a></h3>
+<section id="id55">
+<h3>Args:<a class="headerlink" href="#id55" title="Link to this heading"></a></h3>
 <blockquote>
 <div><p>subcircuits: subcircuits containing the placeholder operations
 cut_locations: list of cut locations
 observables: list of observables as qubit indices (Z observable)
-error: allowed error in approximation (optional)
 backend: backend to use for running experiment circuits (optional)
 mitigate: wether or not to use readout error mitigation (optional)</p>
 </div></blockquote>
 </section>
-<section id="id64">
-<h3>Returns:<a class="headerlink" href="#id64" title="Link to this heading"></a></h3>
+<section id="id56">
+<h3>Returns:<a class="headerlink" href="#id56" title="Link to this heading"></a></h3>
 <blockquote>
 <div><p>list: a list of expectation values</p>
 </div></blockquote>
@@ -812,21 +776,21 @@ mitigate: wether or not to use readout error mitigation (optional)</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="QCut.run_experiments">
-<span class="sig-prename descclassname"><span class="pre">QCut.</span></span><span class="sig-name descname"><span class="pre">run_experiments</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">experiment_circuits</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cut_locations</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_meas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backend</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mitigate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="_modules/QCut/wirecut.html#run_experiments"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.run_experiments" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">QCut.</span></span><span class="sig-name descname"><span class="pre">run_experiments</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">experiment_circuits</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cut_locations</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="source/QCut.html#QCut.wirecut.CutLocation" title="QCut.wirecut.CutLocation"><span class="pre">CutLocation</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_meas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shots</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">4096</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backend</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mitigate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="_modules/QCut/wirecut.html#run_experiments"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.run_experiments" title="Link to this definition"></a></dt>
 <dd><p>Run experiment circuits.</p>
-<section id="id65">
-<h3>Args:<a class="headerlink" href="#id65" title="Link to this heading"></a></h3>
+<section id="id57">
+<h3>Args:<a class="headerlink" href="#id57" title="Link to this heading"></a></h3>
 <blockquote>
 <div><p>experiment_circuits: experiment circuits
 cut_locations: list of cut locations
 id_meas: list of identity basis measurement locations
-error: accpeted error in estimation (optional)
+shots: number of shots per circuit run (optional)
 backend: backend used for running the circuits (optional)
 mitigate: wether to use readout error mitigation or not (optional)</p>
 </div></blockquote>
 </section>
-<section id="id66">
-<h3>Returns:<a class="headerlink" href="#id66" title="Link to this heading"></a></h3>
+<section id="id58">
+<h3>Returns:<a class="headerlink" href="#id58" title="Link to this heading"></a></h3>
 <blockquote>
 <div><p>processed_results: list of transformed results</p>
 </div></blockquote>
@@ -834,38 +798,18 @@ mitigate: wether to use readout error mitigation or not (optional)</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="QCut.separate_sub_circuits">
-<span class="sig-prename descclassname"><span class="pre">QCut.</span></span><span class="sig-name descname"><span class="pre">separate_sub_circuits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">circuit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">QuantumCircuit</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sub_circuit_qubit_bounds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">QuantumCircuit</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/QCut/wirecut.html#separate_sub_circuits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.separate_sub_circuits" title="Link to this definition"></a></dt>
-<dd><p>Split the circuit with measure and prepare channels into separate subcircuits.</p>
-<section id="id67">
-<h3>Args:<a class="headerlink" href="#id67" title="Link to this heading"></a></h3>
-<blockquote>
-<div><p>circuit: Quantum circuit with Move() operations.
-sub_circuit_qubit_bounds: Bounds for subcircuits as list of qubit indices.</p>
-</div></blockquote>
-</section>
-<section id="id68">
-<h3>Returns:<a class="headerlink" href="#id68" title="Link to this heading"></a></h3>
-<blockquote>
-<div><p>circs: Array of subcircuits</p>
-</div></blockquote>
-<p>Raises:</p>
-</section>
-</dd></dl>
-
-<dl class="py function">
 <dt class="sig sig-object py" id="QCut.transpile_experiments">
 <span class="sig-prename descclassname"><span class="pre">QCut.</span></span><span class="sig-name descname"><span class="pre">transpile_experiments</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">experiment_circuits</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backend</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="_modules/QCut/backend_utility.html#transpile_experiments"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.transpile_experiments" title="Link to this definition"></a></dt>
 <dd><p>Transpile experiment circuits.</p>
-<section id="id69">
-<h3>Args:<a class="headerlink" href="#id69" title="Link to this heading"></a></h3>
+<section id="id59">
+<h3>Args:<a class="headerlink" href="#id59" title="Link to this heading"></a></h3>
 <blockquote>
 <div><p>experiment_circuits: experiment circuits
 backend: backend to transpile to</p>
 </div></blockquote>
 </section>
-<section id="id70">
-<h3>Returns:<a class="headerlink" href="#id70" title="Link to this heading"></a></h3>
+<section id="id60">
+<h3>Returns:<a class="headerlink" href="#id60" title="Link to this heading"></a></h3>
 <blockquote>
 <div><p>transpiled_experiments: a list of transpiled experiment circuits</p>
 </div></blockquote>

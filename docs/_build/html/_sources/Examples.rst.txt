@@ -7,3 +7,4 @@ Examples on using QCut
 
    Multiple_cuts
    REM
+   OtherObservables

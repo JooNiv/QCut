@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Usage &mdash; QCut 0.0.7 documentation</title>
+  <title>Usage &mdash; QCut 0.0.8 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
@@ -15,7 +15,7 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=bbaf98b3"></script>
+        <script src="_static/documentation_options.js?v=53b53b71"></script>
         <script src="_static/doctools.js?v=9a2dae69"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -173,10 +173,9 @@ is backend independent you can choose whatever backend you want as long
 as you transpile the experiment circuits accordingly. QCut provides a
 function <code class="docutils literal notranslate"><span class="pre">transpile_experiments()</span></code> for doing just this.</p>
 <p>Since QCut is a circuit knitting package the results are approximations
-of the actual values. Error is the error in the approximation.</p>
+of the actual values.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">backend</span> <span class="o">=</span> <span class="n">AerSimulator</span><span class="p">()</span>
-<span class="n">error</span> <span class="o">=</span> <span class="mf">0.03</span>
-<span class="n">results</span> <span class="o">=</span> <span class="n">ck</span><span class="o">.</span><span class="n">run_experiments</span><span class="p">(</span><span class="n">experiment_circuits</span><span class="p">,</span> <span class="n">cut_locations</span><span class="p">,</span> <span class="n">id_meas</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="n">error</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="n">backend</span><span class="p">)</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">ck</span><span class="o">.</span><span class="n">run_experiments</span><span class="p">(</span><span class="n">experiment_circuits</span><span class="p">,</span> <span class="n">cut_locations</span><span class="p">,</span> <span class="n">id_meas</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="n">backend</span><span class="p">)</span>
 </pre></div>
 </div>
 <p><strong>7. Define observables and calculate expectation values</strong></p>
@@ -187,7 +186,7 @@ observable list.</p>
 values currently this needs to be done by manually modifying the initial
 circuit to perform the basis transform.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">observables</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">]]</span>
-<span class="n">expectation_values</span> <span class="o">=</span> <span class="n">ck</span><span class="o">.</span><span class="n">estimate_expectation_values</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="n">coefficients</span><span class="p">,</span> <span class="n">cut_locations</span><span class="p">,</span> <span class="n">observables</span><span class="p">,</span> <span class="n">error</span><span class="p">)</span>
+<span class="n">expectation_values</span> <span class="o">=</span> <span class="n">ck</span><span class="o">.</span><span class="n">estimate_expectation_values</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="n">coefficients</span><span class="p">,</span> <span class="n">cut_locations</span><span class="p">,</span> <span class="n">observables</span><span class="p">)</span>
 </pre></div>
 </div>
 <p><strong>8: Finally calculate the exact expectation values and compare them to
@@ -224,9 +223,8 @@ aforementioned steps individually. Instead, QCut provides a function
 <p>The same example can then be run like this:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">backend</span> <span class="o">=</span> <span class="n">AerSimulator</span><span class="p">()</span>
 <span class="n">observables</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">]]</span>
-<span class="n">error</span> <span class="o">=</span> <span class="mf">0.03</span>
 
-<span class="n">estimated_expectation_values</span> <span class="o">=</span> <span class="n">ck</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">cut_circuit</span><span class="p">,</span> <span class="n">observables</span><span class="p">,</span> <span class="n">error</span><span class="p">,</span> <span class="n">backend</span><span class="p">)</span>
+<span class="n">estimated_expectation_values</span> <span class="o">=</span> <span class="n">ck</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">cut_circuit</span><span class="p">,</span> <span class="n">observables</span><span class="p">,</span> <span class="n">backend</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>

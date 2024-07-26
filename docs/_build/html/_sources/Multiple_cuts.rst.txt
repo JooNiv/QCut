@@ -47,9 +47,8 @@ to cut the circuit**
 
    backend = AerSimulator()
    observables = [0,1,2, [0,2]]
-   error = 0.03
 
-   estimated_expectation_values = ck.run(cut_circuit, observables, error, backend)
+   estimated_expectation_values = ck.run(cut_circuit, observables, backend)
 
 Click :download:`here </_static/QCutCutToThreeParts.ipynb>` to download example notebook.
 

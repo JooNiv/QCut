@@ -112,13 +112,12 @@ as you transpile the experiment circuits accordingly. QCut provides a
 function ``transpile_experiments()`` for doing just this.
 
 Since QCut is a circuit knitting package the results are approximations
-of the actual values. Error is the error in the approximation.
+of the actual values.
 
 .. code:: python
 
    backend = AerSimulator()
-   error = 0.03
-   results = ck.run_experiments(experiment_circuits, cut_locations, id_meas, error=error, backend=backend)
+   results = ck.run_experiments(experiment_circuits, cut_locations, id_meas, backend=backend)
 
 **7. Define observables and calculate expectation values**
 
@@ -133,7 +132,7 @@ circuit to perform the basis transform.
 .. code:: python
 
    observables = [0,1,2, [0,2]]
-   expectation_values = ck.estimate_expectation_values(results, coefficients, cut_locations, observables, error)
+   expectation_values = ck.estimate_expectation_values(results, coefficients, cut_locations, observables)
 
 **8: Finally calculate the exact expectation values and compare them to
 the results calculated with QCut**
@@ -181,9 +180,8 @@ The same example can then be run like this:
 
    backend = AerSimulator()
    observables = [0,1,2, [0,2]]
-   error = 0.03
 
-   estimated_expectation_values = ck.run(cut_circuit, observables, error, backend)
+   estimated_expectation_values = ck.run(cut_circuit, observables, backend)
 
 Running on IQM fake backends
 ----------------------------
