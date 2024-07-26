@@ -108,7 +108,7 @@ def get_cut_location(circuit: QuantumCircuit) -> list[Any, int]:
 
 #Placeholder function that works for now for the test cases i could think of.
 #Probably not universal and can be made better.
-def get_bounds(cut_locations: list) -> list:
+def get_bounds(cut_locations: list[tuple, int]) -> list:
     """Get the bounds for subcircuits as qubit indices.
 
     Args:
