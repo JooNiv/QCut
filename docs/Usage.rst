@@ -156,8 +156,7 @@ the results calculated with QCut**
    print(f"QCut expectation values:{np.array(expectation_values)}")
    print(f"Exact expectation values with ideal simulator :{np.array(exact_expvals)}")
 
-``QCut expectation values:[-0.018534 -0.018534 -0.012826 0.998416]``
-
+``QCut circuit knitting expectation values: [0.007532 0.007532 -0.003662 1.010128]``
 ``Exact expectation values with ideal simulator :[0.000000 0.000000 0.000000 1.000000]``
 
 As we can see QCut is able to accurately reconstruct the expectation
