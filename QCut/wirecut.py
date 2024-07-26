@@ -4,18 +4,60 @@ from __future__ import annotations
 
 from copy import deepcopy
 from itertools import product
-from typing import Any
 
 import numpy as np
 from qiskit import ClassicalRegister, QuantumCircuit, QuantumRegister
-from qiskit.circuit import CircuitInstruction, Qubit
+from qiskit.circuit import CircuitError, CircuitInstruction, Qubit
 from qiskit.quantum_info import PauliList
 from qiskit.transpiler.passes import RemoveBarriers
 from qiskit_aer import AerSimulator
 from qiskit_experiments.library import LocalReadoutError
 
 from .backend_utility import transpile_experiments
-from .identity_qpd import identity_qpd as identity_QPD  # noqa: N812
+from .identity_qpd import identity_qpd
+
+
+class QCutError(Exception):
+    """Exception raised for custom error conditions.
+
+    Attributes
+    ----------
+        message (str): Explanation of the error.
+        code (int, optional): Error code representing the error type.
+
+    """
+
+    def __init__(self, message: str = "An error occurred", code: int | None = None) -> None:
+        """Init.
+
+        Args:
+        ----
+            message: Explanation of the error. Default is "An error occurred".
+            code: Optional error code representing the error type.
+
+        Attributes:
+        ----------
+            message (str): The error message provided during initialization.
+            code (int or None): The error code provided, or None if not specified.
+
+        """
+        self.message = message
+        self.code = code
+        super().__init__(self.message)
+
+    def __str__(self) -> str:
+        """Return the string representation of the error.
+
+        Returns
+        -------
+            str: A string describing the error, including the code if available.
+
+        """
+        if self.code:
+            return f"[Error {self.code}] {self.message}"
+
+        return self.message
+
 
 #Class for storing results from single sub-circuit run
 
@@ -74,8 +116,14 @@ class CutLocation:
         """Represent as string."""
         return str(self)
 
-def get_cut_location(circuit: QuantumCircuit) -> list[Any, int]:
+def get_cut_location(circuit: QuantumCircuit) -> list[CutLocation]:
     """Get the locations of the cuts in the circuit.
+
+    Note:
+    ----
+        get_cut_location modifies the circuit passed as an argument by removing cut_wire gates. Therefore trying to run
+        it multiple times in a row on the same circuit will fail. To avoid this it is not recommended to run
+        this function by itself. Instead use get_locations_and_subcircuits().
 
     Args:
     ----
@@ -104,11 +152,15 @@ def get_cut_location(circuit: QuantumCircuit) -> list[Any, int]:
             cut_locations.append(CutLocation((tuple(qs), index + offset)))
             index -= 1
         index += 1
+    if len(cut_locations) == 0:
+        exc = """No cuts in circuit. Did you pass the wrong circuit or try to run get_cut_location()
+                multiple times in a row?"""
+        raise QCutError(exc)
     return cut_locations
 
 #Placeholder function that works for now for the test cases i could think of.
 #Probably not universal and can be made better.
-def get_bounds(cut_locations: list[tuple, int]) -> list:
+def get_bounds(cut_locations: list[CutLocation]) -> list:
     """Get the bounds for subcircuits as qubit indices.
 
     Args:
@@ -169,7 +221,7 @@ c = QuantumCircuit(1, name="Init")
 initialize_node = c.to_instruction()
 
 #Insert placeholders to the cut locations
-def insert_meassure_prepare_channel(circuit: QuantumCircuit, cut_locations: list[tuple, int]) -> QuantumCircuit:
+def insert_meassure_prepare_channel(circuit: QuantumCircuit, cut_locations: list[CutLocation]) -> QuantumCircuit:
     """Insert the measure and initialize node at the cut locations.
 
     Args:
@@ -345,7 +397,7 @@ def separate_sub_circuits(circuit: QuantumCircuit, sub_circuit_qubit_bounds: lis
         subcircuit_operations.append(op)
     return subcircuits_list
 
-def get_qpd_combinations(cut_locations: list) -> list:
+def get_qpd_combinations(cut_locations: list[CutLocation]) -> list:
     """Get all possible combinations of the QPD operations so that each combination has len(cutLocations) elements.
 
     Args:
@@ -356,7 +408,7 @@ def get_qpd_combinations(cut_locations: list) -> list:
     Raises:
 
     """
-    return list(product(identity_QPD,repeat=len(cut_locations)))
+    return list(product(identity_qpd,repeat=len(cut_locations)))
 
 def get_qpd_insert_order(cut_locations: list) -> list:
     """Get the order in which to insert qpd operations.
@@ -378,7 +430,8 @@ def get_qpd_insert_order(cut_locations: list) -> list:
 
     return [index for _, index, _ in sorted_value_indices]
 
-def get_experiment_circuits(subcircuits: list[QuantumCircuit], cut_locations: list) -> tuple[list, list, list]:  # noqa: C901, PLR0912, PLR0915
+def get_experiment_circuits(subcircuits: list[QuantumCircuit], # noqa: C901, PLR0912, PLR0915
+                            cut_locations: list[CutLocation]) -> tuple[list, list, list]:
     """Generate all possible experiment circuits by inserting QPD operations on measure/initialize nodes.
 
     Args:
@@ -486,10 +539,10 @@ def get_experiment_circuits(subcircuits: list[QuantumCircuit], cut_locations: li
     return experiment_circuits, coefficients, id_meas[:num_id_meas]
 
 def run_experiments(experiment_circuits: list,  # noqa: PLR0913
-                    cut_locations: list,
+                    cut_locations: list[CutLocation],
                     id_meas: list,
                     error: float = 0.05,
-                    backend: int = 0,
+                    backend: int | None = None,
                     mitigate: bool = False) -> list:  # noqa: FBT001, FBT002
     """Run experiment circuits.
 
@@ -511,7 +564,7 @@ def run_experiments(experiment_circuits: list,  # noqa: PLR0913
     #number of samples neede
     samples = int(np.power(4, (2)*cuts)/np.power(error,2))
     samples = int(samples / len(experiment_circuits))
-    if backend == 0:
+    if backend is None:
         backend = AerSimulator()
 
     results = [0]*(len(experiment_circuits))
@@ -587,9 +640,9 @@ def process_results(results: list, id_meas: list) -> list:
 
 #Calculate the approx expectation values for the original circuit
 #Soon hopefully more than Z-observables
-def estimate_expectation_values(results: list,
-                                coefficients: list,
-                                cut_locations: list,
+def estimate_expectation_values(results: list[TotalResult],
+                                coefficients: list[int],
+                                cut_locations: list[CutLocation],
                                 observables: list,
                                 error: float = 0.05) -> list:
     """Calculate the estimated expectation values.
@@ -686,7 +739,11 @@ def get_locations_and_subcircuits(circuit: QuantumCircuit) -> tuple[list, list]:
     circuit = circuit.copy()
     cut_locations, bounds = get_locations_and_bounds(circuit)
     circ = insert_meassure_prepare_channel(circuit, cut_locations)
-    subcircuits = separate_sub_circuits(circ, bounds)
+    try:
+        subcircuits = separate_sub_circuits(circ, bounds)
+    except CircuitError as e:
+        msg = "Invalid cut placement. See documentation for how cuts should be placed."
+        raise QCutError(msg) from e
 
     return cut_locations, subcircuits
 
