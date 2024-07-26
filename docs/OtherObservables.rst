@@ -36,7 +36,7 @@ This may change in a future release.
 
     observables = [0, 1, 2]
 
-We have manually transformed qubit 2 to the X basis so now the expectatio value returned by QCut will also be the X observable expectation value.
+We have manually transformed qubit 2 to the X basis so now the expectation value returned by QCut will also be the X observable expectation value.
 The other qubits are stull in the Z basis so the expectation value will be the Z observable expectation value.
 
 **2: Z and X observable expectation values for a single qubit**

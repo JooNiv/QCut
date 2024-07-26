@@ -108,6 +108,13 @@ class CutLocation:
         self.init = cut_location[0][1][1]
         self.index = cut_location[1]
 
+    def __eq__(self, other: CutLocation) -> bool:
+        """Equality."""
+        if not isinstance(other, CutLocation):
+            return NotImplemented
+
+        return self.meas == other.meas and self.init == other.init and self.index == other.index
+
     def __str__(self) -> str:
         """Format string."""
         return f"meas qubit: {self.meas}, init qubit: {self.init}, cut index: {self.index}"
