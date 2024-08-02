@@ -15,7 +15,7 @@ def test_get_cut_locations() -> None:
     the pre-defined solutions.
     """
     for solution_index, circ in enumerate(s.test_circuits):
-        assert ck.get_cut_location(circ.copy()) == s.cut_location_solutions[solution_index]  # noqa: S101
+        assert ck.get_cut_locations(circ.copy()) == s.cut_location_solutions[solution_index]  # noqa: S101
 
 def test_get_bounds() -> None:
     """Test get_cut_bounds function.
@@ -25,8 +25,9 @@ def test_get_bounds() -> None:
     circuit by comparing the result to the pre-defined solutions.
     """
     for solution_index, circ in enumerate(s.test_circuits):
-        qss = ck.get_cut_location(circ.copy())
-        assert ck.get_bounds(qss) == s.bounds_solutions[solution_index]  # noqa: S101
+        cut_locations = ck.get_cut_locations(circ.copy())
+        sorted_cut_locations = sorted(cut_locations, key = lambda x: min(x.meas, x.init))
+        assert ck.get_bounds(sorted_cut_locations) == s.bounds_solutions[solution_index]  # noqa: S101
 
 def test_separate_subcircuits() -> None:
     """Test separate_subcircuits function.
@@ -89,7 +90,7 @@ def test_expectation_values() -> None:
     # Iterate over each test circuit and its corresponding expected solutions
     for solution_index, circ in enumerate(s.test_circuits):
         # Calculate expectation values using the run method
-        expvals = ck.run(circ, s.test_observables[solution_index], error=0.05, backend=sim, mitigate=False)
+        expvals = ck.run(circ, s.test_observables[solution_index], backend=sim, mitigate=False)
 
         # Check each calculated expectation value against the corresponding expected value
         tolerance = 0.1
