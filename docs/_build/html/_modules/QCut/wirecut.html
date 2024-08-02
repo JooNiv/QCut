@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>QCut.wirecut &mdash; QCut 0.0.8 documentation</title>
+  <title>QCut.wirecut &mdash; QCut 0.0.9 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
 
@@ -14,7 +14,7 @@
   
         <script src="../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../_static/documentation_options.js?v=53b53b71"></script>
+        <script src="../../_static/documentation_options.js?v=f7cdbf68"></script>
         <script src="../../_static/doctools.js?v=9a2dae69"></script>
         <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/js/theme.js"></script>
@@ -45,6 +45,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../Usage.html">Usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../Examples.html">Examples on using QCut</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../FutureFeatures.html">Possible future features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../Acknowledgement.html">Acknowledgements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../License.html">License</a></li>
 </ul>
@@ -92,7 +93,7 @@
 <span class="kn">from</span> <span class="nn">.backend_utility</span> <span class="kn">import</span> <span class="n">transpile_experiments</span>
 <span class="kn">from</span> <span class="nn">.identity_qpd</span> <span class="kn">import</span> <span class="n">identity_qpd</span>
 
-<span class="n">ERROR</span> <span class="o">=</span> <span class="mf">0.000000000000000000001</span>
+<span class="n">ERROR</span> <span class="o">=</span> <span class="mf">0.001</span>
 
 <div class="viewcode-block" id="QCutError">
 <a class="viewcode-back" href="../../source/QCut.html#QCut.wirecut.QCutError">[docs]</a>
@@ -212,9 +213,9 @@
         <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="get_cut_location">
-<a class="viewcode-back" href="../../source/QCut.html#QCut.wirecut.get_cut_location">[docs]</a>
-<span class="k">def</span> <span class="nf">get_cut_location</span><span class="p">(</span><span class="n">circuit</span><span class="p">:</span> <span class="n">QuantumCircuit</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">CutLocation</span><span class="p">]:</span>
+<div class="viewcode-block" id="get_cut_locations">
+<a class="viewcode-back" href="../../source/QCut.html#QCut.wirecut.get_cut_locations">[docs]</a>
+<span class="k">def</span> <span class="nf">get_cut_locations</span><span class="p">(</span><span class="n">circuit</span><span class="p">:</span> <span class="n">QuantumCircuit</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">CutLocation</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the locations of the cuts in the circuit.</span>
 
 <span class="sd">    Note:</span>
@@ -257,8 +258,6 @@
     <span class="k">return</span> <span class="n">cut_locations</span></div>
 
 
-<span class="c1">#Placeholder function that works for now for the test cases i could think of.</span>
-<span class="c1">#Probably not universal and can be made better.</span>
 <div class="viewcode-block" id="get_bounds">
 <a class="viewcode-back" href="../../source/QCut.html#QCut.wirecut.get_bounds">[docs]</a>
 <span class="k">def</span> <span class="nf">get_bounds</span><span class="p">(</span><span class="n">cut_locations</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">CutLocation</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
@@ -273,26 +272,28 @@
 <span class="sd">        Bounds as a list.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">inds</span> <span class="o">=</span> <span class="p">([([</span><span class="n">x</span><span class="o">.</span><span class="n">meas</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">init</span><span class="p">],</span> <span class="n">x</span><span class="o">.</span><span class="n">index</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">cut_locations</span><span class="p">])</span>
-
     <span class="n">test</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">num</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">inds</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">cut</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">cut_locations</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">test</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">inds</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]])</span>
-            <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
-        <span class="k">elif</span> <span class="p">((</span><span class="n">num</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">inds</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="ow">and</span> <span class="n">num</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">inds</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="ow">or</span>
-            <span class="p">(</span><span class="n">num</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">inds</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="ow">and</span> <span class="n">num</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">inds</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="ow">or</span>
-            <span class="p">(</span><span class="n">num</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">inds</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="n">num</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">inds</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="ow">and</span> <span class="n">num</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">inds</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span> <span class="ow">or</span>
-            <span class="p">(</span><span class="n">num</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">inds</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="n">num</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">inds</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="ow">and</span> <span class="n">num</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">inds</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">])):</span>
-            <span class="n">test</span><span class="p">[</span><span class="n">count</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">num</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">test</span><span class="o">.</span><span class="n">append</span><span class="p">(([</span><span class="n">cut</span><span class="o">.</span><span class="n">meas</span><span class="p">,</span> <span class="n">cut</span><span class="o">.</span><span class="n">init</span><span class="p">],</span> <span class="p">[</span><span class="n">cut</span><span class="o">.</span><span class="n">index</span><span class="p">],</span> <span class="p">[[</span><span class="n">cut</span><span class="o">.</span><span class="n">meas</span><span class="p">,</span> <span class="n">cut</span><span class="o">.</span><span class="n">init</span><span class="p">]]))</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">test</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">cut</span><span class="o">.</span><span class="n">index</span> <span class="ow">in</span> <span class="n">j</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                <span class="n">j</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">j</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">cut</span><span class="o">.</span><span class="n">meas</span><span class="p">)</span>
+                <span class="n">j</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">j</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">cut</span><span class="o">.</span><span class="n">init</span><span class="p">)</span>
+                <span class="n">j</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">cut</span><span class="o">.</span><span class="n">meas</span><span class="p">,</span> <span class="n">cut</span><span class="o">.</span><span class="n">init</span><span class="p">])</span>
+                <span class="k">break</span>
+            <span class="k">elif</span> <span class="nb">min</span><span class="p">(</span><span class="n">cut</span><span class="o">.</span><span class="n">meas</span><span class="p">,</span> <span class="n">cut</span><span class="o">.</span><span class="n">init</span><span class="p">)</span> <span class="o">-</span> <span class="nb">max</span><span class="p">(</span><span class="n">j</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">j</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">j</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">cut</span><span class="o">.</span><span class="n">meas</span><span class="p">,</span> <span class="n">cut</span><span class="o">.</span><span class="n">init</span><span class="p">)</span> <span class="k">if</span> <span class="n">j</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="nb">min</span><span class="p">(</span><span class="n">j</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">else</span> <span class="nb">max</span><span class="p">(</span><span class="n">j</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">cut</span><span class="o">.</span><span class="n">meas</span><span class="p">,</span> <span class="n">cut</span><span class="o">.</span><span class="n">init</span><span class="p">)</span>
+                <span class="n">j</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">j</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">cut</span><span class="o">.</span><span class="n">meas</span><span class="p">,</span> <span class="n">cut</span><span class="o">.</span><span class="n">init</span><span class="p">)</span> <span class="k">if</span> <span class="n">j</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="nb">min</span><span class="p">(</span><span class="n">j</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">else</span> <span class="nb">max</span><span class="p">(</span><span class="n">j</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">cut</span><span class="o">.</span><span class="n">meas</span><span class="p">,</span> <span class="n">cut</span><span class="o">.</span><span class="n">init</span><span class="p">)</span>
+                <span class="n">j</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cut</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+                <span class="n">j</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">cut</span><span class="o">.</span><span class="n">meas</span><span class="p">,</span> <span class="n">cut</span><span class="o">.</span><span class="n">init</span><span class="p">])</span>
+                <span class="k">break</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">test</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">num</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
-            <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">test</span><span class="o">.</span><span class="n">append</span><span class="p">(([</span><span class="n">cut</span><span class="o">.</span><span class="n">meas</span><span class="p">,</span> <span class="n">cut</span><span class="o">.</span><span class="n">init</span><span class="p">],</span> <span class="p">[</span><span class="n">cut</span><span class="o">.</span><span class="n">index</span><span class="p">],</span> <span class="p">[[</span><span class="n">cut</span><span class="o">.</span><span class="n">meas</span><span class="p">,</span> <span class="n">cut</span><span class="o">.</span><span class="n">init</span><span class="p">]]))</span>
 
     <span class="n">bounds</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">test</span><span class="p">:</span>
-        <span class="n">bounds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">max</span><span class="p">([</span><span class="nb">min</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">i</span><span class="p">]))</span>  <span class="c1"># noqa: PERF401</span>
+        <span class="n">bounds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">max</span><span class="p">([</span><span class="nb">min</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">i</span><span class="p">[</span><span class="mi">2</span><span class="p">]]))</span>  <span class="c1"># noqa: PERF401</span>
 
     <span class="k">return</span> <span class="n">bounds</span></div>
 
@@ -311,7 +312,7 @@
 <span class="sd">        Locations of the cuts and bounds as a list.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">cut_locations</span> <span class="o">=</span> <span class="n">get_cut_location</span><span class="p">(</span><span class="n">circuit</span><span class="p">)</span>
+    <span class="n">cut_locations</span> <span class="o">=</span> <span class="n">get_cut_locations</span><span class="p">(</span><span class="n">circuit</span><span class="p">)</span>
     <span class="n">bounds</span> <span class="o">=</span> <span class="n">get_bounds</span><span class="p">(</span><span class="n">cut_locations</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">cut_locations</span><span class="p">,</span> <span class="n">bounds</span></div>
@@ -347,7 +348,14 @@
 
     <span class="n">circuit_data</span> <span class="o">=</span> <span class="n">circuit</span><span class="o">.</span><span class="n">data</span>
     <span class="n">offset</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">cut_locations</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">cut_locations</span><span class="p">):</span>
+        <span class="c1">#Placeholder measure node operation</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">QuantumCircuit</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Meas_</span><span class="si">{</span><span class="n">ind</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">measure_node</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">to_instruction</span><span class="p">()</span>
+
+        <span class="c1">#Placeholder initialize node operation</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">QuantumCircuit</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Init_</span><span class="si">{</span><span class="n">ind</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">initialize_node</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">to_instruction</span><span class="p">()</span>
         <span class="k">if</span> <span class="nb">max</span><span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">meas</span><span class="p">,</span> <span class="n">i</span><span class="o">.</span><span class="n">init</span><span class="p">)</span> <span class="o">==</span> <span class="n">i</span><span class="o">.</span><span class="n">meas</span><span class="p">:</span>
             <span class="n">circuit_data</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">index</span><span class="o">+</span><span class="n">offset</span> <span class="p">,</span> <span class="n">CircuitInstruction</span><span class="p">(</span><span class="n">operation</span><span class="o">=</span><span class="n">measure_node</span><span class="p">,</span>
                                                                  <span class="n">qubits</span><span class="o">=</span><span class="p">[</span><span class="n">Qubit</span><span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">qubits</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">i</span><span class="o">.</span><span class="n">qubits</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">])]))</span>
@@ -466,7 +474,7 @@
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">op</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">circuit</span><span class="o">.</span><span class="n">data</span><span class="p">):</span>
 
         <span class="n">qubits</span> <span class="o">=</span> <span class="p">[</span><span class="n">circuit</span><span class="o">.</span><span class="n">find_bit</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">index</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">op</span><span class="o">.</span><span class="n">qubits</span><span class="p">]</span> <span class="c1">#qubits in operations</span>
-        <span class="k">if</span> <span class="n">op</span><span class="o">.</span><span class="n">operation</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;Meas&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s2">&quot;Meas&quot;</span> <span class="ow">in</span> <span class="n">op</span><span class="o">.</span><span class="n">operation</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
             <span class="n">clbits</span> <span class="o">+=</span> <span class="mi">1</span> <span class="c1">#if measure node add a classical bit</span>
 
         <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">circuit</span><span class="o">.</span><span class="n">data</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span> <span class="c1">#if at the end of the original circuit</span>
@@ -497,7 +505,8 @@
             <span class="n">subcircuits_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">subcircuit</span><span class="p">)</span>
             <span class="k">continue</span>
 
-        <span class="k">if</span> <span class="n">sub_circuit_qubit_bounds</span><span class="p">[</span><span class="n">current_subcircuit</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span> <span class="ow">in</span> <span class="n">qubits</span><span class="p">:</span> <span class="c1">#if at the end of subcircuit</span>
+        <span class="c1">#if sub_circuit_qubit_bounds[current_subcircuit]+1 in qubits: #if at the end of subcircuit</span>
+        <span class="k">if</span> <span class="kc">True</span> <span class="ow">in</span> <span class="p">(</span><span class="n">x</span><span class="o">&gt;</span><span class="n">sub_circuit_qubit_bounds</span><span class="p">[</span><span class="n">current_subcircuit</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">qubits</span><span class="p">):</span>
             <span class="c1">#build the subcircuit</span>
             <span class="n">subcircuit</span> <span class="o">=</span> <span class="n">build_subcircuit</span><span class="p">(</span><span class="n">sub_circuit_qubit_bounds</span><span class="p">[</span><span class="n">current_subcircuit</span><span class="p">]</span> <span class="p">,</span> <span class="n">previous_bound</span><span class="p">,</span> <span class="n">clbits</span><span class="p">,</span>
                                           <span class="n">subcircuit_operations</span><span class="p">,</span> <span class="n">circuit</span><span class="p">)</span>
@@ -530,29 +539,6 @@
     <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">product</span><span class="p">(</span><span class="n">identity_qpd</span><span class="p">,</span><span class="n">repeat</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">cut_locations</span><span class="p">)))</span></div>
 
 
-<div class="viewcode-block" id="get_qpd_insert_order">
-<a class="viewcode-back" href="../../source/QCut.html#QCut.wirecut.get_qpd_insert_order">[docs]</a>
-<span class="k">def</span> <span class="nf">get_qpd_insert_order</span><span class="p">(</span><span class="n">cut_locations</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the order in which to insert qpd operations.</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">    ----</span>
-<span class="sd">        cut_locations: cut locations</span>
-<span class="sd">    Returns:</span>
-<span class="sd">        the insertion order as a list of indices</span>
-
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">value_indices</span> <span class="o">=</span> <span class="p">[]</span>
-
-    <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">cut_location</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">cut_locations</span><span class="p">):</span>
-        <span class="k">for</span> <span class="n">qubit</span> <span class="ow">in</span> <span class="n">cut_location</span><span class="o">.</span><span class="n">qubits</span><span class="p">:</span>
-            <span class="n">value_indices</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">qubit</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">cut_location</span><span class="o">.</span><span class="n">index</span><span class="p">))</span>  <span class="c1"># noqa: PERF401</span>
-
-    <span class="n">sorted_value_indices</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">value_indices</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
-
-    <span class="k">return</span> <span class="p">[</span><span class="n">index</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">sorted_value_indices</span><span class="p">]</span></div>
-
-
 <div class="viewcode-block" id="get_experiment_circuits">
 <a class="viewcode-back" href="../../source/QCut.html#QCut.wirecut.get_experiment_circuits">[docs]</a>
 <span class="k">def</span> <span class="nf">get_experiment_circuits</span><span class="p">(</span><span class="n">subcircuits</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">QuantumCircuit</span><span class="p">],</span> <span class="c1"># noqa: C901, PLR0912, PLR0915</span>
@@ -569,7 +555,7 @@
 <span class="sd">        experimentCircuits: list of experiment circuits.</span>
 <span class="sd">        coefficients: sign coefficients for each circuit.</span>
 <span class="sd">        id_meas: list of index pointers to results that need additional post-processing due to</span>
-<span class="sd">        identity basis measurement.</span>
+<span class="sd">                 identity basis measurement.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">qpd_combinations</span> <span class="o">=</span> <span class="n">get_qpd_combinations</span><span class="p">(</span><span class="n">cut_locations</span><span class="p">)</span> <span class="c1">#generate the QPD operation combinations</span>
@@ -581,15 +567,12 @@
     <span class="n">id_meas</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="n">num_circs</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>
     <span class="n">num_id_meas</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">coefficients</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">num_circs</span><span class="p">)</span>
-    <span class="n">qpd_order</span> <span class="o">=</span> <span class="n">get_qpd_insert_order</span><span class="p">(</span><span class="n">cut_locations</span><span class="p">)</span>
-    <span class="c1">#set counter varibale for strorinfg identity measure locations</span>
 
     <span class="k">for</span> <span class="n">id_meas_eperiment_index</span><span class="p">,</span> <span class="n">qpd</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">qpd_combinations</span><span class="p">):</span> <span class="c1">#loop through all QPD combinations</span>
         <span class="n">coefficient</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">([</span><span class="n">op</span><span class="p">[</span><span class="s2">&quot;c&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">op</span> <span class="ow">in</span> <span class="n">qpd</span><span class="p">])</span>
         <span class="n">coefficients</span><span class="p">[</span><span class="n">id_meas_eperiment_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">coefficient</span><span class="p">)</span>
         <span class="n">sub_experiment_circuits</span> <span class="o">=</span> <span class="p">[]</span> <span class="c1">#sub array for collecting related experiment circuits</span>
 
-        <span class="n">id_meas_subcircuit_index</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1">#stores the index of the circuit in subcircuits where identity measure occurs</span>
         <span class="n">inserted_operations</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">for</span> <span class="n">id_meas_subcircuit_index</span><span class="p">,</span> <span class="n">circ</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">subcircuits</span><span class="p">):</span>
             <span class="n">subcircuit</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">circ</span><span class="p">)</span>
@@ -600,14 +583,13 @@
             <span class="k">for</span> <span class="n">op_ind</span><span class="p">,</span> <span class="n">op</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">subcircuit</span><span class="o">.</span><span class="n">data</span><span class="p">):</span>
                 <span class="k">if</span> <span class="n">inserted_operations</span> <span class="o">&gt;=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">cuts</span><span class="p">:</span> <span class="c1">#if looped through all cuts, stop</span>
                     <span class="k">break</span>
-                <span class="k">if</span> <span class="n">op</span><span class="o">.</span><span class="n">operation</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;Meas&quot;</span><span class="p">:</span> <span class="c1">#if measure channel remove placeholder and insert current</span>
+                <span class="k">if</span> <span class="s2">&quot;Meas&quot;</span> <span class="ow">in</span> <span class="n">op</span><span class="o">.</span><span class="n">operation</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="c1">#if measure channel remove placeholder and insert current</span>
                                                <span class="c1"># qpd operation</span>
                     <span class="n">qubit_index</span> <span class="o">=</span> <span class="n">subcircuit</span><span class="o">.</span><span class="n">find_bit</span><span class="p">(</span><span class="n">op</span><span class="o">.</span><span class="n">qubits</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">index</span>
                     <span class="n">subcircuit</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">op_ind</span><span class="p">)</span> <span class="c1">#remove plaxceholder measure channel</span>
                     <span class="n">qpd_qubits</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">qubit_index</span><span class="p">)</span> <span class="c1">#store index</span>
                     <span class="n">qubits_for_operation</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">Qubit</span><span class="p">(</span><span class="n">subcircuit</span><span class="o">.</span><span class="n">qregs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">qubit_index</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">op</span><span class="o">.</span><span class="n">qubits</span><span class="p">)</span>
-
-                    <span class="k">if</span> <span class="n">qpd</span><span class="p">[</span><span class="n">qpd_order</span><span class="p">[</span><span class="n">inserted_operations</span><span class="p">]][</span><span class="s2">&quot;op&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;id-meas&quot;</span><span class="p">:</span> <span class="c1">#if identity measure channel</span>
+                    <span class="k">if</span> <span class="n">qpd</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">op</span><span class="o">.</span><span class="n">operation</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">])][</span><span class="s2">&quot;op&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;id-meas&quot;</span><span class="p">:</span> <span class="c1">#if identity measure channel</span>
 
                         <span class="c1">#store indices</span>
                         <span class="n">id_meas</span><span class="p">[</span><span class="n">num_id_meas</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">id_meas_eperiment_index</span><span class="p">,</span> <span class="n">id_meas_subcircuit_index</span><span class="p">,</span>
@@ -625,11 +607,11 @@
                                 <span class="n">subcircuit</span><span class="o">.</span><span class="n">cregs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">_size</span> <span class="o">-=</span> <span class="mi">1</span>  <span class="c1"># noqa: SLF001</span>
 
                         <span class="n">subcircuit</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">op_ind</span><span class="p">,</span> <span class="n">CircuitInstruction</span><span class="p">(</span><span class="n">operation</span><span class="o">=</span>
-                                                                       <span class="n">qpd</span><span class="p">[</span><span class="n">qpd_order</span><span class="p">[</span><span class="n">inserted_operations</span><span class="p">]][</span><span class="s2">&quot;op&quot;</span><span class="p">],</span>
+                                                                       <span class="n">qpd</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">op</span><span class="o">.</span><span class="n">operation</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">])][</span><span class="s2">&quot;op&quot;</span><span class="p">],</span>
                                                                        <span class="n">qubits</span><span class="o">=</span><span class="n">qubits_for_operation</span><span class="p">))</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="n">subcircuit</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">op_ind</span><span class="p">,</span> <span class="n">CircuitInstruction</span><span class="p">(</span><span class="n">operation</span><span class="o">=</span>
-                                                                       <span class="n">qpd</span><span class="p">[</span><span class="n">qpd_order</span><span class="p">[</span><span class="n">inserted_operations</span><span class="p">]][</span><span class="s2">&quot;op&quot;</span><span class="p">],</span>
+                                                                       <span class="n">qpd</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">op</span><span class="o">.</span><span class="n">operation</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">])][</span><span class="s2">&quot;op&quot;</span><span class="p">],</span>
                                                                        <span class="n">qubits</span><span class="o">=</span><span class="n">qubits_for_operation</span><span class="p">,</span>
                                                                        <span class="n">clbits</span><span class="o">=</span><span class="p">[</span><span class="n">subcircuit</span><span class="o">.</span><span class="n">cregs</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">classical_bit_index</span><span class="p">]]))</span>
 
@@ -639,12 +621,12 @@
                     <span class="n">id_meas_bit</span> <span class="o">+=</span> <span class="mi">1</span>
                     <span class="n">inserted_operations</span> <span class="o">+=</span> <span class="mi">1</span>
 
-                <span class="k">if</span> <span class="n">op</span><span class="o">.</span><span class="n">operation</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;Init&quot;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="s2">&quot;Init&quot;</span> <span class="ow">in</span> <span class="n">op</span><span class="o">.</span><span class="n">operation</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
                     <span class="n">subcircuit</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">op_ind</span><span class="p">)</span>
                     <span class="n">qubits_for_operation</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">Qubit</span><span class="p">(</span><span class="n">subcircuit</span><span class="o">.</span><span class="n">qregs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
                                                        <span class="n">subcircuit</span><span class="o">.</span><span class="n">find_bit</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">index</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">op</span><span class="o">.</span><span class="n">qubits</span><span class="p">)</span>
                     <span class="n">subcircuit</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">op_ind</span><span class="p">,</span><span class="n">CircuitInstruction</span><span class="p">(</span>
-                                                        <span class="n">operation</span><span class="o">=</span><span class="n">qpd</span><span class="p">[</span><span class="n">qpd_order</span><span class="p">[</span><span class="n">inserted_operations</span><span class="p">]][</span><span class="s2">&quot;init&quot;</span><span class="p">],</span>
+                                                        <span class="n">operation</span><span class="o">=</span><span class="n">qpd</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">op</span><span class="o">.</span><span class="n">operation</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">])][</span><span class="s2">&quot;init&quot;</span><span class="p">],</span>
                                                         <span class="n">qubits</span><span class="o">=</span><span class="n">qubits_for_operation</span><span class="p">))</span>
 
                     <span class="n">inserted_operations</span> <span class="o">+=</span> <span class="mi">1</span>
@@ -718,7 +700,7 @@
                 <span class="n">mitigated_quasi_probs</span> <span class="o">=</span> <span class="n">mitigator</span><span class="o">.</span><span class="n">quasi_probabilities</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
                 <span class="n">probs_test</span> <span class="o">=</span> <span class="p">{</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">old_key</span><span class="p">)</span><span class="si">:</span><span class="s2">0</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">qs</span><span class="p">)</span><span class="si">}</span><span class="s2">b</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">][:</span><span class="n">meas_bits</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span>
                               <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">old_key</span><span class="p">)</span><span class="si">:</span><span class="s2">0</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">qs</span><span class="p">)</span><span class="si">}</span><span class="s2">b</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="n">meas_bits</span><span class="p">:]:</span>
-                              <span class="n">mitigated_quasi_probs</span><span class="p">[</span><span class="n">old_key</span><span class="p">]</span><span class="o">*</span><span class="n">samples</span> <span class="k">if</span> <span class="n">mitigated_quasi_probs</span><span class="p">[</span><span class="n">old_key</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">0</span>
+                              <span class="n">mitigated_quasi_probs</span><span class="p">[</span><span class="n">old_key</span><span class="p">]</span><span class="o">*</span><span class="n">shots</span> <span class="k">if</span> <span class="n">mitigated_quasi_probs</span><span class="p">[</span><span class="n">old_key</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">0</span>
                                     <span class="k">for</span> <span class="n">old_key</span> <span class="ow">in</span> <span class="n">mitigated_quasi_probs</span><span class="p">}</span>
                 <span class="n">sub_result</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="n">probs_test</span>
 
@@ -796,15 +778,15 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">cuts</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">cut_locations</span><span class="p">)</span>
     <span class="c1">#number of samples neede</span>
-    <span class="n">samples</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="n">cuts</span><span class="p">)</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">ERROR</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
+    <span class="n">samples</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="o">*</span><span class="n">cuts</span><span class="p">)</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">ERROR</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
     <span class="n">shots</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">samples</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">results</span><span class="p">))</span>
 
-    <span class="c1">#ininialize apprix expectation values of an array of ones</span>
+    <span class="c1">#ininialize approx expectation values of an array of ones</span>
     <span class="c1">#could also be zeros don&#39;t think it really matters</span>
     <span class="n">expectation_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">observables</span><span class="p">))</span>
     <span class="k">for</span> <span class="n">experiment_run</span><span class="p">,</span> <span class="n">coefficient</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="n">coefficients</span><span class="p">):</span>
         <span class="c1">#add sub results to the total approx expectation value</span>
-        <span class="n">mid</span> <span class="o">=</span> <span class="p">(</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">cuts</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">coefficient</span><span class="o">*</span>
+        <span class="n">mid</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">cuts</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">coefficient</span><span class="o">*</span>
                <span class="n">get_sub_expectation_values</span><span class="p">(</span><span class="n">experiment_run</span><span class="p">,</span> <span class="n">observables</span><span class="p">,</span> <span class="n">shots</span><span class="p">))</span>
         <span class="n">expectation_values</span> <span class="o">+=</span> <span class="n">mid</span>
 
@@ -828,7 +810,7 @@
 <span class="sd">        list: list of sub expectation values</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">sub_circuit_result_combinations</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">product</span><span class="p">(</span><span class="o">*</span><span class="n">experiment_run</span><span class="o">.</span><span class="n">subcircuits</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+    <span class="n">sub_circuit_result_combinations</span> <span class="o">=</span> <span class="n">product</span><span class="p">(</span><span class="o">*</span><span class="n">experiment_run</span><span class="o">.</span><span class="n">subcircuits</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 
     <span class="n">sub_expectation_value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">observables</span><span class="p">))</span>
     <span class="n">total_weight</span> <span class="o">=</span> <span class="mi">0</span>
@@ -844,9 +826,7 @@
                 <span class="n">qpd_measurement_coefficient</span> <span class="o">*=</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">measurements</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
         <span class="n">total_weight</span> <span class="o">+=</span> <span class="n">weight</span>
         <span class="n">observable_results</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">observables</span><span class="p">))</span>
-        <span class="n">count</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
-        <span class="k">for</span> <span class="n">obs</span> <span class="ow">in</span> <span class="n">observables</span><span class="p">:</span>
-            <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">for</span> <span class="n">count</span><span class="p">,</span> <span class="n">obs</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">observables</span><span class="p">):</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obs</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
                 <span class="n">observable_results</span><span class="p">[</span><span class="n">count</span><span class="p">]</span> <span class="o">=</span> <span class="n">full_result</span><span class="p">[</span><span class="n">obs</span><span class="p">]</span>
             <span class="k">else</span><span class="p">:</span>
@@ -855,8 +835,8 @@
                     <span class="n">multi_qubit_observable_eigenvalue</span> <span class="o">*=</span> <span class="n">full_result</span><span class="p">[</span><span class="n">sub_observables</span><span class="p">]</span>
                     <span class="n">observable_results</span><span class="p">[</span><span class="n">count</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">obs</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
                                                  <span class="o">*</span><span class="n">multi_qubit_observable_eigenvalue</span><span class="p">)</span>
-        <span class="n">multi_qubit_observable_eigenvalue</span> <span class="o">=</span> <span class="n">qpd_measurement_coefficient</span><span class="o">*</span><span class="n">observable_results</span><span class="o">*</span><span class="n">weight</span>
-        <span class="n">sub_expectation_value</span> <span class="o">+=</span> <span class="n">multi_qubit_observable_eigenvalue</span>
+        <span class="n">observable_expectation_value</span> <span class="o">=</span> <span class="n">qpd_measurement_coefficient</span><span class="o">*</span><span class="n">observable_results</span><span class="o">*</span><span class="n">weight</span>
+        <span class="n">sub_expectation_value</span> <span class="o">+=</span> <span class="n">observable_expectation_value</span>
 
     <span class="k">return</span> <span class="n">sub_expectation_value</span></div>
 
@@ -877,15 +857,17 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">circuit</span> <span class="o">=</span> <span class="n">circuit</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-    <span class="n">cut_locations</span><span class="p">,</span> <span class="n">bounds</span> <span class="o">=</span> <span class="n">get_locations_and_bounds</span><span class="p">(</span><span class="n">circuit</span><span class="p">)</span>
+    <span class="n">cut_locations</span> <span class="o">=</span> <span class="n">get_cut_locations</span><span class="p">(</span><span class="n">circuit</span><span class="p">)</span>
+    <span class="n">sorted_cut_locations</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">cut_locations</span><span class="p">,</span> <span class="n">key</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">min</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">meas</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">init</span><span class="p">))</span>
     <span class="n">circ</span> <span class="o">=</span> <span class="n">insert_meassure_prepare_channel</span><span class="p">(</span><span class="n">circuit</span><span class="p">,</span> <span class="n">cut_locations</span><span class="p">)</span>
+    <span class="n">bounds</span> <span class="o">=</span> <span class="n">get_bounds</span><span class="p">(</span><span class="n">sorted_cut_locations</span><span class="p">)</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">subcircuits</span> <span class="o">=</span> <span class="n">separate_sub_circuits</span><span class="p">(</span><span class="n">circ</span><span class="p">,</span> <span class="n">bounds</span><span class="p">)</span>
     <span class="k">except</span> <span class="n">CircuitError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
         <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Invalid cut placement. See documentation for how cuts should be placed.&quot;</span>
         <span class="k">raise</span> <span class="n">QCutError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">e</span>
 
-    <span class="k">return</span> <span class="n">cut_locations</span><span class="p">,</span> <span class="n">subcircuits</span></div>
+    <span class="k">return</span> <span class="n">sorted_cut_locations</span><span class="p">,</span> <span class="n">subcircuits</span></div>
 
 
 <div class="viewcode-block" id="run_cut_circuit">
