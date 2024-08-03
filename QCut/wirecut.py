@@ -16,7 +16,7 @@ from qiskit_experiments.library import LocalReadoutError
 from .backend_utility import transpile_experiments
 from .identity_qpd import identity_qpd
 
-ERROR = 0.001
+ERROR = 0.0000001
 
 class QCutError(Exception):
     """Exception raised for custom error conditions.
