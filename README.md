@@ -47,7 +47,7 @@ circuit.measure_all()
 circuit.draw("mpl")
 ```
 
-![](https://33333.cdn.cke-cs.com/kSW7V9NHUXugvhoQeFaf/images/de618d0f193a9532d9ee849bac62e319cd5df3e35a4f9331.png)
+![](./docs/images/circ1.png)
 
 **3: Insert cut\_wire operations to the circuit to denote where we want to cut the circuit**
 
@@ -63,7 +63,7 @@ cut_circuit.cx(2,3)
 cut_circuit.draw("mpl")
 ```
 
-![](https://33333.cdn.cke-cs.com/kSW7V9NHUXugvhoQeFaf/images/97085d3d332653534f045ebd4bceb473b28a1c93014c06c8.png)
+![](./docs/images/circ2.png)
 
 **4\. Extract cut locations from cut\_circuit and split it into independent subcircuit.**
 
@@ -77,13 +77,13 @@ Now we can draw our subcircuits.
 subcircuits[0].draw("mpl")
 ```
 
-![](https://33333.cdn.cke-cs.com/kSW7V9NHUXugvhoQeFaf/images/168872c3d19110c76d6295dce1a9641156e38a9b31de2008.png)
+![](./docs/images/circ3.png)
 
 ```python
 subcircuits[1].draw("mpl")
 ```
 
-![](https://33333.cdn.cke-cs.com/kSW7V9NHUXugvhoQeFaf/images/38cef69b2bf031fb8d88f791932bf5af9b53ba796ac22fd1.png)
+![](./docs/images/circ4.png)
 
 **5: Generate experiment circuits by inserting operations from a quasi-probability distribution for the identity channel**
 
