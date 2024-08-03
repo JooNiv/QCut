@@ -10,6 +10,9 @@ Check out [qcut.readthedocs.io](https://qcut.readthedocs.io/en/latest/) for docu
 
 ## Installation
 
+**Note:**
+QCut is still in active devlopement and even though all implemented features should work bugs are possible.
+
 **Pip:**  
 Installation should be done via `pip`
 
