@@ -19,15 +19,10 @@ def transpile_experiments(experiment_circuits: list, backend) -> list:  # noqa: 
         transpiled_experiments: a list of transpiled experiment circuits
 
     """
-    transpiled_experiments = []
-    for circuit_group in experiment_circuits:
-        transpiled_group = []
-        for circuit in circuit_group:
-            transpiled_circuit = transpile(circuit, backend, layout_method="sabre", optimization_level=3)
-            transpiled_group.append(transpiled_circuit)
-        transpiled_experiments.append(transpiled_group)
-
-    return transpiled_experiments
+    return [
+        [transpile(circuit, backend, layout_method="sabre", optimization_level=3) for circuit in circuit_group]
+        for circuit_group in experiment_circuits
+        ]
 
 def run_and_expectation_value(circuit: QuantumCircuit, backend, observables: list, shots: int,  # noqa: ANN001
                               mitigate = False) -> tuple[dict, list]:  # noqa: ANN001, FBT002
@@ -79,18 +74,25 @@ def expectation_values(counts: dict, observables: list, shots: int) -> list:
         subcircuits: subcircuits with placeholder operations
 
     """
-    new_res = []
-    for meas, count in counts.items():
-        res = {"meas": [1 if x == "0" else -1 for x in meas], "count":count}
-        new_res.append(res)
+    #Convert results to a list of dicts with measurement values and counts
+    measurements = [
+        {"meas": [1 if bit == "0" else -1 for bit in meas], "count": count}
+        for meas, count in counts.items()
+    ]
 
+    #Initialize an array to store expectation values for each observable
     exps = np.zeros(len(observables))
-    for  i in new_res:
-        for sub, z in enumerate(observables):
-            if isinstance(z, int):
-                exps[sub] += i["meas"][z]*i["count"]
+
+    # Calculate expectation values
+    for measurement in measurements:
+        meas_values = measurement["meas"]
+        count = measurement["count"]
+        for idx, observable in enumerate(observables):
+            if isinstance(observable, int):
+                exps[idx] += meas_values[observable] * count
             else:
-                exps[sub] += np.prod([i["meas"][zi] for zi in z])*i["count"]
+                exps[idx] += np.prod([meas_values[zi] for zi in observable]) * count
+
     return np.array(exps) / shots
 
 def run_on_backend(circuit: QuantumCircuit, backend, shots: int) -> dict:  # noqa: ANN001

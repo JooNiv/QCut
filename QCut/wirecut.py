@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from copy import deepcopy
 from itertools import product
+from typing import TYPE_CHECKING
 
 import numpy as np
 from qiskit import ClassicalRegister, QuantumCircuit, QuantumRegister
@@ -15,6 +16,9 @@ from qiskit_experiments.library import LocalReadoutError
 
 from .backend_utility import transpile_experiments
 from .identity_qpd import identity_qpd
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
 
 ERROR = 0.0000001
 
@@ -141,25 +145,36 @@ def get_cut_locations(circuit: QuantumCircuit) -> list[CutLocation]:
     -------
         Locations of the cuts as a list.
 
+    Raises:
+    ------
+        QCutError: if no cuts found
+
     """
     index = 0 #index of the current instruction in circuit_data
     circuit_data = circuit.data
     cut_locations = []
-    offset = 0 #offset to account for removing the move operations
 
     #loop through circuit instructions
-    #if operation is a Move() instruction remove it and add registers and
+    #if operation is a Cut() instruction remove it and add registers and
     # offset index to cut_locations
 
     #rename varibales to be more descriptive (namely qs)
-
     while index < len(circuit):
         if circuit_data[index].operation.name == "Cut":
-            qs = (circuit.find_bit(x).registers[0] for x in circuit_data[index].qubits)
+            #find qubits for Cut operation
+            qubits = (circuit.find_bit(qubit).registers[0] for qubit in circuit_data[index].qubits)
+
+            #remove the cut operation
             circuit_data.remove(circuit_data[index])
-            cut_locations.append(CutLocation((tuple(qs), index + offset)))
+
+            #append to cut_locations
+            cut_locations.append(CutLocation((tuple(qubits), index)))
+
+            #adjust index to account for removed operation
             index -= 1
         index += 1
+
+    #if no cuts found raise error
     if len(cut_locations) == 0:
         exc = """No cuts in circuit. Did you pass the wrong circuit or try to run get_cut_location()
                 multiple times in a row?"""
@@ -175,33 +190,45 @@ def get_bounds(cut_locations: list[CutLocation]) -> list:
 
     Returns:
     -------
-        Bounds as a list.
+        Bounds as a list of qubit indices.
 
     """
-    test = []
-    for i, cut in enumerate(cut_locations):
-        if i == 0:
-            test.append(([cut.meas, cut.init], [cut.index], [[cut.meas, cut.init]]))
-        for j in test:
-            if cut.index in j[1]:
-                j[0][0] = max(j[0][0], cut.meas)
-                j[0][1] = max(j[0][1], cut.init)
-                j[2].append([cut.meas, cut.init])
+
+    def _add_cut_to_group(cut: CutLocation, group: list) -> None:
+        """Update the group with the new cut information."""
+        group[0][0] = max(group[0][0], cut.meas)
+        group[0][1] = max(group[0][1], cut.init)
+        group[2].append([cut.meas, cut.init])
+
+    def _extend_or_create_group(cut: CutLocation, cut_groups: list) -> None:
+        """Add the cut to an existing group or create a new group."""
+        for group in cut_groups:
+            if cut.index in group[1]:
+                _add_cut_to_group(cut, group)
                 break
-            elif min(cut.meas, cut.init) - max(j[0]) < 0:
-                j[0][0] = min(j[0][0], cut.meas, cut.init) if j[0][0] == min(j[0]) else max(j[0][0], cut.meas, cut.init)
-                j[0][1] = min(j[0][1], cut.meas, cut.init) if j[0][1] == min(j[0]) else max(j[0][1], cut.meas, cut.init)
-                j[1].append(cut.index)
-                j[2].append([cut.meas, cut.init])
+            if min(cut.meas, cut.init) - max(group[0]) < 0:
+                group[0][0] = (min(group[0][0], cut.meas, cut.init) if group[0][0] == min(group[0])
+                               else max(group[0][0], cut.meas, cut.init))
+
+                group[0][1] = (min(group[0][1], cut.meas, cut.init) if group[0][1] == min(group[0])
+                               else max(group[0][1], cut.meas, cut.init))
+                group[1].append(cut.index)
+                group[2].append([cut.meas, cut.init])
                 break
+
+            cut_groups.append(([cut.meas, cut.init], [cut.index], [[cut.meas, cut.init]]))
+
+    cut_groups = []
+
+    for index, cut in enumerate(cut_locations):
+        if index == 0:
+            cut_groups.append(([cut.meas, cut.init], [cut.index], [[cut.meas, cut.init]]))
         else:
-            test.append(([cut.meas, cut.init], [cut.index], [[cut.meas, cut.init]]))
+            _extend_or_create_group(cut, cut_groups)
 
-    bounds = []
-    for i in test:
-        bounds.append(max([min(x) for x in i[2]]))  # noqa: PERF401
+    bounds = [max(min(x) for x in group[2]) for group in cut_groups]
 
-    return bounds
+    return bounds  # noqa: RET504
 
 def get_locations_and_bounds(circuit: QuantumCircuit) -> tuple[list, list]:
     """Get the locations of the cuts in the circuit and the subcircuit bounds.
@@ -220,17 +247,8 @@ def get_locations_and_bounds(circuit: QuantumCircuit) -> tuple[list, list]:
 
     return cut_locations, bounds
 
-#Placeholder measure node operation
-c = QuantumCircuit(1, name="Meas")
-measure_node = c.to_instruction()
-
-#Placeholder initialize node operation
-c = QuantumCircuit(1, name="Init")
-initialize_node = c.to_instruction()
-
-#Insert placeholders to the cut locations
 def insert_meassure_prepare_channel(circuit: QuantumCircuit, cut_locations: list[CutLocation]) -> QuantumCircuit:
-    """Insert the measure and initialize node at the cut locations.
+    """Insert the measure and initialize nodes at the cut locations.
 
     Args:
     ----
@@ -240,7 +258,10 @@ def insert_meassure_prepare_channel(circuit: QuantumCircuit, cut_locations: list
     Returns:
     -------
         circuit with measure and initialize nodes inserted
+
     Raises:
+    ------
+        QCutError: If the cuts are not valid.
 
     """
     # make the varibales with deep arrays clearer. Maybe just another vaeriable with a clear name etc?
@@ -248,57 +269,39 @@ def insert_meassure_prepare_channel(circuit: QuantumCircuit, cut_locations: list
 
     circuit_data = circuit.data
     offset = 0
-    for ind, i in enumerate(cut_locations):
+    for index, cut in enumerate(cut_locations):
+
         #Placeholder measure node operation
-        c = QuantumCircuit(1, name=f"Meas_{ind}")
-        measure_node = c.to_instruction()
+        measure_node = QuantumCircuit(1, name=f"Meas_{index}").to_instruction()
 
         #Placeholder initialize node operation
-        c = QuantumCircuit(1, name=f"Init_{ind}")
-        initialize_node = c.to_instruction()
-        if max(i.meas, i.init) == i.meas:
-            circuit_data.insert(i.index+offset , CircuitInstruction(operation=measure_node,
-                                                                 qubits=[Qubit(i.qubits[0][0], i.qubits[0][1])]))
+        initialize_node = QuantumCircuit(1, name=f"Init_{index}").to_instruction()
 
-            circuit_data.insert(i.index+offset , CircuitInstruction(operation=initialize_node,
-                                                                 qubits=[Qubit(i.qubits[1][0], i.qubits[1][1])]))
-            offset += 2
+        #Determine which operation to insert first based on cut location
+        if max(cut.meas, cut.init) == cut.meas:
+            circuit_data.insert(cut.index+offset , CircuitInstruction(operation=measure_node,
+                                                                 qubits=[Qubit(cut.qubits[0][0], cut.qubits[0][1])]))
+
+            circuit_data.insert(cut.index+offset , CircuitInstruction(operation=initialize_node,
+                                                                 qubits=[Qubit(cut.qubits[1][0], cut.qubits[1][1])]))
         else:
-            circuit_data.insert(i.index+offset , CircuitInstruction(operation=initialize_node,
-                                                                 qubits=[Qubit(i.qubits[1][0], i.qubits[1][1])]))
+            circuit_data.insert(cut.index+offset , CircuitInstruction(operation=initialize_node,
+                                                                 qubits=[Qubit(cut.qubits[1][0], cut.qubits[1][1])]))
 
-            circuit_data.insert(i.index+offset , CircuitInstruction(operation=measure_node,
-                                                                 qubits=[Qubit(i.qubits[0][0], i.qubits[0][1])]))
-            offset += 2
-    return circuit.decompose(gates_to_decompose="decomp")
+            circuit_data.insert(cut.index+offset , CircuitInstruction(operation=measure_node,
+                                                               qubits=[Qubit(cut.qubits[0][0], cut.qubits[0][1])]))
 
-def get_locations_and_bounds_and_insert_meassure_prepare_channel(
-        circuit: QuantumCircuit,
-        ) -> tuple[list, list, QuantumCircuit]:
-    """Get locations of cuts and the bounds for the circuit. Insert the measure and initialize nodes.
+        #Update the offset since we have inserted two instructions
+        offset += 2
 
-    Args:
-    ----
-        circuit: Quantum circuit with Move() operations.
+    return circuit
 
-    Returns:
-    -------
-        qss: Locations of the cuts as a list
-        bounds: Subcircuit bounds as a list
-        circ: Circuit with measure and initialize nodes inserted
-    Raises:
-
-    """
-    circuit = circuit.copy() #make a copy of the circuit to avoid modifying the original one
-    qss, bounds = get_locations_and_bounds(circuit)
-    circ = insert_meassure_prepare_channel(circuit, qss)
-    return qss, bounds, circ
-
-def build_subcircuit(current_bound: int,
+def _build_subcircuit(current_bound: int,  # noqa: PLR0913
                      previous_bound: int,
                      clbits: int,
                      subcircuit_operations: list,
-                     circuit: QuantumCircuit) -> QuantumCircuit:
+                     circuit: QuantumCircuit,
+                     last:bool = False) -> QuantumCircuit:  # noqa: FBT001, FBT002
     """Help build subcircuits.
 
     Args:
@@ -308,6 +311,7 @@ def build_subcircuit(current_bound: int,
         current_bound: last qubit of current subcircuit.
         clbits: number of classical bits.
         subcircuit_operations: operations for subcircuit to be built.
+        last: change behaviour if last subcircuit
 
     Returns:
     -------
@@ -315,23 +319,28 @@ def build_subcircuit(current_bound: int,
     Raises:
 
     """
+    qr_size = current_bound - previous_bound if last else current_bound - previous_bound + 1
     #define quantum register
-    qr = QuantumRegister(current_bound - previous_bound + 1)
+    qr = QuantumRegister(qr_size)
 
     #define classical registers for obsrvable - and qpd - measurements
-    crqpd = ClassicalRegister(clbits, "qpd")
-    cr = ClassicalRegister(current_bound - previous_bound + 1 - clbits, "meas")
+    crqpd = ClassicalRegister(clbits, "qpd_meas")
+    cr = ClassicalRegister(qr_size - clbits, "meas")
 
     subcircuit = QuantumCircuit(qr, crqpd, cr) #initialize the subcircuit
-    for operation in subcircuit_operations: #loop throgh the subcircuitOperatiosn and add them to the subcircuit
-        #get the qubits needed fot the operation and bind the to the quantum register of the subcircuit
-        qubits_for_operation = tuple(Qubit(subcircuit.qregs[0],
-                                            circuit.find_bit(qubit).index-previous_bound)
-                                            for qubit in operation.qubits)
+
+    for operation in subcircuit_operations: #loop throgh the subcircuit_operations and add them to the subcircuit
+        #get the qubits needed fot the operation and bind them to the quantum register of the subcircuit
+        if last:
+            qubits_for_operation = [Qubit(qr, circuit.find_bit(qubit).index - current_bound)
+                                    for qubit in operation.qubits]
+        else:
+            qubits_for_operation = [Qubit(qr, circuit.find_bit(qubit).index - previous_bound)
+                                    for qubit in operation.qubits]
 
         # insert operation to subcricuit
-        subcircuit.data.insert(len(subcircuit), CircuitInstruction(operation=operation.operation,
-                                                                   qubits=qubits_for_operation))
+        subcircuit.append(operation.operation, qubits_for_operation)
+
     return subcircuit
 
 #Cuts the given circuit into two at the location of the cut marker
@@ -350,56 +359,37 @@ def separate_sub_circuits(circuit: QuantumCircuit, sub_circuit_qubit_bounds: lis
 
     """
     #remove barriers
-    rb = RemoveBarriers()
-    circuit = rb(circuit)
+    circuit = RemoveBarriers()(circuit)
 
     #append final bound
     sub_circuit_qubit_bounds.append(circuit.num_qubits)
+
     subcircuits_list = [] #initialize solution array
     current_subcircuit = 0  #counter for which subcircuit we are in
     clbits = 0 #number of classical bits needed for subcircuit
-    offset = 0 #offset from inserting operations
     previous_bound = 0 #previous bound
     subcircuit_operations = [] #array for collecting subcircuit operations
 
     for i,op in enumerate(circuit.data):
 
-        qubits = [circuit.find_bit(x).index for x in op.qubits] #qubits in operations
+        qubits = [circuit.find_bit(x).index for x in op.qubits] #qubits in operation
+
         if "Meas" in op.operation.name:
             clbits += 1 #if measure node add a classical bit
 
-        if i == len(circuit.data)-1: #if at the end of the original circuit
-
-            #see if this can be refactored to be nicer
+        if i == len(circuit.data)-1: #if at the end of the original circuit, handle final subcircuit
 
             subcircuit_operations.append(op) #append the final operation to list
-
-            #define quantum register
-            qr = QuantumRegister(sub_circuit_qubit_bounds[current_subcircuit] - previous_bound)
-
-            #define classical registers for obsrvable - and qpd - measurement
-            crqpd = ClassicalRegister(clbits, "qpd")
-            cr = ClassicalRegister(sub_circuit_qubit_bounds[current_subcircuit] - previous_bound - clbits, "meas")
-
-            subcircuit = QuantumCircuit(qr, crqpd, cr) #initialize the subcircuit
-
-            for operation in subcircuit_operations: #loop throgh the subcircuitOperatiosn and add them to the subcircuit
-
-                #get the qubits needed fot the operation and bind the to the quantum register of the subcircuit
-                qubits_for_operation = tuple(Qubit(subcircuit.qregs[0], circuit.find_bit(x).index-offset)
-                                             for x in operation.qubits)
-
-                #insert operation to subcricuit
-                subcircuit.data.insert(len(subcircuit), CircuitInstruction(operation=operation.operation,
-                                                                           qubits=qubits_for_operation))
+            subcircuit = _build_subcircuit(sub_circuit_qubit_bounds[current_subcircuit] , previous_bound, clbits,
+                                          subcircuit_operations, circuit, last=True)
 
             subcircuits_list.append(subcircuit)
-            continue
+            return subcircuits_list
 
-        #if sub_circuit_qubit_bounds[current_subcircuit]+1 in qubits: #if at the end of subcircuit
-        if True in (x>sub_circuit_qubit_bounds[current_subcircuit] for x in qubits):
+        #if sub_circuit_qubit_bounds[current_subcircuit] in qubits:
+        if any(qubit > sub_circuit_qubit_bounds[current_subcircuit] for qubit in qubits):
             #build the subcircuit
-            subcircuit = build_subcircuit(sub_circuit_qubit_bounds[current_subcircuit] , previous_bound, clbits,
+            subcircuit = _build_subcircuit(sub_circuit_qubit_bounds[current_subcircuit] , previous_bound, clbits,
                                           subcircuit_operations, circuit)
             subcircuits_list.append(subcircuit)
 
@@ -408,12 +398,11 @@ def separate_sub_circuits(circuit: QuantumCircuit, sub_circuit_qubit_bounds: lis
             clbits = 0
             previous_bound = sub_circuit_qubit_bounds[current_subcircuit] + 1
             current_subcircuit += 1
-            if current_subcircuit < len(sub_circuit_qubit_bounds):
-                offset = sub_circuit_qubit_bounds[current_subcircuit]
+
         subcircuit_operations.append(op)
     return subcircuits_list
 
-def get_qpd_combinations(cut_locations: list[CutLocation]) -> list:
+def get_qpd_combinations(cut_locations: list[CutLocation]) -> Iterable[CutLocation]:
     """Get all possible combinations of the QPD operations so that each combination has len(cutLocations) elements.
 
     Args:
@@ -424,9 +413,32 @@ def get_qpd_combinations(cut_locations: list[CutLocation]) -> list:
     Raises:
 
     """
-    return list(product(identity_qpd,repeat=len(cut_locations)))
+    return product(identity_qpd,repeat=len(cut_locations))
 
-def get_experiment_circuits(subcircuits: list[QuantumCircuit], # noqa: C901, PLR0912, PLR0915
+def _adjust_cregs(subcircuit: QuantumCircuit) -> None:
+    """Adjust classical registers for identity measurements."""
+    if len(subcircuit.cregs) > 1:
+        if subcircuit.cregs[0].size == 1:
+            del subcircuit.clbits[subcircuit.cregs[0].size-1]
+            del subcircuit.cregs[0]._bits[subcircuit.cregs[0].size-1]  # noqa: SLF001
+            del subcircuit.cregs[0]
+        else:
+            del subcircuit.clbits[subcircuit.cregs[0].size-1]
+            del subcircuit.cregs[0]._bits[subcircuit.cregs[0].size-1]  # noqa: SLF001
+            subcircuit.cregs[0]._size -= 1  # noqa: SLF001
+
+
+def _finalize_subcircuit(subcircuit: QuantumCircuit, qpd_qubits: list) -> QuantumCircuit:
+    """Finalize the subcircuit by measuring remaining qubits and decomposing."""
+    meas_qubits = [i for i in range(subcircuit.num_qubits) if i not in qpd_qubits]
+    if len(subcircuit.cregs) >= 2:  # noqa: PLR2004
+        subcircuit.measure(meas_qubits, subcircuit.cregs[1])
+    else:
+        subcircuit.measure(meas_qubits, subcircuit.cregs[0])
+    decomp = ["z-meas", "y-meas", "x-meas", "id-meas", "1-init", "0-init", "'+'-init", "'-'-init", "'i+'-init", "'i-'-init"]  # noqa: E501
+    return subcircuit.decompose(gates_to_decompose=decomp)
+
+def get_experiment_circuits(subcircuits: list[QuantumCircuit],
                             cut_locations: list[CutLocation]) -> tuple[list, list, list]:
     """Generate all possible experiment circuits by inserting QPD operations on measure/initialize nodes.
 
@@ -453,9 +465,8 @@ def get_experiment_circuits(subcircuits: list[QuantumCircuit], # noqa: C901, PLR
     num_id_meas = 0
     coefficients = np.empty(num_circs)
 
-    for id_meas_eperiment_index, qpd in enumerate(qpd_combinations): #loop through all QPD combinations
-        coefficient = np.prod([op["c"] for op in qpd])
-        coefficients[id_meas_eperiment_index] = np.prod(coefficient)
+    for id_meas_experiment_index, qpd in enumerate(qpd_combinations): #loop through all QPD combinations
+        coefficients[id_meas_experiment_index] = np.prod([op["c"] for op in qpd])
         sub_experiment_circuits = [] #sub array for collecting related experiment circuits
 
         inserted_operations = 0
@@ -468,37 +479,29 @@ def get_experiment_circuits(subcircuits: list[QuantumCircuit], # noqa: C901, PLR
             for op_ind, op in enumerate(subcircuit.data):
                 if inserted_operations >= 2 * cuts: #if looped through all cuts, stop
                     break
+
                 if "Meas" in op.operation.name: #if measure channel remove placeholder and insert current
                                                # qpd operation
                     qubit_index = subcircuit.find_bit(op.qubits[0]).index
                     subcircuit.data.pop(op_ind) #remove plaxceholder measure channel
                     qpd_qubits.append(qubit_index) #store index
-                    qubits_for_operation = tuple(Qubit(subcircuit.qregs[0], qubit_index) for x in op.qubits)
-                    if qpd[int(op.operation.name.split("_")[-1])]["op"].name == "id-meas": #if identity measure channel
+                    qubits_for_operation = [Qubit(subcircuit.qregs[0], qubit_index)]
+                    meas_op = qpd[int(op.operation.name.split("_")[-1])]["op"]
+                    if meas_op.name == "id-meas": #if identity measure channel
 
                         #store indices
-                        id_meas[num_id_meas] = np.array([id_meas_eperiment_index, id_meas_subcircuit_index,
+                        id_meas[num_id_meas] = np.array([id_meas_experiment_index, id_meas_subcircuit_index,
                                                          id_meas_bit])
                         num_id_meas += 1
                         #remove extra classical bits and registers
-                        if len(subcircuit.cregs) > 1:
-                            if subcircuit.cregs[0].size == 1:
-                                del subcircuit.clbits[subcircuit.cregs[0].size-1]
-                                del subcircuit.cregs[0]._bits[subcircuit.cregs[0].size-1]  # noqa: SLF001
-                                del subcircuit.cregs[0]
-                            else:
-                                del subcircuit.clbits[subcircuit.cregs[0].size-1]
-                                del subcircuit.cregs[0]._bits[subcircuit.cregs[0].size-1]  # noqa: SLF001
-                                subcircuit.cregs[0]._size -= 1  # noqa: SLF001
+                        _adjust_cregs(subcircuit)
 
-                        subcircuit.data.insert(op_ind, CircuitInstruction(operation=
-                                                                       qpd[int(op.operation.name.split("_")[-1])]["op"],
-                                                                       qubits=qubits_for_operation))
+                        subcircuit.data.insert(op_ind, CircuitInstruction(operation=meas_op,
+                                                                          qubits=qubits_for_operation))
                     else:
-                        subcircuit.data.insert(op_ind, CircuitInstruction(operation=
-                                                                       qpd[int(op.operation.name.split("_")[-1])]["op"],
-                                                                       qubits=qubits_for_operation,
-                                                                       clbits=[subcircuit.cregs[0][classical_bit_index]]))
+                        subcircuit.data.insert(op_ind, CircuitInstruction(operation=meas_op,
+                                                                          qubits=qubits_for_operation,
+                                                                          clbits=[subcircuit.cregs[0][classical_bit_index]]))
 
                         #increment classical bit counter
                         classical_bit_index += 1
@@ -508,27 +511,44 @@ def get_experiment_circuits(subcircuits: list[QuantumCircuit], # noqa: C901, PLR
 
                 if "Init" in op.operation.name:
                     subcircuit.data.pop(op_ind)
-                    qubits_for_operation = tuple(Qubit(subcircuit.qregs[0],
-                                                       subcircuit.find_bit(x).index) for x in op.qubits)
+                    init_op = qpd[int(op.operation.name.split("_")[-1])]["init"]
+                    qubits_for_operation = [Qubit(subcircuit.qregs[0], subcircuit.find_bit(x).index) for x in op.qubits]
                     subcircuit.data.insert(op_ind,CircuitInstruction(
-                                                        operation=qpd[int(op.operation.name.split("_")[-1])]["init"],
+                                                        operation=init_op,
                                                         qubits=qubits_for_operation))
 
                     inserted_operations += 1
 
-            meas_qubits = [x for x in range(subcircuit.num_qubits) if x not in qpd_qubits]
-            if len(subcircuit.cregs) >= 2:  # noqa: PLR2004
-                subcircuit.measure(meas_qubits, subcircuit.cregs[1])
-            else:
-                subcircuit.measure(meas_qubits, subcircuit.cregs[0])
-
-            decomp = ["z-meas", "y-meas", "x-meas", "id-meas", "1-init", "0-init",
-                      "'+'-init", "'-'-init", "'i+'-init", "'i-'-init"]
-            subcircuit = subcircuit.decompose(gates_to_decompose=decomp)
+            subcircuit = _finalize_subcircuit(subcircuit, qpd_qubits)
             sub_experiment_circuits.append(subcircuit)
         experiment_circuits.append(sub_experiment_circuits)
 
     return experiment_circuits, coefficients, id_meas[:num_id_meas]
+
+def _run_mitigate(sub_result: list, shots: int, backend) -> list:  # noqa: ANN001
+    numqubits_per_circ = set()
+    for res in sub_result:
+        measurements = list(res.keys())
+        circ_numqubits = len(measurements[0].replace(" ", ""))
+        numqubits_per_circ.add(circ_numqubits)
+
+    mitigators = {circ_numqubits: LocalReadoutError(list(range(circ_numqubits))).run(backend)
+                    .analysis_results("Local Readout Mitigator").value
+                    for circ_numqubits in numqubits_per_circ}
+
+    for ind, res in enumerate(sub_result):
+        measurements = list(res.keys())
+        circ_numqubits = list(range(len(measurements[0].replace(" ", ""))))
+        mitigator = mitigators[len(circ_numqubits)]
+        meas_bits = len(measurements[0].split(" ")[0])
+        mitigated_quasi_probs = mitigator.quasi_probabilities(res)
+        probs_test = {f"{int(old_key):0{len(circ_numqubits)}b}"[::-1][:meas_bits] + " " +
+                        f"{int(old_key):0{len(circ_numqubits)}b}"[::-1][meas_bits:]:
+                        mitigated_quasi_probs[old_key]*shots if mitigated_quasi_probs[old_key] > 0 else 0
+                            for old_key in mitigated_quasi_probs}
+
+        sub_result[ind] = probs_test
+    return sub_result
 
 def run_experiments(experiment_circuits: list,  # noqa: PLR0913
                     cut_locations: list[CutLocation],
@@ -564,35 +584,15 @@ def run_experiments(experiment_circuits: list,  # noqa: PLR0913
     for count, subcircuit_group in enumerate(experiment_circuits):
         sub_result = [backend.run(i, shots=shots).result().get_counts() for i in subcircuit_group]
         if mitigate:
-            qss = set()
-            for res in sub_result:
-                q = list(res.keys())
-                qs = len(q[0].replace(" ", ""))
-                qss.add(qs)
-
-            mitigators = {qs: LocalReadoutError(list(range(qs))).run(backend)
-                          .analysis_results("Local Readout Mitigator").value
-                          for qs in qss}
-
-            for ind, res in enumerate(sub_result):
-                q = list(res.keys())
-                qs = list(range(len(q[0].replace(" ", ""))))
-                mitigator = mitigators[len(qs)]
-                meas_bits = len(q[0].split(" ")[0])
-                mitigated_quasi_probs = mitigator.quasi_probabilities(res)
-                probs_test = {f"{int(old_key):0{len(qs)}b}"[::-1][:meas_bits] + " " +
-                              f"{int(old_key):0{len(qs)}b}"[::-1][meas_bits:]:
-                              mitigated_quasi_probs[old_key]*shots if mitigated_quasi_probs[old_key] > 0 else 0
-                                    for old_key in mitigated_quasi_probs}
-                sub_result[ind] = probs_test
+            sub_result = _run_mitigate(sub_result, shots, backend)
 
         results[count] = sub_result
 
         sub_result = []
-    return process_results(results, id_meas, shots, samples)
+    return _process_results(results, id_meas, shots, samples)
 
 
-def process_results(results: list, id_meas: list, shots: int, samples: int) -> list:
+def _process_results(results: list, id_meas: list, shots: int, samples: int) -> list:
     """Transform results with post processing function {0,1} -> [-1, 1].
 
     Args:
@@ -633,7 +633,6 @@ def process_results(results: list, id_meas: list, shots: int, samples: int) -> l
     return preocessed_results
 
 #Calculate the approx expectation values for the original circuit
-#Soon hopefully more than Z-observables
 def estimate_expectation_values(results: list[TotalResult],
                                 coefficients: list[int],
                                 cut_locations: list[CutLocation],
@@ -663,13 +662,13 @@ def estimate_expectation_values(results: list[TotalResult],
     for experiment_run, coefficient in zip(results, coefficients):
         #add sub results to the total approx expectation value
         mid = (np.power(-1, cuts+1) * coefficient*
-               get_sub_expectation_values(experiment_run, observables, shots))
+               _get_sub_expectation_values(experiment_run, observables, shots))
         expectation_values += mid
 
     #multiply by gamma to the power of cuts and take mean
     return np.power(4,cuts) * expectation_values / (samples)
 
-def get_sub_expectation_values(experiment_run: TotalResult, observables: list, shots: int) -> list:
+def _get_sub_expectation_values(experiment_run: TotalResult, observables: list, shots: int) -> list:
     """Calculate sub expectation value for the result.
 
     Args:
