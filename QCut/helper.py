@@ -1,6 +1,7 @@
 """Helper finctions for circuit knitting."""
 
 import numpy as np
+from qiskit.quantum_info import PauliList
 
 #from openqaoa.qaoa_components import Hamiltonian  # noqa: ERA001
 #from qiskit.quantum_info import PauliList  # noqa: ERA001
@@ -29,6 +30,33 @@ def relative_error(actual: list, approx: list) -> list:
         return abs(approx-actual)/(1+abs(actual))
 
     return abs(approx-actual)/(abs(actual))
+
+def get_pauli_list(input_list: list, length: int) -> PauliList:
+    """Transform list of observable indices to Paulilist of Z observables.
+
+    Args:
+    ----
+        input_list: lits of observables as qubit indices
+        length: number of qubits in the circuit
+
+    Returns:
+    -------
+        PauliList: a PauliList of Z observables
+
+    """
+    result = []
+    base_string = "I" * length
+
+    for indices in input_list:
+        temp_string = list(base_string)
+        if isinstance(indices, int):
+            temp_string[indices] = "Z"
+        else:
+            for index in indices:
+                temp_string[index] = "Z"
+        result.append("".join(temp_string))
+
+    return PauliList(result)
 
 """def hamiltonian_to_strings(hamiltonian: Hamiltonian, length: int) -> dict:
     Convert openQAOA hamiltonian to a convenient form.

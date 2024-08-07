@@ -9,7 +9,6 @@ from typing import TYPE_CHECKING
 import numpy as np
 from qiskit import ClassicalRegister, QuantumCircuit, QuantumRegister
 from qiskit.circuit import CircuitError, CircuitInstruction, Qubit
-from qiskit.quantum_info import PauliList
 from qiskit.transpiler.passes import RemoveBarriers
 from qiskit_aer import AerSimulator
 from qiskit_experiments.library import LocalReadoutError
@@ -762,33 +761,6 @@ def run_cut_circuit(subcircuits: list,
                               backend=backend, mitigate=mitigate)
 
     return estimate_expectation_values(results, coefs, cut_locations, observables)
-
-def get_pauli_list(input_list: list, length: int) -> PauliList:
-    """Transform list of observable indices to Paulilist of Z observables.
-
-    Args:
-    ----
-        input_list: lits of observables as qubit indices
-        length: number of qubits in the circuit
-
-    Returns:
-    -------
-        PauliList: a PauliList of Z observables
-
-    """
-    result = []
-    base_string = "I" * length
-
-    for indices in input_list:
-        temp_string = list(base_string)
-        if isinstance(indices, int):
-            temp_string[indices] = "Z"
-        else:
-            for index in indices:
-                temp_string[index] = "Z"
-        result.append("".join(temp_string))
-
-    return PauliList(result)
 
 def run(circuit: QuantumCircuit,
         observables: list,
