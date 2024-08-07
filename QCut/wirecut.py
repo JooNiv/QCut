@@ -162,7 +162,7 @@ def get_cut_locations(circuit: QuantumCircuit) -> list[CutLocation]:
     while index < len(circuit):
         if circuit_data[index].operation.name == "Cut":
             #find qubits for Cut operation
-            qubits = (circuit.find_bit(qubit).registers[0] for qubit in circuit_data[index].qubits)
+            qubits = [circuit.find_bit(qubit).registers[0] for qubit in circuit_data[index].qubits]
 
             #remove the cut operation
             circuit_data.remove(circuit_data[index])
@@ -614,8 +614,6 @@ def _process_results(results: list, id_meas: list, shots: int, samples: int) -> 
             circuit_results = []
             for meassurements, count in sub_result.items():
                 #separate end measurements from mid-circuit measurements
-                #for running on Helmi need to change the circuit construction to avoid
-                #mid circuit measurements. Possible for single / parallel wire cuts.
                 separate_measurements = meassurements.split(" ")
 
                 #map to eigenvalues
@@ -657,7 +655,6 @@ def estimate_expectation_values(results: list[TotalResult],
     shots = int(samples / len(results))
 
     #ininialize approx expectation values of an array of ones
-    #could also be zeros don't think it really matters
     expectation_values = np.ones(len(observables))
     for experiment_run, coefficient in zip(results, coefficients):
         #add sub results to the total approx expectation value

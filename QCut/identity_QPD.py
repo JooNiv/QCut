@@ -1,4 +1,4 @@
-"""Define identity channel quasi probability decomposition."""  # noqa: N999
+"""Define identity channel quasi probability decomposition."""
 
 from .qpd_gates import (
     i_minus_init,
