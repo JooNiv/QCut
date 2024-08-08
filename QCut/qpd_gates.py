@@ -3,52 +3,54 @@
 from qiskit import QuantumCircuit
 
 #define measurements for different bases
-c = QuantumCircuit(1,1, name="x-meas")
-c.h(0)
-c.measure(0,0)
-xmeas = c.to_instruction()
+xmeas = QuantumCircuit(1,1, name="x-meas")
+xmeas.h(0)
+xmeas.measure(0,0)
+xmeas = xmeas.to_instruction()
 
-c = QuantumCircuit(1,1, name="y-meas")
-c.sdg(0)
-c.h(0)
-c.measure(0,0)
-ymeas = c.to_instruction()
+ymeas = QuantumCircuit(1,1, name="y-meas")
+ymeas.sdg(0)
+ymeas.h(0)
+ymeas.measure(0,0)
+ymeas = ymeas.to_instruction()
 
-c = QuantumCircuit(1, name="id-meas")
-idmeas = c.to_instruction()
+idmeas = QuantumCircuit(1, name="id-meas")
+idmeas = idmeas.to_instruction()
 
-c = QuantumCircuit(1,1, name="z-meas")
-c.measure(0,0)
-zmeas = c.to_instruction()
+zmeas = QuantumCircuit(1,1, name="z-meas")
+zmeas.measure(0,0)
+zmeas = zmeas.to_instruction()
 
 #define the cut location marker
-cut = QuantumCircuit(2, name="Cut")
-cut_wire = cut.to_instruction()
+"""Cut-instruction: two qubit gate. 0-qubit is the measure channel
+    and 1-qubit the initialize channel."""
+cut_wire = QuantumCircuit(2, name="Cut")
+cut_wire = cut_wire.to_instruction()
 
-#define initialization instructions for the eigenstates
-c = QuantumCircuit(1, name="0-init")
-zero_init = c.to_instruction()
+#define initialization operations
+zero_init = QuantumCircuit(1, name="0-init")
+zero_init = zero_init.to_instruction()
 
-c = QuantumCircuit(1, name="1-init")
-c.x(0)
-one_init = c.to_instruction()
+one_init = QuantumCircuit(1, name="1-init")
+one_init.x(0)
+one_init = one_init.to_instruction()
 
-c = QuantumCircuit(1, name="'+'-init")
-c.h(0)
-plus_init = c.to_instruction()
+plus_init = QuantumCircuit(1, name="'+'-init")
+plus_init.h(0)
+plus_init = plus_init.to_instruction()
 
-c = QuantumCircuit(1, name="'-'-init")
-c.h(0)
-c.z(0)
-minus_init = c.to_instruction()
+minus_init = QuantumCircuit(1, name="'-'-init")
+minus_init.h(0)
+minus_init.z(0)
+minus_init = minus_init.to_instruction()
 
-c = QuantumCircuit(1, name="'i+'-init")
-c.h(0)
-c.s(0)
-i_plus_init = c.to_instruction()
+i_plus_init = QuantumCircuit(1, name="'i+'-init")
+i_plus_init.h(0)
+i_plus_init.s(0)
+i_plus_init = i_plus_init.to_instruction()
 
-c = QuantumCircuit(1, name="'i-'-init")
-c.h(0)
-c.z(0)
-c.s(0)
-i_minus_init = c.to_instruction()
+i_minus_init = QuantumCircuit(1, name="'i-'-init")
+i_minus_init.h(0)
+i_minus_init.z(0)
+i_minus_init.s(0)
+i_minus_init = i_minus_init.to_instruction()
