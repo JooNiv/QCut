@@ -15,7 +15,7 @@ def test_get_cut_locations() -> None:
     the pre-defined solutions.
     """
     for solution_index, circ in enumerate(s.test_circuits):
-        assert ck.get_cut_locations(circ.copy()) == s.cut_location_solutions[solution_index]  # noqa: S101
+        assert np.array_equal(ck._get_cut_locations(circ.copy()), s.cut_location_solutions[solution_index])  # noqa: S101, SLF001
 
 def test_get_bounds() -> None:
     """Test get_cut_bounds function.
@@ -25,9 +25,9 @@ def test_get_bounds() -> None:
     circuit by comparing the result to the pre-defined solutions.
     """
     for solution_index, circ in enumerate(s.test_circuits):
-        cut_locations = ck.get_cut_locations(circ.copy())
+        cut_locations = ck._get_cut_locations(circ.copy())  # noqa: SLF001
         sorted_cut_locations = sorted(cut_locations, key = lambda x: min(x.meas, x.init))
-        assert ck.get_bounds(sorted_cut_locations) == s.bounds_solutions[solution_index]  # noqa: S101
+        assert np.array_equal(ck._get_bounds(sorted_cut_locations), s.bounds_solutions[solution_index])  # noqa: S101, SLF001
 
 def test_separate_subcircuits() -> None:
     """Test separate_subcircuits function.
