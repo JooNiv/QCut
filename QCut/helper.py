@@ -3,9 +3,6 @@
 import numpy as np
 from qiskit.quantum_info import PauliList
 
-#from openqaoa.qaoa_components import Hamiltonian  # noqa: ERA001
-#from qiskit.quantum_info import PauliList  # noqa: ERA001
-
 
 def isclose(a: float, b: float) -> bool:
     """Check if two floats equal-ish.
@@ -57,29 +54,3 @@ def get_pauli_list(input_list: list, length: int) -> PauliList:
         result.append("".join(temp_string))
 
     return PauliList(result)
-
-"""def hamiltonian_to_strings(hamiltonian: Hamiltonian, length: int) -> dict:
-    Convert openQAOA hamiltonian to a convenient form.
-    terms = str(hamiltonian).split("+")
-    new_string = []
-    coefs = []
-    const = 0
-
-    for term in terms:
-        indices = [int(i.strip("_{ }")) for i in term.split("Z")[1:]]
-
-        new_string = "I"*length
-
-        if len(indices) != 0:
-            coefs.append(float(term[:4]))
-            list_string = list(new_string)
-
-            for i in indices:
-                list_string[i] = "Z"
-
-            new_string.append("".join(list_string)[::-1])
-
-        else:
-            const += float(term[:4])
-
-    return {"paulis":PauliList(new_string), "coefs": coefs, "const": const}"""
