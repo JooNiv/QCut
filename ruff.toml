@@ -1,0 +1,41 @@
+exclude = [
+    "__pycache__",
+    ".pytest_cache",
+    ".vscode",
+    "build",
+    "dist",
+    "htmlcov",
+    "QCut.egg-info",
+    ".coverage",
+    "explain.txt",
+    "tests/solutions.py",
+]
+
+line-length = 88
+indent-width = 4
+
+target-version = "py310"
+
+[lint]
+select = [
+    "E",     # all errors
+    "F",     # all pyflakes-related checks
+    "I",     # import-related checks
+    "C",     # all code style issues
+]
+
+fixable = ["ALL"]
+unfixable = []
+
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[format]
+quote-style = "double"
+
+indent-style = "space"
+
+line-ending = "auto"
+
+docstring-code-format = false
+
+docstring-code-line-length = "dynamic"
