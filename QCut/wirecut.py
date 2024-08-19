@@ -457,8 +457,7 @@ def _finalize_subcircuit(subcircuit: QuantumCircuit, qpd_qubits: list[int]) -> Q
         subcircuit.measure(meas_qubits, subcircuit.cregs[1])
     else:
         subcircuit.measure(meas_qubits, subcircuit.cregs[0])
-    #decomp = ["z-meas", "y-meas", "x-meas", "id-meas", "1-init", "0-init", "'+'-init", "'-'-init", "'i+'-init", "'i-'-init"]  # noqa: E501
-    return subcircuit #.decompose(gates_to_decompose=decomp)
+    return subcircuit
 
 def get_placeholder_locations(subcircuits: list[QuantumCircuit]) -> list:
     """Test."""
@@ -472,7 +471,7 @@ def get_placeholder_locations(subcircuits: list[QuantumCircuit]) -> list:
 
     return ops
 
-def get_experiment_circuits(subcircuits: list[QuantumCircuit],
+def get_experiment_circuits(subcircuits: list[QuantumCircuit],  # noqa: C901
                             cut_locations: np.ndarray[CutLocation],
                             ) -> tuple[list[list[QuantumCircuit]],
                                        list[int],
