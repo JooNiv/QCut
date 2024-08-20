@@ -22,6 +22,12 @@ pip install QCut
 
 Using pip is the recommended install method.
 
+Note: for drawing circuits you might have to install pylatexenc. This can also be done with pip.
+
+```pyhton
+pip install pylatexenc
+```
+
 **Install from source**  
 It is also possible to use QCut by cloning this repository and including it in your project folder.
 
