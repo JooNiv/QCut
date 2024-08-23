@@ -17,3 +17,4 @@ A package for performing circuit knitting with wire cuts on hardware with no res
    FutureFeatures
    Acknowledgement
    License
+   QCut
