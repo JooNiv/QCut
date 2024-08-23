@@ -10,7 +10,7 @@
 import os
 import sys
 
-sys.path.insert(0, os.path.abspath(".."))  # noqa: PTH100
+sys.path.insert(0, os.path.abspath("../QCut"))  # noqa: PTH100
 
 project = "QCut"
 copyright = "2024, Joonas Nivala"  # noqa: A001
