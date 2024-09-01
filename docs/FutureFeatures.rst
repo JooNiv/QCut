@@ -7,7 +7,7 @@ depending on time constraints.
 Streamline calculating other than Z observable expectation values
 -----------------------------------------------------------------
 
-Make it possible to define observables as an dictionary where keys correspond to a Pauli observable
+Make it possible to define observables as a dictionary where keys correspond to a Pauli observable
 and values to qubit indices, like:
 
 .. code:: python
