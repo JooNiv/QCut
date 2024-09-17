@@ -1,5 +1,5 @@
 Examples on using QCut
-==================
+======================
 
 .. toctree::
    :maxdepth: 3

@@ -1,4 +1,4 @@
-"""Helper finctions for circuit knitting."""
+"""Helper functions for circuit knitting."""
 
 import numpy as np
 from qiskit.quantum_info import PauliList
@@ -8,12 +8,12 @@ def isclose(a: float, b: float) -> bool:
     """Check if two floats equal-ish.
 
     Args:
-    ----
+    -----
         b: float to be compared
         a: float to be compared.
 
     Returns:
-    -------
+    --------
         bool: whether a and b close to each other or not.
 
     """
@@ -32,12 +32,12 @@ def get_pauli_list(input_list: list, length: int) -> PauliList:
     """Transform list of observable indices to Paulilist of Z observables.
 
     Args:
-    ----
+    -----
         input_list: lits of observables as qubit indices
         length: number of qubits in the circuit
 
     Returns:
-    -------
+    --------
         PauliList: a PauliList of Z observables
 
     """

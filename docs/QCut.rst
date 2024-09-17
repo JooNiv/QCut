@@ -1,5 +1,5 @@
-QCut Api reference
-============
+QCut API reference
+==================
 
 Submodules
 ----------

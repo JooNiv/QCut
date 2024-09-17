@@ -1,6 +1,6 @@
 """Define identity channel quasi probability decomposition."""
 
-from .qpd_gates import (
+from QCut.qpd_gates import (
     i_minus_init,
     i_plus_init,
     idmeas,

@@ -13,8 +13,8 @@ from qiskit.transpiler.passes import RemoveBarriers
 from qiskit_aer import AerSimulator
 from qiskit_experiments.library import LocalReadoutError
 
-from .backend_utility import transpile_experiments
-from .identity_qpd import identity_qpd
+from QCut.backend_utility import transpile_experiments
+from QCut.identity_qpd import identity_qpd
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -35,12 +35,12 @@ class QCutError(Exception):
         """Init.
 
         Args:
-        ----
+        -----
             message: Explanation of the error. Default is "An error occurred".
             code: Optional error code representing the error type.
 
         Attributes:
-        ----------
+        -----------
             message (str): The error message provided during initialization.
             code (int or None): The error code provided, or None if not specified.
 
@@ -239,11 +239,11 @@ def get_locations_and_bounds(circuit: QuantumCircuit) -> tuple[np.ndarray[CutLoc
     """Get the locations of the cuts in the circuit and the subcircuit bounds.
 
     Args:
-    ----
+    -----
         circuit: Quantum circuit with Move() operations.
 
     Returns:
-    -------
+    --------
         Locations of the cuts and bounds as a list.
 
     """
@@ -419,7 +419,7 @@ def _separate_sub_circuits(circuit: QuantumCircuit, sub_circuit_qubit_bounds: li
         subcircuit_operations.append(op)
     return subcircuits_list
 
-def get_qpd_combinations(cut_locations: np.ndarray[CutLocation]) -> Iterable[tuple[dict]]:
+def get_qpd_combinations(*cut_locations: np.ndarray[CutLocation]) -> Iterable[tuple[dict]]:
     """Get all possible combinations of the QPD operations so that each combination has len(cut_locations) elements.
 
     For a single cut operations can be straightforwardly inserted from the identity qpd. If multiple cuts are made
@@ -428,12 +428,15 @@ def get_qpd_combinations(cut_locations: np.ndarray[CutLocation]) -> Iterable[tup
     These operations can then be inserted to generate the experiment circuits.
 
     Args:
-    ----
+    -----
         cut_locations: cut locations
-    Returns:
-        list of the possible QPD operations
-    Raises:
 
+    Returns:
+    --------
+        ops: list of the possible QPD operations
+
+    Raises:
+        # Add any specific exceptions that this function might raise, if applicable
     """
     return product(identity_qpd,repeat=len(cut_locations))
 
@@ -488,16 +491,16 @@ def get_experiment_circuits(subcircuits: list[QuantumCircuit],  # noqa: C901
     circuit_goup is [subciruit0, subcircuit1, ...].
 
     Args:
-    ----
+    -----
         subcircuits: subcircuits with measure/initialize nodes.
         cut_locations: cut locations.
 
     Returns:
-    -------
+    --------
         experimentCircuits: list of experiment circuits.
         coefficients: sign coefficients for each circuit.
-        id_meas: list of index pointers to results that need additional post-processing due to
-                 identity basis measurement.
+        id_meas: list of index pointers to results that need additional post-processing due to 
+        identity basis measurement.
 
     """
     qpd_combinations = get_qpd_combinations(cut_locations) #generate the QPD operation combinations
@@ -509,7 +512,7 @@ def get_experiment_circuits(subcircuits: list[QuantumCircuit],  # noqa: C901
     id_meas = np.full((num_circs, 3), None)
     num_id_meas = 0
     coefficients = np.empty(num_circs)
-    placheloder_locations = get_placeholder_locations(subcircuits)
+    placeholder_locations = get_placeholder_locations(subcircuits)
     for id_meas_experiment_index, qpd in enumerate(qpd_combinations): #loop through all QPD combinations
         coefficients[id_meas_experiment_index] = np.prod([op["c"] for op in qpd])
         sub_experiment_circuits = [] #sub array for collecting related experiment circuits
@@ -520,7 +523,7 @@ def get_experiment_circuits(subcircuits: list[QuantumCircuit],  # noqa: C901
             classical_bit_index = 0
             id_meas_bit = 0
             qpd_qubits = [] #store the qubit indices of qubits used for qpd measurements
-            for op_ind in placheloder_locations[id_meas_subcircuit_index]:
+            for op_ind in placeholder_locations[id_meas_subcircuit_index]:
                 ind, op = op_ind
                 if "Meas" in op.operation.name: #if measure channel remove placeholder and insert current
                                                # qpd operation
@@ -615,7 +618,7 @@ def run_experiments(experiment_circuits: list[list[QuantumCircuit]],  # noqa: PL
     the meas classical register and yy are the qpd basis measurement results from the qpd_meas class register.
 
     Args:
-    ----
+    -----
         experiment_circuits: experiment circuits
         cut_locations: list of cut locations
         id_meas: list of identity basis measurement locations
@@ -624,7 +627,7 @@ def run_experiments(experiment_circuits: list[list[QuantumCircuit]],  # noqa: PL
         mitigate: wether to use readout error mitigation or not (optional)
 
     Returns:
-    -------
+    --------
         processed_results: list of transformed results
 
     """
@@ -706,14 +709,14 @@ def estimate_expectation_values(results: list[TotalResult],
     where n is the number of cuts, and divide by number of samples.
 
     Args:
-    ----
+    -----
         results: results from experiment circuits
         coefficients: list of coefficients for each subcircuit group
         cut_locations: cut locations
         observables: observables to calculate expectation values for
 
     Returns:
-    -------
+    --------
         list: expectations as a list of floats list of floats
 
     """
@@ -783,11 +786,11 @@ def get_locations_and_subcircuits(circuit: QuantumCircuit) -> tuple[list[CutLoca
     """Get cut locations and subcircuits with placeholder operations.
 
     Args:
-    ----
+    -----
         circuit: circuit with cuts inserted
 
     Returns:
-    -------
+    --------
         cut_locations: a list of cut locations
         subcircuits: subcircuits with placeholder operations
 
@@ -813,7 +816,7 @@ def run_cut_circuit(subcircuits: list[QuantumCircuit],
     """After splitting the circuit run the rest of the circuit knitting sequence.
 
     Args:
-    ----
+    -----
         subcircuits: subcircuits containing the placeholder operations
         cut_locations: list of cut locations
         observables: list of observables as qubit indices (Z observable)
@@ -821,7 +824,7 @@ def run_cut_circuit(subcircuits: list[QuantumCircuit],
         mitigate: wether or not to use readout error mitigation (optional)
 
     Returns:
-    -------
+    --------
         list: a list of expectation values
 
     """
@@ -840,14 +843,14 @@ def run(circuit: QuantumCircuit,
     """Run the whole circuit knitting sequence with one function call.
 
     Args:
-    ----
+    -----
         circuit: circuit with cut experiments
         observables: list of observbles in the form of qubit indices (Z-obsevable).
         backend: backend to use for running experiment circuits (optional)
         mitigate: wether or not to use readout error mitigation (optional)
 
     Returns:
-    -------
+    --------
         list: a list of expectation values
 
     """

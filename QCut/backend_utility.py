@@ -1,4 +1,6 @@
-"""Utility functions for running on real backends."""
+"""
+Utility functions for running on real backends.
+"""
 from __future__ import annotations
 
 import numpy as np
@@ -10,12 +12,12 @@ def transpile_experiments(experiment_circuits: list, backend) -> list:  # noqa: 
     """Transpile experiment circuits.
 
     Args:
-    ----
+    -----
         experiment_circuits: experiment circuits
         backend: backend to transpile to
 
     Returns:
-    -------
+    --------
         transpiled_experiments: a list of transpiled experiment circuits
 
     """
@@ -29,7 +31,7 @@ def run_and_expectation_value(circuit: QuantumCircuit, backend, observables: lis
     """Run circuit and calculate expectation value.
 
     Args:
-    ----
+    -----
         circuit: a quantum circuit
         backend: backend to run circuit on
         observables: observables to calculate expectation values for
@@ -37,7 +39,7 @@ def run_and_expectation_value(circuit: QuantumCircuit, backend, observables: lis
         mitigate: if True use readout error mitigation
 
     Returns:
-    -------
+    --------
         expectation_values: a list of expectation values
 
     """
@@ -59,17 +61,17 @@ def run_and_expectation_value(circuit: QuantumCircuit, backend, observables: lis
     return counts, exps
 
 def expectation_values(counts: dict, observables: list, shots: int) -> list:
-    """Calculate expectration values.
+    """Calculate expectation values.
 
     Args:
-    ----
+    -----
         counts: counts obtained from circuit run
         observables: observables to calculate expectation values for
         shots: number of shots
         probs
 
     Returns:
-    -------
+    --------
         cut_locations: a list of cut locations
         subcircuits: subcircuits with placeholder operations
 
@@ -99,14 +101,14 @@ def run_on_backend(circuit: QuantumCircuit, backend, shots: int) -> dict:  # noq
     """Run circuit on backend.
 
     Args:
-    ----
+    -----
         circuit: a quantum circuit to be executed
         backend: backend to use for executing circuit
         shots: number of shots
         probs
 
     Returns:
-    -------
+    --------
         dict: a dictionary of counts from circuit run
 
     """

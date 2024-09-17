@@ -1,5 +1,5 @@
 Usage
-============
+=====
 
 QCut is a quantum circuit knitting package for performing wire cuts
 especially designed to not use reset gates or mid-circuit since on early
@@ -31,7 +31,7 @@ Using pip is the recommended install method.
   including it in your project folder.
 
 Basic usage
------
+-----------
 
 **1: Import needed packages**
 
@@ -56,7 +56,7 @@ Basic usage
 
    circuit.draw("mpl")
 
-.. image:: /images/circ1.png
+.. image:: _static/images/circ1.png
 
 **3: Insert cut_wire operations to the circuit to denote where we want
 to cut the circuit**
@@ -74,7 +74,7 @@ automatically handled by QCut.
 
    cut_circuit.draw("mpl")
 
-.. image:: /images/circ2.png
+.. image:: _static/images/circ2.png
 
 **4. Extract cut locations from cut_circuit and split it into
 independent subcircuit.**
@@ -89,13 +89,13 @@ Now we can draw our subcircuits.
 
    subcircuits[0].draw("mpl")
 
-.. image:: /images/circ3.png
+.. image:: _static/images/circ3.png
 
 .. code:: python
 
    subcircuits[1].draw("mpl")
 
-.. image:: /images/circ4.png
+.. image:: _static/images/circ4.png
 
 **5: Generate experiment circuits by inserting operations from a
 quasi-probability distribution for the identity channel**
@@ -164,11 +164,11 @@ As we can see QCut is able to accurately reconstruct the expectation
 values. (Note that since this is a probabilistic method the results vary
 a bit each run)
 
-Click :download:`here </_static/QCutBasicUsage.ipynb>` to download example notebook.
+Click :download:`here <examples/QCutBasicUsage.ipynb>` to download example notebook.
 
 
 Basic usage shorthand
----------------
+---------------------
 
 For convenience, it is not necessary to go through each of the
 aforementioned steps individually. Instead, QCut provides a function

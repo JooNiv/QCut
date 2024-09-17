@@ -24,15 +24,39 @@ extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.viewcode",
     "sphinx.ext.napoleon",
+    "sphinx_rtd_theme",
+    "myst_nb",
+    "sphinx.ext.mathjax",
+    "sphinx.ext.githubpages",
 ]
 
 templates_path = ["_templates"]
-exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
+exclude_patterns = [
+    "_build",
+    "Thumbs.db",
+    ".DS_Store",
+    "jupyter_execute",
+    "build",
+]
 
+source_suffix = {
+    '.rst': 'restructuredtext',
+    '.ipynb': 'myst-nb',
+    '.md': 'myst-nb',
+}
 
+myst_enable_extensions = [
+    "amsmath",
+    "dollarmath",
+]
+
+nb_execution_mode = "off"
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_theme = "sphinx_rtd_theme"
+html_theme = "sphinx_book_theme"
+html_logo = "_static/images/QCut-logo.jpg"
+html_title = "QCut"
+html_favicon = "_static/images/QCut-logo.jpg"
 html_static_path = ["_static"]

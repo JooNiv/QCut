@@ -1,11 +1,11 @@
 Multiple cuts
-============
+=============
 
 Performing multiple cuts works the exact same way as a single cut. Since eats cut introduces an extra qubit one just has to 
 be careful to properly allocate the extra qubits needed by wire-cutting.
 
 Cutting to more than two parts
-------------
+------------------------------
 
 **1: Define the circuit we want to cut**
 
@@ -20,7 +20,7 @@ Cutting to more than two parts
 
     circuit.draw("mpl")
 
-.. image:: /images/circ6.png
+.. image:: _static/images/circ6.png
 
 Now let's say we want to cut this circuit into three pieces with two cuts.
 
@@ -39,7 +39,7 @@ to cut the circuit**
 
    cut_circuit.draw("mpl")
 
-.. image:: /images/circ5.png
+.. image:: _static/images/circ5.png
 
 **3: Continue like with single cut**
 
@@ -50,10 +50,10 @@ to cut the circuit**
 
    estimated_expectation_values = ck.run(cut_circuit, observables, backend)
 
-Click :download:`here </_static/QCutCutToThreeParts.ipynb>` to download example notebook.
+Click :download:`here <examples/QCutCutToThreeParts.ipynb>` to download example notebook.
 
 More examples on how the cuts should be placed.
-------------
+-----------------------------------------------
 
 **1: Cutting two subsequent wires**
 
@@ -71,7 +71,7 @@ Initial circuit:
 
     circuit.draw("mpl")
 
-.. image:: /images/circ9.png
+.. image:: _static/images/circ9.png
 
 Circuit with cuts:
 
@@ -88,13 +88,13 @@ Circuit with cuts:
 
     cut_circuit.draw("mpl")
 
-.. image:: /images/circ10.png
+.. image:: _static/images/circ10.png
 
-Click :download:`here </_static/QCutCutSubsequentWires.ipynb>` to download example notebook.
+Click :download:`here <examples/QCutCutSubsequentWires.ipynb>` to download example notebook.
 
 **2: Two consequent cuts on the same wire**
 
-Initial cirucit:
+Initial circuit:
 
 .. code:: python
 
@@ -107,7 +107,7 @@ Initial cirucit:
 
     circuit.draw("mpl")
 
-.. image:: /images/circ7.png
+.. image:: _static/images/circ7.png
 
 Circuit with cuts:
 
@@ -123,6 +123,6 @@ Circuit with cuts:
 
     cut_circuit.draw("mpl")
 
-.. image:: /images/circ8.png
+.. image:: _static/images/circ8.png
 
-Click :download:`here </_static/QCutMultipleCutsOnSingleWire.ipynb>` to download example notebook.
+Click :download:`here <examples/QCutMultipleCutsOnSingleWire.ipynb>` to download example notebook.
