@@ -419,7 +419,7 @@ def _separate_sub_circuits(circuit: QuantumCircuit, sub_circuit_qubit_bounds: li
         subcircuit_operations.append(op)
     return subcircuits_list
 
-def get_qpd_combinations(*cut_locations: np.ndarray[CutLocation]) -> Iterable[tuple[dict]]:
+def get_qpd_combinations(cut_locations: np.ndarray[CutLocation]) -> Iterable[tuple[dict]]:
     """Get all possible combinations of the QPD operations so that each combination has len(cut_locations) elements.
 
     For a single cut operations can be straightforwardly inserted from the identity qpd. If multiple cuts are made
@@ -436,7 +436,7 @@ def get_qpd_combinations(*cut_locations: np.ndarray[CutLocation]) -> Iterable[tu
         ops: list of the possible QPD operations
 
     Raises:
-        # Add any specific exceptions that this function might raise, if applicable
+
     """
     return product(identity_qpd,repeat=len(cut_locations))
 
