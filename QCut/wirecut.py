@@ -14,7 +14,7 @@ from qiskit_aer import AerSimulator
 from qiskit_experiments.library import LocalReadoutError
 
 from QCut.backend_utility import transpile_experiments
-from QCut.identity_qpd import identity_qpd
+from QCut.identity_QPD import identity_qpd
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -419,7 +419,7 @@ def _separate_sub_circuits(circuit: QuantumCircuit, sub_circuit_qubit_bounds: li
         subcircuit_operations.append(op)
     return subcircuits_list
 
-def get_qpd_combinations(*cut_locations: np.ndarray[CutLocation]) -> Iterable[tuple[dict]]:
+def get_qpd_combinations(cut_locations: np.ndarray[CutLocation]) -> Iterable[tuple[dict]]:
     """Get all possible combinations of the QPD operations so that each combination has len(cut_locations) elements.
 
     For a single cut operations can be straightforwardly inserted from the identity qpd. If multiple cuts are made

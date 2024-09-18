@@ -94,6 +94,8 @@ def test_expectation_values() -> None:
 
         # Check each calculated expectation value against the corresponding expected value
         tolerance = 0.1
+        print(expvals)
+        print(s.exp_val_solutions[solution_index])
         for check in [abs(a-b) <= tolerance for a, b in
                       zip(expvals, s.exp_val_solutions[solution_index])]:
             assert check  # noqa: S101

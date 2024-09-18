@@ -2,21 +2,20 @@
 
 from QCut.backend_utility import (
     expectation_values,
-	run_and_expectation_value,
-	run_on_backend,
-	transpile_experiments,
-	
+    run_and_expectation_value,
+    run_on_backend,
+    transpile_experiments,
 )
 from QCut.helper import get_pauli_list
-from QCut.identity_qpd import identity_qpd
+from QCut.identity_QPD import identity_qpd
 from QCut.qpd_gates import cut_wire
 from QCut.wirecut import (
-	estimate_expectation_values,
-	get_experiment_circuits,
-	get_locations_and_subcircuits,
-	run,
-	run_cut_circuit,
-	run_experiments,
+    estimate_expectation_values,
+    get_experiment_circuits,
+    get_locations_and_subcircuits,
+    run,
+    run_cut_circuit,
+    run_experiments,
 )
 
 __all__ = [
@@ -35,4 +34,4 @@ __all__ = [
 	"identity_qpd",
 ]
 
-VERSION = "0.0.9"
+VERSION = "0.1.0"
