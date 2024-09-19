@@ -14,7 +14,7 @@ from qiskit_aer import AerSimulator
 from qiskit_experiments.library import LocalReadoutError
 
 from QCut.backend_utility import transpile_experiments
-from QCut.identity_QPD import identity_qpd
+from QCut.identity_qpd import identity_qpd
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
