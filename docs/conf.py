@@ -12,15 +12,10 @@ import sys
 
 sys.path.insert(0, os.path.abspath("../QCut"))
 
-import re
-with open('../QCut/__init__.py') as f:
-    version_file = f.read()
-    VERSION = re.search(r"VERSION = ['\"]([^'\"]+)['\"]", version_file).group(1)
-
 project = "QCut"
 copyright = "2024, Joonas Nivala"
 author = "Joonas Nivala"
-release = VERSION
+release = "0.1.0"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
