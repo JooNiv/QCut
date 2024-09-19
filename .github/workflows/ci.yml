@@ -64,4 +64,4 @@ jobs:
           python -m pip install ruff
 
       - name: Run ruff linter with pyproject.toml config
-        run: ruff .
+        run: ruff check .
