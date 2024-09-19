@@ -1,6 +1,7 @@
 """
 Utility functions for running on real backends.
 """
+
 from __future__ import annotations
 
 import numpy as np
@@ -22,16 +23,17 @@ def transpile_experiments(experiment_circuits: list, backend) -> list:
 
     """
     return [
-        [transpile(circuit, backend, layout_method="sabre", optimization_level=3)
-         for circuit in circuit_group]
-        for circuit_group in experiment_circuits
+        [
+            transpile(circuit, backend, layout_method="sabre", optimization_level=3)
+            for circuit in circuit_group
         ]
+        for circuit_group in experiment_circuits
+    ]
 
-def run_and_expectation_value(circuit: QuantumCircuit,
-                              backend, observables: list,
-                              shots: int,
-                              mitigate = False
-                              ) -> tuple[dict, list]:
+
+def run_and_expectation_value(
+    circuit: QuantumCircuit, backend, observables: list, shots: int, mitigate=False
+) -> tuple[dict, list]:
     """Run circuit and calculate expectation value.
 
     Args:
@@ -56,14 +58,17 @@ def run_and_expectation_value(circuit: QuantumCircuit,
         result = exp.run(backend)
         mitigator = result.analysis_results("Local Readout Mitigator").value
         mitigated_quasi_probs = mitigator.quasi_probabilities(counts)
-        probs_test = {f"{int(old_key):0{len(qs)}b}"[::-1]:
-                        mitigated_quasi_probs[old_key]*shots
-                        if mitigated_quasi_probs[old_key] > 0 else 0
-                            for old_key in mitigated_quasi_probs}
+        probs_test = {
+            f"{int(old_key):0{len(qs)}b}"[::-1]: mitigated_quasi_probs[old_key] * shots
+            if mitigated_quasi_probs[old_key] > 0
+            else 0
+            for old_key in mitigated_quasi_probs
+        }
         counts = probs_test
     exps = expectation_values(counts, observables, shots)
 
     return counts, exps
+
 
 def expectation_values(counts: dict, observables: list, shots: int) -> list:
     """Calculate expectation values.
@@ -81,13 +86,13 @@ def expectation_values(counts: dict, observables: list, shots: int) -> list:
         subcircuits: subcircuits with placeholder operations
 
     """
-    #Convert results to a list of dicts with measurement values and counts
+    # Convert results to a list of dicts with measurement values and counts
     measurements = [
         {"meas": [1 if bit == "0" else -1 for bit in meas], "count": count}
         for meas, count in counts.items()
     ]
 
-    #Initialize an array to store expectation values for each observable
+    # Initialize an array to store expectation values for each observable
     exps = np.zeros(len(observables))
 
     # Calculate expectation values
@@ -101,6 +106,7 @@ def expectation_values(counts: dict, observables: list, shots: int) -> list:
                 exps[idx] += np.prod([meas_values[zi] for zi in observable]) * count
 
     return np.array(exps) / shots
+
 
 def run_on_backend(circuit: QuantumCircuit, backend, shots: int) -> dict:
     """Run circuit on backend.

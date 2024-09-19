@@ -18,15 +18,17 @@ def isclose(a: float, b: float) -> bool:
 
     """
     tolerance = 0.1
-    return abs(a-b) <= tolerance
+    return abs(a - b) <= tolerance
 
-#calculate relative error
+
+# calculate relative error
 def relative_error(actual: list, approx: list) -> list:
     """Calculate the relative error."""
-    if(np.prod(actual) == 0):
-        return abs(approx-actual)/(1+abs(actual))
+    if np.prod(actual) == 0:
+        return abs(approx - actual) / (1 + abs(actual))
 
-    return abs(approx-actual)/(abs(actual))
+    return abs(approx - actual) / (abs(actual))
+
 
 def get_pauli_list(input_list: list, length: int) -> PauliList:
     """Transform list of observable indices to Paulilist of Z observables.
