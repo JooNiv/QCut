@@ -9,9 +9,13 @@
 
 import os
 import sys
-from QCut import VERSION
 
 sys.path.insert(0, os.path.abspath("../QCut"))
+
+import re
+with open('../QCut/__init__.py') as f:
+    version_file = f.read()
+    VERSION = re.search(r"VERSION = ['\"]([^'\"]+)['\"]", version_file).group(1)
 
 project = "QCut"
 copyright = "2024, Joonas Nivala"
