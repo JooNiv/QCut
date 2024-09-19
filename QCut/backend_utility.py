@@ -8,7 +8,7 @@ from qiskit import QuantumCircuit, transpile
 from qiskit_experiments.library import LocalReadoutError
 
 
-def transpile_experiments(experiment_circuits: list, backend) -> list:  # noqa: ANN001
+def transpile_experiments(experiment_circuits: list, backend) -> list:
     """Transpile experiment circuits.
 
     Args:
@@ -22,12 +22,16 @@ def transpile_experiments(experiment_circuits: list, backend) -> list:  # noqa: 
 
     """
     return [
-        [transpile(circuit, backend, layout_method="sabre", optimization_level=3) for circuit in circuit_group]
+        [transpile(circuit, backend, layout_method="sabre", optimization_level=3)
+         for circuit in circuit_group]
         for circuit_group in experiment_circuits
         ]
 
-def run_and_expectation_value(circuit: QuantumCircuit, backend, observables: list, shots: int,  # noqa: ANN001
-                              mitigate = False) -> tuple[dict, list]:  # noqa: ANN001, FBT002
+def run_and_expectation_value(circuit: QuantumCircuit,
+                              backend, observables: list,
+                              shots: int,
+                              mitigate = False
+                              ) -> tuple[dict, list]:
     """Run circuit and calculate expectation value.
 
     Args:
@@ -53,7 +57,8 @@ def run_and_expectation_value(circuit: QuantumCircuit, backend, observables: lis
         mitigator = result.analysis_results("Local Readout Mitigator").value
         mitigated_quasi_probs = mitigator.quasi_probabilities(counts)
         probs_test = {f"{int(old_key):0{len(qs)}b}"[::-1]:
-                        mitigated_quasi_probs[old_key]*shots if mitigated_quasi_probs[old_key] > 0 else 0
+                        mitigated_quasi_probs[old_key]*shots
+                        if mitigated_quasi_probs[old_key] > 0 else 0
                             for old_key in mitigated_quasi_probs}
         counts = probs_test
     exps = expectation_values(counts, observables, shots)
@@ -97,7 +102,7 @@ def expectation_values(counts: dict, observables: list, shots: int) -> list:
 
     return np.array(exps) / shots
 
-def run_on_backend(circuit: QuantumCircuit, backend, shots: int) -> dict:  # noqa: ANN001
+def run_on_backend(circuit: QuantumCircuit, backend, shots: int) -> dict:
     """Run circuit on backend.
 
     Args:

@@ -15,7 +15,8 @@ def test_get_cut_locations() -> None:
     the pre-defined solutions.
     """
     for solution_index, circ in enumerate(s.test_circuits):
-        assert np.array_equal(ck._get_cut_locations(circ.copy()), s.cut_location_solutions[solution_index])  # noqa: S101, SLF001
+        assert np.array_equal(ck._get_cut_locations(circ.copy()),
+                              s.cut_location_solutions[solution_index])
 
 def test_get_bounds() -> None:
     """Test get_cut_bounds function.
@@ -26,21 +27,25 @@ def test_get_bounds() -> None:
     """
     for solution_index, circ in enumerate(s.test_circuits):
         cut_locations = ck._get_cut_locations(circ.copy())  # noqa: SLF001
-        sorted_cut_locations = sorted(cut_locations, key = lambda x: min(x.meas, x.init))
-        assert np.array_equal(ck._get_bounds(sorted_cut_locations), s.bounds_solutions[solution_index])  # noqa: S101, SLF001
+        sorted_cut_locations = sorted(cut_locations,
+                                      key = lambda x: min(x.meas, x.init))
+        assert np.array_equal(ck._get_bounds(sorted_cut_locations),
+                              s.bounds_solutions[solution_index])  # noqa: S101, SLF001
 
 def test_separate_subcircuits() -> None:
     """Test separate_subcircuits function.
 
     This function tests whether the get_locations_and_subcircuits method correctly
     identifies the locations and separates the subcircuits for each test circuit
-    by comparing the operations in the generated subcircuits to the pre-defined solutions.
+    by comparing the operations in the generated subcircuits to the pre-defined
+    solutions.
     """
     for solution_index, circ in enumerate(s.test_circuits):
         qss, circs = ck.get_locations_and_subcircuits(circ.copy())
 
         for circ_index, subcirc in enumerate(circs):
-            for op1, op2 in zip(subcirc.data, s.subcircuit_solutions[solution_index][circ_index]):
+            for op1, op2 in zip(subcirc.data,
+                                s.subcircuit_solutions[solution_index][circ_index]):
                 assert op1.operation.name == op2.operation.name  # noqa: S101
 
 def test_get_experiment_circuits() -> None:
@@ -72,15 +77,16 @@ def test_get_experiment_circuits() -> None:
         for test_ops, solution_ops in zip(test_data, solution_data):
             for test_op, solution_op in zip(test_ops, solution_ops):
                 assert test_op.operation.name == solution_op.operation.name, (  # noqa: S101
-                    f"Operation mismatch: {test_op.operation.name} != {solution_op.operation.name}"
+                    f"Operation mismatch: {test_op.operation.name} != "
+                    f"{solution_op.operation.name}"
                 )
 
 def test_expectation_values() -> None:
     """Test the expectation values of the test circuits.
 
-    This function tests whether the run method correctly calculates the expectation values
-    for each test circuit and its corresponding observable by comparing the results to the
-    pre-defined solutions within a specified error tolerance.
+    This function tests whether the run method correctly calculates the expectation
+    values for each test circuit and its corresponding observable by comparing the
+    results to the pre-defined solutions within a specified error tolerance.
 
     The test runs each circuit on the AerSimulator backend without error mitigation.
     """
@@ -90,9 +96,12 @@ def test_expectation_values() -> None:
     # Iterate over each test circuit and its corresponding expected solutions
     for solution_index, circ in enumerate(s.test_circuits):
         # Calculate expectation values using the run method
-        expvals = ck.run(circ, s.test_observables[solution_index], backend=sim, mitigate=False)
+        expvals = ck.run(circ,
+                         s.test_observables[solution_index],
+                         backend=sim, mitigate=False)
 
-        # Check each calculated expectation value against the corresponding expected value
+        # Check each calculated expectation value against the corresponding
+        # expected value
         tolerance = 0.1
         print(expvals)
         print(s.exp_val_solutions[solution_index])

@@ -39,6 +39,7 @@ exclude = [
     ".vscode",
     "build",
     "dist",
+    "docs",
     "htmlcov",
     "QCut.egg-info",
     ".coverage",
