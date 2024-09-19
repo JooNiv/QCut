@@ -436,7 +436,7 @@ def get_qpd_combinations(cut_locations: np.ndarray[CutLocation]) -> Iterable[tup
         ops: list of the possible QPD operations
 
     Raises:
-        # Add any specific exceptions that this function might raise, if applicable
+
     """
     return product(identity_qpd,repeat=len(cut_locations))
 
