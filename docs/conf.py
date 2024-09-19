@@ -9,13 +9,14 @@
 
 import os
 import sys
+from QCut import VERSION
 
-sys.path.insert(0, os.path.abspath("../QCut"))  # noqa: PTH100
+sys.path.insert(0, os.path.abspath("../QCut"))
 
 project = "QCut"
-copyright = "2024, Joonas Nivala"  # noqa: A001
+copyright = "2024, Joonas Nivala"
 author = "Joonas Nivala"
-release = "0.1.0"
+release = VERSION
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration

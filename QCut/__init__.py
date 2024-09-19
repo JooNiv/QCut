@@ -1,5 +1,7 @@
 """Init circuit knitting."""  # noqa: N999
 
+from importlib.metadata import version
+
 from QCut.backend_utility import (
     expectation_values,
     run_and_expectation_value,
@@ -18,6 +20,8 @@ from QCut.wirecut import (
     run_experiments,
 )
 
+VERSION = version("QCut")
+
 __all__ = [
 	"expectation_values",
 	"run_on_backend",
@@ -33,5 +37,3 @@ __all__ = [
 	"cut_wire",
 	"identity_qpd",
 ]
-
-VERSION = "0.1.0"
