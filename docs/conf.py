@@ -10,12 +10,25 @@
 import os
 import sys
 
-sys.path.insert(0, os.path.abspath("../QCut"))
+# Find the path to the source files we want to document, relative to the location of this file,
+# convert it to an absolute path.
+py_path = os.path.join(os.getcwd(), os.path.dirname(__file__), '../QCut')
+sys.path.insert(0, os.path.abspath(py_path))
 
 project = "QCut"
 copyright = "2024, Joonas Nivala"
 author = "Joonas Nivala"
-release = "0.1.0"
+
+# The short X.Y version.
+version = ''
+# The full version, including alpha/beta/rc tags.
+release = ''
+try:
+    from QCut import __version__ as version
+except ImportError:
+    pass
+else:
+    release = version
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
