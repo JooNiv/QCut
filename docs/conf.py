@@ -12,7 +12,7 @@ import sys
 
 # Find the path to the source files we want to document, relative to the location of this file,
 # convert it to an absolute path.
-py_path = os.path.join(os.getcwd(), os.path.dirname(__file__), '../QCut')
+py_path = os.path.join(os.getcwd(), os.path.dirname(__file__), '../')
 sys.path.insert(0, os.path.abspath(py_path))
 
 project = "QCut"
