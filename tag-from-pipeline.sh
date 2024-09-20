@@ -4,9 +4,9 @@ function version_gt() {
   if [ "$1" = "$2" ]; then
     return 0
   elif [ "$(printf '%s\n' "$1" "$2" | sort -V | head -n 1)" != "$1" ]; then
-    return 1
-  else
     return 0
+  else
+    return 1
   fi
 }
 
