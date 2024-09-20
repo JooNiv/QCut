@@ -10,7 +10,7 @@ function get_version_in_changelog() {
     version_line=$(sed "${i}q;d" CHANGELOG.rst) # Get ith line of file
     set -- $version_line
     version=$2
-    if [[ $version =~ ^[0-9]+\.[0-9]+$ ]]; then
+    if [[ $version =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
       echo $version $3
       return
     fi
@@ -23,16 +23,23 @@ function get_version_in_changelog() {
 }
 
 function verify_changelog_version() {
+  # Read the version and date from the changelog
   read -r version date < <(get_version_in_changelog)
-  current_version=$(git tag -l --sort=-version:refname | grep -E "^[0-9]+(\.[0-9]){1,2}$" | head -n 1)
+
+  # Get the latest tag in x.x.x format
+  current_version=$(git tag -l --sort=-version:refname | grep -E "^[0-9]+\.[0-9]+\.[0-9]+$" | head -n 1)
+  # Check if the new version is greater than the current version
   if version_gt "$current_version" "$version"; then
     printf "\033[0;31mNew version in the changelog (%s) should be greater than the current version (%s).\n\033[0m" "$version" "$current_version";
     return 172
   fi
-  if [ $(git tag -l "$version") ]; then
+
+  # Check if the version already exists as a tag
+  if git tag -l | grep -q "^$version$"; then
     printf "Version %s already exists.\n" "$version";
     return 172
   fi
+
   printf "Current version is %s, new version is %s.\n" "$current_version" "$version";
 }
 
