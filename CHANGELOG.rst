@@ -5,16 +5,16 @@ Changelog
 Version 0.1.1
 =============
 
-- Code quality improvements
+- Code quality improvements:
     * Move to pyproject.toml. Contents of ruff.toml and setup.py now live in pyproject.toml.
     * Relative imports are now absolute imports.
     * All images are now located under the _static folder.
-- Added Github workflows
+- Added Github workflows:
     * Added github actions workflows for building the documentation and testing that the documentation can be built.
     * Added github actions workflows for testing the code.
     * Added github actions workflows for publishing to pypi.
     * Added github actions workflows for linting.
-- Revamped documentation
+- Revamped documentation:
     * Documentation now uses the Book theme.
     * Fixed all warnings from sphinx when building the documentation.
     * Fixed spelling mistakes.
