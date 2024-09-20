@@ -21,7 +21,7 @@ from QCut.wirecut import (
 )
 
 try:
-    __version__ = version("QCute")
+    __version__ = version("QCut")
 except PackageNotFoundError:  # pragma: no cover
     __version__ = "unknown"
 finally:
