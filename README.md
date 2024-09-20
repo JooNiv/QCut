@@ -53,7 +53,7 @@ circuit.measure_all()
 circuit.draw("mpl")
 ```
 
-![](./docs/images/circ1.png)
+![](./docs/_static/images/circ1.png)
 
 **3: Insert cut\_wire operations to the circuit to denote where we want to cut the circuit**
 
@@ -69,7 +69,7 @@ cut_circuit.cx(2,3)
 cut_circuit.draw("mpl")
 ```
 
-![](./docs/images/circ2.png)
+![](./docs/_static/images/circ2.png)
 
 **4\. Extract cut locations from cut\_circuit and split it into independent subcircuit.**
 
@@ -83,13 +83,13 @@ Now we can draw our subcircuits.
 subcircuits[0].draw("mpl")
 ```
 
-![](./docs/images/circ3.png)
+![](./docs/_static/images/circ3.png)
 
 ```python
 subcircuits[1].draw("mpl")
 ```
 
-![](./docs/images/circ4.png)
+![](./docs/_static/images/circ4.png)
 
 **5: Generate experiment circuits by inserting operations from a quasi-probability distribution for the identity channel**
 
@@ -181,6 +181,18 @@ For running on real IQM hardware through the Lumi supercomputer's FiQCI partitio
 ## Running on other hardware
 
 Running on other providers such as IBM is untested at the moment but as long as the hardware can be accessed with Qiskit version \< 1.0 then QCut should be compatible.
+
+## Documentation
+
+The docs are built with sphinx using the sphinx book theme. To build the docs:
+
+```
+cd docs
+pip install -r requirements-docs.txt
+sphinx-build -v -b html . build/sphinx/html -W
+```
+
+HTML files can then be found under `build/sphinx/html/`
 
 ## Acknowledgements
 

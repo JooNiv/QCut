@@ -6,4 +6,5 @@ dist/
 .vscode
 .coverage
 htmlcov/
-explain.txt
+*.xml
+*.txt

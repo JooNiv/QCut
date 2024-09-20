@@ -2,28 +2,28 @@
 
 from qiskit import QuantumCircuit
 
-#define measurements for different bases
-xmeas = QuantumCircuit(1,1, name="x-meas")
+# define measurements for different bases
+xmeas = QuantumCircuit(1, 1, name="x-meas")
 xmeas.h(0)
-xmeas.measure(0,0)
+xmeas.measure(0, 0)
 
-ymeas = QuantumCircuit(1,1, name="y-meas")
+ymeas = QuantumCircuit(1, 1, name="y-meas")
 ymeas.sdg(0)
 ymeas.h(0)
-ymeas.measure(0,0)
+ymeas.measure(0, 0)
 
 idmeas = QuantumCircuit(1, name="id-meas")
 
-zmeas = QuantumCircuit(1,1, name="z-meas")
-zmeas.measure(0,0)
+zmeas = QuantumCircuit(1, 1, name="z-meas")
+zmeas.measure(0, 0)
 
-#define the cut location marker
+# define the cut location marker
 """Cut-instruction: two qubit gate. 0-qubit is the measure channel
     and 1-qubit the initialize channel."""
 cut_wire = QuantumCircuit(2, name="Cut")
 cut_wire = cut_wire.to_instruction()
 
-#define initialization operations
+# define initialization operations
 zero_init = QuantumCircuit(1, name="0-init")
 
 one_init = QuantumCircuit(1, name="1-init")

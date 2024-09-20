@@ -1,0 +1,80 @@
+[build-system]
+requires = [ "setuptools>=68.0.0", "setuptools_scm[toml]>=7" ]
+build-backend = "setuptools.build_meta"
+
+
+[project]
+name = "QCut"
+dynamic = [ "version" ]
+authors = [
+    { name = "Joonas Nivala", email = "joonas.nivala@gmail.com" },
+]
+description = "A package for performing wire cuts of hardware without reset-gates or mid-circuit measurements. Built on top of qiskit"
+readme = "README.md"
+requires-python = ">=3.9, <3.11"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+]
+
+dependencies = [
+    "qiskit == 0.45.3",
+    "numpy < 2.0.0",
+    "qiskit_aer == 0.13.3",
+    "qiskit_experiments == 0.7.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest", "pytest-cov", "ruff"]
+
+
+[project.urls]
+"Homepage" = "https://github.com/JooNiv/QCut"
+
+[tool.setuptools.packages.find]
+where = ["QCut"]
+
+
+[tool.setuptools_scm]
+version_scheme = "no-guess-dev"
+
+
+[tool.ruff]
+exclude = [
+    "__pycache__",
+    ".pytest_cache",
+    ".vscode",
+    "build",
+    "dist",
+    "docs",
+    "htmlcov",
+    "QCut.egg-info",
+    ".coverage",
+    "explain.txt",
+    "tests/solutions.py",
+]
+line-length = 88
+indent-width = 4
+target-version = "py310"
+
+[tool.ruff.lint]
+select = [
+    "E",  # all errors
+    "F",  # all pyflakes-related checks
+    "I",  # import-related checks
+    "C",  # all code style issues
+]
+fixable = ["ALL"]
+unfixable = []
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "auto"
+docstring-code-format = false
+docstring-code-line-length = "dynamic"
+
+[tool.pytest.ini_options]
+python_files = ["tests.py", "test_*.py"]
