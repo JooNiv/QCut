@@ -569,7 +569,7 @@ def get_placeholder_locations(subcircuits: list[QuantumCircuit]) -> list:
     return ops
 
 
-def get_experiment_circuits(
+def get_experiment_circuits(  # noqa: C901
     subcircuits: list[QuantumCircuit],  # noqa: C901
     cut_locations: np.ndarray[CutLocation],
 ) -> tuple[list[list[QuantumCircuit]], list[int], list[tuple[int, int, int]]]:
@@ -625,7 +625,8 @@ def get_experiment_circuits(
             offset = 0
             classical_bit_index = 0
             id_meas_bit = 0
-            qpd_qubits = []  # store the qubit indices of qubits used for qpd measurements
+            qpd_qubits = []  # store the qubit indices of qubits used for qpd 
+                             # measurements
             for op_ind in placeholder_locations[id_meas_subcircuit_index]:
                 ind, op = op_ind
                 if "Meas" in op.operation.name:  # if measure channel remove placeholder
