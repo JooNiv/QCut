@@ -33,7 +33,7 @@ function verify_changelog_version() {
   read -r version date < <(get_version_in_changelog)
 
   # Get the latest tag in x.x.x format
-  current_version=$(git tag -l | grep -E "^[0-9]+\.[0-9]+\.[0-9]+$" | head -n 1)
+  current_version=$(git tag -l --sort=-version:refname | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | grep -Ev '[a-zA-Z]' | head -n 1)
   # Check if the new version is greater than the current version
   if version_gt "$current_version" "$version"; then
     printf "\033[0;31mNew version in the changelog (%s) should be greater than the current version (%s).\n\033[0m" "$version" "$current_version";
