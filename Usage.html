@@ -1,0 +1,632 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Usage &#8212; QCut</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/sphinx-book-theme.css?v=a3416100" />
+    <link rel="stylesheet" type="text/css" href="_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="_static/jquery.js?v=5d32c60e"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+    <script src="_static/documentation_options.js?v=4e48d009"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'Usage';</script>
+    <link rel="icon" href="_static/QCut-logo.jpg"/>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Examples on using QCut" href="Examples.html" />
+    <link rel="prev" title="QCut documentation" href="index.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="_static/QCut-logo.jpg" class="logo__image only-light" alt="QCut - Home"/>
+    <script>document.write(`<img src="_static/QCut-logo.jpg" class="logo__image only-dark" alt="QCut - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Usage</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="Examples.html">Examples on using QCut</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="Multiple_cuts.html">Multiple cuts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="REM.html">Readout error mitigation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="OtherObservables.html">Other than Z observables</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="Notebooks.html">Notebooks</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="examples/QCutBasicUsage.html">Basic Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/QCutCutSubsequentWires.html">Subsequent Wires</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/QCutCutToThreeParts.html">Cut to Three parts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/QCutMultipleCutsOnSingleWire.html">Multiple cuts on a single wire</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="FutureFeatures.html">Possible future features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Acknowledgement.html">Acknowledgements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="License.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="QCut.html">QCut API reference</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="_sources/Usage.rst" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.rst</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Usage</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#installation">Installation</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-usage">Basic usage</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-usage-shorthand">Basic usage shorthand</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#running-on-iqm-fake-backends">Running on IQM fake backends</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#running-on-fiqci">Running on FiQCI</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#running-on-other-hardware">Running on other hardware</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="usage">
+<h1>Usage<a class="headerlink" href="#usage" title="Link to this heading">#</a></h1>
+<p>QCut is a quantum circuit knitting package for performing wire cuts
+especially designed to not use reset gates or mid-circuit since on early
+NISQ devices they pose significant errors, if they are even available.</p>
+<p>QCut has been designed to work with IQM’s qpus, and therefore on the
+Finnish Quantum Computing Infrastructure
+(<a class="reference external" href="https://fiqci.fi/">FiQCI</a>), and tested with an IQM Adonis 5-qubit
+qpu. Additionally, QCut is built on top of Qiskit 0.45.3 which is the
+current supported Qiskit version of IQM’s Qiskit fork iqm_qiskit.</p>
+<p>QCut was built as a part of a summer internship at CSC - IT Center for
+Science (Finnish IT Center for Science).</p>
+<section id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Link to this heading">#</a></h2>
+<div class="line-block">
+<div class="line"><strong>Pip:</strong></div>
+<div class="line">Installation should be done via <code class="docutils literal notranslate"><span class="pre">pip</span></code></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">QCut</span>
+</pre></div>
+</div>
+<p>Using pip is the recommended install method.</p>
+<div class="line-block">
+<div class="line"><strong>Install from source</strong></div>
+<div class="line">It is also possible to use QCut by cloning this repository and
+including it in your project folder.</div>
+</div>
+</section>
+<section id="basic-usage">
+<h2>Basic usage<a class="headerlink" href="#basic-usage" title="Link to this heading">#</a></h2>
+<p><strong>1: Import needed packages</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">QCut</span> <span class="k">as</span> <span class="nn">ck</span>
+<span class="kn">from</span> <span class="nn">QCut</span> <span class="kn">import</span> <span class="n">cut_wire</span>
+<span class="kn">from</span> <span class="nn">qiskit</span> <span class="kn">import</span> <span class="n">QuantumCircuit</span>
+<span class="kn">from</span> <span class="nn">qiskit_aer</span> <span class="kn">import</span> <span class="n">AerSimulator</span>
+<span class="kn">from</span> <span class="nn">qiskit_aer.primitives</span> <span class="kn">import</span> <span class="n">Estimator</span>
+</pre></div>
+</div>
+<p><strong>2: Start by defining a QuantumCircuit just like in Qiskit</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">circuit</span>  <span class="o">=</span>  <span class="n">QuantumCircuit</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">circuit</span><span class="o">.</span><span class="n">h</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">circuit</span><span class="o">.</span><span class="n">cx</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">circuit</span><span class="o">.</span><span class="n">cx</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="n">circuit</span><span class="o">.</span><span class="n">measure_all</span><span class="p">()</span>
+
+<span class="n">circuit</span><span class="o">.</span><span class="n">draw</span><span class="p">(</span><span class="s2">&quot;mpl&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="_images/circ1.png" src="_images/circ1.png" />
+<p><strong>3: Insert cut_wire operations to the circuit to denote where we want
+to cut the circuit</strong></p>
+<p>Note that here we don’t insert any measurements. Measurements will be
+automatically handled by QCut.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cut_circuit</span> <span class="o">=</span> <span class="n">QuantumCircuit</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+<span class="n">cut_circuit</span><span class="o">.</span><span class="n">h</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">cut_circuit</span><span class="o">.</span><span class="n">cx</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">cut_circuit</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cut_wire</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">])</span>
+<span class="n">cut_circuit</span><span class="o">.</span><span class="n">cx</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
+
+<span class="n">cut_circuit</span><span class="o">.</span><span class="n">draw</span><span class="p">(</span><span class="s2">&quot;mpl&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="_images/circ2.png" src="_images/circ2.png" />
+<p><strong>4. Extract cut locations from cut_circuit and split it into
+independent subcircuit.</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cut_locations</span><span class="p">,</span> <span class="n">subcircuits</span> <span class="o">=</span> <span class="n">ck</span><span class="o">.</span><span class="n">get_locations_and_subcircuits</span><span class="p">(</span><span class="n">cut_circuit</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Now we can draw our subcircuits.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">subcircuits</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">draw</span><span class="p">(</span><span class="s2">&quot;mpl&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="_images/circ3.png" src="_images/circ3.png" />
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">subcircuits</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">draw</span><span class="p">(</span><span class="s2">&quot;mpl&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="_images/circ4.png" src="_images/circ4.png" />
+<p><strong>5: Generate experiment circuits by inserting operations from a
+quasi-probability distribution for the identity channel</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">experiment_circuits</span><span class="p">,</span> <span class="n">coefficients</span><span class="p">,</span> <span class="n">id_meas</span> <span class="o">=</span> <span class="n">ck</span><span class="o">.</span><span class="n">get_experiment_circuits</span><span class="p">(</span><span class="n">subcircuits</span><span class="p">,</span> <span class="n">cut_locations</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>6: Run the experiment circuits</strong></p>
+<p>Here we are using the qisit AerSimulator as our backend but since QCut
+is backend independent you can choose whatever backend you want as long
+as you transpile the experiment circuits accordingly. QCut provides a
+function <code class="docutils literal notranslate"><span class="pre">transpile_experiments()</span></code> for doing just this.</p>
+<p>Since QCut is a circuit knitting package the results are approximations
+of the actual values.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">backend</span> <span class="o">=</span> <span class="n">AerSimulator</span><span class="p">()</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">ck</span><span class="o">.</span><span class="n">run_experiments</span><span class="p">(</span><span class="n">experiment_circuits</span><span class="p">,</span> <span class="n">cut_locations</span><span class="p">,</span> <span class="n">id_meas</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="n">backend</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>7. Define observables and calculate expectation values</strong></p>
+<p>Observables are Pauli-Z observables and are defined as a list of qubit
+indices. Multi-qubit observables are defined as a list inside the
+observable list.</p>
+<p>If one wishes to calculate other than Pauli-Z observable expectation
+values currently this needs to be done by manually modifying the initial
+circuit to perform the basis transform.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">observables</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">]]</span>
+<span class="n">expectation_values</span> <span class="o">=</span> <span class="n">ck</span><span class="o">.</span><span class="n">estimate_expectation_values</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="n">coefficients</span><span class="p">,</span> <span class="n">cut_locations</span><span class="p">,</span> <span class="n">observables</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>8: Finally calculate the exact expectation values and compare them to
+the results calculated with QCut</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">paulilist_observables</span> <span class="o">=</span> <span class="n">ck</span><span class="o">.</span><span class="n">get_pauli_list</span><span class="p">(</span><span class="n">observables</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+
+<span class="n">estimator</span> <span class="o">=</span> <span class="n">Estimator</span><span class="p">(</span><span class="n">run_options</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;shots&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">},</span> <span class="n">approximation</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">exact_expvals</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">estimator</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="n">circuit</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">paulilist_observables</span><span class="p">),</span>  <span class="c1"># noqa: PD011</span>
+                  <span class="nb">list</span><span class="p">(</span><span class="n">paulilist_observables</span><span class="p">))</span><span class="o">.</span><span class="n">result</span><span class="p">()</span><span class="o">.</span><span class="n">values</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="n">np</span><span class="o">.</span><span class="n">set_printoptions</span><span class="p">(</span><span class="n">formatter</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;float&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">x</span><span class="si">:</span><span class="s2">0.6f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">})</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;QCut expectation values:</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">expectation_values</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Exact expectation values with ideal simulator :</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">exact_expvals</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">QCut</span> <span class="pre">circuit</span> <span class="pre">knitting</span> <span class="pre">expectation</span> <span class="pre">values:</span> <span class="pre">[0.007532</span> <span class="pre">0.007532</span> <span class="pre">-0.003662</span> <span class="pre">1.010128]</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">Exact</span> <span class="pre">expectation</span> <span class="pre">values</span> <span class="pre">with</span> <span class="pre">ideal</span> <span class="pre">simulator</span> <span class="pre">:[0.000000</span> <span class="pre">0.000000</span> <span class="pre">0.000000</span> <span class="pre">1.000000]</span></code></p>
+<p>As we can see QCut is able to accurately reconstruct the expectation
+values. (Note that since this is a probabilistic method the results vary
+a bit each run)</p>
+<p>Click <a class="reference download internal" download="" href="_downloads/27eee23723a373cf41db1df6341ef586/QCutBasicUsage.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">here</span></code></a> to download example notebook.</p>
+</section>
+<section id="basic-usage-shorthand">
+<h2>Basic usage shorthand<a class="headerlink" href="#basic-usage-shorthand" title="Link to this heading">#</a></h2>
+<p>For convenience, it is not necessary to go through each of the
+aforementioned steps individually. Instead, QCut provides a function
+<code class="docutils literal notranslate"><span class="pre">run()</span></code> that executes the whole wire-cutting sequence.</p>
+<p>The same example can then be run like this:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">backend</span> <span class="o">=</span> <span class="n">AerSimulator</span><span class="p">()</span>
+<span class="n">observables</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">]]</span>
+
+<span class="n">estimated_expectation_values</span> <span class="o">=</span> <span class="n">ck</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">cut_circuit</span><span class="p">,</span> <span class="n">observables</span><span class="p">,</span> <span class="n">backend</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="running-on-iqm-fake-backends">
+<h2>Running on IQM fake backends<a class="headerlink" href="#running-on-iqm-fake-backends" title="Link to this heading">#</a></h2>
+<p>To use QCut with IQM’s fake backends it is required to install <a class="reference external" href="https://github.com/iqm-finland/qiskit-on-iqm">Qiskit
+IQM</a>. QCut supports
+version 13.7. Installation can be done with pip:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">qiskit</span><span class="o">-</span><span class="n">iqm</span>
+</pre></div>
+</div>
+<p>After installation just import the backend you want to use:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">iqm.qiskit_iqm</span> <span class="kn">import</span> <span class="n">IQMFakeAdonis</span><span class="p">()</span>
+<span class="n">backend</span> <span class="o">=</span> <span class="n">IQMFakeAdonis</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>To tranpile experiment circuits to the backend one can either manually call qiskit
+transpile in a loop or use QCut’s <code class="docutils literal notranslate"><span class="pre">transpile_experiments()</span></code> function:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">transpiled_experiments</span> <span class="o">=</span> <span class="n">ck</span><span class="o">.</span><span class="n">transpile_experiments</span><span class="p">(</span><span class="n">experiment_circuits</span><span class="p">,</span> <span class="n">backend</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Now one can proceed like before.</p>
+</section>
+<section id="running-on-fiqci">
+<h2>Running on FiQCI<a class="headerlink" href="#running-on-fiqci" title="Link to this heading">#</a></h2>
+<p>For running on real IQM hardware through the Lumi supercomputer’s FiQCI
+partition follow the instructions
+<a class="reference external" href="https://docs.csc.fi/computing/quantum-computing/helmi/running-on-helmi/">here</a>.
+If you are used to using Qiskit on jupyter notebooks it is recommended
+to use the <a class="reference external" href="https://docs.lumi-supercomputer.eu/runjobs/webui/">Lumi web
+interface</a>.</p>
+</section>
+<section id="running-on-other-hardware">
+<h2>Running on other hardware<a class="headerlink" href="#running-on-other-hardware" title="Link to this heading">#</a></h2>
+<p>Running on other providers such as IBM is untested at the moment but as
+long as the hardware can be accessed with Qiskit version &lt; 1.0 the QCut
+should be compatible.</p>
+</section>
+</section>
+
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="index.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">QCut documentation</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="Examples.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Examples on using QCut</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#installation">Installation</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-usage">Basic usage</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-usage-shorthand">Basic usage shorthand</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#running-on-iqm-fake-backends">Running on IQM fake backends</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#running-on-fiqci">Running on FiQCI</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#running-on-other-hardware">Running on other hardware</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Joonas Nivala
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2024, Joonas Nivala.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>
