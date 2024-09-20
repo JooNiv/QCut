@@ -23,8 +23,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     
-    
-    create_tag_and_release:
+
+  create_tag_and_release:
     needs: check_version
     runs-on: ubuntu-latest
     if: ${{ github.ref == 'refs/heads/main' }}
