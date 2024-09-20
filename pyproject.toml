@@ -32,6 +32,14 @@ dev = ["pytest", "pytest-cov", "ruff"]
 [project.urls]
 "Homepage" = "https://github.com/JooNiv/QCut"
 
+[tool.setuptools.packages.find]
+where = ["QCut"]
+
+
+[tool.setuptools_scm]
+version_scheme = "no-guess-dev"
+
+
 [tool.ruff]
 exclude = [
     "__pycache__",
