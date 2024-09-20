@@ -19,3 +19,8 @@ A package for performing circuit knitting with wire cuts on hardware with no res
    Acknowledgement
    License
    QCut
+
+.. toctree::
+   :maxdepth: 1
+   
+   Changelog
