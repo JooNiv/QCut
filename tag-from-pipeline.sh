@@ -1,7 +1,13 @@
 #! /bin/bash
 
 function version_gt() {
-  test "$(printf '%s\n' "$@" | sort -V | head -n 1)" != "$1";
+  if [ "$1" = "$2" ]; then
+    return 0
+  elif [ "$(printf '%s\n' "$1" "$2" | sort -V | head -n 1)" != "$1" ]; then
+    return 1
+  else
+    return 0
+  fi
 }
 
 function get_version_in_changelog() {
