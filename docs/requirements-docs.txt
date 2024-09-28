@@ -2,7 +2,7 @@ sphinx==7.4.7
 myst-nb
 sphinx-book-theme
 sphinx_lesson
-qiskit == 0.45.3
-numpy < 2.0.0
-qiskit_aer == 0.13.3
+qiskit >= 0.45.3, < 1.2
+numpy
+qiskit_aer == 0.13.0, < 1.15
 qiskit_experiments == 0.7.0

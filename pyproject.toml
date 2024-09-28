@@ -11,7 +11,7 @@ authors = [
 ]
 description = "A package for performing wire cuts of hardware without reset-gates or mid-circuit measurements. Built on top of qiskit"
 readme = "README.md"
-requires-python = ">=3.9, <3.11"
+requires-python = ">=3.9, < 3.12"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: Apache Software License",
@@ -19,9 +19,9 @@ classifiers = [
 ]
 
 dependencies = [
-    "qiskit == 0.45.3",
-    "numpy < 2.0.0",
-    "qiskit_aer == 0.13.3",
+    "qiskit >= 0.45.3, < 1.2",
+    "numpy",
+    "qiskit_aer >= 0.13.0, < 1.15",
     "qiskit_experiments == 0.7.0",
 ]
 
