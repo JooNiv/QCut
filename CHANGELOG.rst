@@ -13,6 +13,7 @@ Version 0.1.2
 - Fix bug in :code:`_get_bounds()` method.
 - Use :code:`pickle.loads(pickle.dumps())` instead of :code:`deepcopy()` in :code:`_get_experiment_circuits()`.
     * Slight performance improvement.
+- Revert back to vx.x.x versioning scheme.
 
 
 Version 0.1.1
