@@ -328,6 +328,7 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-0-1-2">Version 0.1.2</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-0-1-1">Version 0.1.1</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-0-1-0">Version 0.1.0</a></li>
 </ul>
@@ -343,6 +344,34 @@ document.write(`
                   
   <section id="changelog">
 <span id="changes"></span><h1>Changelog<a class="headerlink" href="#changelog" title="Link to this heading">#</a></h1>
+<section id="version-0-1-2">
+<h2>Version 0.1.2<a class="headerlink" href="#version-0-1-2" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><dl class="simple">
+<dt>Add Qiskit 1.0 support.</dt><dd><ul>
+<li><p>Supported versions now &gt;= 0.45.3, &lt; 1.2.</p></li>
+<li><p>No worflow changes. No migration required.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Add Python 3.11 support.</dt><dd><ul>
+<li><p>Supported versions now &gt;= 3.9, &lt; 3.12.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p>Fix bug in <code class="code docutils literal notranslate"><span class="pre">_get_bounds()</span></code> method.</p></li>
+<li><dl class="simple">
+<dt>Use <code class="code docutils literal notranslate"><span class="pre">pickle.loads(pickle.dumps())</span></code> instead of <code class="code docutils literal notranslate"><span class="pre">deepcopy()</span></code> in <code class="code docutils literal notranslate"><span class="pre">_get_experiment_circuits()</span></code>.</dt><dd><ul>
+<li><p>Slight performance improvement.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</section>
 <section id="version-0-1-1">
 <h2>Version 0.1.1<a class="headerlink" href="#version-0-1-1" title="Link to this heading">#</a></h2>
 <ul class="simple">
@@ -423,6 +452,7 @@ document.write(`
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-0-1-2">Version 0.1.2</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-0-1-1">Version 0.1.1</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-0-1-0">Version 0.1.0</a></li>
 </ul>
