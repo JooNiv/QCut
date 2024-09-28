@@ -287,7 +287,7 @@ document.write(`
 
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
 
-<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+<span class="kn">import</span> <span class="nn">pickle</span>
 <span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">product</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
@@ -526,11 +526,12 @@ document.write(`
 
     <span class="k">def</span> <span class="nf">_extend_or_create_group</span><span class="p">(</span><span class="n">cut</span><span class="p">:</span> <span class="n">CutLocation</span><span class="p">,</span> <span class="n">cut_groups</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Add the cut to an existing group or create a new group.&quot;&quot;&quot;</span>
+        
         <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">cut_groups</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">cut</span><span class="o">.</span><span class="n">index</span> <span class="ow">in</span> <span class="n">group</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
                 <span class="n">_add_cut_to_group</span><span class="p">(</span><span class="n">cut</span><span class="p">,</span> <span class="n">group</span><span class="p">)</span>
-                <span class="k">break</span>
-            <span class="k">if</span> <span class="nb">min</span><span class="p">(</span><span class="n">cut</span><span class="o">.</span><span class="n">meas</span><span class="p">,</span> <span class="n">cut</span><span class="o">.</span><span class="n">init</span><span class="p">)</span> <span class="o">-</span> <span class="nb">max</span><span class="p">(</span><span class="n">group</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">return</span>
+            <span class="k">elif</span> <span class="nb">min</span><span class="p">(</span><span class="n">cut</span><span class="o">.</span><span class="n">meas</span><span class="p">,</span> <span class="n">cut</span><span class="o">.</span><span class="n">init</span><span class="p">)</span> <span class="o">-</span> <span class="nb">max</span><span class="p">(</span><span class="n">group</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">group</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
                     <span class="nb">min</span><span class="p">(</span><span class="n">group</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">cut</span><span class="o">.</span><span class="n">meas</span><span class="p">,</span> <span class="n">cut</span><span class="o">.</span><span class="n">init</span><span class="p">)</span>
                     <span class="k">if</span> <span class="n">group</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="nb">min</span><span class="p">(</span><span class="n">group</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
@@ -544,11 +545,11 @@ document.write(`
                 <span class="p">)</span>
                 <span class="n">group</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cut</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
                 <span class="n">group</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">cut</span><span class="o">.</span><span class="n">meas</span><span class="p">,</span> <span class="n">cut</span><span class="o">.</span><span class="n">init</span><span class="p">])</span>
-                <span class="k">break</span>
+                <span class="k">return</span>
 
-            <span class="n">cut_groups</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="p">([</span><span class="n">cut</span><span class="o">.</span><span class="n">meas</span><span class="p">,</span> <span class="n">cut</span><span class="o">.</span><span class="n">init</span><span class="p">],</span> <span class="p">[</span><span class="n">cut</span><span class="o">.</span><span class="n">index</span><span class="p">],</span> <span class="p">[[</span><span class="n">cut</span><span class="o">.</span><span class="n">meas</span><span class="p">,</span> <span class="n">cut</span><span class="o">.</span><span class="n">init</span><span class="p">]])</span>
-            <span class="p">)</span>
+        <span class="n">cut_groups</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="p">([</span><span class="n">cut</span><span class="o">.</span><span class="n">meas</span><span class="p">,</span> <span class="n">cut</span><span class="o">.</span><span class="n">init</span><span class="p">],</span> <span class="p">[</span><span class="n">cut</span><span class="o">.</span><span class="n">index</span><span class="p">],</span> <span class="p">[[</span><span class="n">cut</span><span class="o">.</span><span class="n">meas</span><span class="p">,</span> <span class="n">cut</span><span class="o">.</span><span class="n">init</span><span class="p">]])</span>
+        <span class="p">)</span>
 
     <span class="n">cut_groups</span> <span class="o">=</span> <span class="p">[]</span>
 
@@ -559,7 +560,6 @@ document.write(`
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">_extend_or_create_group</span><span class="p">(</span><span class="n">cut</span><span class="p">,</span> <span class="n">cut_groups</span><span class="p">)</span>
-
     <span class="n">bounds</span> <span class="o">=</span> <span class="p">[</span><span class="nb">max</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">group</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">cut_groups</span><span class="p">]</span>
 
     <span class="k">return</span> <span class="n">bounds</span>
@@ -738,7 +738,7 @@ document.write(`
 
 <span class="sd">    Args:</span>
 <span class="sd">    ----</span>
-<span class="sd">        circuit: Quantum circuit with Move() operations.</span>
+<span class="sd">        circuit: Quantum circuit with cut_wire() operations.</span>
 <span class="sd">        sub_circuit_qubit_bounds: Bounds for subcircuits as list of qubit indices.</span>
 
 <span class="sd">    Returns:</span>
@@ -929,7 +929,8 @@ document.write(`
         <span class="c1"># circuits</span>
         <span class="n">inserted_operations</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">for</span> <span class="n">id_meas_subcircuit_index</span><span class="p">,</span> <span class="n">circ</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">subcircuits</span><span class="p">):</span>
-            <span class="n">subcircuit</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">circ</span><span class="p">)</span>
+            <span class="n">subcircuit</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">pickle</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">circ</span><span class="p">))</span>
+            <span class="c1">#subcircuit = deepcopy(circ)</span>
             <span class="n">offset</span> <span class="o">=</span> <span class="mi">0</span>
             <span class="n">classical_bit_index</span> <span class="o">=</span> <span class="mi">0</span>
             <span class="n">id_meas_bit</span> <span class="o">=</span> <span class="mi">0</span>
@@ -1015,7 +1016,6 @@ document.write(`
             <span class="n">subcircuit</span> <span class="o">=</span> <span class="n">_finalize_subcircuit</span><span class="p">(</span><span class="n">subcircuit</span><span class="p">,</span> <span class="n">qpd_qubits</span><span class="p">)</span>
             <span class="n">sub_experiment_circuits</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">subcircuit</span><span class="p">)</span>
         <span class="n">experiment_circuits</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sub_experiment_circuits</span><span class="p">)</span>
-
     <span class="k">return</span> <span class="n">experiment_circuits</span><span class="p">,</span> <span class="n">coefficients</span><span class="p">,</span> <span class="n">id_meas</span><span class="p">[:</span><span class="n">num_id_meas</span><span class="p">]</span></div>
 
 
