@@ -2,6 +2,18 @@
 Changelog
 =========
 
+Version 0.1.2
+=============
+- Add Qiskit 1.0 support.
+    * Supported versions now >= 0.45.3, < 1.2.
+    * No worflow changes. No migration required.
+- Add Python 3.11 support.
+    * Supported versions now >= 3.9, < 3.12.
+- Fix bug in :code:`_get_bounds()` method.
+- Use :code:`pickle.loads(pickle.dumps())` instead of :code:`deepcopy()` in :code:`_get_experiment_circuits()`.
+    * Slight performance improvement.
+
+
 Version 0.1.1
 =============
 
