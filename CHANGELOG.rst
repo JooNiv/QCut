@@ -2,6 +2,11 @@
 Changelog
 =========
 
+Version 0.1.3
+=============
+- Hotfix for source files not included in pypi build.
+    * 0.1.0 - 0.1.2 not installable.
+
 Version 0.1.2
 =============
 - Add Qiskit 1.0 support.
