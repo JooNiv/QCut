@@ -7,6 +7,7 @@ Version 0.1.2
 - Add Qiskit 1.0 support.
     * Supported versions now >= 0.45.3, < 1.2.
     * No worflow changes. No migration required.
+    * Compatible with qiskit-iqm 13.15
 - Add Python 3.11 support.
     * Supported versions now >= 3.9, < 3.12.
 - Fix bug in :code:`_get_bounds()` method.
