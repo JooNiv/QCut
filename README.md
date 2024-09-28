@@ -2,9 +2,9 @@
 
 QCut is a quantum circuit knitting package for performing wire cuts especially designed to not use reset gates or mid-circuit measurements since on early NISQ devices they pose significant errors, if available at all.
 
-QCut has been designed to work with IQM's qpus, and therefore on the Finnish Quantum Computing Infrastructure ([FiQCI](https://fiqci.fi/)), and tested with an IQM Adonis 5-qubit qpu. Additionally, QCut is built on top of Qiskit 0.45.3 which is the current supported Qiskit version of IQM's Qiskit fork iqm\_qiskit.
+QCut has been designed to work with IQM's qpus, and therefore on the Finnish Quantum Computing Infrastructure ([FiQCI](https://fiqci.fi/)), and tested with an IQM Adonis 5-qubit qpu. Additionally, QCut is built on top of Qiskit to ensure building and running circuits stays familiar.
 
-QCut was built as a part of a summer internship at CSC - IT Center for Science (Finnish IT Center for Science).
+QCut has been built at CSC - IT Center for Science (Finnish IT Center for Science).
 
 Check out [qcut.readthedocs.io](https://qcut.readthedocs.io/en/latest/) for documentation and more examples.
 
@@ -161,7 +161,7 @@ estimated_expectation_values = ck.run(cut_circuit, observables, backend)
 
 ## Running on IQM fake backends
 
-To use QCut with IQM's fake backends it is required to install [Qiskit IQM](https://github.com/iqm-finland/qiskit-on-iqm). QCut supports version 13.7. Installation can be done with pip:
+To use QCut with IQM's fake backends it is required to install [Qiskit IQM](https://github.com/iqm-finland/qiskit-on-iqm). QCut supports version 13.15. Installation can be done with pip:
 
 ```python
 pip install qiskit-iqm
@@ -180,7 +180,7 @@ For running on real IQM hardware through the Lumi supercomputer's FiQCI partitio
 
 ## Running on other hardware
 
-Running on other providers such as IBM is untested at the moment but as long as the hardware can be accessed with Qiskit version \< 1.0 then QCut should be compatible.
+Running on other providers such as IBM is untested at the moment but as long as the hardware can be accessed with Qiskit QCut should be compatible.
 
 ## Documentation
 
