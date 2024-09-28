@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from copy import deepcopy
+import pickle
 from itertools import product
 from typing import TYPE_CHECKING
 
@@ -229,11 +229,12 @@ def _get_bounds(cut_locations: list[CutLocation]) -> list:
 
     def _extend_or_create_group(cut: CutLocation, cut_groups: list) -> None:
         """Add the cut to an existing group or create a new group."""
+        
         for group in cut_groups:
             if cut.index in group[1]:
                 _add_cut_to_group(cut, group)
-                break
-            if min(cut.meas, cut.init) - max(group[0]) < 0:
+                return
+            elif min(cut.meas, cut.init) - max(group[0]) < 0:
                 group[0][0] = (
                     min(group[0][0], cut.meas, cut.init)
                     if group[0][0] == min(group[0])
@@ -247,11 +248,11 @@ def _get_bounds(cut_locations: list[CutLocation]) -> list:
                 )
                 group[1].append(cut.index)
                 group[2].append([cut.meas, cut.init])
-                break
+                return
 
-            cut_groups.append(
-                ([cut.meas, cut.init], [cut.index], [[cut.meas, cut.init]])
-            )
+        cut_groups.append(
+            ([cut.meas, cut.init], [cut.index], [[cut.meas, cut.init]])
+        )
 
     cut_groups = []
 
@@ -262,7 +263,6 @@ def _get_bounds(cut_locations: list[CutLocation]) -> list:
             )
         else:
             _extend_or_create_group(cut, cut_groups)
-
     bounds = [max(min(x) for x in group[2]) for group in cut_groups]
 
     return bounds
@@ -438,7 +438,7 @@ def _separate_sub_circuits(
 
     Args:
     ----
-        circuit: Quantum circuit with Move() operations.
+        circuit: Quantum circuit with cut_wire() operations.
         sub_circuit_qubit_bounds: Bounds for subcircuits as list of qubit indices.
 
     Returns:
@@ -621,7 +621,8 @@ def get_experiment_circuits(  # noqa: C901
         # circuits
         inserted_operations = 0
         for id_meas_subcircuit_index, circ in enumerate(subcircuits):
-            subcircuit = deepcopy(circ)
+            subcircuit = pickle.loads(pickle.dumps(circ))
+            #subcircuit = deepcopy(circ)
             offset = 0
             classical_bit_index = 0
             id_meas_bit = 0
@@ -707,7 +708,6 @@ def get_experiment_circuits(  # noqa: C901
             subcircuit = _finalize_subcircuit(subcircuit, qpd_qubits)
             sub_experiment_circuits.append(subcircuit)
         experiment_circuits.append(sub_experiment_circuits)
-
     return experiment_circuits, coefficients, id_meas[:num_id_meas]
 
 
