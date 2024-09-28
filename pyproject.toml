@@ -2,7 +2,6 @@
 requires = [ "setuptools>=68.0.0", "setuptools_scm[toml]>=7" ]
 build-backend = "setuptools.build_meta"
 
-
 [project]
 name = "QCut"
 dynamic = [ "version" ]
@@ -33,7 +32,8 @@ dev = ["pytest", "pytest-cov", "ruff"]
 "Homepage" = "https://github.com/JooNiv/QCut"
 
 [tool.setuptools.packages.find]
-where = ["QCut"]
+where = ["."]
+exclude=["tests", "tests.*"]
 
 
 [tool.setuptools_scm]
