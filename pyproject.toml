@@ -38,6 +38,7 @@ where = ["QCut"]
 
 [tool.setuptools_scm]
 version_scheme = "no-guess-dev"
+local_scheme = "no-local-version"
 
 
 [tool.ruff]
