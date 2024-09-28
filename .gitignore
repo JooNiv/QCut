@@ -8,3 +8,5 @@ dist/
 htmlcov/
 *.xml
 *.txt
+test.ipynb
+test.py
