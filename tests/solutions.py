@@ -4,7 +4,7 @@ from qiskit import ClassicalRegister, QuantumCircuit, QuantumRegister
 from qiskit.circuit import CircuitInstruction, Clbit, Instruction, Qubit
 
 from QCut import cut_wire
-from QCut.wirecut import CutLocation
+from QCut.cutlocation import CutLocation
 
 qc_1 = QuantumCircuit(4)
 qc_1.x(0)

@@ -10,3 +10,4 @@ htmlcov/
 *.txt
 test.ipynb
 test.py
+docs/_build/

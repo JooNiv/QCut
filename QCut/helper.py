@@ -4,26 +4,20 @@ import numpy as np
 from qiskit.quantum_info import PauliList
 
 
-def isclose(a: float, b: float) -> bool:
-    """Check if two floats equal-ish.
-
-    Args:
-    -----
-        b: float to be compared
-        a: float to be compared.
-
-    Returns:
-    --------
-        bool: whether a and b close to each other or not.
-
-    """
-    tolerance = 0.1
-    return abs(a - b) <= tolerance
-
-
 # calculate relative error
 def relative_error(actual: list, approx: list) -> list:
-    """Calculate the relative error."""
+    """
+    Calculate the relative error between actual and approximate values.
+    Args:
+        actual (list): The list of actual values.
+        approx (list): The list of approximate values.
+    Returns:
+        list:
+            The list of relative errors for each corresponding pair of actual
+            and approximate values.
+    Raises:
+        ValueError: If the lengths of actual and approx lists are not the same.
+    """
     if np.prod(actual) == 0:
         return abs(approx - actual) / (1 + abs(actual))
 
@@ -34,12 +28,10 @@ def get_pauli_list(input_list: list, length: int) -> PauliList:
     """Transform list of observable indices to Paulilist of Z observables.
 
     Args:
-    -----
-        input_list: lits of observables as qubit indices
-        length: number of qubits in the circuit
+        input_list (list): list of observables as qubit indices
+        length (int): number of qubits in the circuit
 
     Returns:
-    --------
         PauliList: a PauliList of Z observables
 
     """

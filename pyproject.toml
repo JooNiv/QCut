@@ -52,6 +52,7 @@ exclude = [
     "QCut.egg-info",
     ".coverage",
     "explain.txt",
+    "tests/solutions_1q.py",
     "tests/solutions.py",
 ]
 line-length = 88
