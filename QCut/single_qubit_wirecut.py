@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-from collections import OrderedDict, namedtuple
+from collections import namedtuple
 from copy import deepcopy
 
 import numpy as np
-from qiskit import ClassicalRegister, QuantumCircuit, QuantumRegister
-from qiskit.circuit import CircuitError, CircuitInstruction, Qubit
+from qiskit import ClassicalRegister, QuantumCircuit
+from qiskit.circuit import CircuitInstruction, Qubit
 from qiskit.converters import circuit_to_dag, dag_to_circuit
 from qiskit_aer import AerSimulator
 
@@ -93,8 +93,8 @@ def _insert_cut_nodes(circuit, cut_locations):
 
 def _move_to_new_wire(circuit, num_cuts):  # noqa: C901
     count = 0
-    #qr = QuantumRegister(num_cuts, "qpd")
-    #circuit.qregs.append(qr)
+    # qr = QuantumRegister(num_cuts, "qpd")
+    # circuit.qregs.append(qr)
     i = 0
     j = 0
     all_cut_qubits = []
@@ -104,9 +104,11 @@ def _move_to_new_wire(circuit, num_cuts):  # noqa: C901
             consecutive_cuts = 0
             cut_qubits = []
             j = 0
-            while "Meas" in circuit.data[ind+j].operation.name:
-                cut_qubits.append(circuit.data[ind+j].qubits[0])
-                all_cut_qubits.append(circuit.find_bit(circuit.data[ind+j].qubits[0]).index)
+            while "Meas" in circuit.data[ind + j].operation.name:
+                cut_qubits.append(circuit.data[ind + j].qubits[0])
+                all_cut_qubits.append(
+                    circuit.find_bit(circuit.data[ind + j].qubits[0]).index
+                )
                 consecutive_cuts += 1
                 j += 2
             for _ in range(consecutive_cuts):
@@ -141,6 +143,7 @@ def _move_to_new_wire(circuit, num_cuts):  # noqa: C901
             i += 1
     return circuit
 
+
 def count_gates(qc: QuantumCircuit):
     gate_count = {qubit: 0 for qubit in qc.qubits}
     for gate in qc.data:
@@ -173,7 +176,7 @@ def _separate_subcircuits(circuit):
 
     new_circs = []
     for i in circs:
-        circ =_remove_idle_wires(dag_to_circuit(i))
+        circ = _remove_idle_wires(dag_to_circuit(i))
         if len(circ.qubits) == 0:
             continue
         new_circs.append(circ)
@@ -191,6 +194,7 @@ def _add_cbits(subcircuits):
         circ.add_register(ClassicalRegister(circ.num_qubits - clbits, "meas"))
 
     return subcircuits
+
 
 def get_locations_and_subcircuits(
     circuit: QuantumCircuit,
@@ -223,7 +227,10 @@ def get_locations_and_subcircuits(
             test.append(CircuitInstruction(j.operation, qubits))
 
         fixed_circs.append(test)
-
+    if len(fixed_circs) <= 1:
+        raise QCutError(
+            "Invalid cuts. Check documentation to see how cuts should be placed."
+        )
     return cut_locations, fixed_circs
 
 
