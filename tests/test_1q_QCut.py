@@ -97,7 +97,6 @@ def test_expectation_values() -> None:
         expvals = wc.run(
             circ, s.test_observables[solution_index], backend=sim, mitigate=False
         )
-
         # Check each calculated expectation value against the corresponding
         # expected value
         tolerance = 0.1

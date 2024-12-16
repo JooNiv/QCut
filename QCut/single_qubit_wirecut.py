@@ -1,10 +1,12 @@
 from __future__ import annotations
 
-from collections import namedtuple
+from collections import OrderedDict, namedtuple
+from copy import deepcopy
 
 import numpy as np
-from qiskit import ClassicalRegister, QuantumCircuit
-from qiskit.circuit import CircuitError, CircuitInstruction, Clbit, Qubit
+from qiskit import ClassicalRegister, QuantumCircuit, QuantumRegister
+from qiskit.circuit import CircuitError, CircuitInstruction, Qubit
+from qiskit.converters import circuit_to_dag, dag_to_circuit
 from qiskit_aer import AerSimulator
 
 from QCut.backend_utility import transpile_experiments
@@ -89,209 +91,110 @@ def _insert_cut_nodes(circuit, cut_locations):
     return circuit, placeholder_locations
 
 
-def num_parallel_cuts_placeholders(data, ind):
-    num_placeholders = 0
-    for i in data[ind:]:
-        if "Meas_" in i[0].name or "Init_" in i[0].name:
-            num_placeholders += 1
+def _move_to_new_wire(circuit, num_cuts):  # noqa: C901
+    count = 0
+    #qr = QuantumRegister(num_cuts, "qpd")
+    #circuit.qregs.append(qr)
+    i = 0
+    j = 0
+    all_cut_qubits = []
+    while i < len(circuit):
+        ind, op = list(enumerate(circuit.data))[i]
+        if "Meas" in op.operation.name:
+            consecutive_cuts = 0
+            cut_qubits = []
+            j = 0
+            while "Meas" in circuit.data[ind+j].operation.name:
+                cut_qubits.append(circuit.data[ind+j].qubits[0])
+                all_cut_qubits.append(circuit.find_bit(circuit.data[ind+j].qubits[0]).index)
+                consecutive_cuts += 1
+                j += 2
+            for _ in range(consecutive_cuts):
+                q = Qubit()
+                circuit.add_bits([q])
+                circuit.qubits.remove(q)
+                circuit.qubits.insert(circuit.qubits.index(cut_qubits[-1]) + 1, q)
+            check = 0
+            for subind, subop in enumerate(circuit.data[ind::]):
+                if "Meas" in subop.operation.name and check < consecutive_cuts:
+                    check += 1
+                    continue
+                new_qubs = []
+                for qub in subop.qubits:
+                    if qub in cut_qubits:
+                        q_ind = cut_qubits.index(qub) + 1
+                        new_qubs.append(
+                            circuit.qubits[circuit.qubits.index(cut_qubits[-1]) + q_ind]
+                        )
+                    else:
+                        new_qubs.append(qub)
+                if new_qubs != subop.qubits:
+                    circuit.data[ind + subind] = CircuitInstruction(
+                        subop.operation, new_qubs
+                    )
+
+            count += consecutive_cuts
+        if j != 0:
+            i += j
+            j = 0
         else:
-            break
-    return num_placeholders
+            i += 1
+    return circuit
+
+def count_gates(qc: QuantumCircuit):
+    gate_count = {qubit: 0 for qubit in qc.qubits}
+    for gate in qc.data:
+        for qubit in gate.qubits:
+            gate_count[qubit] += 1
+    return gate_count
 
 
-def get_subcircuit_qubits(circuit, subcircuits):
-    qubits = []
-    sub_arr = set()
-    for i in subcircuits:
-        for j in i:
-            for q in j.qubits:
-                sub_arr.add(circuit.find_bit(q).index)
-        qubits.append(sub_arr)
-        sub_arr = set()
-    return qubits
+def _remove_idle_wires(qc: QuantumCircuit):
+    qc_out = deepcopy(qc)
+    gate_count = count_gates(qc_out)
+    for qubit, count in gate_count.items():
+        if count == 0:
+            qc_out.qubits.remove(qubit)
+            for i in qc_out.qregs:
+                if qubit in i._bits:
+                    i._bits.remove(qubit)
+    qc_out.qregs[0]._bit_indices = {
+        qubit: qc_out.qubits.index(qubit) for qubit in qc_out.qubits
+    }
+    qc_out.qregs[0]._bits = qc_out.qubits
+    qc_out.qregs[0]._size = len(qc_out.qregs[0]._bits)
+    return qc_out
 
 
-def merge_subcircuits(circuit, subcircuits, cut_locations):
-    cut_qubits = {cut.meas for cut in cut_locations}
-    qubits_per_sub = get_subcircuit_qubits(circuit, subcircuits)
-    merged = []
-    merged_indices = set()
-    for ind1, i in enumerate(qubits_per_sub):
-        for ind2, j in enumerate(qubits_per_sub):
-            if (
-                ind1 != ind2
-                and (ind1, ind2) not in merged_indices
-                and (ind2, ind1) not in merged_indices
-                and not i == cut_qubits
-                and not j == cut_qubits
-            ):
-                if i == j or i.issubset(j) or j.issubset(i):
-                    merged.append(subcircuits[ind1] + subcircuits[ind2])
-                    merged_indices.add((ind1, ind2))
-    result = []
-    merged_set = set(merged_indices)
-    merged_dict = {min(pair): merged[ind] for ind, pair in enumerate(merged_indices)}
-    for ind, subcircuit in enumerate(subcircuits):
-        if not any(ind in pair for pair in merged_set):
-            result.append((subcircuit, False))
-        elif ind in merged_dict:
-            result.append((merged_dict[ind], True))
-    return result
+def _separate_subcircuits(circuit):
+    dag = circuit_to_dag(circuit)
 
+    circs = dag.separable_circuits()
 
-def _get_subcircuit_data(circuit, placeholder_locations):
-    subcircuits = []
-    cur_circ = []
-    num_to_skip = 0
-    prev_ind = 0
-    for placeholder_location in placeholder_locations:
-        if num_to_skip > 0:
-            num_to_skip -= 1
+    new_circs = []
+    for i in circs:
+        circ =_remove_idle_wires(dag_to_circuit(i))
+        if len(circ.qubits) == 0:
             continue
-        num_to_skip = max(
-            0,
-            num_parallel_cuts_placeholders(circuit.data, placeholder_location[0]) / 2
-            - 1,
-        )
+        new_circs.append(circ)
 
-        cur_circ = (
-            cur_circ + circuit.data[prev_ind : placeholder_location[0] + 1]
-            if num_to_skip == 0
-            else cur_circ
-            + circuit.data[prev_ind : placeholder_location[0] + 1]
-            + [circuit.data[placeholder_location[0] + int(num_to_skip * 2)]]
-        )
-        subcircuits.append(cur_circ)
-        cur_circ = []
-        for i in range(0, int(num_to_skip * 2), 2):
-            cur_circ.append(circuit.data[placeholder_location[0] + 1 + i])
-        prev_ind = int(placeholder_location[0] + num_to_skip * 2 + 1)
-    cur_circ = cur_circ + circuit.data[prev_ind:]
-    subcircuits.append(cur_circ)
-    return subcircuits
+    return new_circs
 
 
-def expand_subcircuit(circuit):
-    cut_indices = cut_wire_indices(circuit)
-    new_sub0 = QuantumCircuit(circuit.num_qubits + num_cuts_plcaholder(circuit))
-    offset = 0
-    cut_index = 0
-    for i in circuit.data:
-        if "Meas_" in i[0].name:
-            measure_node = QuantumCircuit(1, name=f"Meas_{cut_index}").to_instruction()
-            qubits_for_operation = [
-                Qubit(circuit.qregs[0], circuit.find_bit(x).index) for x in i.qubits
-            ]
-            new_sub0.append(
-                measure_node,
-                [
-                    Qubit(new_sub0.qregs[0], circuit.find_bit(x).index)
-                    for x in qubits_for_operation
-                ],
-            )
-            offset += 1
-            cut_index += 1
-        elif "Init_" in i[0].name:
-            initialize_node = QuantumCircuit(
-                1, name=f"Init_{cut_index}"
-            ).to_instruction()
-            qubits_for_operation = [
-                Qubit(circuit.qregs[0], circuit.find_bit(x).index) for x in i.qubits
-            ]
-            new_sub0.append(
-                initialize_node,
-                [
-                    Qubit(new_sub0.qregs[0], circuit.find_bit(x).index + offset)
-                    for x in qubits_for_operation
-                ],
-            )
-            cut_index += 1
-        else:
-            qubits_for_operation = [
-                Qubit(circuit.qregs[0], circuit.find_bit(x).index) for x in i.qubits
-            ]
-            new_sub0.data.append(
-                CircuitInstruction(
-                    i.operation,
-                    [
-                        Qubit(new_sub0.qregs[0], circuit.find_bit(x).index + offset)
-                        if circuit.find_bit(x).index in cut_indices
-                        else Qubit(new_sub0.qregs[0], circuit.find_bit(x).index)
-                        for x in qubits_for_operation
-                    ],
-                )
-            )
-
-    return new_sub0
-
-
-def num_cuts_plcaholder(circuit):
-    num_cuts = 0
-    for i in circuit.data:
-        if "Meas_" in i[0].name:
-            num_cuts += 1
-    return num_cuts
-
-
-def cut_wire_indices(circuit):
-    cut_indices = []
-    for ind, i in enumerate(circuit.data):
-        if "Meas_" in i[0].name:
-            cut_indices.append(circuit.find_bit(i.qubits[0]).index)
-    return cut_indices
-
-
-def build_subcircuits(circuit, merged_subcircuits):
-    circuits = []
-    merged = [i[0] for i in merged_subcircuits]
-    qubits = get_subcircuit_qubits(circuit, merged)
-    num_qubits_per_circuit = [len(i) for i in qubits]
-    clbits = 0
-    for ind, pair in enumerate(merged_subcircuits):
-        i = pair[0]
-        check = pair[1]
-        offset = min(qubits[ind])
-        subcirc = QuantumCircuit(num_qubits_per_circuit[ind])
-        for j in i:
-            if "Meas_" in j.operation.name:
-                clbits += 1
-            qubits_for_operation = [
-                Qubit(circuit.qregs[0], circuit.find_bit(x).index) for x in j.qubits
-            ]
-            subcirc.data.append(
-                CircuitInstruction(
-                    j.operation,
-                    [
-                        Qubit(subcirc.qregs[0], circuit.find_bit(x).index - offset)
-                        for x in qubits_for_operation
-                    ],
-                )
-            )
-        if check:
-            subcirc = expand_subcircuit(subcirc)
-        cr_qpd = ClassicalRegister(clbits, name="qpd_meas")
-        cr = ClassicalRegister(subcirc.num_qubits - clbits, name="meas")
-        subcirc.cregs.append(cr_qpd)
-        subcirc.cregs.append(cr)
-        clbit_indices = {}
-        for cl in range(clbits):
-            bit = Clbit(cr_qpd, cl)
-            subcirc.clbits.append(bit)
-            clbit_indices[bit] = BitLocations(cl, [(cr_qpd, cl)])
-        for cl in range(subcirc.num_qubits - clbits):
-            bit = Clbit(cr, cl)
-            subcirc.clbits.append(bit)
-            clbit_indices[bit] = BitLocations(cl, [(cr, cl)])
-        subcirc._clbit_indices = clbit_indices
+def _add_cbits(subcircuits):
+    for circ in subcircuits:
         clbits = 0
-        circuits.append(subcirc)
+        for i in circ:
+            if "Meas" in i.operation.name:
+                clbits += 1
+        circ.add_register(ClassicalRegister(clbits, "qpd_meas"))
+        circ.add_register(ClassicalRegister(circ.num_qubits - clbits, "meas"))
 
-    return circuits
-
+    return subcircuits
 
 def get_locations_and_subcircuits(
     circuit: QuantumCircuit,
-) -> tuple[list[SingleQubitCutLocation], list[QuantumCircuit]]:
+):
     """Get cut locations and subcircuits with placeholder operations.
 
     Args:
@@ -305,16 +208,23 @@ def get_locations_and_subcircuits(
     """
     circuit = circuit.copy()  # copy to avoid modifying the original circuit
     cut_locations = _get_cut_locations(circuit)
-    circ, placeholder_locations = _insert_cut_nodes(circuit, cut_locations)
-    subcircuits = _get_subcircuit_data(circ, placeholder_locations)
-    merged = merge_subcircuits(circ, subcircuits)
-    try:
-        subcircuits = build_subcircuits(circ, merged)
-    except CircuitError as e:
-        msg = "Invalid cut placement. See documentation for how cuts should be placed."
-        raise QCutError(msg) from e
+    circuit1, _placeholder_locations = _insert_cut_nodes(circuit, cut_locations)
+    circuit = _move_to_new_wire(circuit1.copy(), len(cut_locations))
+    subcircuits = _separate_subcircuits(circuit)
+    subcircuits = _add_cbits(subcircuits)
+    fixed_circs = []
+    for i in subcircuits:
+        test = QuantumCircuit(i.num_qubits)
+        test.add_register(i.cregs[0])
+        test.add_register(i.cregs[1])
 
-    return cut_locations, subcircuits
+        for j in i.data:
+            qubits = [test.qubits[i.qubits.index(q)] for q in j.qubits]
+            test.append(CircuitInstruction(j.operation, qubits))
+
+        fixed_circs.append(test)
+
+    return cut_locations, fixed_circs
 
 
 def run_cut_circuit(
