@@ -17,6 +17,7 @@ def test_get_cut_locations() -> None:
     the pre-defined solutions.
     """
     for solution_index, circ in enumerate(sq.test_circuits):
+        print(solution_index)
         assert np.array_equal(
             wc._get_cut_locations(circ.copy()),
             sq.cut_location_solutions[solution_index],
@@ -33,7 +34,7 @@ def test_separate_subcircuits() -> None:
     """
     count = 0
     for solution_index, circ in enumerate(sq.test_circuits):
-        qss, circs = wc.get_locations_and_subcircuits(circ.copy())
+        qss, circs, map_qubits = wc.get_locations_and_subcircuits(circ.copy())
         _remove_obsm(circs)
         print(count)
         count += 1
