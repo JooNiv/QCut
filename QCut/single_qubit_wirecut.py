@@ -196,6 +196,23 @@ def _add_cbits(subcircuits):
     return subcircuits
 
 
+def get_qubit_map(subcircuits: list[QuantumCircuit]):
+    def filter_obs_i(qc_data):
+        return [i for i in qc_data if "obs" in i.operation.name]
+
+    def sort_func(obs):
+        return int(obs.operation.name.split("_")[1])
+
+    map_qubit = {}
+    count = 0
+    for ind, i in enumerate(reversed(subcircuits)):
+        for j in sorted(filter_obs_i(i.data), key=sort_func, reverse=True):
+            map_qubit[int(j.operation.name.split("_")[1])] = count
+            count += 1
+
+    return map_qubit
+
+
 def get_locations_and_subcircuits(
     circuit: QuantumCircuit,
 ):
@@ -211,6 +228,10 @@ def get_locations_and_subcircuits(
 
     """
     circuit = circuit.copy()  # copy to avoid modifying the original circuit
+    for i in range(circuit.num_qubits):
+        obs_m = QuantumCircuit(1, name=f"obs_{i}")
+        obs_m = obs_m.to_instruction()
+        circuit.append(obs_m, [i])
     cut_locations = _get_cut_locations(circuit)
     circuit1, _placeholder_locations = _insert_cut_nodes(circuit, cut_locations)
     circuit = _move_to_new_wire(circuit1.copy(), len(cut_locations))
@@ -231,13 +252,17 @@ def get_locations_and_subcircuits(
         raise QCutError(
             "Invalid cuts. Check documentation to see how cuts should be placed."
         )
-    return cut_locations, fixed_circs
+
+    map_qubits = get_qubit_map(fixed_circs)
+
+    return cut_locations, fixed_circs, map_qubits
 
 
 def run_cut_circuit(
     subcircuits: list[QuantumCircuit],
     cut_locations: np.ndarray[SingleQubitCutLocation],
     observables: list[int | list[int]],
+    map_qubits: dict[int, int],
     backend=AerSimulator(),
     mitigate: bool = False,
 ) -> np.ndarray[float]:
@@ -268,7 +293,9 @@ def run_cut_circuit(
         mitigate=mitigate,
     )
 
-    return estimate_expectation_values(results, coefs, cut_locations, observables)
+    return estimate_expectation_values(
+        results, coefs, cut_locations, observables, map_qubits
+    )
 
 
 def run(
@@ -290,7 +317,7 @@ def run(
         list: a list of expectation values
 
     """
-    circuit = circuit.copy()
-    qss, circs = get_locations_and_subcircuits(circuit)
+    # circuit = circuit.copy()
+    qss, circs, map_qubits = get_locations_and_subcircuits(circuit)
 
-    return run_cut_circuit(circs, qss, observables, backend, mitigate)
+    return run_cut_circuit(circs, qss, observables, map_qubits, backend, mitigate)

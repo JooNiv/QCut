@@ -5,8 +5,8 @@ from qiskit_aer import AerSimulator
 
 #import QCut as ck
 import QCut.single_qubit_wirecut as wc
-import tests.solutions as s
 import tests.solutions_1q as sq
+from QCut.wirecut import _remove_obsm
 
 
 def test_get_cut_locations() -> None:
@@ -34,6 +34,7 @@ def test_separate_subcircuits() -> None:
     count = 0
     for solution_index, circ in enumerate(sq.test_circuits):
         qss, circs = wc.get_locations_and_subcircuits(circ.copy())
+        _remove_obsm(circs)
         print(count)
         count += 1
         for circ_index, subcirc in enumerate(circs):
@@ -93,17 +94,18 @@ def test_expectation_values() -> None:
 
     # Iterate over each test circuit and its corresponding expected solutions
     for solution_index, circ in enumerate(sq.test_circuits):
+        print(solution_index)
         # Calculate expectation values using the run method
         expvals = wc.run(
-            circ, s.test_observables[solution_index], backend=sim, mitigate=False
+            circ, sq.test_observables[solution_index], backend=sim, mitigate=False
         )
         # Check each calculated expectation value against the corresponding
         # expected value
         tolerance = 0.1
         print(expvals)
-        print(s.exp_val_solutions[solution_index])
+        print(sq.exp_val_solutions[solution_index])
         for check in [
             abs(a - b) <= tolerance
-            for a, b in zip(expvals, s.exp_val_solutions[solution_index])
+            for a, b in zip(expvals, sq.exp_val_solutions[solution_index])
         ]:
             assert check  # noqa: S101

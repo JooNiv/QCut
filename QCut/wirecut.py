@@ -22,6 +22,7 @@ if TYPE_CHECKING:
 
 ERROR = 0.0000001
 
+
 def get_qpd_combinations(
     cut_locations: np.ndarray[CutLocation],
 ) -> Iterable[tuple[dict]]:
@@ -73,7 +74,7 @@ def _finalize_subcircuit(
 def get_placeholder_locations(subcircuits: list[QuantumCircuit]) -> list:
     """
     Identify the locations of placeholder operations in a list of quantum subcircuits.
-    This function scans through each quantum subcircuit provided in the input list and 
+    This function scans through each quantum subcircuit provided in the input list and
     identifies the indices and operations where either measurement ("Meas") or
     initialization ("Init") operations occur. It returns a list of lists, where each
     sublist corresponds to  a subcircuit and contains tuples of the
@@ -98,6 +99,16 @@ def get_placeholder_locations(subcircuits: list[QuantumCircuit]) -> list:
         ops.append(subops)
 
     return ops
+
+
+def _remove_obsm(subcircuits: list[QuantumCircuit]) -> list[QuantumCircuit]:
+    for i in subcircuits:
+        j = 0
+        while j < len(i.data):
+            if "obs" in i[j].operation.name:
+                i.data.remove(i[j])
+            else:
+                j += 1
 
 
 def get_experiment_circuits(  # noqa: C901
@@ -135,6 +146,8 @@ def get_experiment_circuits(  # noqa: C901
     qpd_combinations = get_qpd_combinations(cut_locations)  # generate the QPD
     # operation combinations
 
+    _remove_obsm(subcircuits)
+
     # initialize solution lists
     cuts = len(cut_locations)
     num_circs = np.power(8, cuts)
@@ -153,12 +166,12 @@ def get_experiment_circuits(  # noqa: C901
         inserted_operations = 0
         for id_meas_subcircuit_index, circ in enumerate(subcircuits):
             subcircuit = pickle.loads(pickle.dumps(circ))
-            #subcircuit = deepcopy(circ)
+            # subcircuit = deepcopy(circ)
             offset = 0
             classical_bit_index = 0
             id_meas_bit = 0
-            qpd_qubits = []  # store the qubit indices of qubits used for qpd 
-                             # measurements
+            qpd_qubits = []  # store the qubit indices of qubits used for qpd
+            # measurements
             for op_ind in placeholder_locations[id_meas_subcircuit_index]:
                 ind, op = op_ind
                 if "Meas" in op.operation.name:  # if measure channel remove placeholder
@@ -390,6 +403,7 @@ def estimate_expectation_values(
     coefficients: list[int],
     cut_locations: np.ndarray[CutLocation],
     observables: list[int | list[int]],
+    map_qubits: dict[int, int],
 ) -> list[float]:
     """Calculate the estimated expectation values.
 
@@ -426,7 +440,9 @@ def estimate_expectation_values(
         mid = (
             np.power(-1, cuts + 1)
             * coefficient
-            * _get_sub_expectation_values(experiment_run, observables, shots)
+            * _get_sub_expectation_values(
+                experiment_run, observables, shots, map_qubits
+            )
         )
         expectation_values += mid
 
@@ -435,7 +451,10 @@ def estimate_expectation_values(
 
 
 def _get_sub_expectation_values(
-    experiment_run: TotalResult, observables: list[int | list[int]], shots: int
+    experiment_run: TotalResult,
+    observables: list[int | list[int]],
+    shots: int,
+    map_qubits: dict[int, int],
 ) -> list:
     """Calculate sub expectation value for the result.
 
@@ -461,7 +480,12 @@ def _get_sub_expectation_values(
         full_result = np.concatenate(
             [i.measurements[0] for i in reversed(circuit_result)]
         )
-
+        sorted_full_result = np.array(
+            [
+                full_result[map_qubits[key]]
+                for key in sorted(map_qubits.keys(), reverse=True)
+            ]
+        )
         qpd_measurement_coefficient = 1  # initial value for qpd coefficient
         weight = shots  # initial weight
         for res in circuit_result:  # calculate weight and qpd coefficient
@@ -472,13 +496,15 @@ def _get_sub_expectation_values(
         # for obsrvables
         for count, obs in enumerate(observables):  # populate observable array
             if isinstance(obs, int):
-                observable_results[count] = full_result[obs]  # if single qubit
+                observable_results[count] = sorted_full_result[obs]  # if single qubit
             # observable just save
             # to array
             else:  # if multi qubit observable
                 multi_qubit_observable_eigenvalue = 1  # initial eigenvalue
                 for sub_observables in obs:  # multio qubit observable
-                    multi_qubit_observable_eigenvalue *= full_result[sub_observables]
+                    multi_qubit_observable_eigenvalue *= sorted_full_result[
+                        sub_observables
+                    ]
                     observable_results[count] = (
                         np.power(-1, len(obs) + 1) * multi_qubit_observable_eigenvalue
                     )
