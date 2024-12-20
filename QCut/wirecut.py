@@ -332,8 +332,17 @@ def run_experiments(
 
     for count, subcircuit_group in enumerate(experiment_circuits.circuits):
         sub_result = [
-            backend.run(i, shots=shots).result().get_counts() for i in subcircuit_group
+            {
+                " " + k: v
+                for k, v in backend.run(i, shots=shots).result().get_counts().items()
+            }
+            if len(i.cregs) == 1 and i.cregs[0].name == "qpd_meas"
+            else {" ": shots}
+            if i.data[-1].operation.name != "measure"
+            else backend.run(i, shots=shots).result().get_counts()
+            for i in subcircuit_group
         ]
+
         if mitigate:
             sub_result = _run_mitigate(sub_result, shots, backend)
 
