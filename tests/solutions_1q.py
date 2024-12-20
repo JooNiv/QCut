@@ -1,5 +1,5 @@
-from qiskit import ClassicalRegister, QuantumCircuit, QuantumRegister
-from qiskit.circuit import CircuitInstruction, Clbit, Instruction, Qubit
+from qiskit import QuantumCircuit, QuantumRegister
+from qiskit.circuit import CircuitInstruction, Instruction, Qubit
 
 from QCut import cut
 from QCut.cutlocation import SingleQubitCutLocation as CutLocation

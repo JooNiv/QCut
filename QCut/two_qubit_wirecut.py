@@ -1,4 +1,9 @@
-"""Circuit knitting wire cut functionality."""
+"""Circuit knitting wire cut functionality.
+
+.. deprecated:: 0.2.0
+   This module is deprecated and will be removed in version 0.3.0.
+   Use `single_qubit_wirecut` instead.
+"""
 
 from __future__ import annotations
 
@@ -22,10 +27,12 @@ from QCut.wirecut import (
 
 warnings.simplefilter("always", DeprecationWarning)
 warnings.warn(
-    """The module `two_qubit_wirecut` for doing wirecuts with 2 two-qubit
-    placeholder gates is deprecated and will be removed in a future version.
+    """
+    The module `two_qubit_wirecut` for wirecuts as two-qubit
+    gates is deprecated as of 0.2.0 and will be removed in 0.3.0.
     Please use `single_qubit_wirecut` instead. 'single_qubit_wirecut' will be
-    renamed to 'wirecut' in a future version.""",
+    renamed to 'wirecut' in a future version. For migration see documentation.
+    """,
     DeprecationWarning,
     stacklevel=2,
 )
