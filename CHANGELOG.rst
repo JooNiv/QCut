@@ -7,7 +7,7 @@ Version 0.2.0
 - Single qubit cut gate now the default cut method
     * Greatly simplifies placing cuts.
     * Old two qubit gate deprecated and will be removed soon.
-    * Check new documentation for migration help.
+    * Check out documentation for migration help.
 
 Version 0.1.3
 =============
