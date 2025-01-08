@@ -38,7 +38,7 @@ Basic usage
 .. code:: python
 
    import QCut as ck
-   from QCut import cut_wire
+   from QCut import cut
    from qiskit import QuantumCircuit
    from qiskit_aer import AerSimulator
    from qiskit_aer.primitives import Estimator
@@ -66,11 +66,11 @@ automatically handled by QCut.
 
 .. code:: python
 
-   cut_circuit = QuantumCircuit(4)
+   cut_circuit = QuantumCircuit(3)
    cut_circuit.h(0)
    cut_circuit.cx(0,1)
-   cut_circuit.append(cut_wire, [1,2])
-   cut_circuit.cx(2,3)
+   cut_circuit.append(cut, [1])
+   cut_circuit.cx(1,2)
 
    cut_circuit.draw("mpl")
 
@@ -81,7 +81,7 @@ independent subcircuit.**
 
 .. code:: python
 
-   cut_locations, subcircuits = ck.get_locations_and_subcircuits(cut_circuit)
+   cut_locations, subcircuits, map_qubit = ck.get_locations_and_subcircuits(cut_circuit)
 
 Now we can draw our subcircuits.
 
@@ -132,7 +132,7 @@ circuit to perform the basis transform.
 .. code:: python
 
    observables = [0,1,2, [0,2]]
-   expectation_values = ck.estimate_expectation_values(results, coefficients, cut_locations, observables)
+   expectation_values = ck.estimate_expectation_values(results, coefficients, cut_locations, observables, map_qubit)
 
 **8: Finally calculate the exact expectation values and compare them to
 the results calculated with QCut**
@@ -188,7 +188,7 @@ Running on IQM fake backends
 
 To use QCut with IQM’s fake backends it is required to install `Qiskit
 IQM <https://github.com/iqm-finland/qiskit-on-iqm>`__. QCut supports
-version 13.7. Installation can be done with pip:
+version 15.6. Installation can be done with pip:
 
 .. code:: python
 
@@ -213,7 +213,7 @@ Now one can proceed like before.
 Running on FiQCI
 ----------------
 
-For running on real IQM hardware through the Lumi supercomputer’s FiQCI
+For running on real hardware through the Lumi supercomputer’s FiQCI
 partition follow the instructions
 `here <https://docs.csc.fi/computing/quantum-computing/helmi/running-on-helmi/>`__.
 If you are used to using Qiskit on jupyter notebooks it is recommended

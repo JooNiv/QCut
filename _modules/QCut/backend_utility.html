@@ -15,26 +15,29 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
-<link href="../../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
-<link href="../../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-  
-  <link href="../../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
-  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
-
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/sphinx-book-theme.css?v=a3416100" />
     <link rel="stylesheet" type="text/css" href="../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
   
+  <!-- So that users can add custom icons -->
+  <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
-<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
-  <script src="../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
     <script src="../../_static/jquery.js?v=5d32c60e"></script>
     <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
@@ -48,6 +51,7 @@
     <link rel="search" title="Search" href="../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="unknown" />
   </head>
   
   
@@ -63,19 +67,8 @@
     <i class="fa-solid fa-arrow-up"></i>Back to top</button>
 
   
-  <input type="checkbox"
-          class="sidebar-toggle"
-          id="pst-primary-sidebar-checkbox"/>
-  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
-  
-  <input type="checkbox"
-          class="sidebar-toggle"
-          id="pst-secondary-sidebar-checkbox"/>
-  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
-  
-  <div class="search-button__wrapper">
-    <div class="search-button__overlay"></div>
-    <div class="search-button__search-container">
+  <dialog id="pst-search-dialog">
+    
 <form class="bd-search d-flex align-items-center"
       action="../../search.html"
       method="get">
@@ -83,7 +76,6 @@
   <input type="search"
          class="form-control"
          name="q"
-         id="search-input"
          placeholder="Search..."
          aria-label="Search..."
          autocomplete="off"
@@ -91,8 +83,8 @@
          autocapitalize="off"
          spellcheck="false"/>
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
-</form></div>
-  </div>
+</form>
+  </dialog>
 
   <div class="pst-async-banner-revealer d-none">
   <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
@@ -110,7 +102,8 @@
       
         
       
-      <div class="bd-sidebar-primary bd-sidebar">
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
         
 
   
@@ -140,21 +133,17 @@
     
     
     <img src="../../_static/QCut-logo.jpg" class="logo__image only-light" alt="QCut - Home"/>
-    <script>document.write(`<img src="../../_static/QCut-logo.jpg" class="logo__image only-dark" alt="QCut - Home"/>`);</script>
+    <img src="../../_static/QCut-logo.jpg" class="logo__image only-dark pst-js-only" alt="QCut - Home"/>
   
   
 </a></div>
         <div class="sidebar-primary-item">
 
- <script>
- document.write(`
-   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="fa-solid fa-magnifying-glass"></i>
-    <span class="search-button__default-text">Search</span>
-    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-   </button>
- `);
- </script></div>
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button></div>
         <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
     <div class="bd-toc-item navbar-nav active">
         <p aria-level="2" class="caption" role="heading"><span class="caption-text">Contents:</span></p>
@@ -188,9 +177,14 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
   </div>
-  
-  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -239,24 +233,16 @@
 
 
 
-<script>
-document.write(`
-  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
-    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
-    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
-  </button>
-`);
-</script>
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button>
 
 
-<script>
-document.write(`
-  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <i class="fa-solid fa-magnifying-glass fa-lg"></i>
-  </button>
-`);
-</script>
+</button>
 
 </div></div>
       
@@ -287,28 +273,27 @@ document.write(`
 <span class="sd">Utility functions for running on real backends.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">qiskit</span> <span class="kn">import</span> <span class="n">QuantumCircuit</span><span class="p">,</span> <span class="n">transpile</span>
-<span class="kn">from</span> <span class="nn">qiskit_experiments.library</span> <span class="kn">import</span> <span class="n">LocalReadoutError</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit</span><span class="w"> </span><span class="kn">import</span> <span class="n">QuantumCircuit</span><span class="p">,</span> <span class="n">transpile</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_experiments.library</span><span class="w"> </span><span class="kn">import</span> <span class="n">LocalReadoutError</span>
 
 
 <div class="viewcode-block" id="transpile_experiments">
 <a class="viewcode-back" href="../../QCut.html#QCut.backend_utility.transpile_experiments">[docs]</a>
-<span class="k">def</span> <span class="nf">transpile_experiments</span><span class="p">(</span><span class="n">experiment_circuits</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">backend</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Transpile experiment circuits.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">transpile_experiments</span><span class="p">(</span><span class="n">experiment_circuits</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">backend</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Transpile experiment circuits.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">    -----</span>
-<span class="sd">        experiment_circuits: experiment circuits</span>
-<span class="sd">        backend: backend to transpile to</span>
+<span class="sd">        experiment_circuits: (list): Experiment circuits to be transpiled.</span>
+<span class="sd">        backend (str): Backend to transpile to.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">    --------</span>
-<span class="sd">        transpiled_experiments: a list of transpiled experiment circuits</span>
-
+<span class="sd">        list: A list of transpiled experiment circuits.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">return</span> <span class="p">[</span>
         <span class="p">[</span>
             <span class="n">transpile</span><span class="p">(</span><span class="n">circuit</span><span class="p">,</span> <span class="n">backend</span><span class="p">,</span> <span class="n">layout_method</span><span class="o">=</span><span class="s2">&quot;sabre&quot;</span><span class="p">,</span> <span class="n">optimization_level</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
@@ -321,23 +306,22 @@ document.write(`
 
 <div class="viewcode-block" id="run_and_expectation_value">
 <a class="viewcode-back" href="../../QCut.html#QCut.backend_utility.run_and_expectation_value">[docs]</a>
-<span class="k">def</span> <span class="nf">run_and_expectation_value</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">run_and_expectation_value</span><span class="p">(</span>
     <span class="n">circuit</span><span class="p">:</span> <span class="n">QuantumCircuit</span><span class="p">,</span> <span class="n">backend</span><span class="p">,</span> <span class="n">observables</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">shots</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">mitigate</span><span class="o">=</span><span class="kc">False</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">dict</span><span class="p">,</span> <span class="nb">list</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Run circuit and calculate expectation value.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">    -----</span>
-<span class="sd">        circuit: a quantum circuit</span>
-<span class="sd">        backend: backend to run circuit on</span>
-<span class="sd">        observables: observables to calculate expectation values for</span>
-<span class="sd">        shots: number of shots</span>
-<span class="sd">        mitigate: if True use readout error mitigation</span>
+<span class="sd">        circuit (QuantumCircuit): A quantum circuit.</span>
+<span class="sd">        backend: Backend to run circuit on.</span>
+<span class="sd">        observables (list): Observables to calculate expectation values for.</span>
+<span class="sd">        shots (int): Number of shots.</span>
+<span class="sd">        mitigate (bool): If True, use readout error mitigation.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">    --------</span>
-<span class="sd">        expectation_values: a list of expectation values</span>
-
+<span class="sd">        tuple: A tuple containing:</span>
+<span class="sd">            - dict: Counts from the circuit run.</span>
+<span class="sd">            - list: A list of expectation values.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">counts</span> <span class="o">=</span> <span class="n">run_on_backend</span><span class="p">(</span><span class="n">circuit</span><span class="p">,</span> <span class="n">backend</span><span class="p">,</span> <span class="n">shots</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">mitigate</span><span class="p">:</span>
@@ -363,20 +347,23 @@ document.write(`
 
 <div class="viewcode-block" id="expectation_values">
 <a class="viewcode-back" href="../../QCut.html#QCut.backend_utility.expectation_values">[docs]</a>
-<span class="k">def</span> <span class="nf">expectation_values</span><span class="p">(</span><span class="n">counts</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">observables</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">shots</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">expectation_values</span><span class="p">(</span><span class="n">counts</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">observables</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">shots</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate expectation values.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">    -----</span>
-<span class="sd">        counts: counts obtained from circuit run</span>
-<span class="sd">        observables: observables to calculate expectation values for</span>
-<span class="sd">        shots: number of shots</span>
-<span class="sd">        probs</span>
+<span class="sd">        counts (dict):</span>
+<span class="sd">            Counts obtained from circuit run, where keys are measurement outcomes and</span>
+<span class="sd">            values are the number of times each outcome was observed.</span>
+
+<span class="sd">        observables (list):</span>
+<span class="sd">            List of observables to calculate expectation values for. Each observable can</span>
+<span class="sd">            be an integer (index of a single qubit) or a list of integers</span>
+<span class="sd">            (indices of multiple qubits).</span>
+
+<span class="sd">        shots (int): Number of shots (total number of measurements).</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">    --------</span>
-<span class="sd">        cut_locations: a list of cut locations</span>
-<span class="sd">        subcircuits: subcircuits with placeholder operations</span>
+<span class="sd">        list: A list of expectation values for each observable.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Convert results to a list of dicts with measurement values and counts</span>
@@ -404,20 +391,16 @@ document.write(`
 
 <div class="viewcode-block" id="run_on_backend">
 <a class="viewcode-back" href="../../QCut.html#QCut.backend_utility.run_on_backend">[docs]</a>
-<span class="k">def</span> <span class="nf">run_on_backend</span><span class="p">(</span><span class="n">circuit</span><span class="p">:</span> <span class="n">QuantumCircuit</span><span class="p">,</span> <span class="n">backend</span><span class="p">,</span> <span class="n">shots</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Run circuit on backend.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">run_on_backend</span><span class="p">(</span><span class="n">circuit</span><span class="p">:</span> <span class="n">QuantumCircuit</span><span class="p">,</span> <span class="n">backend</span><span class="p">,</span> <span class="n">shots</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Run a quantum circuit on a specified backend.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">    -----</span>
-<span class="sd">        circuit: a quantum circuit to be executed</span>
-<span class="sd">        backend: backend to use for executing circuit</span>
-<span class="sd">        shots: number of shots</span>
-<span class="sd">        probs</span>
+<span class="sd">        circuit (QuantumCircuit): The quantum circuit to be executed.</span>
+<span class="sd">        backend (Backend): The backend to use for executing the circuit.</span>
+<span class="sd">        shots (int): The number of shots (repetitions) to run the circuit.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">    --------</span>
-<span class="sd">        dict: a dictionary of counts from circuit run</span>
-
+<span class="sd">        dict: A dictionary of counts from the circuit run.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">job</span> <span class="o">=</span> <span class="n">backend</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">circuit</span><span class="p">,</span> <span class="n">shots</span><span class="o">=</span><span class="n">shots</span><span class="p">)</span>
     <span class="n">result</span> <span class="o">=</span> <span class="n">job</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
@@ -485,8 +468,8 @@ By Joonas Nivala
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
-<script src="../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+  <script defer src="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
 
   <footer class="bd-footer">
   </footer>
