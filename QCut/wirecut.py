@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pickle
 from itertools import product
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 import numpy as np
 from qiskit import QuantumCircuit
@@ -412,7 +412,7 @@ def estimate_expectation_values(
     coefficients: list[int],
     cut_locations: np.ndarray[CutLocation],
     observables: list[int | list[int]],
-    map_qubits: dict[int, int] | None = None,
+    map_qubits: Optional[dict[int, int]] = None,
 ) -> list[float]:
     """Calculate the estimated expectation values.
 
@@ -463,7 +463,7 @@ def _get_sub_expectation_values(
     experiment_run: TotalResult,
     observables: list[int | list[int]],
     shots: int,
-    map_qubits: dict[int, int] | None = None,
+    map_qubits: Optional[dict[int, int]] = None,
 ) -> list:
     """Calculate sub expectation value for the result.
 
