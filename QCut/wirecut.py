@@ -412,7 +412,7 @@ def estimate_expectation_values(
     coefficients: list[int],
     cut_locations: np.ndarray[CutLocation],
     observables: list[int | list[int]],
-    map_qubits: dict[int, int],
+    map_qubits: dict[int, int] | None = None,
 ) -> list[float]:
     """Calculate the estimated expectation values.
 
@@ -463,7 +463,7 @@ def _get_sub_expectation_values(
     experiment_run: TotalResult,
     observables: list[int | list[int]],
     shots: int,
-    map_qubits: dict[int, int],
+    map_qubits: dict[int, int] | None = None,
 ) -> list:
     """Calculate sub expectation value for the result.
 
@@ -489,12 +489,15 @@ def _get_sub_expectation_values(
         full_result = np.concatenate(
             [i.measurements[0] for i in reversed(circuit_result)]
         )
-        sorted_full_result = np.array(
-            [
-                full_result[map_qubits[key]]
-                for key in sorted(map_qubits.keys(), reverse=True)
-            ]
-        )
+        if map_qubits is not None:
+            sorted_full_result = np.array(
+                [
+                    full_result[map_qubits[key]]
+                    for key in sorted(map_qubits.keys(), reverse=True)
+                ]
+            )
+        else:
+            sorted_full_result = full_result
         qpd_measurement_coefficient = 1  # initial value for qpd coefficient
         weight = shots  # initial weight
         for res in circuit_result:  # calculate weight and qpd coefficient
