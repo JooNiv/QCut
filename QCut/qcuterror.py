@@ -1,5 +1,8 @@
 "Define QCutError class for custom error handling."
 
+from typing import Optional
+
+
 class QCutError(Exception):
     """Exception raised for custom error conditions.
 
@@ -10,7 +13,7 @@ class QCutError(Exception):
     """
 
     def __init__(
-        self, message: str = "An error occurred", code: int | None = None
+        self, message: str = "An error occurred", code: Optional[int] = None
     ) -> None:
         """Init.
 
