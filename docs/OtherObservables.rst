@@ -23,12 +23,12 @@ This may change in a future release.
 
 .. code:: python
 
-    cut_circuit_x = QuantumCircuit(4)
+    cut_circuit_x = QuantumCircuit(3)
     cut_circuit_x.h(0)
     cut_circuit_x.cx(0,1)
-    cut_circuit_x.append(cut_wire, [1,2])
-    cut_circuit_x.cx(2,3)
-    cut_circuit_x.h(3)
+    cut_circuit_x.append(cut, [1])
+    cut_circuit_x.cx(1,2)
+    cut_circuit_x.h(2)
 
     cut_circuit_z.draw("mpl")
 
@@ -55,11 +55,11 @@ In addition to the circuits above let's define the "normal" Z basis circuits.
 
 .. code:: python
 
-    cut_circuit_z = QuantumCircuit(4)
+    cut_circuit_z = QuantumCircuit(3)
     cut_circuit_z.h(0)
     cut_circuit_z.cx(0,1)
-    cut_circuit_z.append(cut_wire, [1,2])
-    cut_circuit_z.cx(2,3)
+    cut_circuit_z.append(cut, [1])
+    cut_circuit_z.cx(1,2)
 
     cut_circuit_z.draw("mpl")
 

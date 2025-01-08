@@ -29,13 +29,13 @@ to cut the circuit**
 
 .. code:: python
 
-   cut_circuit = QuantumCircuit(6)
-   cut_circuit.h(0)
-   cut_circuit.cx(0,1)
-   cut_circuit.append(cut_wire, [1,2])
-   cut_circuit.cx(2,3)
-   cut_circuit.append(cut_wire, [3,4])
-   cut_circuit.cx(4,5)
+   cut_circuit = QuantumCircuit(4)
+    cut_circuit.h(0)
+    cut_circuit.cx(0,1)
+    cut_circuit.append(cut, [1])
+    cut_circuit.cx(1,2)
+    cut_circuit.append(cut, [2])
+    cut_circuit.cx(2,3)
 
    cut_circuit.draw("mpl")
 
@@ -77,14 +77,14 @@ Circuit with cuts:
 
 .. code:: python
 
-    cut_circuit = QuantumCircuit(6)
+    cut_circuit = QuantumCircuit(4)
     cut_circuit.h(0)
     cut_circuit.cx(0,1)
     cut_circuit.cx(0,2)
-    cut_circuit.append(cut_wire, [1,3])
-    cut_circuit.append(cut_wire, [2,4])
-    cut_circuit.cx(3,4)
-    cut_circuit.cx(3,5)
+    cut_circuit.append(cut, [1])
+    cut_circuit.append(cut, [2])
+    cut_circuit.cx(1,2)
+    cut_circuit.cx(1,3)
 
     cut_circuit.draw("mpl")
 
@@ -113,13 +113,13 @@ Circuit with cuts:
 
 .. code:: python
 
-    cut_circuit = QuantumCircuit(5)
+    cut_circuit = QuantumCircuit(3)
     cut_circuit.h(0)
     cut_circuit.cx(0,1)
-    cut_circuit.append(cut_wire, [1,3])
-    cut_circuit.cx(3,4)
-    cut_circuit.append(cut_wire, [3,2])
-    cut_circuit.cx(0,2)
+    cut_circuit.append(cut, [1])
+    cut_circuit.cx(1,2)
+    cut_circuit.append(cut, [1])
+    cut_circuit.cx(0,1)
 
     cut_circuit.draw("mpl")
 

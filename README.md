@@ -34,7 +34,7 @@ It is also possible to use QCut by cloning this repository and including it in y
 
 ```python
 import QCut as ck
-from QCut import cut_wire
+from QCut import cut
 from qiskit import QuantumCircuit
 from qiskit_aer import AerSimulator
 from qiskit_aer.primitives import Estimator
@@ -55,16 +55,16 @@ circuit.draw("mpl")
 
 ![](./docs/_static/images/circ1.png)
 
-**3: Insert cut\_wire operations to the circuit to denote where we want to cut the circuit**
+**3: Insert cut operations to the circuit to denote where we want to cut the circuit**
 
 Note that here we don't insert any measurements. Measurements will be automatically handled by QCut.
 
 ```python
-cut_circuit = QuantumCircuit(4)
+cut_circuit = QuantumCircuit(3)
 cut_circuit.h(0)
 cut_circuit.cx(0,1)
-cut_circuit.append(cut_wire, [1,2])
-cut_circuit.cx(2,3)
+cut_circuit.append(cut, [1])
+cut_circuit.cx(1,2)
 
 cut_circuit.draw("mpl")
 ```
@@ -74,7 +74,7 @@ cut_circuit.draw("mpl")
 **4\. Extract cut locations from cut\_circuit and split it into independent subcircuit.**
 
 ```python
-cut_locations, subcircuits = ck.get_locations_and_subcircuits(cut_circuit)
+cut_locations, subcircuits, map_qubit = ck.get_locations_and_subcircuits(qc_cut)
 ```
 
 Now we can draw our subcircuits.
@@ -116,7 +116,7 @@ If one wishes to calculate other than Pauli-Z observable expectation values curr
 
 ```python
 observables = [0,1,2, [0,2]]
-expectation_values = ck.estimate_expectation_values(results, coefficients, cut_locations, observables)
+expectation_values = ck.estimate_expectation_values(results, coefficients, cut_locations, observables, map_qubit)
 ```
 
 **8: Finally calculate the exact expectation values and compare them to the results calculated with QCut**
@@ -161,7 +161,7 @@ estimated_expectation_values = ck.run(cut_circuit, observables, backend)
 
 ## Running on IQM fake backends
 
-To use QCut with IQM's fake backends it is required to install [Qiskit IQM](https://github.com/iqm-finland/qiskit-on-iqm). QCut supports version 13.15. Installation can be done with pip:
+To use QCut with IQM's fake backends it is required to install [Qiskit IQM](https://github.com/iqm-finland/qiskit-on-iqm). QCut supports version 15.6. Installation can be done with pip:
 
 ```python
 pip install qiskit-iqm
@@ -176,7 +176,7 @@ backend = IQMFakeAdonis()
 
 ## Running on FiQCI
 
-For running on real IQM hardware through the Lumi supercomputer's FiQCI partition follow the instructions [here](https://docs.csc.fi/computing/quantum-computing/helmi/running-on-helmi/). If you are used to using Qiskit on jupyter notebooks it is recommended to use the [Lumi web interface](https://docs.lumi-supercomputer.eu/runjobs/webui/).
+For running on real hardware through the Lumi supercomputer's FiQCI partition follow the instructions [here](https://docs.csc.fi/computing/quantum-computing/helmi/running-on-helmi/). If you are used to using Qiskit on jupyter notebooks it is recommended to use the [Lumi web interface](https://docs.lumi-supercomputer.eu/runjobs/webui/).
 
 ## Running on other hardware
 
