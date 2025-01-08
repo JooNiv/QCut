@@ -10,13 +10,15 @@ from QCut.backend_utility import (
 )
 from QCut.helper import get_pauli_list
 from QCut.identity_qpd import identity_qpd
-from QCut.qpd_gates import cut_wire
-from QCut.wirecut import (
-    estimate_expectation_values,
-    get_experiment_circuits,
+from QCut.qpd_gates import cut, cut_wire
+from QCut.single_qubit_wirecut import (
     get_locations_and_subcircuits,
     run,
     run_cut_circuit,
+)
+from QCut.wirecut import (
+    estimate_expectation_values,
+    get_experiment_circuits,
     run_experiments,
 )
 
@@ -40,5 +42,6 @@ __all__ = [
     "run_cut_circuit",
     "run_experiments",
     "cut_wire",
+    "cut",
     "identity_qpd",
 ]

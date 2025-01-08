@@ -23,6 +23,9 @@ zmeas.measure(0, 0)
 cut_wire = QuantumCircuit(2, name="Cut")
 cut_wire = cut_wire.to_instruction()
 
+cut = QuantumCircuit(1, name="Cut")
+cut = cut.to_instruction()
+
 # define initialization operations
 zero_init = QuantumCircuit(1, name="0-init")
 

@@ -4,7 +4,7 @@ from qiskit import ClassicalRegister, QuantumCircuit, QuantumRegister
 from qiskit.circuit import CircuitInstruction, Clbit, Instruction, Qubit
 
 from QCut import cut_wire
-from QCut.wirecut import CutLocation
+from QCut.cutlocation import CutLocation
 
 qc_1 = QuantumCircuit(4)
 qc_1.x(0)
@@ -72,7 +72,6 @@ test_observables = [
 exp_val_solutions = [
     [-1.0, -1.0, -1.0, 1.0, 1.0, -1.0], [-1.0, -1.0, -1.0, -1.0, 1.0, -1.0, 1.0], [1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0],
 ]
-
 experiment_circuit_solutions = [
     [
         [CircuitInstruction(operation=Instruction(name="x", num_qubits=1, num_clbits=0, params=[]), qubits=(Qubit(QuantumRegister(2, "q7"), 0),), clbits=()), CircuitInstruction(operation=Instruction(name="cx", num_qubits=2, num_clbits=0, params=[]), qubits=(Qubit(QuantumRegister(2, "q7"), 0), Qubit(QuantumRegister(2, "q7"), 1)), clbits=()), CircuitInstruction(operation=Instruction(name="measure", num_qubits=1, num_clbits=1, params=[]), qubits=(Qubit(QuantumRegister(2, "q7"), 0),), clbits=(Clbit(ClassicalRegister(1, "meas"), 0),))],

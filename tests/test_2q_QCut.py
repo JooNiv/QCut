@@ -3,8 +3,9 @@
 import numpy as np
 from qiskit_aer import AerSimulator
 
+import QCut as ck
+import QCut.two_qubit_wirecut as wc
 import tests.solutions as s
-from QCut import wirecut as ck
 
 
 def test_get_cut_locations() -> None:
@@ -16,7 +17,7 @@ def test_get_cut_locations() -> None:
     """
     for solution_index, circ in enumerate(s.test_circuits):
         assert np.array_equal(
-            ck._get_cut_locations(circ.copy()), s.cut_location_solutions[solution_index]
+            wc._get_cut_locations(circ.copy()), s.cut_location_solutions[solution_index]
         )
 
 
@@ -28,10 +29,10 @@ def test_get_bounds() -> None:
     circuit by comparing the result to the pre-defined solutions.
     """
     for solution_index, circ in enumerate(s.test_circuits):
-        cut_locations = ck._get_cut_locations(circ.copy())  # noqa: SLF001
+        cut_locations = wc._get_cut_locations(circ.copy())  # noqa: SLF001
         sorted_cut_locations = sorted(cut_locations, key=lambda x: min(x.meas, x.init))
         assert np.array_equal(
-            ck._get_bounds(sorted_cut_locations), s.bounds_solutions[solution_index]
+            wc._get_bounds(sorted_cut_locations), s.bounds_solutions[solution_index]
         )  # noqa: S101, SLF001
 
 
@@ -44,7 +45,7 @@ def test_separate_subcircuits() -> None:
     solutions.
     """
     for solution_index, circ in enumerate(s.test_circuits):
-        qss, circs = ck.get_locations_and_subcircuits(circ.copy())
+        qss, circs = wc.get_locations_and_subcircuits(circ.copy())
 
         for circ_index, subcirc in enumerate(circs):
             for op1, op2 in zip(
@@ -63,7 +64,7 @@ def test_get_experiment_circuits() -> None:
     """
     for solution_index, circ in enumerate(s.test_circuits):
         # Retrieve qubit locations and subcircuits
-        qss, circuits = ck.get_locations_and_subcircuits(circ)
+        qss, circuits = wc.get_locations_and_subcircuits(circ)
 
         # Generate experiment circuits
         experiment_circuits, coefs, id_meas = ck.get_experiment_circuits(circuits, qss)
@@ -73,7 +74,8 @@ def test_get_experiment_circuits() -> None:
         assert np.array_equal(id_meas, s.id_meas_solutions[solution_index])  # noqa: S101
 
         # Flatten the nested list of experiment circuits and extract their data
-        test_data = [op.data for sublist in experiment_circuits for op in sublist]
+        test_data = [op.data for sublist in experiment_circuits.circuits
+                      for op in sublist]
 
         # Retrieve the corresponding solution data
         solution_data = s.experiment_circuit_solutions[solution_index]
@@ -102,9 +104,8 @@ def test_expectation_values() -> None:
     # Iterate over each test circuit and its corresponding expected solutions
     for solution_index, circ in enumerate(s.test_circuits):
         # Calculate expectation values using the run method
-        expvals = ck.run(
-            circ, s.test_observables[solution_index], backend=sim, mitigate=False
-        )
+        expvals = wc.run(
+            circ, s.test_observables[solution_index], backend=sim, mitigate=False)
 
         # Check each calculated expectation value against the corresponding
         # expected value

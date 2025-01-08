@@ -10,18 +10,17 @@ from qiskit_experiments.library import LocalReadoutError
 
 
 def transpile_experiments(experiment_circuits: list, backend) -> list:
-    """Transpile experiment circuits.
+    """
+    Transpile experiment circuits.
 
     Args:
-    -----
-        experiment_circuits: experiment circuits
-        backend: backend to transpile to
+        experiment_circuits: (list): Experiment circuits to be transpiled.
+        backend (str): Backend to transpile to.
 
     Returns:
-    --------
-        transpiled_experiments: a list of transpiled experiment circuits
-
+        list: A list of transpiled experiment circuits.
     """
+
     return [
         [
             transpile(circuit, backend, layout_method="sabre", optimization_level=3)
@@ -37,17 +36,16 @@ def run_and_expectation_value(
     """Run circuit and calculate expectation value.
 
     Args:
-    -----
-        circuit: a quantum circuit
-        backend: backend to run circuit on
-        observables: observables to calculate expectation values for
-        shots: number of shots
-        mitigate: if True use readout error mitigation
+        circuit (QuantumCircuit): A quantum circuit.
+        backend: Backend to run circuit on.
+        observables (list): Observables to calculate expectation values for.
+        shots (int): Number of shots.
+        mitigate (bool): If True, use readout error mitigation.
 
     Returns:
-    --------
-        expectation_values: a list of expectation values
-
+        tuple: A tuple containing:
+            - dict: Counts from the circuit run.
+            - list: A list of expectation values.
     """
     counts = run_on_backend(circuit, backend, shots)
     if mitigate:
@@ -74,16 +72,19 @@ def expectation_values(counts: dict, observables: list, shots: int) -> list:
     """Calculate expectation values.
 
     Args:
-    -----
-        counts: counts obtained from circuit run
-        observables: observables to calculate expectation values for
-        shots: number of shots
-        probs
+        counts (dict):
+            Counts obtained from circuit run, where keys are measurement outcomes and
+            values are the number of times each outcome was observed.
+
+        observables (list):
+            List of observables to calculate expectation values for. Each observable can
+            be an integer (index of a single qubit) or a list of integers
+            (indices of multiple qubits).
+
+        shots (int): Number of shots (total number of measurements).
 
     Returns:
-    --------
-        cut_locations: a list of cut locations
-        subcircuits: subcircuits with placeholder operations
+        list: A list of expectation values for each observable.
 
     """
     # Convert results to a list of dicts with measurement values and counts
@@ -109,19 +110,15 @@ def expectation_values(counts: dict, observables: list, shots: int) -> list:
 
 
 def run_on_backend(circuit: QuantumCircuit, backend, shots: int) -> dict:
-    """Run circuit on backend.
+    """Run a quantum circuit on a specified backend.
 
     Args:
-    -----
-        circuit: a quantum circuit to be executed
-        backend: backend to use for executing circuit
-        shots: number of shots
-        probs
+        circuit (QuantumCircuit): The quantum circuit to be executed.
+        backend (Backend): The backend to use for executing the circuit.
+        shots (int): The number of shots (repetitions) to run the circuit.
 
     Returns:
-    --------
-        dict: a dictionary of counts from circuit run
-
+        dict: A dictionary of counts from the circuit run.
     """
     job = backend.run(circuit, shots=shots)
     result = job.result()
