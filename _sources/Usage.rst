@@ -8,8 +8,7 @@ NISQ devices they pose significant errors, if they are even available.
 QCut has been designed to work with IQM’s qpus, and therefore on the
 Finnish Quantum Computing Infrastructure
 (`FiQCI <https://fiqci.fi/>`__), and tested with an IQM Adonis 5-qubit
-qpu. Additionally, QCut is built on top of Qiskit 0.45.3 which is the
-current supported Qiskit version of IQM’s Qiskit fork iqm_qiskit.
+qpu. Additionally, QCut is built to be combatible with IQM’s Qiskit fork iqm_qiskit.
 
 QCut was built as a part of a summer internship at CSC - IT Center for
 Science (Finnish IT Center for Science).
