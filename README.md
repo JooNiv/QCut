@@ -2,7 +2,8 @@
 
 QCut is a quantum circuit knitting package for performing wire cuts especially designed to not use reset gates or mid-circuit measurements since on early NISQ devices they pose significant errors, if available at all.
 
-QCut has been designed to work with IQM's qpus, and therefore on the Finnish Quantum Computing Infrastructure ([FiQCI](https://fiqci.fi/)), and tested with an IQM Adonis 5-qubit qpu. Additionally, QCut is built on top of Qiskit to ensure building and running circuits stays familiar.
+QCut has been designed to work with IQM's qpus, and therefore on the Finnish Quantum Computing Infrastructure ([FiQCI](https://fiqci.fi/)), and tested with an IQM Adonis 5-qubit qpu. Additionally, QCut is built to be combatible with IQM’s Qiskit fork iqm_qiskit.
+
 
 QCut has been built at CSC - IT Center for Science (Finnish IT Center for Science).
 
