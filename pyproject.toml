@@ -8,14 +8,19 @@ dynamic = [ "version" ]
 authors = [
     { name = "Joonas Nivala", email = "joonas.nivala@gmail.com" },
 ]
+
 description = "A package for performing wire cuts of hardware without reset-gates or mid-circuit measurements. Built on top of qiskit"
 readme = "README.md"
-requires-python = ">=3.9, < 3.12"
+license = {file = "LICENSE"}
 classifiers = [
-    "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: Apache Software License",
-    "Operating System :: OS Independent",
+    "Development Status :: 4 - Beta",
+    "Programming Language :: Python :: 3 :: Only",
+    "Topic :: Scientific/Engineering :: Physics",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: Apache Software License"
 ]
+
+requires-python = ">=3.9, < 3.12"
 
 dependencies = [
     "qiskit >= 0.45.3, < 1.2",
@@ -24,12 +29,14 @@ dependencies = [
     "qiskit-experiments == 0.7.0",
 ]
 
+[project.urls]
+homepage = "https://github.com/JooNiv/QCut"
+documentation = "https://jooniv.github.io/QCut/"
+repository = "https://github.com/JooNiv/QCut.git"
+changelog = "https://github.com/JooNiv/QCut/blob/main/CHANGELOG.rst"
+
 [project.optional-dependencies]
 dev = ["pytest", "pytest-cov", "ruff"]
-
-
-[project.urls]
-"Homepage" = "https://github.com/JooNiv/QCut"
 
 [tool.setuptools.packages.find]
 where = ["."]
