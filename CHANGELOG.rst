@@ -2,6 +2,10 @@
 Changelog
 =========
 
+Version 0.2.1
+=============
+- Hotfix for incorrect version of qiskit-aer in pyproject.toml.
+
 Version 0.2.0
 =============
 - Single qubit cut gate now the default cut method
