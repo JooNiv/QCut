@@ -5,6 +5,7 @@ Changelog
 Version 0.2.1
 =============
 - Hotfix for incorrect version of qiskit-aer in pyproject.toml.
+- Fix pypi workflow
 
 Version 0.2.0
 =============
