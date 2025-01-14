@@ -36,4 +36,4 @@ jobs:
       - name: Create new tag and release
         run: bash ./tag-from-pipeline.sh create_new_tag
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PAT }}

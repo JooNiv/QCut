@@ -3,8 +3,7 @@ name: Publish Python 🐍 distribution 📦 to PyPI
 
 on:
   release:
-    types:
-      - published  # Trigger only when a new release is published
+    types: [published]  # Trigger only when a new release is published
   workflow_dispatch:  # Optional: to allow manual triggering
 
 jobs:
