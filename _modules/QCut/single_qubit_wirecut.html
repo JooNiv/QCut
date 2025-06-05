@@ -430,7 +430,7 @@ document.write(`
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">count_gates</span><span class="p">(</span><span class="n">qc</span><span class="p">:</span> <span class="n">QuantumCircuit</span><span class="p">):</span>
-    <span class="n">gate_count</span> <span class="o">=</span> <span class="p">{</span><span class="n">qubit</span><span class="p">:</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">qubit</span> <span class="ow">in</span> <span class="n">qc</span><span class="o">.</span><span class="n">qubits</span><span class="p">}</span>
+    <span class="n">gate_count</span> <span class="o">=</span> <span class="nb">dict</span><span class="o">.</span><span class="n">fromkeys</span><span class="p">(</span><span class="n">qc</span><span class="o">.</span><span class="n">qubits</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">gate</span> <span class="ow">in</span> <span class="n">qc</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">qubit</span> <span class="ow">in</span> <span class="n">gate</span><span class="o">.</span><span class="n">qubits</span><span class="p">:</span>
             <span class="n">gate_count</span><span class="p">[</span><span class="n">qubit</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
