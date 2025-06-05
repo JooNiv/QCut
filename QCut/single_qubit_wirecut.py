@@ -145,7 +145,7 @@ def _move_to_new_wire(circuit, num_cuts):  # noqa: C901
 
 
 def count_gates(qc: QuantumCircuit):
-    gate_count = {qubit: 0 for qubit in qc.qubits}
+    gate_count = dict.fromkeys(qc.qubits, 0)
     for gate in qc.data:
         for qubit in gate.qubits:
             gate_count[qubit] += 1
