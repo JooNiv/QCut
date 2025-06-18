@@ -152,7 +152,8 @@ def get_experiment_circuits(  # noqa: C901
     cuts = len(cut_locations)
     num_circs = np.power(8, cuts)
     experiment_circuits = []
-    id_meas = np.full((num_circs, 3), None)
+    num_id_meas_init = cuts * 2 * np.power(8, cuts - 1) 
+    id_meas = np.full((num_id_meas_init, 3), None)
     num_id_meas = 0
     coefficients = np.empty(num_circs)
     placeholder_locations = get_placeholder_locations(subcircuits)

@@ -2,6 +2,10 @@
 Changelog
 =========
 
+Version 0.2.2
+=============
+- Bugfix for array overflow in :code:`get_experiment_circuits`
+
 Version 0.2.1
 =============
 - Hotfix for incorrect version of qiskit-aer in pyproject.toml.
