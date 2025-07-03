@@ -1,13 +1,27 @@
+# Byte-compiled / cache files
 __pycache__/
 *cache
+
+# Build and distribution directories
 build/
 dist/
+docs/_build/
+
+# Python packaging
 *.egg-info/
-.vscode
+
+# Coverage and test outputs
 .coverage
 htmlcov/
 *.xml
 *.txt
+
+# Lock files
+*.lock
+
+# Editor settings
+.vscode
+
+# Test files
 test.ipynb
 test.py
-docs/_build/
