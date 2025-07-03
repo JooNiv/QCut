@@ -2,6 +2,12 @@
 Changelog
 =========
 
+Version 0.2.3
+=============
+- Major optimisation on :code:`_move_to_new_wire` method.
+    * Old version took around 11s for a random circuit with depth of 50 and 50 qubits.
+    * New version takes around 0.2s for the same circuit.
+
 Version 0.2.2
 =============
 - Bugfix for array overflow in :code:`get_experiment_circuits`
