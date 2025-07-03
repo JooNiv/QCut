@@ -91,56 +91,56 @@ def _insert_cut_nodes(circuit, cut_locations):
     return circuit, placeholder_locations
 
 
-def _move_to_new_wire(circuit, num_cuts):  # noqa: C901
-    count = 0
-    # qr = QuantumRegister(num_cuts, "qpd")
-    # circuit.qregs.append(qr)
-    i = 0
-    j = 0
-    all_cut_qubits = []
-    while i < len(circuit):
-        ind, op = list(enumerate(circuit.data))[i]
-        if "Meas" in op.operation.name:
-            consecutive_cuts = 0
-            cut_qubits = []
-            j = 0
-            while "Meas" in circuit.data[ind + j].operation.name:
-                cut_qubits.append(circuit.data[ind + j].qubits[0])
-                all_cut_qubits.append(
-                    circuit.find_bit(circuit.data[ind + j].qubits[0]).index
-                )
-                consecutive_cuts += 1
-                j += 2
-            for _ in range(consecutive_cuts):
-                q = Qubit()
-                circuit.add_bits([q])
-                circuit.qubits.remove(q)
-                circuit.qubits.insert(circuit.qubits.index(cut_qubits[-1]) + 1, q)
-            check = 0
-            for subind, subop in enumerate(circuit.data[ind::]):
-                if "Meas" in subop.operation.name and check < consecutive_cuts:
-                    check += 1
-                    continue
-                new_qubs = []
-                for qub in subop.qubits:
-                    if qub in cut_qubits:
-                        q_ind = cut_qubits.index(qub) + 1
-                        new_qubs.append(
-                            circuit.qubits[circuit.qubits.index(cut_qubits[-1]) + q_ind]
-                        )
-                    else:
-                        new_qubs.append(qub)
-                if new_qubs != subop.qubits:
-                    circuit.data[ind + subind] = CircuitInstruction(
-                        subop.operation, new_qubs
-                    )
-
-            count += consecutive_cuts
-        if j != 0:
-            i += j
-            j = 0
+def _move_to_new_wire(circuit, num_cuts):
+    # collect blocks
+    blocks = []
+    idx = 0
+    data = circuit.data
+    while idx < len(data):
+        if data[idx].operation.name.startswith("Meas"):
+            start = idx
+            qubits = []
+            while idx < len(data) and data[idx].operation.name.startswith("Meas"):
+                qubits.append(data[idx].qubits[0])
+                idx += 1
+            blocks.append((start, qubits))
         else:
-            i += 1
+            idx += 1
+
+    # bulk add, then re‐splice each block
+    total_new = sum(len(qs) for _, qs in blocks)
+    new_qubits = [Qubit() for _ in range(total_new)]
+    circuit.add_bits(new_qubits)
+
+    new_iter = iter(new_qubits)
+    for start, cut_qubits in blocks:
+        # grab and remove this block’s qubits from qubits
+        block_news = [next(new_iter) for _ in range(len(cut_qubits))]
+        for q in reversed(block_news):
+            circuit.qubits.remove(q)
+
+        # splice into place
+        insertion_idx = circuit.qubits.index(cut_qubits[-1]) + 1
+        circuit.qubits[insertion_idx:insertion_idx] = block_news
+
+        # build remap
+        block_map = dict(zip(cut_qubits, block_news))
+
+        # find first non meas index
+        boundary = start
+        while (boundary < len(circuit.data) and
+               circuit.data[boundary].operation.name.startswith("Meas")):
+            boundary += 1
+
+        # remap everything from boundary onward
+        for inst_idx in range(boundary, len(circuit.data)):
+            inst = circuit.data[inst_idx]
+            mapped = [block_map.get(q, q) for q in inst.qubits]
+            if mapped != list(inst.qubits):
+                circuit.data[inst_idx] = CircuitInstruction(
+                    inst.operation, mapped
+                )
+
     return circuit
 
 
