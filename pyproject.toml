@@ -27,7 +27,6 @@ dependencies = [
     "numpy",
     "qiskit-aer >= 0.13.0, < 0.15",
     "qiskit-experiments == 0.7.0",
-    "pytest>=8.4.1",
 ]
 
 [project.urls]
@@ -87,3 +86,8 @@ docstring-code-line-length = "dynamic"
 
 [tool.pytest.ini_options]
 python_files = ["tests.py", "test_*.py"]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.4.1",
+]
