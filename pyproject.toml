@@ -27,6 +27,7 @@ dependencies = [
     "numpy",
     "qiskit-aer >= 0.13.0, < 0.15",
     "qiskit-experiments == 0.7.0",
+    "pytest>=8.4.1",
 ]
 
 [project.urls]
