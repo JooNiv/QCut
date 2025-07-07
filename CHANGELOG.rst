@@ -2,6 +2,10 @@
 Changelog
 =========
 
+Version 0.2.4
+=============
+- Bugfix for incorrect partitioning for cases where there are multipe cuts on a single wire
+
 Version 0.2.3
 =============
 - Major optimisation on :code:`_move_to_new_wire` method.
