@@ -133,59 +133,6 @@ def _move_to_new_wire(orig: QuantumCircuit) -> QuantumCircuit:
 
     return new
 
-def _move_to_new_wire_old(circuit, num_cuts):
-    # collect blocks
-    blocks = []
-    idx = 0
-    data = circuit.data
-    while idx < len(data):
-        if data[idx].operation.name.startswith("Meas"):
-            start = idx
-            qubits = []
-            while idx < len(data) and data[idx].operation.name.startswith("Meas"):
-                qubits.append(data[idx].qubits[0])
-                idx += 1
-            blocks.append((start, qubits))
-        else:
-            idx += 1
-
-    # bulk add, then re‐splice each block
-    total_new = sum(len(qs) for _, qs in blocks)
-    new_qubits = [Qubit() for _ in range(total_new)]
-    circuit.add_bits(new_qubits)
-
-    new_iter = iter(new_qubits)
-    for start, cut_qubits in blocks:
-        # grab and remove this block’s qubits from qubits
-        block_news = [next(new_iter) for _ in range(len(cut_qubits))]
-        for q in reversed(block_news):
-            circuit.qubits.remove(q)
-
-        # splice into place
-        insertion_idx = circuit.qubits.index(cut_qubits[-1]) + 1
-        circuit.qubits[insertion_idx:insertion_idx] = block_news
-
-        # build remap
-        block_map = dict(zip(cut_qubits, block_news))
-
-        # find first non meas index
-        boundary = start
-        while (boundary < len(circuit.data) and
-               circuit.data[boundary].operation.name.startswith("Meas")):
-            boundary += 1
-
-        # remap everything from boundary onward
-        for inst_idx in range(boundary, len(circuit.data)):
-            inst = circuit.data[inst_idx]
-            mapped = [block_map.get(q, q) for q in inst.qubits]
-            if mapped != list(inst.qubits):
-                circuit.data[inst_idx] = CircuitInstruction(
-                    inst.operation, mapped
-                )
-
-    return circuit
-
-
 def count_gates(qc: QuantumCircuit):
     gate_count = dict.fromkeys(qc.qubits, 0)
     for gate in qc.data:
