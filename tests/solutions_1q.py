@@ -46,15 +46,23 @@ qc_5.cx(0,1)
 qc_5.cx(2,3)
 qc_5.cx(0,3)
 
-test_circuits = [qc_1, qc_2, qc_3, qc_4, qc_5]
+qc_6 = QuantumCircuit(3)
+qc_6.h(0)
+qc_6.cx(0, 1)
+qc_6.append(cut, [1])
+qc_6.cx(1, 2)
+qc_6.append(cut, [1])
+qc_6.cx(0, 1)
+
+test_circuits = [qc_1, qc_2, qc_3, qc_4, qc_5, qc_6]
 
 cut_location_solutions = [[CutLocation(((QuantumRegister(3, "q"), 1), 2))],
                           [CutLocation(((QuantumRegister(4, "q"), 1), 3)), CutLocation(((QuantumRegister(4, "q"), 2), 3))],
                           [CutLocation(((QuantumRegister(4, "q"), 1), 2)), CutLocation(((QuantumRegister(4, "q"), 2), 3))],
                           [CutLocation(((QuantumRegister(4, "q"), 1), 3)), CutLocation(((QuantumRegister(4, "q"), 3), 3))],
                           [CutLocation(((QuantumRegister(4, "q"), 1), 2)), CutLocation(((QuantumRegister(4, "q"), 2), 2))],
+                          [CutLocation(((QuantumRegister(3, "q"), 1), 2)), CutLocation(((QuantumRegister(3, "q"), 1), 3))],
                         ]
-
 
 subcircuit_solutions = [
     [
@@ -76,8 +84,12 @@ subcircuit_solutions = [
 
     ],
     [
-        [CircuitInstruction(operation=Instruction(name='h', num_qubits=1, num_clbits=0, params=[]), qubits=(Qubit(QuantumRegister(4, 'q'), 0),), clbits=()), CircuitInstruction(operation=Instruction(name='Init_0', num_qubits=1, num_clbits=0, params=[]), qubits=(Qubit(QuantumRegister(4, 'q'), 1),), clbits=()), CircuitInstruction(operation=Instruction(name='cx', num_qubits=2, num_clbits=0, params=[]), qubits=(Qubit(QuantumRegister(4, 'q'), 0), Qubit(QuantumRegister(4, 'q'), 1)), clbits=()), CircuitInstruction(operation=Instruction(name='Init_1', num_qubits=1, num_clbits=0, params=[]), qubits=(Qubit(QuantumRegister(4, 'q'), 2),), clbits=()), CircuitInstruction(operation=Instruction(name='cx', num_qubits=2, num_clbits=0, params=[]), qubits=(Qubit(QuantumRegister(4, 'q'), 2), Qubit(QuantumRegister(4, 'q'), 3)), clbits=()), CircuitInstruction(operation=Instruction(name='cx', num_qubits=2, num_clbits=0, params=[]), qubits=(Qubit(QuantumRegister(4, 'q'), 0), Qubit(QuantumRegister(4, 'q'), 3)), clbits=()), CircuitInstruction(operation=Instruction(name='obs_2', num_qubits=1, num_clbits=0, params=[]), qubits=(Qubit(QuantumRegister(4, 'q'), 2),), clbits=())] ,
+        [CircuitInstruction(operation=Instruction(name='h', num_qubits=1, num_clbits=0, params=[]), qubits=(Qubit(QuantumRegister(4, 'q'), 0),), clbits=()), CircuitInstruction(operation=Instruction(name='Init_0', num_qubits=1, num_clbits=0, params=[]), qubits=(Qubit(QuantumRegister(4, 'q'), 1),), clbits=()), CircuitInstruction(operation=Instruction(name='cx', num_qubits=2, num_clbits=0, params=[]), qubits=(Qubit(QuantumRegister(4, 'q'), 0), Qubit(QuantumRegister(4, 'q'), 1)), clbits=()), CircuitInstruction(operation=Instruction(name='Init_1', num_qubits=1, num_clbits=0, params=[]), qubits=(Qubit(QuantumRegister(4, 'q'), 2),), clbits=()), CircuitInstruction(operation=Instruction(name='cx', num_qubits=2, num_clbits=0, params=[]), qubits=(Qubit(QuantumRegister(4, 'q'), 2), Qubit(QuantumRegister(4, 'q'), 3)), clbits=()), CircuitInstruction(operation=Instruction(name='cx', num_qubits=2, num_clbits=0, params=[]), qubits=(Qubit(QuantumRegister(4, 'q'), 0), Qubit(QuantumRegister(4, 'q'), 3)), clbits=())] ,
         [CircuitInstruction(operation=Instruction(name='cx', num_qubits=2, num_clbits=0, params=[]), qubits=(Qubit(QuantumRegister(2, 'q'), 0), Qubit(QuantumRegister(2, 'q'), 1)), clbits=()), CircuitInstruction(operation=Instruction(name='Meas_0', num_qubits=1, num_clbits=0, params=[]), qubits=(Qubit(QuantumRegister(2, 'q'), 0),), clbits=()), CircuitInstruction(operation=Instruction(name='Meas_1', num_qubits=1, num_clbits=0, params=[]), qubits=(Qubit(QuantumRegister(2, 'q'), 1),), clbits=())] ,
+    ],
+    [
+        [CircuitInstruction(operation=Instruction(name='h', num_qubits=1, num_clbits=0, params=[]), qubits=(Qubit(QuantumRegister(3, 'q'), 0),), clbits=()), CircuitInstruction(operation=Instruction(name='cx', num_qubits=2, num_clbits=0, params=[]), qubits=(Qubit(QuantumRegister(3, 'q'), 0), Qubit(QuantumRegister(3, 'q'), 1)), clbits=()), CircuitInstruction(operation=Instruction(name='Meas_0', num_qubits=1, num_clbits=0, params=[]), qubits=(Qubit(QuantumRegister(3, 'q'), 1),), clbits=()), CircuitInstruction(operation=Instruction(name='Init_1', num_qubits=1, num_clbits=0, params=[]), qubits=(Qubit(QuantumRegister(3, 'q'), 2),), clbits=()), CircuitInstruction(operation=Instruction(name='cx', num_qubits=2, num_clbits=0, params=[]), qubits=(Qubit(QuantumRegister(3, 'q'), 0), Qubit(QuantumRegister(3, 'q'), 2)), clbits=())],
+        [CircuitInstruction(operation=Instruction(name='Init_0', num_qubits=1, num_clbits=0, params=[]), qubits=(Qubit(QuantumRegister(2, 'q'), 1),), clbits=()), CircuitInstruction(operation=Instruction(name='cx', num_qubits=2, num_clbits=0, params=[]), qubits=(Qubit(QuantumRegister(2, 'q'), 1), Qubit(QuantumRegister(2, 'q'), 0)), clbits=()), CircuitInstruction(operation=Instruction(name='Meas_1', num_qubits=1, num_clbits=0, params=[]), qubits=(Qubit(QuantumRegister(2, 'q'), 1),), clbits=())], 
     ],
 ]
 
@@ -87,6 +99,7 @@ test_observables = [
     [0,1,2,3, [0,3], [1,2,3], [0,1,2,3]],
     [0,1,2, [0,2], [0,3,4]],
     [0,1,2,3, [0,2], [0,3,1]],
+    [0, 1, 2, [0, 2], [0, 1]],
 ]
 
 exp_val_solutions = [
@@ -95,4 +108,5 @@ exp_val_solutions = [
     [1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0],
     [0.0, 1.0, 1.0, 0.0, 0.0],
     [0.0, 1.0, 0.0, 0.0, 1.0, 1.0],
+    [0.0, 1.0, 0.0, 1.0, 0.0],
 ]
