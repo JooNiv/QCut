@@ -4,7 +4,7 @@ from collections import namedtuple
 from copy import deepcopy
 
 import numpy as np
-from qiskit import ClassicalRegister, QuantumCircuit
+from qiskit import ClassicalRegister, QuantumCircuit, QuantumRegister
 from qiskit.circuit import CircuitInstruction, Qubit
 from qiskit.converters import circuit_to_dag, dag_to_circuit
 from qiskit_aer import AerSimulator
@@ -90,8 +90,50 @@ def _insert_cut_nodes(circuit, cut_locations):
 
     return circuit, placeholder_locations
 
+def _move_to_new_wire(orig: QuantumCircuit) -> QuantumCircuit:
+    # Create the new circuit and add registers
+    offset = 0
+    new = QuantumCircuit(name=orig.name + "_rebuilt")
+    for creg in orig.cregs:
+        new.add_register(ClassicalRegister(creg.size, creg.name))
+    for qreg in orig.qregs:
+        new.add_register(QuantumRegister(0, qreg.name))
 
-def _move_to_new_wire(circuit, num_cuts):
+    # Create fresh Qubit objects for each original wire
+    # and record a mapping old_qubit -> new_qubit
+    qubit_map = {}
+    new_qubits = []
+    for idx, q_old in enumerate(orig.qubits):
+        q_new = Qubit()
+        new_qubits.append(q_new)
+        qubit_map[q_old] = q_new
+    new.add_bits(new_qubits)
+
+    # 3) Replay every instruction, splitting on Measure
+    for inst, qargs, cargs in orig.data:
+        # map every qarg via our current mapping
+        mapped_qs = [qubit_map[q] for q in qargs]
+
+        if inst.name.startswith("Meas"):
+            # append this measurement on the current wire
+            new.append(inst, mapped_qs, cargs)
+
+            # now allocate a fresh wire for all future uses of qargs[0]
+            q_fresh = Qubit()
+            new.add_bits([q_fresh])
+            new.qubits.remove(q_fresh)
+            new.qubits.insert(orig.find_bit(qargs[0]).index+1+offset, q_fresh)
+            offset += 1
+            # update the mapping so q_old -> q_fresh going forward
+            qubit_map[qargs[0]] = q_fresh
+
+        else:
+            # just copy the gate over to mapped_qs
+            new.append(inst, mapped_qs, cargs)
+
+    return new
+
+def _move_to_new_wire_old(circuit, num_cuts):
     # collect blocks
     blocks = []
     idx = 0
@@ -234,7 +276,7 @@ def get_locations_and_subcircuits(
         circuit.append(obs_m, [i])
     cut_locations = _get_cut_locations(circuit)
     circuit1, _placeholder_locations = _insert_cut_nodes(circuit, cut_locations)
-    circuit = _move_to_new_wire(circuit1.copy(), len(cut_locations))
+    circuit = _move_to_new_wire(circuit1.copy())
     subcircuits = _separate_subcircuits(circuit)
     subcircuits = _add_cbits(subcircuits)
     fixed_circs = []
