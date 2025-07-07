@@ -289,7 +289,7 @@ document.write(`
 <span class="kn">from</span><span class="w"> </span><span class="nn">copy</span><span class="w"> </span><span class="kn">import</span> <span class="n">deepcopy</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit</span><span class="w"> </span><span class="kn">import</span> <span class="n">ClassicalRegister</span><span class="p">,</span> <span class="n">QuantumCircuit</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit</span><span class="w"> </span><span class="kn">import</span> <span class="n">ClassicalRegister</span><span class="p">,</span> <span class="n">QuantumCircuit</span><span class="p">,</span> <span class="n">QuantumRegister</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">qiskit.circuit</span><span class="w"> </span><span class="kn">import</span> <span class="n">CircuitInstruction</span><span class="p">,</span> <span class="n">Qubit</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">qiskit.converters</span><span class="w"> </span><span class="kn">import</span> <span class="n">circuit_to_dag</span><span class="p">,</span> <span class="n">dag_to_circuit</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_aer</span><span class="w"> </span><span class="kn">import</span> <span class="n">AerSimulator</span>
@@ -375,59 +375,48 @@ document.write(`
 
     <span class="k">return</span> <span class="n">circuit</span><span class="p">,</span> <span class="n">placeholder_locations</span>
 
+<span class="k">def</span><span class="w"> </span><span class="nf">_move_to_new_wire</span><span class="p">(</span><span class="n">orig</span><span class="p">:</span> <span class="n">QuantumCircuit</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">QuantumCircuit</span><span class="p">:</span>
+    <span class="c1"># Create the new circuit and add registers</span>
+    <span class="n">offset</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">new</span> <span class="o">=</span> <span class="n">QuantumCircuit</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">orig</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;_rebuilt&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">creg</span> <span class="ow">in</span> <span class="n">orig</span><span class="o">.</span><span class="n">cregs</span><span class="p">:</span>
+        <span class="n">new</span><span class="o">.</span><span class="n">add_register</span><span class="p">(</span><span class="n">ClassicalRegister</span><span class="p">(</span><span class="n">creg</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">creg</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">qreg</span> <span class="ow">in</span> <span class="n">orig</span><span class="o">.</span><span class="n">qregs</span><span class="p">:</span>
+        <span class="n">new</span><span class="o">.</span><span class="n">add_register</span><span class="p">(</span><span class="n">QuantumRegister</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">qreg</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_move_to_new_wire</span><span class="p">(</span><span class="n">circuit</span><span class="p">,</span> <span class="n">num_cuts</span><span class="p">):</span>
-    <span class="c1"># collect blocks</span>
-    <span class="n">blocks</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">idx</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="n">data</span> <span class="o">=</span> <span class="n">circuit</span><span class="o">.</span><span class="n">data</span>
-    <span class="k">while</span> <span class="n">idx</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">operation</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;Meas&quot;</span><span class="p">):</span>
-            <span class="n">start</span> <span class="o">=</span> <span class="n">idx</span>
-            <span class="n">qubits</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="k">while</span> <span class="n">idx</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="ow">and</span> <span class="n">data</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">operation</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;Meas&quot;</span><span class="p">):</span>
-                <span class="n">qubits</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">qubits</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-                <span class="n">idx</span> <span class="o">+=</span> <span class="mi">1</span>
-            <span class="n">blocks</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">start</span><span class="p">,</span> <span class="n">qubits</span><span class="p">))</span>
+    <span class="c1"># Create fresh Qubit objects for each original wire</span>
+    <span class="c1"># and record a mapping old_qubit -&gt; new_qubit</span>
+    <span class="n">qubit_map</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">new_qubits</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">q_old</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">orig</span><span class="o">.</span><span class="n">qubits</span><span class="p">):</span>
+        <span class="n">q_new</span> <span class="o">=</span> <span class="n">Qubit</span><span class="p">()</span>
+        <span class="n">new_qubits</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">q_new</span><span class="p">)</span>
+        <span class="n">qubit_map</span><span class="p">[</span><span class="n">q_old</span><span class="p">]</span> <span class="o">=</span> <span class="n">q_new</span>
+    <span class="n">new</span><span class="o">.</span><span class="n">add_bits</span><span class="p">(</span><span class="n">new_qubits</span><span class="p">)</span>
+
+    <span class="c1"># 3) Replay every instruction, splitting on Measure</span>
+    <span class="k">for</span> <span class="n">inst</span><span class="p">,</span> <span class="n">qargs</span><span class="p">,</span> <span class="n">cargs</span> <span class="ow">in</span> <span class="n">orig</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+        <span class="c1"># map every qarg via our current mapping</span>
+        <span class="n">mapped_qs</span> <span class="o">=</span> <span class="p">[</span><span class="n">qubit_map</span><span class="p">[</span><span class="n">q</span><span class="p">]</span> <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="n">qargs</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">inst</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;Meas&quot;</span><span class="p">):</span>
+            <span class="c1"># append this measurement on the current wire</span>
+            <span class="n">new</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">inst</span><span class="p">,</span> <span class="n">mapped_qs</span><span class="p">,</span> <span class="n">cargs</span><span class="p">)</span>
+
+            <span class="c1"># now allocate a fresh wire for all future uses of qargs[0]</span>
+            <span class="n">q_fresh</span> <span class="o">=</span> <span class="n">Qubit</span><span class="p">()</span>
+            <span class="n">new</span><span class="o">.</span><span class="n">add_bits</span><span class="p">([</span><span class="n">q_fresh</span><span class="p">])</span>
+            <span class="n">new</span><span class="o">.</span><span class="n">qubits</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">q_fresh</span><span class="p">)</span>
+            <span class="n">new</span><span class="o">.</span><span class="n">qubits</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">orig</span><span class="o">.</span><span class="n">find_bit</span><span class="p">(</span><span class="n">qargs</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">index</span><span class="o">+</span><span class="mi">1</span><span class="o">+</span><span class="n">offset</span><span class="p">,</span> <span class="n">q_fresh</span><span class="p">)</span>
+            <span class="n">offset</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="c1"># update the mapping so q_old -&gt; q_fresh going forward</span>
+            <span class="n">qubit_map</span><span class="p">[</span><span class="n">qargs</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="n">q_fresh</span>
+
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">idx</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="c1"># just copy the gate over to mapped_qs</span>
+            <span class="n">new</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">inst</span><span class="p">,</span> <span class="n">mapped_qs</span><span class="p">,</span> <span class="n">cargs</span><span class="p">)</span>
 
-    <span class="c1"># bulk add, then re‐splice each block</span>
-    <span class="n">total_new</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">qs</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">qs</span> <span class="ow">in</span> <span class="n">blocks</span><span class="p">)</span>
-    <span class="n">new_qubits</span> <span class="o">=</span> <span class="p">[</span><span class="n">Qubit</span><span class="p">()</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">total_new</span><span class="p">)]</span>
-    <span class="n">circuit</span><span class="o">.</span><span class="n">add_bits</span><span class="p">(</span><span class="n">new_qubits</span><span class="p">)</span>
-
-    <span class="n">new_iter</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span><span class="n">new_qubits</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">start</span><span class="p">,</span> <span class="n">cut_qubits</span> <span class="ow">in</span> <span class="n">blocks</span><span class="p">:</span>
-        <span class="c1"># grab and remove this block’s qubits from qubits</span>
-        <span class="n">block_news</span> <span class="o">=</span> <span class="p">[</span><span class="nb">next</span><span class="p">(</span><span class="n">new_iter</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">cut_qubits</span><span class="p">))]</span>
-        <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">block_news</span><span class="p">):</span>
-            <span class="n">circuit</span><span class="o">.</span><span class="n">qubits</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
-
-        <span class="c1"># splice into place</span>
-        <span class="n">insertion_idx</span> <span class="o">=</span> <span class="n">circuit</span><span class="o">.</span><span class="n">qubits</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">cut_qubits</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="mi">1</span>
-        <span class="n">circuit</span><span class="o">.</span><span class="n">qubits</span><span class="p">[</span><span class="n">insertion_idx</span><span class="p">:</span><span class="n">insertion_idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">block_news</span>
-
-        <span class="c1"># build remap</span>
-        <span class="n">block_map</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">cut_qubits</span><span class="p">,</span> <span class="n">block_news</span><span class="p">))</span>
-
-        <span class="c1"># find first non meas index</span>
-        <span class="n">boundary</span> <span class="o">=</span> <span class="n">start</span>
-        <span class="k">while</span> <span class="p">(</span><span class="n">boundary</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">circuit</span><span class="o">.</span><span class="n">data</span><span class="p">)</span> <span class="ow">and</span>
-               <span class="n">circuit</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">boundary</span><span class="p">]</span><span class="o">.</span><span class="n">operation</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;Meas&quot;</span><span class="p">)):</span>
-            <span class="n">boundary</span> <span class="o">+=</span> <span class="mi">1</span>
-
-        <span class="c1"># remap everything from boundary onward</span>
-        <span class="k">for</span> <span class="n">inst_idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">boundary</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">circuit</span><span class="o">.</span><span class="n">data</span><span class="p">)):</span>
-            <span class="n">inst</span> <span class="o">=</span> <span class="n">circuit</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">inst_idx</span><span class="p">]</span>
-            <span class="n">mapped</span> <span class="o">=</span> <span class="p">[</span><span class="n">block_map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">q</span><span class="p">)</span> <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="n">inst</span><span class="o">.</span><span class="n">qubits</span><span class="p">]</span>
-            <span class="k">if</span> <span class="n">mapped</span> <span class="o">!=</span> <span class="nb">list</span><span class="p">(</span><span class="n">inst</span><span class="o">.</span><span class="n">qubits</span><span class="p">):</span>
-                <span class="n">circuit</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">inst_idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">CircuitInstruction</span><span class="p">(</span>
-                    <span class="n">inst</span><span class="o">.</span><span class="n">operation</span><span class="p">,</span> <span class="n">mapped</span>
-                <span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">circuit</span>
-
+    <span class="k">return</span> <span class="n">new</span>
 
 <span class="k">def</span><span class="w"> </span><span class="nf">count_gates</span><span class="p">(</span><span class="n">qc</span><span class="p">:</span> <span class="n">QuantumCircuit</span><span class="p">):</span>
     <span class="n">gate_count</span> <span class="o">=</span> <span class="nb">dict</span><span class="o">.</span><span class="n">fromkeys</span><span class="p">(</span><span class="n">qc</span><span class="o">.</span><span class="n">qubits</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
@@ -521,7 +510,7 @@ document.write(`
         <span class="n">circuit</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">obs_m</span><span class="p">,</span> <span class="p">[</span><span class="n">i</span><span class="p">])</span>
     <span class="n">cut_locations</span> <span class="o">=</span> <span class="n">_get_cut_locations</span><span class="p">(</span><span class="n">circuit</span><span class="p">)</span>
     <span class="n">circuit1</span><span class="p">,</span> <span class="n">_placeholder_locations</span> <span class="o">=</span> <span class="n">_insert_cut_nodes</span><span class="p">(</span><span class="n">circuit</span><span class="p">,</span> <span class="n">cut_locations</span><span class="p">)</span>
-    <span class="n">circuit</span> <span class="o">=</span> <span class="n">_move_to_new_wire</span><span class="p">(</span><span class="n">circuit1</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span> <span class="nb">len</span><span class="p">(</span><span class="n">cut_locations</span><span class="p">))</span>
+    <span class="n">circuit</span> <span class="o">=</span> <span class="n">_move_to_new_wire</span><span class="p">(</span><span class="n">circuit1</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
     <span class="n">subcircuits</span> <span class="o">=</span> <span class="n">_separate_subcircuits</span><span class="p">(</span><span class="n">circuit</span><span class="p">)</span>
     <span class="n">subcircuits</span> <span class="o">=</span> <span class="n">_add_cbits</span><span class="p">(</span><span class="n">subcircuits</span><span class="p">)</span>
     <span class="n">fixed_circs</span> <span class="o">=</span> <span class="p">[]</span>
