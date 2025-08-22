@@ -18,11 +18,6 @@ zmeas = QuantumCircuit(1, 1, name="z-meas")
 zmeas.measure(0, 0)
 
 # define the cut location marker
-"""Cut-instruction: two qubit gate. 0-qubit is the measure channel
-    and 1-qubit the initialize channel."""
-cut_wire = QuantumCircuit(2, name="Cut")
-cut_wire = cut_wire.to_instruction()
-
 cut = QuantumCircuit(1, name="Cut")
 cut = cut.to_instruction()
 
