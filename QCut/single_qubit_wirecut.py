@@ -4,6 +4,7 @@ from collections import namedtuple
 from copy import deepcopy
 
 import numpy as np
+from QCutFind import construct_final_subcircuits
 from qiskit import ClassicalRegister, QuantumCircuit, QuantumRegister
 from qiskit.circuit import CircuitInstruction, Qubit
 from qiskit.converters import circuit_to_dag, dag_to_circuit
@@ -203,6 +204,7 @@ def get_qubit_map(subcircuits: list[QuantumCircuit]):
 
 def get_locations_and_subcircuits(
     circuit: QuantumCircuit,
+    max_qubits: list[int] | None = None,
 ):
     """Get cut locations and subcircuits with placeholder operations.
 
@@ -240,6 +242,15 @@ def get_locations_and_subcircuits(
         raise QCutError(
             "Invalid cuts. Check documentation to see how cuts should be placed."
         )
+    
+    if len(fixed_circs) != len(max_qubits):
+        if max_qubits is None:
+            raise QCutError(
+                "max_qubits must be specified when automatic cut finding with " \
+                "max_qubits constraint is used."
+            )
+        fixed_circs = construct_final_subcircuits(fixed_circs, max_qubits)
+
 
     map_qubits = get_qubit_map(fixed_circs)
 
