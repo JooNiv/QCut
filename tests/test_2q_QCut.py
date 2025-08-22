@@ -105,7 +105,7 @@ def test_expectation_values() -> None:
     for solution_index, circ in enumerate(s.test_circuits):
         # Calculate expectation values using the run method
         expvals = wc.run(
-            circ, s.test_observables[solution_index], backend=sim, mitigate=False)
+            circ, s.test_observables[solution_index], backend=sim)
 
         # Check each calculated expectation value against the corresponding
         # expected value

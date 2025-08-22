@@ -253,7 +253,6 @@ def run_cut_circuit(
     observables: list[int | list[int]],
     map_qubits: dict[int, int],
     backend=AerSimulator(),
-    mitigate: bool = False,
 ) -> np.ndarray[float]:
     """After splitting the circuit run the rest of the circuit knitting sequence.
 
@@ -264,7 +263,6 @@ def run_cut_circuit(
         observables (list[int | list[int]]):
             list of observables as qubit indices (Z observable)
         backend: backend to use for running experiment circuits (optional)
-        mitigate (bool): wether or not to use readout error mitigation (optional)
 
     Returns:
         list: a list of expectation values
@@ -273,13 +271,12 @@ def run_cut_circuit(
     subexperiments, coefs, id_meas = get_experiment_circuits(subcircuits, cut_locations)
     if not isinstance(backend, AerSimulator):
         subexperiments = transpile_experiments(subexperiments.circuits, backend)
-        subexperiments = CutCircuit(subexperiments)
+        
     results = run_experiments(
         subexperiments,
         cut_locations,
         id_meas=id_meas,
         backend=backend,
-        mitigate=mitigate,
     )
 
     return estimate_expectation_values(
@@ -291,7 +288,6 @@ def run(
     circuit: QuantumCircuit,
     observables: list[int, list[int]],
     backend=AerSimulator(),
-    mitigate: bool = False,
 ) -> list[float]:
     """Run the whole circuit knitting sequence with one function call.
 
@@ -300,7 +296,6 @@ def run(
         observables (list[int | list[int]]):
             list of observbles in the form of qubit indices (Z-obsevable).
         backend: backend to use for running experiment circuits (optional)
-        mitigate (bool): wether or not to use readout error mitigation (optional)
 
     Returns:
         list: a list of expectation values
@@ -309,4 +304,4 @@ def run(
     # circuit = circuit.copy()
     qss, circs, map_qubits = get_locations_and_subcircuits(circuit)
 
-    return run_cut_circuit(circs, qss, observables, map_qubits, backend, mitigate)
+    return run_cut_circuit(circs, qss, observables, map_qubits, backend)
