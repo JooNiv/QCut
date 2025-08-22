@@ -30,7 +30,7 @@
 
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="_static/styles/sphinx-book-theme.css?v=eba8b062" />
-    <link rel="stylesheet" type="text/css" href="_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
   <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
@@ -162,7 +162,6 @@
 <li class="toctree-l1"><a class="reference internal" href="Usage.html">Usage</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="Examples.html">Examples on using QCut</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="Multiple_cuts.html">Multiple cuts</a></li>
-<li class="toctree-l2"><a class="reference internal" href="REM.html">Readout error mitigation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="OtherObservables.html">Other than Z observables</a></li>
 </ul>
 </details></li>
@@ -328,6 +327,7 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-0-3-0">Version 0.3.0</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-0-2-4">Version 0.2.4</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-0-2-3">Version 0.2.3</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-0-2-2">Version 0.2.2</a></li>
@@ -350,6 +350,27 @@ document.write(`
                   
   <section id="changelog">
 <span id="changes"></span><h1>Changelog<a class="headerlink" href="#changelog" title="Link to this heading">#</a></h1>
+<section id="version-0-3-0">
+<h2>Version 0.3.0<a class="headerlink" href="#version-0-3-0" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><dl class="simple">
+<dt>Support for IQM Qiskit 17.8</dt><dd><ul>
+<li><p>Added support for IQM Qiskit 17.8.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p>Removed built in <code class="code docutils literal notranslate"><span class="pre">mitigate</span></code> flag</p></li>
+<li><p>Bug fixes</p></li>
+<li><dl class="simple">
+<dt>Remove old two qubit gate <code class="code docutils literal notranslate"><span class="pre">CutWire</span></code> operation</dt><dd><ul>
+<li><p>Users using the old method can consult documentation for migration help</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</section>
 <section id="version-0-2-4">
 <h2>Version 0.2.4<a class="headerlink" href="#version-0-2-4" title="Link to this heading">#</a></h2>
 <ul class="simple">
@@ -518,6 +539,7 @@ document.write(`
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-0-3-0">Version 0.3.0</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-0-2-4">Version 0.2.4</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-0-2-3">Version 0.2.3</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-0-2-2">Version 0.2.2</a></li>

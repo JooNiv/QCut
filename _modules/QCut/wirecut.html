@@ -29,7 +29,7 @@
 
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/sphinx-book-theme.css?v=eba8b062" />
-    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
@@ -162,7 +162,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../../Usage.html">Usage</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../Examples.html">Examples on using QCut</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../Multiple_cuts.html">Multiple cuts</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../REM.html">Readout error mitigation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../OtherObservables.html">Other than Z observables</a></li>
 </ul>
 </details></li>
@@ -295,7 +294,6 @@ document.write(`
 <span class="kn">from</span><span class="w"> </span><span class="nn">qiskit</span><span class="w"> </span><span class="kn">import</span> <span class="n">QuantumCircuit</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">qiskit.circuit</span><span class="w"> </span><span class="kn">import</span> <span class="n">CircuitInstruction</span><span class="p">,</span> <span class="n">Qubit</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_aer</span><span class="w"> </span><span class="kn">import</span> <span class="n">AerSimulator</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_experiments.library</span><span class="w"> </span><span class="kn">import</span> <span class="n">LocalReadoutError</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">QCut.cutcircuit</span><span class="w"> </span><span class="kn">import</span> <span class="n">CutCircuit</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">QCut.cutlocation</span><span class="w"> </span><span class="kn">import</span> <span class="n">CutLocation</span>
@@ -549,44 +547,6 @@ document.write(`
     <span class="k">return</span> <span class="n">CutCircuit</span><span class="p">(</span><span class="n">experiment_circuits</span><span class="p">),</span> <span class="n">coefficients</span><span class="p">,</span> <span class="n">id_meas</span><span class="p">[:</span><span class="n">num_id_meas</span><span class="p">]</span></div>
 
 
-
-<span class="k">def</span><span class="w"> </span><span class="nf">_run_mitigate</span><span class="p">(</span><span class="n">sub_result</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">],</span> <span class="n">shots</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">backend</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Run experiment circuits and apply readout error mitigation.&quot;&quot;&quot;</span>
-    <span class="n">numqubits_per_circ</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
-    <span class="k">for</span> <span class="n">res</span> <span class="ow">in</span> <span class="n">sub_result</span><span class="p">:</span>
-        <span class="n">measurements</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
-        <span class="n">circ_numqubits</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">measurements</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">))</span>
-        <span class="n">numqubits_per_circ</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">circ_numqubits</span><span class="p">)</span>
-
-    <span class="n">mitigators</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="n">circ_numqubits</span><span class="p">:</span> <span class="n">LocalReadoutError</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">circ_numqubits</span><span class="p">)))</span>
-        <span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">backend</span><span class="p">)</span>
-        <span class="o">.</span><span class="n">analysis_results</span><span class="p">(</span><span class="s2">&quot;Local Readout Mitigator&quot;</span><span class="p">)</span>
-        <span class="o">.</span><span class="n">value</span>
-        <span class="k">for</span> <span class="n">circ_numqubits</span> <span class="ow">in</span> <span class="n">numqubits_per_circ</span>
-    <span class="p">}</span>
-
-    <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">res</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">sub_result</span><span class="p">):</span>
-        <span class="n">measurements</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
-        <span class="n">circ_numqubits</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">measurements</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">))))</span>
-        <span class="n">mitigator</span> <span class="o">=</span> <span class="n">mitigators</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">circ_numqubits</span><span class="p">)]</span>
-        <span class="n">meas_bits</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">measurements</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
-        <span class="n">mitigated_quasi_probs</span> <span class="o">=</span> <span class="n">mitigator</span><span class="o">.</span><span class="n">quasi_probabilities</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
-        <span class="n">probs_test</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">old_key</span><span class="p">)</span><span class="si">:</span><span class="s2">0</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">circ_numqubits</span><span class="p">)</span><span class="si">}</span><span class="s2">b</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">][:</span><span class="n">meas_bits</span><span class="p">]</span>
-            <span class="o">+</span> <span class="s2">&quot; &quot;</span>
-            <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">old_key</span><span class="p">)</span><span class="si">:</span><span class="s2">0</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">circ_numqubits</span><span class="p">)</span><span class="si">}</span><span class="s2">b</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span>
-                <span class="n">meas_bits</span><span class="p">:</span>
-            <span class="p">]:</span> <span class="n">mitigated_quasi_probs</span><span class="p">[</span><span class="n">old_key</span><span class="p">]</span> <span class="o">*</span> <span class="n">shots</span>
-            <span class="k">if</span> <span class="n">mitigated_quasi_probs</span><span class="p">[</span><span class="n">old_key</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span>
-            <span class="k">else</span> <span class="mi">0</span>
-            <span class="k">for</span> <span class="n">old_key</span> <span class="ow">in</span> <span class="n">mitigated_quasi_probs</span>
-        <span class="p">}</span>
-
-        <span class="n">sub_result</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="n">probs_test</span>
-    <span class="k">return</span> <span class="n">sub_result</span>
-
-
 <div class="viewcode-block" id="run_experiments">
 <a class="viewcode-back" href="../../QCut.html#QCut.wirecut.run_experiments">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">run_experiments</span><span class="p">(</span>
@@ -595,7 +555,6 @@ document.write(`
     <span class="n">id_meas</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]],</span>
     <span class="n">shots</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="o">**</span><span class="mi">12</span><span class="p">,</span>
     <span class="n">backend</span><span class="p">:</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">mitigate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">TotalResult</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Run experiment circuits.</span>
 
@@ -611,7 +570,6 @@ document.write(`
 <span class="sd">        id_meas (list[int, int, int]): list of identity basis measurement locations</span>
 <span class="sd">        shots (int): number of shots per circuit run (optional)</span>
 <span class="sd">        backend: backend used for running the circuits (optional)</span>
-<span class="sd">        mitigate (bool): wether to use readout error mitigation or not (optional)</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        list[TotalResult]:</span>
@@ -639,9 +597,6 @@ document.write(`
             <span class="k">else</span> <span class="n">backend</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">shots</span><span class="o">=</span><span class="n">shots</span><span class="p">)</span><span class="o">.</span><span class="n">result</span><span class="p">()</span><span class="o">.</span><span class="n">get_counts</span><span class="p">()</span>
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">subcircuit_group</span>
         <span class="p">]</span>
-
-        <span class="k">if</span> <span class="n">mitigate</span><span class="p">:</span>
-            <span class="n">sub_result</span> <span class="o">=</span> <span class="n">_run_mitigate</span><span class="p">(</span><span class="n">sub_result</span><span class="p">,</span> <span class="n">shots</span><span class="p">,</span> <span class="n">backend</span><span class="p">)</span>
 
         <span class="n">results</span><span class="p">[</span><span class="n">count</span><span class="p">]</span> <span class="o">=</span> <span class="n">sub_result</span>
 
