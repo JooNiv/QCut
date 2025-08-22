@@ -27,6 +27,9 @@ dependencies = [
     "numpy",
     "qiskit-aer >= 0.13.0, < 0.15",
     "qiskit-iqm==17.8",
+    "ortools>=9.14.6206",
+    "pymetis>=2025.2.1",
+    "scikit-learn>=1.7.1",
 ]
 
 [dependency-groups]
