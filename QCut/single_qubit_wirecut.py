@@ -10,7 +10,6 @@ from qiskit.converters import circuit_to_dag, dag_to_circuit
 from qiskit_aer import AerSimulator
 
 from QCut.backend_utility import transpile_experiments
-from QCut.cutcircuit import CutCircuit
 from QCut.cutlocation import SingleQubitCutLocation
 from QCut.qcuterror import QCutError
 from QCut.wirecut import (
