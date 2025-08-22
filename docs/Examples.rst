@@ -6,5 +6,4 @@ Examples on using QCut
    :caption: Contents:
 
    Multiple_cuts
-   REM
    OtherObservables

@@ -98,7 +98,7 @@ def test_expectation_values() -> None:
         print(solution_index)
         # Calculate expectation values using the run method
         expvals = wc.run(
-            circ, sq.test_observables[solution_index], backend=sim, mitigate=False
+            circ, sq.test_observables[solution_index], backend=sim
         )
         # Check each calculated expectation value against the corresponding
         # expected value

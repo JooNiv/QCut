@@ -2,6 +2,15 @@
 Changelog
 =========
 
+Version 0.3.0
+=============
+- Support for IQM Qiskit 17.8
+    * Added support for IQM Qiskit 17.8.
+- Removed built in :code:`mitigate` flag
+- Bug fixes
+- Remove old two qubit gate :code:`CutWire` operation
+    * Users using the old method can consult documentation for migration help
+
 Version 0.2.4
 =============
 - Bugfix for incorrect partitioning for cases where there are multipe cuts on a single wire

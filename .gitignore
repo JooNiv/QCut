@@ -2,6 +2,9 @@
 __pycache__/
 *cache
 
+#Virtual environment
+.venv
+
 # Build and distribution directories
 build/
 dist/
@@ -25,3 +28,4 @@ htmlcov/
 # Test files
 test.ipynb
 test.py
+test_local/

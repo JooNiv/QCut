@@ -6,10 +6,11 @@ from __future__ import annotations
 
 import numpy as np
 from qiskit import QuantumCircuit, transpile
-from qiskit_experiments.library import LocalReadoutError
+
+from QCut.cutcircuit import CutCircuit
 
 
-def transpile_experiments(experiment_circuits: list, backend) -> list:
+def transpile_experiments(experiment_circuits: list | CutCircuit, backend) -> list:
     """
     Transpile experiment circuits.
 
@@ -21,7 +22,10 @@ def transpile_experiments(experiment_circuits: list, backend) -> list:
         list: A list of transpiled experiment circuits.
     """
 
-    return [
+    if isinstance(experiment_circuits, CutCircuit):
+        experiment_circuits = experiment_circuits.circuits
+
+    subexperiments = [
         [
             transpile(circuit, backend, layout_method="sabre", optimization_level=3)
             for circuit in circuit_group
@@ -29,9 +33,11 @@ def transpile_experiments(experiment_circuits: list, backend) -> list:
         for circuit_group in experiment_circuits
     ]
 
+    return CutCircuit(subexperiments)
+
 
 def run_and_expectation_value(
-    circuit: QuantumCircuit, backend, observables: list, shots: int, mitigate=False
+    circuit: QuantumCircuit, backend, observables: list, shots: int
 ) -> tuple[dict, list]:
     """Run circuit and calculate expectation value.
 
@@ -40,7 +46,6 @@ def run_and_expectation_value(
         backend: Backend to run circuit on.
         observables (list): Observables to calculate expectation values for.
         shots (int): Number of shots.
-        mitigate (bool): If True, use readout error mitigation.
 
     Returns:
         tuple: A tuple containing:
@@ -48,21 +53,7 @@ def run_and_expectation_value(
             - list: A list of expectation values.
     """
     counts = run_on_backend(circuit, backend, shots)
-    if mitigate:
-        q = list(counts.keys())
-        qs = list(range(len(q[0])))
-        exp = LocalReadoutError(qs)
-        exp.analysis.set_options(verbose=False)
-        result = exp.run(backend)
-        mitigator = result.analysis_results("Local Readout Mitigator").value
-        mitigated_quasi_probs = mitigator.quasi_probabilities(counts)
-        probs_test = {
-            f"{int(old_key):0{len(qs)}b}"[::-1]: mitigated_quasi_probs[old_key] * shots
-            if mitigated_quasi_probs[old_key] > 0
-            else 0
-            for old_key in mitigated_quasi_probs
-        }
-        counts = probs_test
+    
     exps = expectation_values(counts, observables, shots)
 
     return counts, exps

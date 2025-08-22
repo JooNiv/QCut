@@ -10,7 +10,6 @@ import numpy as np
 from qiskit import QuantumCircuit
 from qiskit.circuit import CircuitInstruction, Qubit
 from qiskit_aer import AerSimulator
-from qiskit_experiments.library import LocalReadoutError
 
 from QCut.cutcircuit import CutCircuit
 from QCut.cutlocation import CutLocation
@@ -255,51 +254,12 @@ def get_experiment_circuits(  # noqa: C901
         experiment_circuits.append(sub_experiment_circuits)
     return CutCircuit(experiment_circuits), coefficients, id_meas[:num_id_meas]
 
-
-def _run_mitigate(sub_result: list[tuple], shots: int, backend) -> list[tuple]:
-    """Run experiment circuits and apply readout error mitigation."""
-    numqubits_per_circ = set()
-    for res in sub_result:
-        measurements = list(res.keys())
-        circ_numqubits = len(measurements[0].replace(" ", ""))
-        numqubits_per_circ.add(circ_numqubits)
-
-    mitigators = {
-        circ_numqubits: LocalReadoutError(list(range(circ_numqubits)))
-        .run(backend)
-        .analysis_results("Local Readout Mitigator")
-        .value
-        for circ_numqubits in numqubits_per_circ
-    }
-
-    for ind, res in enumerate(sub_result):
-        measurements = list(res.keys())
-        circ_numqubits = list(range(len(measurements[0].replace(" ", ""))))
-        mitigator = mitigators[len(circ_numqubits)]
-        meas_bits = len(measurements[0].split(" ")[0])
-        mitigated_quasi_probs = mitigator.quasi_probabilities(res)
-        probs_test = {
-            f"{int(old_key):0{len(circ_numqubits)}b}"[::-1][:meas_bits]
-            + " "
-            + f"{int(old_key):0{len(circ_numqubits)}b}"[::-1][
-                meas_bits:
-            ]: mitigated_quasi_probs[old_key] * shots
-            if mitigated_quasi_probs[old_key] > 0
-            else 0
-            for old_key in mitigated_quasi_probs
-        }
-
-        sub_result[ind] = probs_test
-    return sub_result
-
-
 def run_experiments(
     experiment_circuits: CutCircuit,
     cut_locations: np.ndarray[CutLocation],
     id_meas: list[tuple[int, int, int]],
     shots: int = 2**12,
     backend: None = None,
-    mitigate: bool = False,
 ) -> list[TotalResult]:
     """Run experiment circuits.
 
@@ -315,7 +275,6 @@ def run_experiments(
         id_meas (list[int, int, int]): list of identity basis measurement locations
         shots (int): number of shots per circuit run (optional)
         backend: backend used for running the circuits (optional)
-        mitigate (bool): wether to use readout error mitigation or not (optional)
 
     Returns:
         list[TotalResult]:
@@ -343,9 +302,6 @@ def run_experiments(
             else backend.run(i, shots=shots).result().get_counts()
             for i in subcircuit_group
         ]
-
-        if mitigate:
-            sub_result = _run_mitigate(sub_result, shots, backend)
 
         results[count] = sub_result
 

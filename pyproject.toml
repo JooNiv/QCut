@@ -20,14 +20,25 @@ classifiers = [
     "License :: OSI Approved :: Apache Software License"
 ]
 
-requires-python = ">=3.9, < 3.12"
+requires-python = ">=3.10, < 3.13"
 
 dependencies = [
     "qiskit >= 0.45.3, < 1.2",
     "numpy",
     "qiskit-aer >= 0.13.0, < 0.15",
-    "qiskit-experiments == 0.7.0",
+    "qiskit-iqm==17.8",
 ]
+
+[dependency-groups]
+dev = [
+    "matplotlib>=3.10.5",
+    "notebook>=7.4.5",
+    "pylatexenc>=2.10",
+    "pytest>=8.4.1",
+    "pytest-cov>=6.2.1",
+    "ruff>=0.12.1",
+]
+
 
 [project.urls]
 homepage = "https://github.com/JooNiv/QCut"
@@ -86,8 +97,3 @@ docstring-code-line-length = "dynamic"
 
 [tool.pytest.ini_options]
 python_files = ["tests.py", "test_*.py"]
-
-[dependency-groups]
-dev = [
-    "pytest>=8.4.1",
-]
