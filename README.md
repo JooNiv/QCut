@@ -14,10 +14,7 @@
 
 # QCut
 
-QCut is a quantum circuit knitting package for performing wire cuts especially designed to not use reset gates or mid-circuit measurements since on early NISQ devices they pose significant errors, if available at all.
-
-QCut has been designed to work with IQM's qpus, and therefore on the Finnish Quantum Computing Infrastructure ([FiQCI](https://fiqci.fi/)), and tested with an IQM Adonis 5-qubit qpu. Additionally, QCut is built to be combatible with IQM’s Qiskit fork iqm_qiskit.
-
+QCut is a quantum circuit knitting package for gate cuts and resrtless wire cuts. QCut has been designed to work with IQM's qpus, and therefore on the Finnish Quantum Computing Infrastructure ([FiQCI](https://fiqci.fi/)), and tested with an IQM qpus. Additionally, QCut is built to be combatible with IQM’s Qiskit fork iqm_qiskit.
 
 QCut has been built at CSC - IT Center for Science (Finnish IT Center for Science).
 
@@ -26,18 +23,30 @@ Check out [jooniv.github.io/QCut/](https://jooniv.github.io/QCut/) for documenta
 # Installation
 
 **Pip:**  
-Installation should be done via `pip`
+Installation should be done via `uv`
 
-```python
-pip install QCut
+```bash
+uv pip install QCut
+#or
+uv add QCut
 ```
 
-Using pip is the recommended install method.
+Uv can be installed with
+
+```bash
+#Linux / mac
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+#Windows (piwershell)
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+```
 
 Note: for drawing circuits you might have to install pylatexenc. This can also be done with pip.
 
-```pyhton
-pip install pylatexenc
+```bash
+uv pip install pylatexenc
+#or
+uv add pylatexenc
 ```
 
 **Install from source**  
@@ -207,7 +216,10 @@ estimated_expectation_values = ck.run_cut_circuit(subcircuits, cut_locations, ob
 To use QCut with IQM's fake backends it is required to install [Qiskit IQM](https://github.com/iqm-finland/qiskit-on-iqm). QCut supports version 17.8. Installation can be done with pip:
 
 ```python
-pip install qiskit-iqm==17.8
+uv pip install qiskit-iqm==17.8
+#or
+uv add qiskit-iqm==17.8
+
 ```
 
 After installation just import the backend you want to use:
@@ -233,7 +245,7 @@ The docs are built with sphinx using the sphinx book theme. To build the docs:
 
 ```
 cd docs
-pip install -r requirements-docs.txt
+uv pip install -r requirements-docs.txt
 sphinx-build -v -b html . build/sphinx/html -W
 ```
 
