@@ -41,7 +41,7 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
 ```
 
-Note: for drawing circuits you might have to install pylatexenc. This can also be done with pip.
+Note: for drawing circuits you might have to install pylatexenc. This can also be done with uv.
 
 ```bash
 uv pip install pylatexenc
@@ -51,6 +51,16 @@ uv add pylatexenc
 
 **Install from source**  
 It is also possible to use QCut by cloning this repository and including it in your project folder.
+
+```bash
+cd QCut
+uv pip install .
+#or
+uv sync --no-dev
+
+#or with dev deps
+uv sync
+```
 
 # Usage
 
@@ -213,7 +223,7 @@ estimated_expectation_values = ck.run_cut_circuit(subcircuits, cut_locations, ob
 
 ## Running on IQM fake backends
 
-To use QCut with IQM's fake backends it is required to install [Qiskit IQM](https://github.com/iqm-finland/qiskit-on-iqm). QCut supports version 17.8. Installation can be done with pip:
+To use QCut with IQM's fake backends it is required to install [Qiskit IQM](https://github.com/iqm-finland/qiskit-on-iqm). QCut supports version 17.8. Installation can be done with uv:
 
 ```python
 uv pip install qiskit-iqm==17.8
