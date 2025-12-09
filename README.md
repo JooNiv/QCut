@@ -1,4 +1,18 @@
-## QCut
+- [QCut](#qcut)
+- [Installation](#installation)
+- [Usage](#usage)
+  - [Manual Usage](#manual-usage)
+  - [Usage shorthand](#usage-shorthand)
+  - [Automatic cuts](#automatic-cuts)
+  - [Running on IQM fake backends](#running-on-iqm-fake-backends)
+  - [Running on FiQCI](#running-on-fiqci)
+  - [Running on other hardware](#running-on-other-hardware)
+- [Documentation](#documentation)
+- [Acknowledgements](#acknowledgements)
+- [License](#license)
+
+
+# QCut
 
 QCut is a quantum circuit knitting package for performing wire cuts especially designed to not use reset gates or mid-circuit measurements since on early NISQ devices they pose significant errors, if available at all.
 
@@ -9,7 +23,7 @@ QCut has been built at CSC - IT Center for Science (Finnish IT Center for Scienc
 
 Check out [jooniv.github.io/QCut/](https://jooniv.github.io/QCut/) for documentation and more examples.
 
-## Installation
+# Installation
 
 **Pip:**  
 Installation should be done via `pip`
@@ -29,13 +43,15 @@ pip install pylatexenc
 **Install from source**  
 It is also possible to use QCut by cloning this repository and including it in your project folder.
 
-## Usage
+# Usage
+
+## Manual Usage
 
 **1: Import needed packages**
 
 ```python
 import QCut as ck
-from QCut import cut
+from QCut import cut, cutCZ
 from qiskit import QuantumCircuit
 from qiskit_aer import AerSimulator
 from qiskit_aer.primitives import Estimator
@@ -69,6 +85,22 @@ cut_circuit.cx(1,2)
 
 cut_circuit.draw("mpl")
 ```
+
+Or to use gate cuts one can do
+
+```python
+cut_circuit = QuantumCircuit(3)
+cut_circuit.h(0)
+cut_circuit.h(1)
+cut_circuit.append(cutCz, [0,1])
+cut_circuit.h(1)
+cut_circuit.cx(1,2)
+
+cut_circuit.draw("mpl")
+```
+
+**Note** that currently QCut only supports cutting Cz gates so transformation have to be done manually for the time being (hence the added H gates)
+
 
 ![](./docs/_static/images/circ2.png)
 
@@ -160,12 +192,22 @@ observables = [0,1,2, [0,2]]
 estimated_expectation_values = ck.run(cut_circuit, observables, backend)
 ```
 
-## Running on IQM fake backends
+## Automatic cuts
 
-To use QCut with IQM's fake backends it is required to install [Qiskit IQM](https://github.com/iqm-finland/qiskit-on-iqm). QCut supports version 15.6. Installation can be done with pip:
+QCut comes with functionality for automatically finding good cut locations that can place both wire and gate cuts.
 
 ```python
-pip install qiskit-iqm
+cut_locations, subcircuits, map_qubit = find_cuts(circuit , 3, cuts="both")
+estimated_expectation_values = ck.run_cut_circuit(subcircuits, cut_locations, observables, map_qubit, backend)
+```
+
+
+## Running on IQM fake backends
+
+To use QCut with IQM's fake backends it is required to install [Qiskit IQM](https://github.com/iqm-finland/qiskit-on-iqm). QCut supports version 17.8. Installation can be done with pip:
+
+```python
+pip install qiskit-iqm==17.8
 ```
 
 After installation just import the backend you want to use:
@@ -183,7 +225,9 @@ For running on real hardware through the Lumi supercomputer's FiQCI partition fo
 
 Running on other providers such as IBM is untested at the moment but as long as the hardware can be accessed with Qiskit QCut should be compatible.
 
-## Documentation
+# Documentation
+
+Check out [jooniv.github.io/QCut/](https://jooniv.github.io/QCut/) for documentation and more examples.
 
 The docs are built with sphinx using the sphinx book theme. To build the docs:
 
@@ -195,10 +239,10 @@ sphinx-build -v -b html . build/sphinx/html -W
 
 HTML files can then be found under `build/sphinx/html/`
 
-## Acknowledgements
+# Acknowledgements
 
 This project is built on top of [Qiskit](https://github.com/Qiskit/qiskit) which is licensed under the Apache 2.0 license.
 
-## License
+# License
 
 [Apache 2.0 license](https://github.com/JooNiv/QCut/blob/main/LICENSE)

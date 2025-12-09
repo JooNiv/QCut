@@ -9,9 +9,9 @@ from QCut.backend_utility import (
     transpile_experiments,
 )
 from QCut.helper import get_pauli_list
-from QCut.identity_qpd import identity_qpd
 from QCut.QCutFind import find_cuts
-from QCut.qpd_gates import cut
+from QCut.qpd import identity_qpd
+from QCut.qpd_gates import cut, cutCZ
 from QCut.single_qubit_wirecut import (
     get_locations_and_subcircuits,
     run,

@@ -1,20 +1,16 @@
 import rustworkx as rx
-from QCutFind.graph_circuit_utils import circ_to_graph
-from QCutFind.ilp import k_way_min_cut_cp_sat
-from QCutFind.kmeans import k_way_kmeans_partition
-from QCutFind.metis import k_way_metis_partition
-from QCutFind.refine import refine_cuts
-from QCutFind.spectral import (
-    k_way_spectral_partition,
-    k_way_spectral_partition_sk,
-)
-from qiskit import QuantumCircuit
+from qiskit import transpile
 from qiskit.circuit import CircuitInstruction
 
-from QCut import cut
+from QCut.QCutFind.graph_circuit_utils import circ_to_graph
+from QCut.QCutFind.metis import k_way_metis_partition
+from QCut.QCutFind.refine import refine_cuts
+from QCut.qpd_gates import cut, cutCZ
+from QCut.single_qubit_wirecut import get_locations_and_subcircuits
 
+BASIS_GATES = ["cz", "r"]
 
-def extract_cuts(graph, labels):
+def extract_cuts(graph, labels):  # noqa: C901
     cut_edges = []
 
     for u, v in graph.edge_list():
@@ -84,34 +80,20 @@ def add_cuts_to_circuit(circuit, cut_data, cut_data_test):
         ),
     )
 
-    gate_cut_ind = 0
     for ind, (i, j) in enumerate(zipped_data):
-        cutCZc = QuantumCircuit(1, name=f"cutCZc_{gate_cut_ind}").to_instruction()
-        cutCZt = QuantumCircuit(1, name=f"cutCZt_{gate_cut_ind}").to_instruction()
 
         if len(j) > 2:
-            # Remove the original operation at the specified index
+            # Remove the original operation at the specified index§
+            qubits = list(filter(lambda x: x is not None, [q if circuit.find_bit(q).index in j[2] else None for q in qctest.qubits]))
             target_index = i[2][0] + offset
             qctest.data.pop(target_index)
 
-            # Insert the first cut operation
+            # Insert the cut operation
             insert_or_append(
                 qctest,
                 target_index,
-                CircuitInstruction(cutCZc, [qctest.qubits[j[2][0]]]),
+                CircuitInstruction(cutCZ, qubits),
             )
-
-            # Insert the second cut operation
-            insert_or_append(
-                qctest,
-                target_index + 1,  # Adjust for the first insertion
-                CircuitInstruction(cutCZt, [qctest.qubits[j[2][1]]]),
-            )
-
-            # Increment offset to account for the two new instructions
-            offset += 1  # Only increment by 1 since one operation was removed and
-            # two were added
-            gate_cut_ind += 1
 
         else:
             # Find the correct index for the cut operation
@@ -131,25 +113,51 @@ def add_cuts_to_circuit(circuit, cut_data, cut_data_test):
     return qctest
 
 
-def find_cuts(
+def find_cuts(  # noqa: C901
     circuit,
     num_partitions=None,
     max_qubits=None,
     cuts="both",
-    method="spectral",
+    more_data = False
 ):
-    """
-    Find cuts in a quantum circuit and return a new circuit with cut operations 
-    inserted.
+    """Partition a quantum circuit into subcircuits by inserting cut operations.
+
+    Converts the input circuit into a graph representation and partitions it into the
+    specified number of subcircuits using METIS partitioning. Optionally refines the
+    partitioning to respect maximum qubit constraints per subcircuit. Cut operations
+    are inserted at the partition boundaries, and the resulting subcircuits and their
+    mappings are returned.
 
     Args:
-        circuit (QuantumCircuit): The input quantum circuit.
-        gate_cuts (bool): If True, use gate cuts and wire cuts; otherwise, use only 
-        wire cuts.
+        circuit (QuantumCircuit): The input quantum circuit to partition.
+        num_partitions (int, optional): Number of partitions to create. If None,
+            determined from max_qubits.
+        max_qubits (list[int], optional): Maximum number of qubits allowed in each
+            partition. If specified, must match num_partitions.
+        cuts (str, optional): Type of cuts to insert. Can be "both", "gate", or "wire".
+            Defaults to "both".
+        more_data (bool, optional): If True, returns additional data for debugging and
+            analysis. Defaults to False.
 
     Returns:
-        QuantumCircuit: A new quantum circuit with cut operations inserted.
+        tuple: If more_data is False, returns:
+            - list[list[int]]: Qubit locations for each subcircuit.
+            - list[QuantumCircuit]: List of subcircuits after cuts.
+            - list[dict]: Mapping of qubits for each subcircuit.
+        If more_data is True, returns:
+            - list[list[int]]: Qubit locations for each subcircuit.
+            - list[QuantumCircuit]: List of subcircuits after cuts.
+            - list[dict]: Mapping of qubits for each subcircuit.
+            - QuantumCircuit: The circuit with cuts inserted.
+            - list: Data describing the cuts.
+            - list: Additional cut data for testing.
+            - dict: Partition labels for each node.
+            - rustworkx.PyGraph: The graph representation of the circuit.
+            - dict: Mapping of nodes to qubits.
     """
+
+    if (max_qubits and len(max_qubits) < 2) or num_partitions < 2:
+        raise ValueError("Number of partitions has to be atleast 2")
 
     if num_partitions is None and max_qubits is not None:
         num_partitions = len(max_qubits)
@@ -158,29 +166,30 @@ def find_cuts(
     elif num_partitions is not None and max_qubits is not None:
         if len(max_qubits) != num_partitions:
             raise ValueError(
-                "If both num_partitions and max_qubits are specified, length of" \
+                "If both num_partitions and max_qubits are specified, length of"
                 "max_qubits must match num_partitions."
             )
 
     if num_partitions < 1:
         raise ValueError(
-            "max_qubits_per_circuit must be less than the number of qubits in the" \
+            "max_qubits_per_circuit must be less than the number of qubits in the"
             "circuit."
         )
     if num_partitions == 1:
         return circuit, [], []
 
-    gate_cut_weight = 3 if (cuts == "both" or cuts == "gate") else 1000000000
-    wire_cut_weight = 4 if (cuts == "both" or cuts == "wire") else 1000000000
-    import time
+    gate_cut_weight = 3 if (cuts == "both" or cuts == "gate") else 100000000000
+    wire_cut_weight = 4 if (cuts == "both" or cuts == "wire") else 100000000000
+    
+    circuit.remove_final_measurements()
 
-    start = time.time()
+    circuit = transpile(circuit, basis_gates=BASIS_GATES)
+
     graph, nodes_on_qubit = circ_to_graph(
         circuit, gateCutWeight=gate_cut_weight, wireCutWeight=wire_cut_weight
     )
 
     components = rx.connected_components(graph)
-    print(f"Components found {len(components)}: ", components)
     labels = {}
     if len(components) == num_partitions:
         for comp_ind, comp in enumerate(components):
@@ -188,39 +197,11 @@ def find_cuts(
                 labels[node] = comp_ind
         return circuit, [], [], labels, graph, nodes_on_qubit
 
-    print("Circ to graph took: ", time.time() - start)
+    labels = k_way_metis_partition(graph, num_partitions)
 
-    print(len(graph.nodes()), "nodes in graph")
-    print(len(graph.edges()), "edges in graph")
-
-    start = time.time()
-    if method == "metis":
-        labels = k_way_metis_partition(graph, num_partitions)
-    elif method == "spectral":
-        labels = k_way_spectral_partition(graph, num_partitions)
-    elif method == "spectral_sk":
-        labels = k_way_spectral_partition_sk(graph, num_partitions)
-    elif method == "kmeans":
-        labels = k_way_kmeans_partition(graph, num_partitions)
-    elif method == "ilp":
-        labels = k_way_min_cut_cp_sat(graph, num_partitions)
-    else:
-        raise ValueError(
-            "Invalid method. Existing methods: 'metis', 'spectral', 'spectral_sk'," \
-            "'kmeans', or 'ilp'."
-        )
-
-    print("Partitioning took: ", time.time() - start)
-
-    start = time.time()
     cut_data, cut_data_test = extract_cuts(graph, labels)
-    print("Extracting took: ", time.time() - start)
-
-    print("Initial labels: ", labels)
 
     if max_qubits is not None:
-        print("Refining:")
-        start = time.time()
         cut_data, cut_data_test, labels = refine_cuts(
             cut_data,
             cut_data_test,
@@ -229,33 +210,15 @@ def find_cuts(
             max_qubits,
             nodes_on_qubit,
             circuit,
-            onlywire=False,
+            cuts
         )
-        print("Refining took: ", time.time() - start)
-    else:
-        print("No refinement needed, max_qubits is None.")
 
-    """per_partition = qubits_per_partition(graph, labels)
-
-    start = time.time()
-    cut_data, cut_data_test = extract_cuts(graph, labels)
-    print("Extracting took: ", time.time() - start)
-
-
-    if max_qubits is not None:
-        start = time.time()
-        res = give_receive_qubits(per_partition, max_qubits)
-        givers = [{key: abs(value["receive"])}
-                for key, value in res.items() if value["receive"] < 0]
-        
-        if len(givers) > 0:
-            cut_data, cut_data_test, labels = refine_cuts(circuit, nodes_on_qubit, 
-            cut_data, cut_data_test, labels, graph, max_qubits, verbose=True)
-        print("Refining cuts took: ", time.time() - start)
-        print("Refined labels: ", labels)"""
-
-    start = time.time()
     cut_circuit = add_cuts_to_circuit(circuit, cut_data, cut_data_test)
-    print("Adding cuts took: ", time.time() - start)
 
-    return cut_circuit, cut_data, cut_data_test, labels, graph, nodes_on_qubit
+    qss, circs, map_qubits = get_locations_and_subcircuits(cut_circuit)
+
+    if not more_data:
+        return qss, circs, map_qubits
+    else:
+        return (qss, circs, map_qubits, cut_circuit, cut_data, cut_data_test, labels, 
+                graph, nodes_on_qubit)

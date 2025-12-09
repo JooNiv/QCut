@@ -37,7 +37,7 @@ Basic usage
 .. code:: python
 
    import QCut as ck
-   from QCut import cut
+   from QCut import cut, cutCZ
    from qiskit import QuantumCircuit
    from qiskit_aer import AerSimulator
    from qiskit_aer.primitives import Estimator
@@ -57,7 +57,7 @@ Basic usage
 
 .. image:: _static/images/circ1.png
 
-**3: Insert cut_wire operations to the circuit to denote where we want
+**3: Insert cuts to the circuit to denote where we want
 to cut the circuit**
 
 Note that here we don’t insert any measurements. Measurements will be
@@ -74,6 +74,23 @@ automatically handled by QCut.
    cut_circuit.draw("mpl")
 
 .. image:: _static/images/circ2.png
+
+
+Alternatively one can use gate cuts.
+
+.. code:: python
+
+   cut_circuit = QuantumCircuit(3)
+   cut_circuit.h(0)
+   cut_circuit.h(1)
+   cut_circuit.append(cutCZ, [0,1])
+   cut_circuit.h(1)
+   cut_circuit.cx(1,2)
+
+   cut_circuit.draw("mpl")
+
+**Note** that currently QCut only supports cutting Cz gates so transformation have to be done manually for the time being (hence the added H gates)
+
 
 **4. Extract cut locations from cut_circuit and split it into
 independent subcircuit.**
@@ -182,16 +199,27 @@ The same example can then be run like this:
 
    estimated_expectation_values = ck.run(cut_circuit, observables, backend)
 
+Automatic cuts
+--------------
+
+QCut comes with functionality for automatically finding good cut locations that can place both wire and gate cuts.
+
+.. code:: python
+
+   cut_locations, subcircuits, map_qubit = find_cuts(circuit , 3, cuts="both")
+   estimated_expectation_values = ck.run_cut_circuit(subcircuits, cut_locations, observables, map_qubit, backend)
+
+
 Running on IQM fake backends
 ----------------------------
 
 To use QCut with IQM’s fake backends it is required to install `Qiskit
 IQM <https://github.com/iqm-finland/qiskit-on-iqm>`__. QCut supports
-version 15.6. Installation can be done with pip:
+version 17.8. Installation can be done with pip:
 
 .. code:: python
 
-   pip install qiskit-iqm
+   pip install qiskit-iqm==17.8
 
 After installation just import the backend you want to use:
 

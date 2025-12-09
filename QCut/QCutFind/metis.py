@@ -3,7 +3,8 @@ from collections import defaultdict
 import numpy as np
 import pymetis
 import rustworkx as rx
-from QCutFind.graph_circuit_utils import weight_fn
+
+from QCut.QCutFind.graph_circuit_utils import weight_fn
 
 
 def build_csr(graph: rx.PyGraph, weight_fn):
@@ -39,7 +40,7 @@ def build_csr(graph: rx.PyGraph, weight_fn):
 
 def k_way_metis_partition(graph: rx.PyGraph, k: int):
     n = graph.num_nodes()
-    
+
     xadj, adjncy, eweights = build_csr(graph, weight_fn)
 
     options = pymetis.Options(
@@ -68,5 +69,5 @@ def k_way_metis_partition(graph: rx.PyGraph, k: int):
         None,  # contiguous
         options,  # options
     )
-    
+
     return {i: parts[i] for i in range(n)}

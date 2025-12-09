@@ -23,7 +23,7 @@ def extra_wire_cuts(circuit, max_qubits, cut_data_test):
     return max(0, num_wire_cuts - num_allowed_wire_cuts)
 
 
-def revert_wire_cut_cost(graph, cut_data_test, cut_data):
+def revert_wire_cut_cost(graph, cut_data_test, cut_data):  # noqa: C901
     wirecuts = [x for x in zip(cut_data, cut_data_test) if len(x[1]) == 2]
 
     wirecuts.sort(key=lambda x: x[1][0])
@@ -78,6 +78,7 @@ def revert_wire_cut_cost(graph, cut_data_test, cut_data):
             if len(filtered) == 0:
                 raise RuntimeError(
                     "No valid neighbours found for filtered list; cannot proceed."
+                    "If you encounter this open an issue in github"
                 )
 
             rightNode = leftNode
@@ -129,7 +130,8 @@ def revert_wire_cuts(
             if x[2] not in cut_data_test:
                 cut_data_test.append(x[2])
                 cut_data.append(x)
-            # Should be able to somehow make the below work to get rid of redundant cuts TODO
+            # Should be able to somehow make the below work to get rid of redundant
+            # cuts TODO
             """else:
                 if x[0] in nodes_on_qubit[wirecut["data"][1][0]] or x[1] in 
                 nodes_on_qubit[wirecut["data"][1][0]]:
@@ -138,7 +140,6 @@ def revert_wire_cuts(
                     ind_var = x if x in cut_data else (x[1], x[0], x[2])
                     ind = zipped.index((ind_var, x[2]))
                     #continue
-                    print("Removing from cut_data: ", x)
                     #if x in cut_data:
                     #    cut_data.pop(ind)
                     #else:
@@ -146,7 +147,6 @@ def revert_wire_cuts(
                     cut_data.pop(ind)
                     cut_data_test.pop(ind)
                 else:
-                    print("Continuing without changes")
                     continue"""
 
         for i in to_flip:
@@ -172,7 +172,7 @@ def give_receive_qubits(qubits_per_partition, max_qubits):
     return res
 
 
-def swap_qubits(
+def swap_qubits(  # noqa: C901
     graph, cut_data_test, cut_data, receivers, givers, labels, nodes_on_qubit
 ):
     """
@@ -186,7 +186,6 @@ def swap_qubits(
     from collections import Counter
 
     def is_gate_edge(e):
-        # gate edges have len(data) > 2 as per the codebase
         return len(e[2]) > 2
 
     def edge_in_cuts(e):
@@ -209,9 +208,6 @@ def swap_qubits(
         zipped = list(zip(cut_data, cut_data_test))
         ind_var = (u, v, d) if (u, v, d) in cut_data else (v, u, d)
         ind = zipped.index((ind_var, d))
-        # ind = cut_data.index((u, v, d)) if (u, v, d) in cut_data 
-        # else cut_data.index((v, u, d))
-
         cut_data.pop(ind)
         cut_data_test.pop(ind)
 
@@ -229,11 +225,11 @@ def swap_qubits(
         owner, _ = cnt.most_common(1)[0]
         qubit_owner[q] = owner
 
-    # Gather gate edges touching a set of nodes (both in and out, unique by 
+    # Gather gate edges touching a set of nodes (both in and out, unique by
     # unordered endpoints)
     def gate_edges_touching_nodes(nodes):
         nodes_set = set(nodes)
-        seen_pairs = set()  # (min(u,v), max(u,v))
+        seen_pairs = set()
         res = []
         for n in nodes_set:
             # Combine in_edges/out_edges, filter by gate edges, deduplicate
@@ -253,7 +249,7 @@ def swap_qubits(
                         res.append((u, v, d))
         return res
 
-    # Compute delta in number of gate cuts if we relabel all nodes on 'nodes' 
+    # Compute delta in number of gate cuts if we relabel all nodes on 'nodes'
     # to 'to_label'
     def delta_cuts_for_qubit(nodes, to_label):
         nodes_set = set(nodes)
@@ -341,7 +337,7 @@ def swap_qubits(
 
         give[giver_label] = remaining
 
-    # Rebuild receivers list in-place to reflect updated deficits (optional)
+    # Rebuild receivers list in-place to reflect updated deficits
     receivers[:] = [{k: v} for k, v in recv.items() if v > 0]
 
 
@@ -353,14 +349,18 @@ def refine_cuts(
     max_qubits,
     nodes_on_qubit,
     circuit,
-    onlywire=False,
+    cuts
 ):
     if len(cut_data_in) == 0 or len(cut_data_test_in) == 0:
         return cut_data_in, cut_data_test_in, labels_in
     cut_data_loc = cut_data_in.copy()
     cut_data_test_loc = cut_data_test_in.copy()
     labels_loc = labels_in.copy()
-    extra_wire_cuts_val = extra_wire_cuts(circuit, max_qubits, cut_data_test_loc)
+    if cuts == "gate":
+        #remove all wirecuts that slipped through
+        extra_wire_cuts_val = len([i for i in cut_data_test_loc if len(i) == 2])
+    else:
+        extra_wire_cuts_val = extra_wire_cuts(circuit, max_qubits, cut_data_test_loc)
 
     if extra_wire_cuts_val > 0:
         cost = revert_wire_cut_cost(graph, cut_data_test_loc, cut_data_loc)
@@ -386,16 +386,15 @@ def refine_cuts(
         for key, value in res.items()
         if value["receive"] < 0
     ]
-    if not onlywire:
-        swap_qubits(
-            graph,
-            cut_data_test_loc,
-            cut_data_loc,
-            receivers,
-            givers,
-            labels_loc,
-            nodes_on_qubit,
-        )
+    swap_qubits(
+        graph,
+        cut_data_test_loc,
+        cut_data_loc,
+        receivers,
+        givers,
+        labels_loc,
+        nodes_on_qubit,
+    )
 
     zipped_data = list(zip(cut_data_test_loc, cut_data_loc))
 

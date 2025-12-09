@@ -87,7 +87,8 @@ def combine_subcircuits(subcircuits):
 
 def construct_final_subcircuits(subcircuits, max_qubits):
     if len(subcircuits) <= len(max_qubits):
-        # If the number of subcircuits matches the number of max_qubits, return them as is
+        # If the number of subcircuits matches the number of max_qubits, return 
+        # them as is
         return subcircuits
     groups = group_circuits(subcircuits, max_qubits)
     final_subcircuits = []

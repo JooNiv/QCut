@@ -1,8 +1,4 @@
-from QCutFind.cut_finding import find_cuts
+from QCut.QCutFind.combine_subcircuits import construct_final_subcircuits
+from QCut.QCutFind.cut_finding import find_cuts
 
-from QCutFind.combine_subcircuits import construct_final_subcircuits
-
-__all__ = [
-    "find_cuts",
-    "construct_final_subcircuits"
-]
+__all__ = ["find_cuts", "construct_final_subcircuits"]
