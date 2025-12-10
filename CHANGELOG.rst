@@ -2,7 +2,7 @@
 Changelog
 =========
 
-Version 0.8.0
+Version 0.6.0
 =============
 - Support cutting CZ gates
     * Added support for cutting CZ gates in addition wire cuts.
@@ -11,6 +11,8 @@ Version 0.8.0
     * Added :code:`QCutFind` module for automatically finding good cut locations in a circuit.
     * Check documentation for details on how to use.
 - Bug fixes
+- Drop windows support for the time being due to METIS issues
+    * Windows users should use WSL
 
 Version 0.3.0
 =============
