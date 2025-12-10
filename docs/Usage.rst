@@ -16,14 +16,18 @@ Science (Finnish IT Center for Science).
 Installation
 ------------
 
+For installation a UNIX-like system is currently needed due to pymetis being used for automatic cut finding. On Windows use WSL
+
 | **Pip:**
-| Installation should be done via ``pip``
+| Installation should be done via ``uv``
 
-.. code:: python
+.. code:: bash
 
-   pip install QCut
+   uv pip install QCut
+   #or
+   uv add QCut
 
-Using pip is the recommended install method.
+Using uv is the recommended install method.
 
 | **Install from source**
 | It is also possible to use QCut by cloning this repository and
@@ -215,11 +219,14 @@ Running on IQM fake backends
 
 To use QCut with IQM’s fake backends it is required to install `Qiskit
 IQM <https://github.com/iqm-finland/qiskit-on-iqm>`__. QCut supports
-version 17.8. Installation can be done with pip:
+version 17.8. Installation can be done with uv:
 
-.. code:: python
+.. code:: bash
 
-   pip install qiskit-iqm==17.8
+   uv pip install qiskit-iqm==17.8
+   #or
+   uv add qiskit-iqm==17.8
+
 
 After installation just import the backend you want to use:
 

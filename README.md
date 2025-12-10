@@ -22,6 +22,8 @@ Check out [jooniv.github.io/QCut/](https://jooniv.github.io/QCut/) for documenta
 
 # Installation
 
+For installation a UNIX-like system is currently needed due to pymetis being used for automatic cut finding. On Windows use WSL
+
 **Pip:**  
 Installation should be done via `uv`
 
@@ -36,9 +38,6 @@ Uv can be installed with
 ```bash
 #Linux / mac
 curl -LsSf https://astral.sh/uv/install.sh | sh
-
-#Windows (piwershell)
-powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
 ```
 
 Note: for drawing circuits you might have to install pylatexenc. This can also be done with uv.
@@ -225,7 +224,7 @@ estimated_expectation_values = ck.run_cut_circuit(subcircuits, cut_locations, ob
 
 To use QCut with IQM's fake backends it is required to install [Qiskit IQM](https://github.com/iqm-finland/qiskit-on-iqm). QCut supports version 17.8. Installation can be done with uv:
 
-```python
+```bash
 uv pip install qiskit-iqm==17.8
 #or
 uv add qiskit-iqm==17.8
@@ -253,7 +252,7 @@ Check out [jooniv.github.io/QCut/](https://jooniv.github.io/QCut/) for documenta
 
 The docs are built with sphinx using the sphinx book theme. To build the docs:
 
-```
+```bash
 cd docs
 uv pip install -r requirements-docs.txt
 sphinx-build -v -b html . build/sphinx/html -W
