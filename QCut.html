@@ -162,6 +162,9 @@
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="Usage.html">Usage</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="Examples.html">Examples on using QCut</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="WireCuts.html">Wire cuts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="GateCuts.html">Gate cuts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="AutomaticCuts.html">Automatic cuts</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Multiple_cuts.html">Multiple cuts</a></li>
 <li class="toctree-l2"><a class="reference internal" href="OtherObservables.html">Other than Z observables</a></li>
 </ul>
@@ -342,18 +345,34 @@ document.write(`
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-QCut.qpd_gates">QCut.qpd_gates module</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-QCut.identity_qpd">QCut.identity_qpd module</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-QCut.identity_qpd">QCut.identity_qpd module</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.identity_qpd.append"><code class="docutils literal notranslate"><span class="pre">append()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.identity_qpd.clear"><code class="docutils literal notranslate"><span class="pre">clear()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.identity_qpd.copy"><code class="docutils literal notranslate"><span class="pre">copy()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.identity_qpd.count"><code class="docutils literal notranslate"><span class="pre">count()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.identity_qpd.extend"><code class="docutils literal notranslate"><span class="pre">extend()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.identity_qpd.index"><code class="docutils literal notranslate"><span class="pre">index()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.identity_qpd.insert"><code class="docutils literal notranslate"><span class="pre">insert()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.identity_qpd.pop"><code class="docutils literal notranslate"><span class="pre">pop()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.identity_qpd.remove"><code class="docutils literal notranslate"><span class="pre">remove()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.identity_qpd.reverse"><code class="docutils literal notranslate"><span class="pre">reverse()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.identity_qpd.sort"><code class="docutils literal notranslate"><span class="pre">sort()</span></code></a></li>
+</ul>
+</li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-QCut.wirecut">QCut.wirecut module</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.wirecut.estimate_expectation_values"><code class="docutils literal notranslate"><span class="pre">estimate_expectation_values()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.wirecut.get_experiment_circuits"><code class="docutils literal notranslate"><span class="pre">get_experiment_circuits()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.wirecut.get_placeholder_locations"><code class="docutils literal notranslate"><span class="pre">get_placeholder_locations()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.wirecut.get_qpd_combinations"><code class="docutils literal notranslate"><span class="pre">get_qpd_combinations()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.wirecut.insert_cz_cut_qpd"><code class="docutils literal notranslate"><span class="pre">insert_cz_cut_qpd()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.wirecut.insert_wire_cut_qpd"><code class="docutils literal notranslate"><span class="pre">insert_wire_cut_qpd()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.wirecut.run_experiments"><code class="docutils literal notranslate"><span class="pre">run_experiments()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-QCut">Module contents</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.estimate_expectation_values"><code class="docutils literal notranslate"><span class="pre">estimate_expectation_values()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.expectation_values"><code class="docutils literal notranslate"><span class="pre">expectation_values()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.find_cuts"><code class="docutils literal notranslate"><span class="pre">find_cuts()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.get_experiment_circuits"><code class="docutils literal notranslate"><span class="pre">get_experiment_circuits()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.get_locations_and_subcircuits"><code class="docutils literal notranslate"><span class="pre">get_locations_and_subcircuits()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.get_pauli_list"><code class="docutils literal notranslate"><span class="pre">get_pauli_list()</span></code></a></li>
@@ -531,7 +550,83 @@ and approximate values.</p>
 </section>
 <section id="module-QCut.identity_qpd">
 <span id="qcut-identity-qpd-module"></span><h2>QCut.identity_qpd module<a class="headerlink" href="#module-QCut.identity_qpd" title="Link to this heading">#</a></h2>
-<p>Define identity channel quasi probability decomposition.</p>
+<p>Built-in mutable sequence.</p>
+<p>If no argument is given, the constructor creates a new empty list.
+The argument must be an iterable if specified.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="QCut.identity_qpd.append">
+<span class="sig-prename descclassname"><span class="pre">QCut.identity_qpd.</span></span><span class="sig-name descname"><span class="pre">append</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">object</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#QCut.identity_qpd.append" title="Link to this definition">#</a></dt>
+<dd><p>Append object to the end of the list.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QCut.identity_qpd.clear">
+<span class="sig-prename descclassname"><span class="pre">QCut.identity_qpd.</span></span><span class="sig-name descname"><span class="pre">clear</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#QCut.identity_qpd.clear" title="Link to this definition">#</a></dt>
+<dd><p>Remove all items from list.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QCut.identity_qpd.copy">
+<span class="sig-prename descclassname"><span class="pre">QCut.identity_qpd.</span></span><span class="sig-name descname"><span class="pre">copy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#QCut.identity_qpd.copy" title="Link to this definition">#</a></dt>
+<dd><p>Return a shallow copy of the list.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QCut.identity_qpd.count">
+<span class="sig-prename descclassname"><span class="pre">QCut.identity_qpd.</span></span><span class="sig-name descname"><span class="pre">count</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#QCut.identity_qpd.count" title="Link to this definition">#</a></dt>
+<dd><p>Return number of occurrences of value.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QCut.identity_qpd.extend">
+<span class="sig-prename descclassname"><span class="pre">QCut.identity_qpd.</span></span><span class="sig-name descname"><span class="pre">extend</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">iterable</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#QCut.identity_qpd.extend" title="Link to this definition">#</a></dt>
+<dd><p>Extend list by appending elements from the iterable.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QCut.identity_qpd.index">
+<span class="sig-prename descclassname"><span class="pre">QCut.identity_qpd.</span></span><span class="sig-name descname"><span class="pre">index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">9223372036854775807</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#QCut.identity_qpd.index" title="Link to this definition">#</a></dt>
+<dd><p>Return first index of value.</p>
+<p>Raises ValueError if the value is not present.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QCut.identity_qpd.insert">
+<span class="sig-prename descclassname"><span class="pre">QCut.identity_qpd.</span></span><span class="sig-name descname"><span class="pre">insert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">object</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#QCut.identity_qpd.insert" title="Link to this definition">#</a></dt>
+<dd><p>Insert object before index.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QCut.identity_qpd.pop">
+<span class="sig-prename descclassname"><span class="pre">QCut.identity_qpd.</span></span><span class="sig-name descname"><span class="pre">pop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#QCut.identity_qpd.pop" title="Link to this definition">#</a></dt>
+<dd><p>Remove and return item at index (default last).</p>
+<p>Raises IndexError if list is empty or index is out of range.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QCut.identity_qpd.remove">
+<span class="sig-prename descclassname"><span class="pre">QCut.identity_qpd.</span></span><span class="sig-name descname"><span class="pre">remove</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#QCut.identity_qpd.remove" title="Link to this definition">#</a></dt>
+<dd><p>Remove first occurrence of value.</p>
+<p>Raises ValueError if the value is not present.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QCut.identity_qpd.reverse">
+<span class="sig-prename descclassname"><span class="pre">QCut.identity_qpd.</span></span><span class="sig-name descname"><span class="pre">reverse</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#QCut.identity_qpd.reverse" title="Link to this definition">#</a></dt>
+<dd><p>Reverse <em>IN PLACE</em>.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QCut.identity_qpd.sort">
+<span class="sig-prename descclassname"><span class="pre">QCut.identity_qpd.</span></span><span class="sig-name descname"><span class="pre">sort</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reverse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#QCut.identity_qpd.sort" title="Link to this definition">#</a></dt>
+<dd><p>Sort the list in ascending order and return None.</p>
+<p>The sort is in-place (i.e. the list itself is modified) and stable (i.e. the
+order of two equal elements is maintained).</p>
+<p>If a key function is given, apply it once to each list item and sort them,
+ascending or descending, according to their function values.</p>
+<p>The reverse flag can be set to sort in descending order.</p>
+</dd></dl>
+
 </section>
 <section id="module-QCut.wirecut">
 <span id="qcut-wirecut-module"></span><h2>QCut.wirecut module<a class="headerlink" href="#module-QCut.wirecut" title="Link to this heading">#</a></h2>
@@ -575,7 +670,7 @@ measure/initialize nodes.</p>
 taking the product of all coefficients in the current qpd row. Loop through
 subcircuits generated in 4. Make deepcopy of subcircuit and iterate over its
 circuit data. When hit either Meas_{ind} of Init_{ind} repace it with operation
-found in qpd[ind][“op”/”init”]. WHile generating experiment circuits also
+found in qpd[ind][“op_0”/”op_1”]. WHile generating experiment circuits also
 generate a list of locations that have an identity basis measurement. These
 measurement outcomes need to be added during post-processing. Locations added as
 [index of experiment circuit, index of subcircuit, index of classical bit
@@ -657,6 +752,16 @@ be inserted to generate the experiment circuits.</p>
 </dd>
 </dl>
 </dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QCut.wirecut.insert_cz_cut_qpd">
+<span class="sig-prename descclassname"><span class="pre">QCut.wirecut.</span></span><span class="sig-name descname"><span class="pre">insert_cz_cut_qpd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ind</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">op</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subcircuit</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qpd_qubits</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qpd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_meas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_id_meas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_meas_experiment_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_meas_subcircuit_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_meas_bit</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">classical_bit_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inserted_operations</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QCut/wirecut.html#insert_cz_cut_qpd"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.wirecut.insert_cz_cut_qpd" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QCut.wirecut.insert_wire_cut_qpd">
+<span class="sig-prename descclassname"><span class="pre">QCut.wirecut.</span></span><span class="sig-name descname"><span class="pre">insert_wire_cut_qpd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ind</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">op</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subcircuit</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qpd_qubits</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qpd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_meas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_id_meas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_meas_experiment_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_meas_subcircuit_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_meas_bit</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">classical_bit_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inserted_operations</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QCut/wirecut.html#insert_wire_cut_qpd"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.wirecut.insert_wire_cut_qpd" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="QCut.wirecut.run_experiments">
@@ -745,6 +850,58 @@ be an integer (index of a single qubit) or a list of integers
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="QCut.find_cuts">
+<span class="sig-prename descclassname"><span class="pre">QCut.</span></span><span class="sig-name descname"><span class="pre">find_cuts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">circuit</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_partitions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_qubits</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cuts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'both'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">more_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QCut/QCutFind/cut_finding.html#find_cuts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.find_cuts" title="Link to this definition">#</a></dt>
+<dd><p>Partition a quantum circuit into subcircuits by inserting cut operations.</p>
+<p>Converts the input circuit into a graph representation and partitions it into the
+specified number of subcircuits using METIS partitioning. Optionally refines the
+partitioning to respect maximum qubit constraints per subcircuit. Cut operations
+are inserted at the partition boundaries, and the resulting subcircuits and their
+mappings are returned.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>circuit</strong> (<em>QuantumCircuit</em>) – The input quantum circuit to partition.</p></li>
+<li><p><strong>num_partitions</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of partitions to create. If None,
+determined from max_qubits.</p></li>
+<li><p><strong>max_qubits</strong> (<em>list</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – Maximum number of qubits allowed in each
+partition. If specified, must match num_partitions.</p></li>
+<li><p><strong>cuts</strong> (<em>str</em><em>, </em><em>optional</em>) – Type of cuts to insert. Can be “both”, “gate”, or “wire”.
+Defaults to “both”.</p></li>
+<li><p><strong>more_data</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, returns additional data for debugging and
+analysis. Defaults to False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>If more_data is False, returns:</dt><dd><ul class="simple">
+<li><p>list[list[int]]: Qubit locations for each subcircuit.</p></li>
+<li><p>list[QuantumCircuit]: List of subcircuits after cuts.</p></li>
+<li><p>list[dict]: Mapping of qubits for each subcircuit.</p></li>
+</ul>
+</dd>
+<dt>If more_data is True, returns:</dt><dd><ul class="simple">
+<li><p>list[list[int]]: Qubit locations for each subcircuit.</p></li>
+<li><p>list[QuantumCircuit]: List of subcircuits after cuts.</p></li>
+<li><p>list[dict]: Mapping of qubits for each subcircuit.</p></li>
+<li><p>QuantumCircuit: The circuit with cuts inserted.</p></li>
+<li><p>list: Data describing the cuts.</p></li>
+<li><p>list: Additional cut data for testing.</p></li>
+<li><p>dict: Partition labels for each node.</p></li>
+<li><p>rustworkx.PyGraph: The graph representation of the circuit.</p></li>
+<li><p>dict: Mapping of nodes to qubits.</p></li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="QCut.get_experiment_circuits">
 <span class="sig-prename descclassname"><span class="pre">QCut.</span></span><span class="sig-name descname"><span class="pre">get_experiment_circuits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subcircuits</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">QuantumCircuit</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cut_locations</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">CutLocation</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">CutCircuit</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/QCut/wirecut.html#get_experiment_circuits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.get_experiment_circuits" title="Link to this definition">#</a></dt>
 <dd><p>Generate experiment circuits by inserting QPD operations on
@@ -753,7 +910,7 @@ measure/initialize nodes.</p>
 taking the product of all coefficients in the current qpd row. Loop through
 subcircuits generated in 4. Make deepcopy of subcircuit and iterate over its
 circuit data. When hit either Meas_{ind} of Init_{ind} repace it with operation
-found in qpd[ind][“op”/”init”]. WHile generating experiment circuits also
+found in qpd[ind][“op_0”/”op_1”]. WHile generating experiment circuits also
 generate a list of locations that have an identity basis measurement. These
 measurement outcomes need to be added during post-processing. Locations added as
 [index of experiment circuit, index of subcircuit, index of classical bit
@@ -791,7 +948,7 @@ due to identity basis measurement.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="QCut.get_locations_and_subcircuits">
-<span class="sig-prename descclassname"><span class="pre">QCut.</span></span><span class="sig-name descname"><span class="pre">get_locations_and_subcircuits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">circuit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">QuantumCircuit</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QCut/single_qubit_wirecut.html#get_locations_and_subcircuits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.get_locations_and_subcircuits" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">QCut.</span></span><span class="sig-name descname"><span class="pre">get_locations_and_subcircuits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">circuit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">QuantumCircuit</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_qubits</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/QCut/single_qubit_wirecut.html#get_locations_and_subcircuits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.get_locations_and_subcircuits" title="Link to this definition">#</a></dt>
 <dd><p>Get cut locations and subcircuits with placeholder operations.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -802,6 +959,11 @@ due to identity basis measurement.</p>
 <dt>A tuple containing:</dt><dd><ul class="simple">
 <li><p>list[SingleQubitCutLocation]: Locations of the cuts as a list</p></li>
 <li><p>list[QuantumCircuit]: Subcircuits with placeholder operations</p></li>
+<li><dl class="simple">
+<dt>dict[int:int]: map of subcircuit qubit indices to original circuit</dt><dd><p>qubit indices</p>
+</dd>
+</dl>
+</li>
 </ul>
 </dd>
 </dl>
@@ -1036,18 +1198,34 @@ results from the qpd_meas class register.</p>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-QCut.qpd_gates">QCut.qpd_gates module</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-QCut.identity_qpd">QCut.identity_qpd module</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-QCut.identity_qpd">QCut.identity_qpd module</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.identity_qpd.append"><code class="docutils literal notranslate"><span class="pre">append()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.identity_qpd.clear"><code class="docutils literal notranslate"><span class="pre">clear()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.identity_qpd.copy"><code class="docutils literal notranslate"><span class="pre">copy()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.identity_qpd.count"><code class="docutils literal notranslate"><span class="pre">count()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.identity_qpd.extend"><code class="docutils literal notranslate"><span class="pre">extend()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.identity_qpd.index"><code class="docutils literal notranslate"><span class="pre">index()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.identity_qpd.insert"><code class="docutils literal notranslate"><span class="pre">insert()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.identity_qpd.pop"><code class="docutils literal notranslate"><span class="pre">pop()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.identity_qpd.remove"><code class="docutils literal notranslate"><span class="pre">remove()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.identity_qpd.reverse"><code class="docutils literal notranslate"><span class="pre">reverse()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.identity_qpd.sort"><code class="docutils literal notranslate"><span class="pre">sort()</span></code></a></li>
+</ul>
+</li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-QCut.wirecut">QCut.wirecut module</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.wirecut.estimate_expectation_values"><code class="docutils literal notranslate"><span class="pre">estimate_expectation_values()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.wirecut.get_experiment_circuits"><code class="docutils literal notranslate"><span class="pre">get_experiment_circuits()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.wirecut.get_placeholder_locations"><code class="docutils literal notranslate"><span class="pre">get_placeholder_locations()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.wirecut.get_qpd_combinations"><code class="docutils literal notranslate"><span class="pre">get_qpd_combinations()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.wirecut.insert_cz_cut_qpd"><code class="docutils literal notranslate"><span class="pre">insert_cz_cut_qpd()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.wirecut.insert_wire_cut_qpd"><code class="docutils literal notranslate"><span class="pre">insert_wire_cut_qpd()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.wirecut.run_experiments"><code class="docutils literal notranslate"><span class="pre">run_experiments()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-QCut">Module contents</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.estimate_expectation_values"><code class="docutils literal notranslate"><span class="pre">estimate_expectation_values()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.expectation_values"><code class="docutils literal notranslate"><span class="pre">expectation_values()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.find_cuts"><code class="docutils literal notranslate"><span class="pre">find_cuts()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.get_experiment_circuits"><code class="docutils literal notranslate"><span class="pre">get_experiment_circuits()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.get_locations_and_subcircuits"><code class="docutils literal notranslate"><span class="pre">get_locations_and_subcircuits()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.get_pauli_list"><code class="docutils literal notranslate"><span class="pre">get_pauli_list()</span></code></a></li>

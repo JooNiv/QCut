@@ -161,6 +161,9 @@
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../../Usage.html">Usage</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../Examples.html">Examples on using QCut</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../WireCuts.html">Wire cuts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../GateCuts.html">Gate cuts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../AutomaticCuts.html">Automatic cuts</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../Multiple_cuts.html">Multiple cuts</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../OtherObservables.html">Other than Z observables</a></li>
 </ul>
@@ -296,9 +299,9 @@ document.write(`
 <span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_aer</span><span class="w"> </span><span class="kn">import</span> <span class="n">AerSimulator</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">QCut.cutcircuit</span><span class="w"> </span><span class="kn">import</span> <span class="n">CutCircuit</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">QCut.cutlocation</span><span class="w"> </span><span class="kn">import</span> <span class="n">CutLocation</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">QCut.identity_qpd</span><span class="w"> </span><span class="kn">import</span> <span class="n">identity_qpd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">QCut.cutlocation</span><span class="w"> </span><span class="kn">import</span> <span class="n">CutLocation</span><span class="p">,</span> <span class="n">SingleQubitCutLocation</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">QCut.qcutresult</span><span class="w"> </span><span class="kn">import</span> <span class="n">SubResult</span><span class="p">,</span> <span class="n">TotalResult</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">QCut.qpd</span><span class="w"> </span><span class="kn">import</span> <span class="n">cz_qpd</span><span class="p">,</span> <span class="n">identity_qpd</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Iterable</span>
@@ -328,7 +331,18 @@ document.write(`
 <span class="sd">            Iterable of the possible QPD operations</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">product</span><span class="p">(</span><span class="n">identity_qpd</span><span class="p">,</span> <span class="n">repeat</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">cut_locations</span><span class="p">))</span></div>
+    <span class="n">qpd_lists</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">cut</span> <span class="ow">in</span> <span class="n">cut_locations</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cut</span><span class="p">,</span> <span class="n">SingleQubitCutLocation</span><span class="p">):</span>
+            <span class="n">qpd_lists</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">identity_qpd</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cut</span><span class="p">,</span> <span class="n">CutLocation</span><span class="p">):</span>
+            <span class="n">qpd_lists</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cz_qpd</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown cut type: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">cut</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Cartesian product across all qpd options per cut</span>
+    <span class="n">all_combinations</span> <span class="o">=</span> <span class="n">product</span><span class="p">(</span><span class="o">*</span><span class="n">qpd_lists</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">all_combinations</span></div>
 
 
 
@@ -379,10 +393,12 @@ document.write(`
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">ops</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Meas&quot;</span><span class="p">,</span> <span class="s2">&quot;Init&quot;</span><span class="p">,</span> <span class="s2">&quot;cutCZ&quot;</span><span class="p">]</span>
     <span class="k">for</span> <span class="n">circ</span> <span class="ow">in</span> <span class="n">subcircuits</span><span class="p">:</span>
         <span class="n">subops</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">op</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">circ</span><span class="p">):</span>
-            <span class="k">if</span> <span class="s2">&quot;Meas&quot;</span> <span class="ow">in</span> <span class="n">op</span><span class="o">.</span><span class="n">operation</span><span class="o">.</span><span class="n">name</span> <span class="ow">or</span> <span class="s2">&quot;Init&quot;</span> <span class="ow">in</span> <span class="n">op</span><span class="o">.</span><span class="n">operation</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+            <span class="c1"># if &quot;Meas&quot; in op.operation.name or &quot;Init&quot; in op.operation.name :</span>
+            <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">i</span> <span class="ow">in</span> <span class="n">op</span><span class="o">.</span><span class="n">operation</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">names</span><span class="p">):</span>
                 <span class="n">subops</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">ind</span><span class="p">,</span> <span class="n">op</span><span class="p">))</span>
         <span class="n">ops</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">subops</span><span class="p">)</span>
 
@@ -400,6 +416,231 @@ document.write(`
                 <span class="n">j</span> <span class="o">+=</span> <span class="mi">1</span>
 
 
+<div class="viewcode-block" id="insert_wire_cut_qpd">
+<a class="viewcode-back" href="../../QCut.html#QCut.wirecut.insert_wire_cut_qpd">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">insert_wire_cut_qpd</span><span class="p">(</span>
+    <span class="n">ind</span><span class="p">,</span>
+    <span class="n">op</span><span class="p">,</span>
+    <span class="n">subcircuit</span><span class="p">,</span>
+    <span class="n">offset</span><span class="p">,</span>
+    <span class="n">qpd_qubits</span><span class="p">,</span>
+    <span class="n">qpd</span><span class="p">,</span>
+    <span class="n">id_meas</span><span class="p">,</span>
+    <span class="n">num_id_meas</span><span class="p">,</span>
+    <span class="n">id_meas_experiment_index</span><span class="p">,</span>
+    <span class="n">id_meas_subcircuit_index</span><span class="p">,</span>
+    <span class="n">id_meas_bit</span><span class="p">,</span>
+    <span class="n">classical_bit_index</span><span class="p">,</span>
+    <span class="n">inserted_operations</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="k">if</span> <span class="s2">&quot;Meas&quot;</span> <span class="ow">in</span> <span class="n">op</span><span class="o">.</span><span class="n">operation</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>  <span class="c1"># if measure channel remove placeholder</span>
+        <span class="c1"># and insert current</span>
+        <span class="c1"># qpd operation</span>
+        <span class="n">qubit_index</span> <span class="o">=</span> <span class="n">subcircuit</span><span class="o">.</span><span class="n">find_bit</span><span class="p">(</span><span class="n">op</span><span class="o">.</span><span class="n">qubits</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">index</span>
+        <span class="n">subcircuit</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="n">offset</span><span class="p">)</span>  <span class="c1"># remove plaxceholder</span>
+        <span class="c1"># measure channel</span>
+        <span class="n">qpd_qubits</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">qubit_index</span><span class="p">)</span>  <span class="c1"># store index</span>
+        <span class="n">qubits_for_operation</span> <span class="o">=</span> <span class="p">[</span><span class="n">Qubit</span><span class="p">(</span><span class="n">subcircuit</span><span class="o">.</span><span class="n">qregs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">qubit_index</span><span class="p">)]</span>
+        <span class="n">meas_op</span> <span class="o">=</span> <span class="n">qpd</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">op</span><span class="o">.</span><span class="n">operation</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">])][</span><span class="s2">&quot;op_0&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">meas_op</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;id-meas&quot;</span><span class="p">:</span>  <span class="c1"># if identity measure channel</span>
+            <span class="c1"># store indices</span>
+            <span class="n">id_meas</span><span class="p">[</span><span class="n">num_id_meas</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                <span class="p">[</span>
+                    <span class="n">id_meas_experiment_index</span><span class="p">,</span>
+                    <span class="n">id_meas_subcircuit_index</span><span class="p">,</span>
+                    <span class="n">id_meas_bit</span><span class="p">,</span>
+                <span class="p">]</span>
+            <span class="p">)</span>
+            <span class="n">num_id_meas</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="c1"># remove extra classical bits and registers</span>
+            <span class="n">_adjust_cregs</span><span class="p">(</span><span class="n">subcircuit</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">subop</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">meas_op</span><span class="o">.</span><span class="n">data</span><span class="p">):</span>
+                <span class="n">subcircuit</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span>
+                    <span class="n">ind</span> <span class="o">+</span> <span class="n">offset</span><span class="p">,</span>
+                    <span class="n">CircuitInstruction</span><span class="p">(</span><span class="n">operation</span><span class="o">=</span><span class="n">subop</span><span class="p">,</span> <span class="n">qubits</span><span class="o">=</span><span class="n">qubits_for_operation</span><span class="p">),</span>
+                <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">subop</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">reversed</span><span class="p">(</span><span class="n">meas_op</span><span class="o">.</span><span class="n">data</span><span class="p">)):</span>
+                <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">subcircuit</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span>
+                        <span class="n">ind</span> <span class="o">+</span> <span class="n">offset</span><span class="p">,</span>
+                        <span class="n">CircuitInstruction</span><span class="p">(</span>
+                            <span class="n">operation</span><span class="o">=</span><span class="n">subop</span><span class="o">.</span><span class="n">operation</span><span class="p">,</span>
+                            <span class="n">qubits</span><span class="o">=</span><span class="n">qubits_for_operation</span><span class="p">,</span>
+                            <span class="n">clbits</span><span class="o">=</span><span class="p">[</span><span class="n">subcircuit</span><span class="o">.</span><span class="n">cregs</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">classical_bit_index</span><span class="p">]],</span>
+                        <span class="p">),</span>
+                    <span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">subcircuit</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span>
+                        <span class="n">ind</span> <span class="o">+</span> <span class="n">offset</span><span class="p">,</span>
+                        <span class="n">CircuitInstruction</span><span class="p">(</span>
+                            <span class="n">operation</span><span class="o">=</span><span class="n">subop</span><span class="o">.</span><span class="n">operation</span><span class="p">,</span>
+                            <span class="n">qubits</span><span class="o">=</span><span class="n">qubits_for_operation</span><span class="p">,</span>
+                        <span class="p">),</span>
+                    <span class="p">)</span>
+
+            <span class="c1"># increment classical bit counter</span>
+            <span class="n">classical_bit_index</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="n">id_meas_bit</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">inserted_operations</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">offset</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">meas_op</span><span class="o">.</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+
+    <span class="k">if</span> <span class="s2">&quot;Init&quot;</span> <span class="ow">in</span> <span class="n">op</span><span class="o">.</span><span class="n">operation</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+        <span class="n">subcircuit</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="n">offset</span><span class="p">)</span>
+        <span class="n">init_op</span> <span class="o">=</span> <span class="n">qpd</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">op</span><span class="o">.</span><span class="n">operation</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">])][</span><span class="s2">&quot;op_1&quot;</span><span class="p">]</span>
+        <span class="n">qubits_for_operation</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">Qubit</span><span class="p">(</span><span class="n">subcircuit</span><span class="o">.</span><span class="n">qregs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">subcircuit</span><span class="o">.</span><span class="n">find_bit</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">index</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">op</span><span class="o">.</span><span class="n">qubits</span>
+        <span class="p">]</span>
+        <span class="k">for</span> <span class="n">subop</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">init_op</span><span class="o">.</span><span class="n">data</span><span class="p">):</span>
+            <span class="n">subcircuit</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span>
+                <span class="n">ind</span> <span class="o">+</span> <span class="n">offset</span><span class="p">,</span>
+                <span class="n">CircuitInstruction</span><span class="p">(</span>
+                    <span class="n">operation</span><span class="o">=</span><span class="n">subop</span><span class="o">.</span><span class="n">operation</span><span class="p">,</span> <span class="n">qubits</span><span class="o">=</span><span class="n">qubits_for_operation</span>
+                <span class="p">),</span>
+            <span class="p">)</span>
+
+        <span class="n">inserted_operations</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">offset</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">init_op</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+
+    <span class="k">return</span> <span class="n">offset</span><span class="p">,</span> <span class="n">num_id_meas</span><span class="p">,</span> <span class="n">id_meas_bit</span><span class="p">,</span> <span class="n">classical_bit_index</span><span class="p">,</span> <span class="n">inserted_operations</span></div>
+
+
+
+<div class="viewcode-block" id="insert_cz_cut_qpd">
+<a class="viewcode-back" href="../../QCut.html#QCut.wirecut.insert_cz_cut_qpd">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">insert_cz_cut_qpd</span><span class="p">(</span>  <span class="c1"># noqa: C901</span>
+    <span class="n">ind</span><span class="p">,</span>
+    <span class="n">op</span><span class="p">,</span>
+    <span class="n">subcircuit</span><span class="p">,</span>
+    <span class="n">offset</span><span class="p">,</span>
+    <span class="n">qpd_qubits</span><span class="p">,</span>
+    <span class="n">qpd</span><span class="p">,</span>
+    <span class="n">id_meas</span><span class="p">,</span>
+    <span class="n">num_id_meas</span><span class="p">,</span>
+    <span class="n">id_meas_experiment_index</span><span class="p">,</span>
+    <span class="n">id_meas_subcircuit_index</span><span class="p">,</span>
+    <span class="n">id_meas_bit</span><span class="p">,</span>
+    <span class="n">classical_bit_index</span><span class="p">,</span>
+    <span class="n">inserted_operations</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="k">if</span> <span class="s2">&quot;_c_&quot;</span> <span class="ow">in</span> <span class="n">op</span><span class="o">.</span><span class="n">operation</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>  <span class="c1"># if measure channel remove placeholder</span>
+        <span class="c1"># and insert current</span>
+        <span class="c1"># qpd operation</span>
+
+        <span class="n">qubit_index</span> <span class="o">=</span> <span class="n">subcircuit</span><span class="o">.</span><span class="n">find_bit</span><span class="p">(</span><span class="n">op</span><span class="o">.</span><span class="n">qubits</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">index</span>
+        <span class="n">subcircuit</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="n">offset</span><span class="p">)</span>  <span class="c1"># remove plaxceholder</span>
+        <span class="c1"># measure channel</span>
+        <span class="c1"># qpd_qubits.append(qubit_index)  # store index</span>
+        <span class="n">qubits_for_operation</span> <span class="o">=</span> <span class="p">[</span><span class="n">Qubit</span><span class="p">(</span><span class="n">subcircuit</span><span class="o">.</span><span class="n">qregs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">qubit_index</span><span class="p">)]</span>
+        <span class="n">meas_op</span> <span class="o">=</span> <span class="n">qpd</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">op</span><span class="o">.</span><span class="n">operation</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">])][</span><span class="s2">&quot;op_0&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">meas_op</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;id-meas&quot;</span><span class="p">,</span> <span class="s2">&quot;s&quot;</span><span class="p">,</span> <span class="s2">&quot;sdg&quot;</span><span class="p">,</span> <span class="s2">&quot;z&quot;</span><span class="p">]:</span>
+            <span class="c1"># if identity measure channel</span>
+            <span class="c1"># store indices</span>
+            <span class="n">id_meas</span><span class="p">[</span><span class="n">num_id_meas</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                <span class="p">[</span>
+                    <span class="n">id_meas_experiment_index</span><span class="p">,</span>
+                    <span class="n">id_meas_subcircuit_index</span><span class="p">,</span>
+                    <span class="n">id_meas_bit</span><span class="p">,</span>
+                <span class="p">]</span>
+            <span class="p">)</span>
+            <span class="n">num_id_meas</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="c1"># remove extra classical bits and registers</span>
+            <span class="n">_adjust_cregs</span><span class="p">(</span><span class="n">subcircuit</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">subop</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">meas_op</span><span class="o">.</span><span class="n">data</span><span class="p">):</span>
+                <span class="n">subcircuit</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span>
+                    <span class="n">ind</span> <span class="o">+</span> <span class="n">offset</span><span class="p">,</span>
+                    <span class="n">CircuitInstruction</span><span class="p">(</span>
+                        <span class="n">operation</span><span class="o">=</span><span class="n">subop</span><span class="o">.</span><span class="n">operation</span><span class="p">,</span> <span class="n">qubits</span><span class="o">=</span><span class="n">qubits_for_operation</span>
+                    <span class="p">),</span>
+                <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">subop</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">reversed</span><span class="p">(</span><span class="n">meas_op</span><span class="o">.</span><span class="n">data</span><span class="p">)):</span>
+                <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">subcircuit</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span>
+                        <span class="n">ind</span> <span class="o">+</span> <span class="n">offset</span><span class="p">,</span>
+                        <span class="n">CircuitInstruction</span><span class="p">(</span>
+                            <span class="n">operation</span><span class="o">=</span><span class="n">subop</span><span class="o">.</span><span class="n">operation</span><span class="p">,</span>
+                            <span class="n">qubits</span><span class="o">=</span><span class="n">qubits_for_operation</span><span class="p">,</span>
+                            <span class="n">clbits</span><span class="o">=</span><span class="p">[</span><span class="n">subcircuit</span><span class="o">.</span><span class="n">cregs</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">classical_bit_index</span><span class="p">]],</span>
+                        <span class="p">),</span>
+                    <span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">subcircuit</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span>
+                        <span class="n">ind</span> <span class="o">+</span> <span class="n">offset</span><span class="p">,</span>
+                        <span class="n">CircuitInstruction</span><span class="p">(</span>
+                            <span class="n">operation</span><span class="o">=</span><span class="n">subop</span><span class="o">.</span><span class="n">operation</span><span class="p">,</span>
+                            <span class="n">qubits</span><span class="o">=</span><span class="n">qubits_for_operation</span><span class="p">,</span>
+                        <span class="p">),</span>
+                    <span class="p">)</span>
+
+            <span class="c1"># increment classical bit counter</span>
+            <span class="n">classical_bit_index</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="n">id_meas_bit</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">inserted_operations</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">offset</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">meas_op</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+
+    <span class="k">if</span> <span class="s2">&quot;_t_&quot;</span> <span class="ow">in</span> <span class="n">op</span><span class="o">.</span><span class="n">operation</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+        <span class="c1"># and insert current</span>
+        <span class="c1"># qpd operation</span>
+        <span class="n">qubit_index</span> <span class="o">=</span> <span class="n">subcircuit</span><span class="o">.</span><span class="n">find_bit</span><span class="p">(</span><span class="n">op</span><span class="o">.</span><span class="n">qubits</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">index</span>
+        <span class="n">subcircuit</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="n">offset</span><span class="p">)</span>  <span class="c1"># remove plaxceholder</span>
+        <span class="c1"># measure channel</span>
+        <span class="c1"># qpd_qubits.append(qubit_index)  # store index</span>
+        <span class="n">qubits_for_operation</span> <span class="o">=</span> <span class="p">[</span><span class="n">Qubit</span><span class="p">(</span><span class="n">subcircuit</span><span class="o">.</span><span class="n">qregs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">qubit_index</span><span class="p">)]</span>
+        <span class="n">meas_op</span> <span class="o">=</span> <span class="n">qpd</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">op</span><span class="o">.</span><span class="n">operation</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">])][</span><span class="s2">&quot;op_1&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">meas_op</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;id-meas&quot;</span><span class="p">,</span> <span class="s2">&quot;s&quot;</span><span class="p">,</span> <span class="s2">&quot;sdg&quot;</span><span class="p">,</span> <span class="s2">&quot;z&quot;</span><span class="p">]:</span>
+            <span class="c1"># if identity measure channel</span>
+            <span class="c1"># store indices</span>
+            <span class="n">id_meas</span><span class="p">[</span><span class="n">num_id_meas</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                <span class="p">[</span>
+                    <span class="n">id_meas_experiment_index</span><span class="p">,</span>
+                    <span class="n">id_meas_subcircuit_index</span><span class="p">,</span>
+                    <span class="n">id_meas_bit</span><span class="p">,</span>
+                <span class="p">]</span>
+            <span class="p">)</span>
+            <span class="n">num_id_meas</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="c1"># remove extra classical bits and registers</span>
+            <span class="n">_adjust_cregs</span><span class="p">(</span><span class="n">subcircuit</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">subop</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">meas_op</span><span class="o">.</span><span class="n">data</span><span class="p">):</span>
+                <span class="n">subcircuit</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span>
+                    <span class="n">ind</span> <span class="o">+</span> <span class="n">offset</span><span class="p">,</span>
+                    <span class="n">CircuitInstruction</span><span class="p">(</span>
+                        <span class="n">operation</span><span class="o">=</span><span class="n">subop</span><span class="o">.</span><span class="n">operation</span><span class="p">,</span> <span class="n">qubits</span><span class="o">=</span><span class="n">qubits_for_operation</span>
+                    <span class="p">),</span>
+                <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">subop</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">reversed</span><span class="p">(</span><span class="n">meas_op</span><span class="o">.</span><span class="n">data</span><span class="p">)):</span>
+                <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">subcircuit</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span>
+                        <span class="n">ind</span> <span class="o">+</span> <span class="n">offset</span><span class="p">,</span>
+                        <span class="n">CircuitInstruction</span><span class="p">(</span>
+                            <span class="n">operation</span><span class="o">=</span><span class="n">subop</span><span class="o">.</span><span class="n">operation</span><span class="p">,</span>
+                            <span class="n">qubits</span><span class="o">=</span><span class="n">qubits_for_operation</span><span class="p">,</span>
+                            <span class="n">clbits</span><span class="o">=</span><span class="p">[</span><span class="n">subcircuit</span><span class="o">.</span><span class="n">cregs</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">classical_bit_index</span><span class="p">]],</span>
+                        <span class="p">),</span>
+                    <span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">subcircuit</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span>
+                        <span class="n">ind</span> <span class="o">+</span> <span class="n">offset</span><span class="p">,</span>
+                        <span class="n">CircuitInstruction</span><span class="p">(</span>
+                            <span class="n">operation</span><span class="o">=</span><span class="n">subop</span><span class="o">.</span><span class="n">operation</span><span class="p">,</span>
+                            <span class="n">qubits</span><span class="o">=</span><span class="n">qubits_for_operation</span><span class="p">,</span>
+                        <span class="p">),</span>
+                    <span class="p">)</span>
+
+            <span class="c1"># increment classical bit counter</span>
+            <span class="n">classical_bit_index</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="n">id_meas_bit</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">inserted_operations</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">offset</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">meas_op</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+
+    <span class="k">return</span> <span class="n">offset</span><span class="p">,</span> <span class="n">num_id_meas</span><span class="p">,</span> <span class="n">id_meas_bit</span><span class="p">,</span> <span class="n">classical_bit_index</span><span class="p">,</span> <span class="n">inserted_operations</span></div>
+
+
+
 <div class="viewcode-block" id="get_experiment_circuits">
 <a class="viewcode-back" href="../../QCut.html#QCut.wirecut.get_experiment_circuits">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_experiment_circuits</span><span class="p">(</span>  <span class="c1"># noqa: C901</span>
@@ -413,7 +654,7 @@ document.write(`
 <span class="sd">    taking the product of all coefficients in the current qpd row. Loop through</span>
 <span class="sd">    subcircuits generated in 4. Make deepcopy of subcircuit and iterate over its</span>
 <span class="sd">    circuit data. When hit either Meas_{ind} of Init_{ind} repace it with operation</span>
-<span class="sd">    found in qpd[ind][&quot;op&quot;/&quot;init&quot;]. WHile generating experiment circuits also</span>
+<span class="sd">    found in qpd[ind][&quot;op_0&quot;/&quot;op_1&quot;]. WHile generating experiment circuits also</span>
 <span class="sd">    generate a list of locations that have an identity basis measurement. These</span>
 <span class="sd">    measurement outcomes need to be added during post-processing. Locations added as</span>
 <span class="sd">    [index of experiment circuit, index of subcircuit, index of classical bit</span>
@@ -441,9 +682,12 @@ document.write(`
 
     <span class="c1"># initialize solution lists</span>
     <span class="n">cuts</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">cut_locations</span><span class="p">)</span>
-    <span class="n">num_circs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="n">cuts</span><span class="p">)</span>
+    <span class="n">cz_cuts</span> <span class="o">=</span> <span class="nb">len</span><span class="p">([</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">cut_locations</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">CutLocation</span><span class="p">)])</span>
+    <span class="n">wire_cuts</span> <span class="o">=</span> <span class="n">cuts</span> <span class="o">-</span> <span class="n">cz_cuts</span>
+
+    <span class="n">num_circs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="n">wire_cuts</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="n">cz_cuts</span><span class="p">)</span>
     <span class="n">experiment_circuits</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">num_id_meas_init</span> <span class="o">=</span> <span class="n">cuts</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="n">cuts</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> 
+    <span class="n">num_id_meas_init</span> <span class="o">=</span> <span class="n">cuts</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="n">cuts</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="n">cz_cuts</span><span class="p">)</span>
     <span class="n">id_meas</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="n">num_id_meas_init</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>
     <span class="n">num_id_meas</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">coefficients</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">num_circs</span><span class="p">)</span>
@@ -466,85 +710,57 @@ document.write(`
             <span class="c1"># measurements</span>
             <span class="k">for</span> <span class="n">op_ind</span> <span class="ow">in</span> <span class="n">placeholder_locations</span><span class="p">[</span><span class="n">id_meas_subcircuit_index</span><span class="p">]:</span>
                 <span class="n">ind</span><span class="p">,</span> <span class="n">op</span> <span class="o">=</span> <span class="n">op_ind</span>
-                <span class="k">if</span> <span class="s2">&quot;Meas&quot;</span> <span class="ow">in</span> <span class="n">op</span><span class="o">.</span><span class="n">operation</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>  <span class="c1"># if measure channel remove placeholder</span>
-                    <span class="c1"># and insert current</span>
-                    <span class="c1"># qpd operation</span>
-                    <span class="n">qubit_index</span> <span class="o">=</span> <span class="n">subcircuit</span><span class="o">.</span><span class="n">find_bit</span><span class="p">(</span><span class="n">op</span><span class="o">.</span><span class="n">qubits</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">index</span>
-                    <span class="n">subcircuit</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="n">offset</span><span class="p">)</span>  <span class="c1"># remove plaxceholder</span>
-                    <span class="c1"># measure channel</span>
-                    <span class="n">qpd_qubits</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">qubit_index</span><span class="p">)</span>  <span class="c1"># store index</span>
-                    <span class="n">qubits_for_operation</span> <span class="o">=</span> <span class="p">[</span><span class="n">Qubit</span><span class="p">(</span><span class="n">subcircuit</span><span class="o">.</span><span class="n">qregs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">qubit_index</span><span class="p">)]</span>
-                    <span class="n">meas_op</span> <span class="o">=</span> <span class="n">qpd</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">op</span><span class="o">.</span><span class="n">operation</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">])][</span><span class="s2">&quot;op&quot;</span><span class="p">]</span>
-                    <span class="k">if</span> <span class="n">meas_op</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;id-meas&quot;</span><span class="p">:</span>  <span class="c1"># if identity measure channel</span>
-                        <span class="c1"># store indices</span>
-                        <span class="n">id_meas</span><span class="p">[</span><span class="n">num_id_meas</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
-                            <span class="p">[</span>
-                                <span class="n">id_meas_experiment_index</span><span class="p">,</span>
-                                <span class="n">id_meas_subcircuit_index</span><span class="p">,</span>
-                                <span class="n">id_meas_bit</span><span class="p">,</span>
-                            <span class="p">]</span>
-                        <span class="p">)</span>
-                        <span class="n">num_id_meas</span> <span class="o">+=</span> <span class="mi">1</span>
-                        <span class="c1"># remove extra classical bits and registers</span>
-                        <span class="n">_adjust_cregs</span><span class="p">(</span><span class="n">subcircuit</span><span class="p">)</span>
-                        <span class="k">for</span> <span class="n">subop</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">meas_op</span><span class="o">.</span><span class="n">data</span><span class="p">):</span>
-                            <span class="n">subcircuit</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span>
-                                <span class="n">ind</span> <span class="o">+</span> <span class="n">offset</span><span class="p">,</span>
-                                <span class="n">CircuitInstruction</span><span class="p">(</span>
-                                    <span class="n">operation</span><span class="o">=</span><span class="n">subop</span><span class="p">,</span> <span class="n">qubits</span><span class="o">=</span><span class="n">qubits_for_operation</span>
-                                <span class="p">),</span>
-                            <span class="p">)</span>
-                    <span class="k">else</span><span class="p">:</span>
-                        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">subop</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">reversed</span><span class="p">(</span><span class="n">meas_op</span><span class="o">.</span><span class="n">data</span><span class="p">)):</span>
-                            <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                                <span class="n">subcircuit</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span>
-                                    <span class="n">ind</span> <span class="o">+</span> <span class="n">offset</span><span class="p">,</span>
-                                    <span class="n">CircuitInstruction</span><span class="p">(</span>
-                                        <span class="n">operation</span><span class="o">=</span><span class="n">subop</span><span class="o">.</span><span class="n">operation</span><span class="p">,</span>
-                                        <span class="n">qubits</span><span class="o">=</span><span class="n">qubits_for_operation</span><span class="p">,</span>
-                                        <span class="n">clbits</span><span class="o">=</span><span class="p">[</span>
-                                            <span class="n">subcircuit</span><span class="o">.</span><span class="n">cregs</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">classical_bit_index</span><span class="p">]</span>
-                                        <span class="p">],</span>
-                                    <span class="p">),</span>
-                                <span class="p">)</span>
-                            <span class="k">else</span><span class="p">:</span>
-                                <span class="n">subcircuit</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span>
-                                    <span class="n">ind</span> <span class="o">+</span> <span class="n">offset</span><span class="p">,</span>
-                                    <span class="n">CircuitInstruction</span><span class="p">(</span>
-                                        <span class="n">operation</span><span class="o">=</span><span class="n">subop</span><span class="o">.</span><span class="n">operation</span><span class="p">,</span>
-                                        <span class="n">qubits</span><span class="o">=</span><span class="n">qubits_for_operation</span><span class="p">,</span>
-                                    <span class="p">),</span>
-                                <span class="p">)</span>
+                <span class="k">if</span> <span class="s2">&quot;cut&quot;</span> <span class="ow">in</span> <span class="n">op</span><span class="o">.</span><span class="n">operation</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+                    <span class="p">(</span>
+                        <span class="n">offset</span><span class="p">,</span>
+                        <span class="n">num_id_meas</span><span class="p">,</span>
+                        <span class="n">id_meas_bit</span><span class="p">,</span>
+                        <span class="n">classical_bit_index</span><span class="p">,</span>
+                        <span class="n">inserted_operations</span><span class="p">,</span>
+                    <span class="p">)</span> <span class="o">=</span> <span class="n">insert_cz_cut_qpd</span><span class="p">(</span>
+                        <span class="n">ind</span><span class="p">,</span>
+                        <span class="n">op</span><span class="p">,</span>
+                        <span class="n">subcircuit</span><span class="p">,</span>
+                        <span class="n">offset</span><span class="p">,</span>
+                        <span class="n">qpd_qubits</span><span class="p">,</span>
+                        <span class="n">qpd</span><span class="p">,</span>
+                        <span class="n">id_meas</span><span class="p">,</span>
+                        <span class="n">num_id_meas</span><span class="p">,</span>
+                        <span class="n">id_meas_experiment_index</span><span class="p">,</span>
+                        <span class="n">id_meas_subcircuit_index</span><span class="p">,</span>
+                        <span class="n">id_meas_bit</span><span class="p">,</span>
+                        <span class="n">classical_bit_index</span><span class="p">,</span>
+                        <span class="n">inserted_operations</span><span class="p">,</span>
+                    <span class="p">)</span>
 
-                        <span class="c1"># increment classical bit counter</span>
-                        <span class="n">classical_bit_index</span> <span class="o">+=</span> <span class="mi">1</span>
-
-                    <span class="n">id_meas_bit</span> <span class="o">+=</span> <span class="mi">1</span>
-                    <span class="n">inserted_operations</span> <span class="o">+=</span> <span class="mi">1</span>
-                    <span class="n">offset</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">meas_op</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
-
-                <span class="k">if</span> <span class="s2">&quot;Init&quot;</span> <span class="ow">in</span> <span class="n">op</span><span class="o">.</span><span class="n">operation</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
-                    <span class="n">subcircuit</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="n">offset</span><span class="p">)</span>
-                    <span class="n">init_op</span> <span class="o">=</span> <span class="n">qpd</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">op</span><span class="o">.</span><span class="n">operation</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">])][</span><span class="s2">&quot;init&quot;</span><span class="p">]</span>
-                    <span class="n">qubits_for_operation</span> <span class="o">=</span> <span class="p">[</span>
-                        <span class="n">Qubit</span><span class="p">(</span><span class="n">subcircuit</span><span class="o">.</span><span class="n">qregs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">subcircuit</span><span class="o">.</span><span class="n">find_bit</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
-                        <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">op</span><span class="o">.</span><span class="n">qubits</span>
-                    <span class="p">]</span>
-                    <span class="k">for</span> <span class="n">subop</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">init_op</span><span class="o">.</span><span class="n">data</span><span class="p">):</span>
-                        <span class="n">subcircuit</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span>
-                            <span class="n">ind</span> <span class="o">+</span> <span class="n">offset</span><span class="p">,</span>
-                            <span class="n">CircuitInstruction</span><span class="p">(</span>
-                                <span class="n">operation</span><span class="o">=</span><span class="n">subop</span><span class="o">.</span><span class="n">operation</span><span class="p">,</span> <span class="n">qubits</span><span class="o">=</span><span class="n">qubits_for_operation</span>
-                            <span class="p">),</span>
-                        <span class="p">)</span>
-
-                    <span class="n">inserted_operations</span> <span class="o">+=</span> <span class="mi">1</span>
-                    <span class="n">offset</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">init_op</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="p">(</span>
+                        <span class="n">offset</span><span class="p">,</span>
+                        <span class="n">num_id_meas</span><span class="p">,</span>
+                        <span class="n">id_meas_bit</span><span class="p">,</span>
+                        <span class="n">classical_bit_index</span><span class="p">,</span>
+                        <span class="n">inserted_operations</span><span class="p">,</span>
+                    <span class="p">)</span> <span class="o">=</span> <span class="n">insert_wire_cut_qpd</span><span class="p">(</span>
+                        <span class="n">ind</span><span class="p">,</span>
+                        <span class="n">op</span><span class="p">,</span>
+                        <span class="n">subcircuit</span><span class="p">,</span>
+                        <span class="n">offset</span><span class="p">,</span>
+                        <span class="n">qpd_qubits</span><span class="p">,</span>
+                        <span class="n">qpd</span><span class="p">,</span>
+                        <span class="n">id_meas</span><span class="p">,</span>
+                        <span class="n">num_id_meas</span><span class="p">,</span>
+                        <span class="n">id_meas_experiment_index</span><span class="p">,</span>
+                        <span class="n">id_meas_subcircuit_index</span><span class="p">,</span>
+                        <span class="n">id_meas_bit</span><span class="p">,</span>
+                        <span class="n">classical_bit_index</span><span class="p">,</span>
+                        <span class="n">inserted_operations</span><span class="p">,</span>
+                    <span class="p">)</span>
 
             <span class="n">subcircuit</span> <span class="o">=</span> <span class="n">_finalize_subcircuit</span><span class="p">(</span><span class="n">subcircuit</span><span class="p">,</span> <span class="n">qpd_qubits</span><span class="p">)</span>
             <span class="n">sub_experiment_circuits</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">subcircuit</span><span class="p">)</span>
         <span class="n">experiment_circuits</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sub_experiment_circuits</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">CutCircuit</span><span class="p">(</span><span class="n">experiment_circuits</span><span class="p">),</span> <span class="n">coefficients</span><span class="p">,</span> <span class="n">id_meas</span><span class="p">[:</span><span class="n">num_id_meas</span><span class="p">]</span></div>
+
 
 
 <div class="viewcode-block" id="run_experiments">
@@ -576,9 +792,11 @@ document.write(`
 <span class="sd">            list of transformed results</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">cuts</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">cut_locations</span><span class="p">)</span>
-    <span class="c1"># number of samples neede</span>
-    <span class="n">samples</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">cuts</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">ERROR</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+    <span class="n">wire_cuts</span> <span class="o">=</span> <span class="nb">len</span><span class="p">([</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">cut_locations</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">SingleQubitCutLocation</span><span class="p">)])</span>
+    <span class="n">cz_cuts</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">cut_locations</span><span class="p">)</span> <span class="o">-</span> <span class="n">wire_cuts</span>
+    <span class="n">samples</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span>
+        <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">wire_cuts</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">cz_cuts</span><span class="p">))</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">ERROR</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="p">)</span>
     <span class="n">samples</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">samples</span> <span class="o">/</span> <span class="n">experiment_circuits</span><span class="o">.</span><span class="n">num_groups</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">backend</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">backend</span> <span class="o">=</span> <span class="n">AerSimulator</span><span class="p">()</span>
@@ -593,7 +811,7 @@ document.write(`
             <span class="p">}</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">cregs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">i</span><span class="o">.</span><span class="n">cregs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;qpd_meas&quot;</span>
             <span class="k">else</span> <span class="p">{</span><span class="s2">&quot; &quot;</span><span class="p">:</span> <span class="n">shots</span><span class="p">}</span>
-            <span class="k">if</span> <span class="n">i</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">operation</span><span class="o">.</span><span class="n">name</span> <span class="o">!=</span> <span class="s2">&quot;measure&quot;</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">data</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">i</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">operation</span><span class="o">.</span><span class="n">name</span> <span class="o">!=</span> <span class="s2">&quot;measure&quot;</span>
             <span class="k">else</span> <span class="n">backend</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">shots</span><span class="o">=</span><span class="n">shots</span><span class="p">)</span><span class="o">.</span><span class="n">result</span><span class="p">()</span><span class="o">.</span><span class="n">get_counts</span><span class="p">()</span>
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">subcircuit_group</span>
         <span class="p">]</span>
@@ -637,7 +855,10 @@ document.write(`
             <span class="n">circuit_results</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">for</span> <span class="n">meassurements</span><span class="p">,</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">sub_result</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                 <span class="c1"># separate end measurements from mid-circuit measurements</span>
-                <span class="n">separate_measurements</span> <span class="o">=</span> <span class="n">meassurements</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">meassurements</span> <span class="o">==</span> <span class="s2">&quot; &quot;</span><span class="p">:</span>
+                    <span class="n">separate_measurements</span> <span class="o">=</span> <span class="p">[</span><span class="n">meassurements</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">separate_measurements</span> <span class="o">=</span> <span class="n">meassurements</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
 
                 <span class="c1"># map to eigenvalues</span>
                 <span class="n">result_eigenvalues</span> <span class="o">=</span> <span class="p">[</span>
@@ -693,25 +914,31 @@ document.write(`
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">cuts</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">cut_locations</span><span class="p">)</span>
+    <span class="n">wire_cuts</span> <span class="o">=</span> <span class="nb">len</span><span class="p">([</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">cut_locations</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">SingleQubitCutLocation</span><span class="p">)])</span>
+    <span class="n">cz_cuts</span> <span class="o">=</span> <span class="n">cuts</span> <span class="o">-</span> <span class="n">wire_cuts</span>
     <span class="c1"># number of samples neede</span>
-    <span class="n">samples</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">cuts</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">ERROR</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+    <span class="n">samples</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span>
+        <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">wire_cuts</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">cz_cuts</span><span class="p">))</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">ERROR</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="p">)</span>
     <span class="n">shots</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">samples</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">results</span><span class="p">))</span>
 
+    <span class="n">sum_shots</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="c1"># ininialize approx expectation values of an array of ones</span>
     <span class="n">expectation_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">observables</span><span class="p">))</span>
     <span class="k">for</span> <span class="n">experiment_run</span><span class="p">,</span> <span class="n">coefficient</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="n">coefficients</span><span class="p">):</span>
         <span class="c1"># add sub results to the total approx expectation value</span>
         <span class="n">mid</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">cuts</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">wire_cuts</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>  <span class="c1"># * (np.power(-1, cz_cuts)</span>
             <span class="o">*</span> <span class="n">coefficient</span>
             <span class="o">*</span> <span class="n">_get_sub_expectation_values</span><span class="p">(</span>
                 <span class="n">experiment_run</span><span class="p">,</span> <span class="n">observables</span><span class="p">,</span> <span class="n">shots</span><span class="p">,</span> <span class="n">map_qubits</span>
             <span class="p">)</span>
         <span class="p">)</span>
+        <span class="n">sum_shots</span> <span class="o">+=</span> <span class="n">shots</span>
         <span class="n">expectation_values</span> <span class="o">+=</span> <span class="n">mid</span>
 
     <span class="c1"># multiply by gamma to the power of cuts and take mean</span>
-    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">cuts</span><span class="p">)</span> <span class="o">*</span> <span class="n">expectation_values</span> <span class="o">/</span> <span class="p">(</span><span class="n">samples</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">wire_cuts</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">cz_cuts</span><span class="p">)</span> <span class="o">*</span> <span class="n">expectation_values</span> <span class="o">/</span> <span class="n">samples</span></div>
 
 
 
@@ -754,12 +981,12 @@ document.write(`
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">sorted_full_result</span> <span class="o">=</span> <span class="n">full_result</span>
-        <span class="n">qpd_measurement_coefficient</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># initial value for qpd coefficient</span>
+        <span class="n">qpd_measurement_coefficient</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># initial value for qpd</span>
         <span class="n">weight</span> <span class="o">=</span> <span class="n">shots</span>  <span class="c1"># initial weight</span>
         <span class="k">for</span> <span class="n">res</span> <span class="ow">in</span> <span class="n">circuit_result</span><span class="p">:</span>  <span class="c1"># calculate weight and qpd coefficient</span>
             <span class="n">weight</span> <span class="o">*=</span> <span class="n">res</span><span class="o">.</span><span class="n">count</span> <span class="o">/</span> <span class="n">shots</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">measurements</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="n">qpd_measurement_coefficient</span> <span class="o">*=</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">measurements</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="c1"># if len(res.measurements) &gt; 1:</span>
+            <span class="n">qpd_measurement_coefficient</span> <span class="o">*=</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">measurements</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
         <span class="n">observable_results</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">observables</span><span class="p">))</span>  <span class="c1"># initialize empty array</span>
         <span class="c1"># for obsrvables</span>
         <span class="k">for</span> <span class="n">count</span><span class="p">,</span> <span class="n">obs</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">observables</span><span class="p">):</span>  <span class="c1"># populate observable array</span>

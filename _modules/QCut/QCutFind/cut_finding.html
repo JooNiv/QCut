@@ -1,0 +1,585 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>QCut.QCutFind.cut_finding &#8212; QCut</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../../../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/sphinx-book-theme.css?v=eba8b062" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+    <script src="../../../_static/documentation_options.js?v=4e48d009"></script>
+    <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/QCut/QCutFind/cut_finding';</script>
+    <link rel="icon" href="../../../_static/QCut-logo.jpg"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../_static/QCut-logo.jpg" class="logo__image only-light" alt="QCut - Home"/>
+    <script>document.write(`<img src="../../../_static/QCut-logo.jpg" class="logo__image only-dark" alt="QCut - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../../Usage.html">Usage</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../Examples.html">Examples on using QCut</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../WireCuts.html">Wire cuts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../GateCuts.html">Gate cuts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../AutomaticCuts.html">Automatic cuts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../Multiple_cuts.html">Multiple cuts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../OtherObservables.html">Other than Z observables</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../Notebooks.html">Notebooks</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../examples/QCutBasicUsage.html">Basic Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../examples/QCutCutSubsequentWires.html">Subsequent Wires</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../examples/QCutCutToThreeParts.html">Cut to Three parts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../examples/QCutMultipleCutsOnSingleWire.html">Multiple cuts on a single wire</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../FutureFeatures.html">Possible future features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Acknowledgement.html">Acknowledgements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../License.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../QCut.html">QCut API reference</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../../Changelog.html">Changelog</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1></h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for QCut.QCutFind.cut_finding</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">rustworkx</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">rx</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit</span><span class="w"> </span><span class="kn">import</span> <span class="n">transpile</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit.circuit</span><span class="w"> </span><span class="kn">import</span> <span class="n">CircuitInstruction</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">QCut.QCutFind.graph_circuit_utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">circ_to_graph</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">QCut.QCutFind.metis</span><span class="w"> </span><span class="kn">import</span> <span class="n">k_way_metis_partition</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">QCut.QCutFind.refine</span><span class="w"> </span><span class="kn">import</span> <span class="n">refine_cuts</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">QCut.qpd_gates</span><span class="w"> </span><span class="kn">import</span> <span class="n">cut</span><span class="p">,</span> <span class="n">cutCZ</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">QCut.single_qubit_wirecut</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_locations_and_subcircuits</span>
+
+<span class="n">BASIS_GATES</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;cz&quot;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">]</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">extract_cuts</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">labels</span><span class="p">):</span>  <span class="c1"># noqa: C901</span>
+    <span class="n">cut_edges</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">u</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">graph</span><span class="o">.</span><span class="n">edge_list</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">labels</span><span class="p">[</span><span class="n">u</span><span class="p">]</span> <span class="o">!=</span> <span class="n">labels</span><span class="p">[</span><span class="n">v</span><span class="p">]:</span>
+            <span class="n">cut_edges</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">))</span>
+
+    <span class="n">cut_data_test</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">edge</span> <span class="ow">in</span> <span class="n">cut_edges</span><span class="p">:</span>
+        <span class="n">cut_data_test</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">graph</span><span class="o">.</span><span class="n">get_edge_data</span><span class="p">(</span><span class="n">edge</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">edge</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+        <span class="c1"># Collect all unique nodes involved in cut_edges</span>
+    <span class="n">cut_nodes</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="n">cut_data</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">u</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">cut_edges</span><span class="p">:</span>
+        <span class="c1"># Get all edges connected to u and v (excluding the cut edge itself)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">graph</span><span class="o">.</span><span class="n">get_edge_data</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">cut_data</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">graph</span><span class="o">.</span><span class="n">get_edge_data</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">)))</span>
+            <span class="k">continue</span>
+        <span class="n">connected_edges</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">nbr</span> <span class="ow">in</span> <span class="n">graph</span><span class="o">.</span><span class="n">neighbors</span><span class="p">(</span><span class="n">u</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">nbr</span> <span class="o">!=</span> <span class="n">v</span><span class="p">:</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">get_edge_data</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">nbr</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="n">connected_edges</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">u</span><span class="p">,</span> <span class="n">nbr</span><span class="p">,</span> <span class="n">data</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">nbr</span> <span class="ow">in</span> <span class="n">graph</span><span class="o">.</span><span class="n">neighbors</span><span class="p">(</span><span class="n">v</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">nbr</span> <span class="o">!=</span> <span class="n">u</span><span class="p">:</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">get_edge_data</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">nbr</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="n">connected_edges</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">v</span><span class="p">,</span> <span class="n">nbr</span><span class="p">,</span> <span class="n">data</span><span class="p">))</span>
+        <span class="c1"># Find the edge with the smallest data[1]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">connected_edges</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">filtered_edges</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">edge</span>
+                <span class="k">for</span> <span class="n">edge</span> <span class="ow">in</span> <span class="n">connected_edges</span>
+                <span class="k">if</span> <span class="n">graph</span><span class="o">.</span><span class="n">get_edge_data</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="n">edge</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span>
+            <span class="p">]</span>
+            <span class="n">min_edge</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">filtered_edges</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+            <span class="n">cut_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">min_edge</span><span class="p">)</span>
+
+        <span class="n">cut_nodes</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>
+        <span class="n">cut_nodes</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">cut_data</span><span class="p">,</span> <span class="n">cut_data_test</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">insert_or_append</span><span class="p">(</span><span class="n">circuit</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">instruction</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Insert an instruction at a specific index in the circuit.</span>
+<span class="sd">    If the index is out of bounds, append the instruction.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">index</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">index</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">circuit</span><span class="o">.</span><span class="n">data</span><span class="p">):</span>
+        <span class="n">circuit</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">instruction</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">circuit</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">instruction</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">add_cuts_to_circuit</span><span class="p">(</span><span class="n">circuit</span><span class="p">,</span> <span class="n">cut_data</span><span class="p">,</span> <span class="n">cut_data_test</span><span class="p">):</span>
+    <span class="n">qctest</span> <span class="o">=</span> <span class="n">circuit</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">offset</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="n">zipped_data</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="n">cut_data</span><span class="p">,</span> <span class="n">cut_data_test</span><span class="p">)</span>
+    <span class="n">zipped_data</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
+        <span class="n">zipped_data</span><span class="p">,</span>
+        <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pair</span><span class="p">:</span> <span class="p">(</span>
+            <span class="n">pair</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+            <span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">pair</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">pair</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="s2">&quot;__len__&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="p">),</span>
+    <span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">zipped_data</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">j</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="c1"># Remove the original operation at the specified index§</span>
+            <span class="n">qubits</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> 
+                                 <span class="p">[</span><span class="n">q</span> <span class="k">if</span> <span class="n">circuit</span><span class="o">.</span><span class="n">find_bit</span><span class="p">(</span><span class="n">q</span><span class="p">)</span><span class="o">.</span><span class="n">index</span> <span class="ow">in</span> <span class="n">j</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">else</span> 
+                                  <span class="kc">None</span> <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="n">qctest</span><span class="o">.</span><span class="n">qubits</span><span class="p">]))</span>
+            <span class="n">target_index</span> <span class="o">=</span> <span class="n">i</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">offset</span>
+            <span class="n">qctest</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">target_index</span><span class="p">)</span>
+
+            <span class="c1"># Insert the cut operation</span>
+            <span class="n">insert_or_append</span><span class="p">(</span>
+                <span class="n">qctest</span><span class="p">,</span>
+                <span class="n">target_index</span><span class="p">,</span>
+                <span class="n">CircuitInstruction</span><span class="p">(</span><span class="n">cutCZ</span><span class="p">,</span> <span class="n">qubits</span><span class="p">),</span>
+            <span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Find the correct index for the cut operation</span>
+            <span class="n">ind</span> <span class="o">=</span> <span class="n">i</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">2</span><span class="p">][</span><span class="n">i</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">j</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span>
+            <span class="n">target_index</span> <span class="o">=</span> <span class="n">i</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">offset</span> <span class="o">+</span> <span class="mi">1</span>
+
+            <span class="c1"># Insert the cut operation</span>
+            <span class="n">insert_or_append</span><span class="p">(</span>
+                <span class="n">qctest</span><span class="p">,</span>
+                <span class="n">target_index</span><span class="p">,</span>
+                <span class="n">CircuitInstruction</span><span class="p">(</span><span class="n">cut</span><span class="p">,</span> <span class="p">[</span><span class="n">qctest</span><span class="o">.</span><span class="n">qubits</span><span class="p">[</span><span class="n">ind</span><span class="p">]]),</span>
+            <span class="p">)</span>
+
+            <span class="c1"># Increment offset to account for the new instruction</span>
+            <span class="n">offset</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="k">return</span> <span class="n">qctest</span>
+
+
+<div class="viewcode-block" id="find_cuts">
+<a class="viewcode-back" href="../../../QCut.html#QCut.find_cuts">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">find_cuts</span><span class="p">(</span>  <span class="c1"># noqa: C901</span>
+    <span class="n">circuit</span><span class="p">,</span>
+    <span class="n">num_partitions</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">max_qubits</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">cuts</span><span class="o">=</span><span class="s2">&quot;both&quot;</span><span class="p">,</span>
+    <span class="n">more_data</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Partition a quantum circuit into subcircuits by inserting cut operations.</span>
+
+<span class="sd">    Converts the input circuit into a graph representation and partitions it into the</span>
+<span class="sd">    specified number of subcircuits using METIS partitioning. Optionally refines the</span>
+<span class="sd">    partitioning to respect maximum qubit constraints per subcircuit. Cut operations</span>
+<span class="sd">    are inserted at the partition boundaries, and the resulting subcircuits and their</span>
+<span class="sd">    mappings are returned.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        circuit (QuantumCircuit): The input quantum circuit to partition.</span>
+<span class="sd">        num_partitions (int, optional): Number of partitions to create. If None,</span>
+<span class="sd">            determined from max_qubits.</span>
+<span class="sd">        max_qubits (list[int], optional): Maximum number of qubits allowed in each</span>
+<span class="sd">            partition. If specified, must match num_partitions.</span>
+<span class="sd">        cuts (str, optional): Type of cuts to insert. Can be &quot;both&quot;, &quot;gate&quot;, or &quot;wire&quot;.</span>
+<span class="sd">            Defaults to &quot;both&quot;.</span>
+<span class="sd">        more_data (bool, optional): If True, returns additional data for debugging and</span>
+<span class="sd">            analysis. Defaults to False.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        tuple: If more_data is False, returns:</span>
+<span class="sd">            - list[list[int]]: Qubit locations for each subcircuit.</span>
+<span class="sd">            - list[QuantumCircuit]: List of subcircuits after cuts.</span>
+<span class="sd">            - list[dict]: Mapping of qubits for each subcircuit.</span>
+<span class="sd">        If more_data is True, returns:</span>
+<span class="sd">            - list[list[int]]: Qubit locations for each subcircuit.</span>
+<span class="sd">            - list[QuantumCircuit]: List of subcircuits after cuts.</span>
+<span class="sd">            - list[dict]: Mapping of qubits for each subcircuit.</span>
+<span class="sd">            - QuantumCircuit: The circuit with cuts inserted.</span>
+<span class="sd">            - list: Data describing the cuts.</span>
+<span class="sd">            - list: Additional cut data for testing.</span>
+<span class="sd">            - dict: Partition labels for each node.</span>
+<span class="sd">            - rustworkx.PyGraph: The graph representation of the circuit.</span>
+<span class="sd">            - dict: Mapping of nodes to qubits.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">max_qubits</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">max_qubits</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">)</span> <span class="ow">or</span> <span class="n">num_partitions</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Number of partitions has to be atleast 2&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">num_partitions</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">max_qubits</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">num_partitions</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">max_qubits</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">num_partitions</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">max_qubits</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Either num_partitions or max_qubits must be specified.&quot;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">num_partitions</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">max_qubits</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">max_qubits</span><span class="p">)</span> <span class="o">!=</span> <span class="n">num_partitions</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;If both num_partitions and max_qubits are specified, length of&quot;</span>
+                <span class="s2">&quot;max_qubits must match num_partitions.&quot;</span>
+            <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">num_partitions</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;max_qubits_per_circuit must be less than the number of qubits in the&quot;</span>
+            <span class="s2">&quot;circuit.&quot;</span>
+        <span class="p">)</span>
+    <span class="k">if</span> <span class="n">num_partitions</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">circuit</span><span class="p">,</span> <span class="p">[],</span> <span class="p">[]</span>
+
+    <span class="n">gate_cut_weight</span> <span class="o">=</span> <span class="mi">3</span> <span class="k">if</span> <span class="p">(</span><span class="n">cuts</span> <span class="o">==</span> <span class="s2">&quot;both&quot;</span> <span class="ow">or</span> <span class="n">cuts</span> <span class="o">==</span> <span class="s2">&quot;gate&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="mi">100000000000</span>
+    <span class="n">wire_cut_weight</span> <span class="o">=</span> <span class="mi">4</span> <span class="k">if</span> <span class="p">(</span><span class="n">cuts</span> <span class="o">==</span> <span class="s2">&quot;both&quot;</span> <span class="ow">or</span> <span class="n">cuts</span> <span class="o">==</span> <span class="s2">&quot;wire&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="mi">100000000000</span>
+    
+    <span class="n">circuit</span><span class="o">.</span><span class="n">remove_final_measurements</span><span class="p">()</span>
+
+    <span class="n">circuit</span> <span class="o">=</span> <span class="n">transpile</span><span class="p">(</span><span class="n">circuit</span><span class="p">,</span> <span class="n">basis_gates</span><span class="o">=</span><span class="n">BASIS_GATES</span><span class="p">)</span>
+
+    <span class="n">graph</span><span class="p">,</span> <span class="n">nodes_on_qubit</span> <span class="o">=</span> <span class="n">circ_to_graph</span><span class="p">(</span>
+        <span class="n">circuit</span><span class="p">,</span> <span class="n">gateCutWeight</span><span class="o">=</span><span class="n">gate_cut_weight</span><span class="p">,</span> <span class="n">wireCutWeight</span><span class="o">=</span><span class="n">wire_cut_weight</span>
+    <span class="p">)</span>
+
+    <span class="n">components</span> <span class="o">=</span> <span class="n">rx</span><span class="o">.</span><span class="n">connected_components</span><span class="p">(</span><span class="n">graph</span><span class="p">)</span>
+    <span class="n">labels</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">components</span><span class="p">)</span> <span class="o">==</span> <span class="n">num_partitions</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">comp_ind</span><span class="p">,</span> <span class="n">comp</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">components</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">comp</span><span class="p">:</span>
+                <span class="n">labels</span><span class="p">[</span><span class="n">node</span><span class="p">]</span> <span class="o">=</span> <span class="n">comp_ind</span>
+        <span class="k">return</span> <span class="n">circuit</span><span class="p">,</span> <span class="p">[],</span> <span class="p">[],</span> <span class="n">labels</span><span class="p">,</span> <span class="n">graph</span><span class="p">,</span> <span class="n">nodes_on_qubit</span>
+
+    <span class="n">labels</span> <span class="o">=</span> <span class="n">k_way_metis_partition</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">num_partitions</span><span class="p">)</span>
+
+    <span class="n">cut_data</span><span class="p">,</span> <span class="n">cut_data_test</span> <span class="o">=</span> <span class="n">extract_cuts</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">max_qubits</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">cut_data</span><span class="p">,</span> <span class="n">cut_data_test</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="n">refine_cuts</span><span class="p">(</span>
+            <span class="n">cut_data</span><span class="p">,</span>
+            <span class="n">cut_data_test</span><span class="p">,</span>
+            <span class="n">labels</span><span class="p">,</span>
+            <span class="n">graph</span><span class="p">,</span>
+            <span class="n">max_qubits</span><span class="p">,</span>
+            <span class="n">nodes_on_qubit</span><span class="p">,</span>
+            <span class="n">circuit</span><span class="p">,</span>
+            <span class="n">cuts</span>
+        <span class="p">)</span>
+
+    <span class="n">cut_circuit</span> <span class="o">=</span> <span class="n">add_cuts_to_circuit</span><span class="p">(</span><span class="n">circuit</span><span class="p">,</span> <span class="n">cut_data</span><span class="p">,</span> <span class="n">cut_data_test</span><span class="p">)</span>
+
+    <span class="n">qss</span><span class="p">,</span> <span class="n">circs</span><span class="p">,</span> <span class="n">map_qubits</span> <span class="o">=</span> <span class="n">get_locations_and_subcircuits</span><span class="p">(</span><span class="n">cut_circuit</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">more_data</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">qss</span><span class="p">,</span> <span class="n">circs</span><span class="p">,</span> <span class="n">map_qubits</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">qss</span><span class="p">,</span> <span class="n">circs</span><span class="p">,</span> <span class="n">map_qubits</span><span class="p">,</span> <span class="n">cut_circuit</span><span class="p">,</span> <span class="n">cut_data</span><span class="p">,</span> <span class="n">cut_data_test</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> 
+                <span class="n">graph</span><span class="p">,</span> <span class="n">nodes_on_qubit</span><span class="p">)</span></div>
+
+</pre></div>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Joonas Nivala
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2024, Joonas Nivala.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

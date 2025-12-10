@@ -161,6 +161,9 @@
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../../Usage.html">Usage</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../Examples.html">Examples on using QCut</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../WireCuts.html">Wire cuts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../GateCuts.html">Gate cuts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../AutomaticCuts.html">Automatic cuts</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../Multiple_cuts.html">Multiple cuts</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../OtherObservables.html">Other than Z observables</a></li>
 </ul>
@@ -294,8 +297,9 @@ document.write(`
 <span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_aer</span><span class="w"> </span><span class="kn">import</span> <span class="n">AerSimulator</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">QCut.backend_utility</span><span class="w"> </span><span class="kn">import</span> <span class="n">transpile_experiments</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">QCut.cutlocation</span><span class="w"> </span><span class="kn">import</span> <span class="n">SingleQubitCutLocation</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">QCut.cutlocation</span><span class="w"> </span><span class="kn">import</span> <span class="n">CutLocation</span><span class="p">,</span> <span class="n">SingleQubitCutLocation</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">QCut.qcuterror</span><span class="w"> </span><span class="kn">import</span> <span class="n">QCutError</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">QCut.QCutFind</span><span class="w"> </span><span class="kn">import</span> <span class="n">construct_final_subcircuits</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">QCut.wirecut</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">estimate_expectation_values</span><span class="p">,</span>
     <span class="n">get_experiment_circuits</span><span class="p">,</span>
@@ -316,20 +320,29 @@ document.write(`
 
     <span class="c1"># rename varibales to be more descriptive (namely qs)</span>
     <span class="k">while</span> <span class="n">index</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">circuit</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">circuit_data</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">operation</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;Cut&quot;</span><span class="p">:</span>
+        <span class="n">op</span> <span class="o">=</span> <span class="n">circuit_data</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s2">&quot;Cut&quot;</span> <span class="ow">in</span> <span class="n">op</span><span class="o">.</span><span class="n">operation</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
             <span class="c1"># find qubits for Cut operation</span>
             <span class="n">qubits</span> <span class="o">=</span> <span class="p">[</span>
                 <span class="n">circuit</span><span class="o">.</span><span class="n">find_bit</span><span class="p">(</span><span class="n">qubit</span><span class="p">)</span><span class="o">.</span><span class="n">registers</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-                <span class="k">for</span> <span class="n">qubit</span> <span class="ow">in</span> <span class="n">circuit_data</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">qubits</span>
+                <span class="k">for</span> <span class="n">qubit</span> <span class="ow">in</span> <span class="n">op</span><span class="o">.</span><span class="n">qubits</span>
             <span class="p">]</span>
 
             <span class="c1"># remove the cut operation</span>
-            <span class="n">circuit_data</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">circuit_data</span><span class="p">[</span><span class="n">index</span><span class="p">])</span>
+            <span class="n">circuit_data</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">op</span><span class="p">)</span>
 
             <span class="c1"># append to cut_locations</span>
-            <span class="n">cut_locations</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="n">cut_locations</span><span class="p">,</span> <span class="n">SingleQubitCutLocation</span><span class="p">((</span><span class="n">qubits</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">index</span><span class="p">))</span>
-            <span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">qubits</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">cut_locations</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="n">cut_locations</span><span class="p">,</span> <span class="n">SingleQubitCutLocation</span><span class="p">((</span><span class="n">qubits</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">index</span><span class="p">))</span>
+                <span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">qubits</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="n">cut_locations</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="n">cut_locations</span><span class="p">,</span> <span class="n">CutLocation</span><span class="p">((</span><span class="n">qubits</span><span class="p">,</span> <span class="n">index</span><span class="p">))</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">QCutError</span><span class="p">(</span><span class="s2">&quot;Cannot cut gates with more that 2 qubits.&quot;</span> \
+                <span class="s2">&quot;Transpile circuit to only contain 2 qubit gates.&quot;</span><span class="p">)</span>
 
             <span class="c1"># adjust index to account for removed operation</span>
             <span class="n">index</span> <span class="o">-=</span> <span class="mi">1</span>
@@ -339,39 +352,56 @@ document.write(`
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_insert_cut_nodes</span><span class="p">(</span><span class="n">circuit</span><span class="p">,</span> <span class="n">cut_locations</span><span class="p">):</span>
-    <span class="n">placeholder_locations</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">circuit_data</span> <span class="o">=</span> <span class="n">circuit</span><span class="o">.</span><span class="n">data</span>
     <span class="n">cut_index</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">offset</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">for</span> <span class="n">cut_location</span> <span class="ow">in</span> <span class="n">cut_locations</span><span class="p">:</span>
-        <span class="n">cur_placeholder</span> <span class="o">=</span> <span class="p">()</span>
         <span class="n">measure_node</span> <span class="o">=</span> <span class="n">QuantumCircuit</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Meas_</span><span class="si">{</span><span class="n">cut_index</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">to_instruction</span><span class="p">()</span>
         <span class="n">initialize_node</span> <span class="o">=</span> <span class="n">QuantumCircuit</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Init_</span><span class="si">{</span><span class="n">cut_index</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">to_instruction</span><span class="p">()</span>
+        <span class="n">cut_czc</span> <span class="o">=</span> <span class="n">QuantumCircuit</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;cutCZ_c_</span><span class="si">{</span><span class="n">cut_index</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">cut_czt</span> <span class="o">=</span> <span class="n">QuantumCircuit</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;cutCZ_t_</span><span class="si">{</span><span class="n">cut_index</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="n">cut_index</span> <span class="o">+=</span> <span class="mi">1</span>
 
-        <span class="n">circuit_data</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span>
-            <span class="n">cut_location</span><span class="o">.</span><span class="n">index</span> <span class="o">+</span> <span class="n">offset</span><span class="p">,</span>
-            <span class="n">CircuitInstruction</span><span class="p">(</span>
-                <span class="n">operation</span><span class="o">=</span><span class="n">measure_node</span><span class="p">,</span>
-                <span class="n">qubits</span><span class="o">=</span><span class="p">[</span><span class="n">Qubit</span><span class="p">(</span><span class="n">cut_location</span><span class="o">.</span><span class="n">qubits</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">cut_location</span><span class="o">.</span><span class="n">qubits</span><span class="p">[</span><span class="mi">1</span><span class="p">])],</span>
-            <span class="p">),</span>
-        <span class="p">)</span>
-        <span class="n">meas_plcaholder</span> <span class="o">=</span> <span class="n">cut_location</span><span class="o">.</span><span class="n">index</span> <span class="o">+</span> <span class="n">offset</span>
-        <span class="n">circuit_data</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span>
-            <span class="n">cut_location</span><span class="o">.</span><span class="n">index</span> <span class="o">+</span> <span class="n">offset</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
-            <span class="n">CircuitInstruction</span><span class="p">(</span>
-                <span class="n">operation</span><span class="o">=</span><span class="n">initialize_node</span><span class="p">,</span>
-                <span class="n">qubits</span><span class="o">=</span><span class="p">[</span><span class="n">Qubit</span><span class="p">(</span><span class="n">cut_location</span><span class="o">.</span><span class="n">qubits</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">cut_location</span><span class="o">.</span><span class="n">qubits</span><span class="p">[</span><span class="mi">1</span><span class="p">])],</span>
-            <span class="p">),</span>
-        <span class="p">)</span>
-        <span class="n">init_placeholder</span> <span class="o">=</span> <span class="n">cut_location</span><span class="o">.</span><span class="n">index</span> <span class="o">+</span> <span class="n">offset</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="n">cur_ops</span> <span class="o">=</span> <span class="p">(</span><span class="n">measure_node</span><span class="p">,</span> <span class="n">initialize_node</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cut_location</span><span class="p">,</span> 
+                    <span class="n">SingleQubitCutLocation</span><span class="p">)</span> <span class="k">else</span> <span class="p">(</span><span class="n">cut_czc</span><span class="p">,</span> <span class="n">cut_czt</span><span class="p">)</span>
 
-        <span class="n">cur_placeholder</span> <span class="o">=</span> <span class="p">(</span><span class="n">meas_plcaholder</span><span class="p">,</span> <span class="n">init_placeholder</span><span class="p">)</span>
-        <span class="n">placeholder_locations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cur_placeholder</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cut_location</span><span class="p">,</span> <span class="n">SingleQubitCutLocation</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">ph_op</span> <span class="ow">in</span> <span class="n">cur_ops</span><span class="p">:</span>
+                <span class="n">circuit_data</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span>
+                    <span class="n">cut_location</span><span class="o">.</span><span class="n">index</span> <span class="o">+</span> <span class="n">offset</span><span class="p">,</span>
+                    <span class="n">CircuitInstruction</span><span class="p">(</span>
+                        <span class="n">operation</span><span class="o">=</span><span class="n">ph_op</span><span class="p">,</span>
+                        <span class="n">qubits</span><span class="o">=</span><span class="p">[</span><span class="n">Qubit</span><span class="p">(</span><span class="n">cut_location</span><span class="o">.</span><span class="n">qubits</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">cut_location</span><span class="o">.</span><span class="n">qubits</span><span class="p">[</span><span class="mi">1</span><span class="p">])],</span>
+                    <span class="p">),</span>
+                <span class="p">)</span>
 
-        <span class="n">offset</span> <span class="o">+=</span> <span class="mi">2</span>
+                <span class="n">offset</span> <span class="o">+=</span> <span class="mi">1</span>
+        
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">circuit_data</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span>
+                <span class="n">cut_location</span><span class="o">.</span><span class="n">index</span> <span class="o">+</span> <span class="n">offset</span><span class="p">,</span>
+                <span class="n">CircuitInstruction</span><span class="p">(</span>
+                    <span class="n">operation</span><span class="o">=</span><span class="n">cur_ops</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                    <span class="n">qubits</span><span class="o">=</span><span class="p">[</span><span class="n">Qubit</span><span class="p">(</span><span class="n">cut_location</span><span class="o">.</span><span class="n">qubits</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> 
+                                    <span class="n">cut_location</span><span class="o">.</span><span class="n">qubits</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">])],</span>
+                <span class="p">),</span>
+            <span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">circuit</span><span class="p">,</span> <span class="n">placeholder_locations</span>
+            <span class="n">offset</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="n">circuit_data</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span>
+                <span class="n">cut_location</span><span class="o">.</span><span class="n">index</span> <span class="o">+</span> <span class="n">offset</span><span class="p">,</span>
+                <span class="n">CircuitInstruction</span><span class="p">(</span>
+                    <span class="n">operation</span><span class="o">=</span><span class="n">cur_ops</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                    <span class="n">qubits</span><span class="o">=</span><span class="p">[</span><span class="n">Qubit</span><span class="p">(</span><span class="n">cut_location</span><span class="o">.</span><span class="n">qubits</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> 
+                                    <span class="n">cut_location</span><span class="o">.</span><span class="n">qubits</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">])],</span>
+                <span class="p">),</span>
+            <span class="p">)</span>
+
+            <span class="n">offset</span> <span class="o">+=</span> <span class="mi">1</span>
+
+
+    <span class="k">return</span> <span class="n">circuit</span>
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_move_to_new_wire</span><span class="p">(</span><span class="n">orig</span><span class="p">:</span> <span class="n">QuantumCircuit</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">QuantumCircuit</span><span class="p">:</span>
     <span class="c1"># Create the new circuit and add registers</span>
@@ -459,11 +489,18 @@ document.write(`
 <span class="k">def</span><span class="w"> </span><span class="nf">_add_cbits</span><span class="p">(</span><span class="n">subcircuits</span><span class="p">):</span>
     <span class="k">for</span> <span class="n">circ</span> <span class="ow">in</span> <span class="n">subcircuits</span><span class="p">:</span>
         <span class="n">clbits</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">clbits_qpd</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">circ</span><span class="p">:</span>
-            <span class="k">if</span> <span class="s2">&quot;Meas&quot;</span> <span class="ow">in</span> <span class="n">i</span><span class="o">.</span><span class="n">operation</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">i</span><span class="o">.</span><span class="n">operation</span><span class="o">.</span><span class="n">name</span>
+            <span class="k">if</span> <span class="s2">&quot;Meas&quot;</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
+                <span class="n">clbits_qpd</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">elif</span> <span class="s2">&quot;cut&quot;</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
                 <span class="n">clbits</span> <span class="o">+=</span> <span class="mi">1</span>
-        <span class="n">circ</span><span class="o">.</span><span class="n">add_register</span><span class="p">(</span><span class="n">ClassicalRegister</span><span class="p">(</span><span class="n">clbits</span><span class="p">,</span> <span class="s2">&quot;qpd_meas&quot;</span><span class="p">))</span>
-        <span class="n">circ</span><span class="o">.</span><span class="n">add_register</span><span class="p">(</span><span class="n">ClassicalRegister</span><span class="p">(</span><span class="n">circ</span><span class="o">.</span><span class="n">num_qubits</span> <span class="o">-</span> <span class="n">clbits</span><span class="p">,</span> <span class="s2">&quot;meas&quot;</span><span class="p">))</span>
+                <span class="n">clbits_qpd</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="n">circ</span><span class="o">.</span><span class="n">add_register</span><span class="p">(</span><span class="n">ClassicalRegister</span><span class="p">(</span><span class="n">clbits_qpd</span><span class="p">,</span> <span class="s2">&quot;qpd_meas&quot;</span><span class="p">))</span>
+        <span class="n">circ</span><span class="o">.</span><span class="n">add_register</span><span class="p">(</span><span class="n">ClassicalRegister</span><span class="p">(</span><span class="n">circ</span><span class="o">.</span><span class="n">num_qubits</span> <span class="o">-</span> <span class="n">clbits_qpd</span> 
+                                            <span class="o">+</span> <span class="n">clbits</span><span class="p">,</span> <span class="s2">&quot;meas&quot;</span><span class="p">))</span>
 
     <span class="k">return</span> <span class="n">subcircuits</span>
 
@@ -489,6 +526,7 @@ document.write(`
 <a class="viewcode-back" href="../../QCut.html#QCut.get_locations_and_subcircuits">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_locations_and_subcircuits</span><span class="p">(</span>
     <span class="n">circuit</span><span class="p">:</span> <span class="n">QuantumCircuit</span><span class="p">,</span>
+    <span class="n">max_qubits</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get cut locations and subcircuits with placeholder operations.</span>
 
@@ -499,6 +537,8 @@ document.write(`
 <span class="sd">        tuple: A tuple containing:</span>
 <span class="sd">            - list[SingleQubitCutLocation]: Locations of the cuts as a list</span>
 <span class="sd">            - list[QuantumCircuit]: Subcircuits with placeholder operations</span>
+<span class="sd">            - dict[int:int]: map of subcircuit qubit indices to original circuit</span>
+<span class="sd">                            qubit indices</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">circuit</span> <span class="o">=</span> <span class="n">circuit</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>  <span class="c1"># copy to avoid modifying the original circuit</span>
@@ -507,7 +547,7 @@ document.write(`
         <span class="n">obs_m</span> <span class="o">=</span> <span class="n">obs_m</span><span class="o">.</span><span class="n">to_instruction</span><span class="p">()</span>
         <span class="n">circuit</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">obs_m</span><span class="p">,</span> <span class="p">[</span><span class="n">i</span><span class="p">])</span>
     <span class="n">cut_locations</span> <span class="o">=</span> <span class="n">_get_cut_locations</span><span class="p">(</span><span class="n">circuit</span><span class="p">)</span>
-    <span class="n">circuit1</span><span class="p">,</span> <span class="n">_placeholder_locations</span> <span class="o">=</span> <span class="n">_insert_cut_nodes</span><span class="p">(</span><span class="n">circuit</span><span class="p">,</span> <span class="n">cut_locations</span><span class="p">)</span>
+    <span class="n">circuit1</span> <span class="o">=</span> <span class="n">_insert_cut_nodes</span><span class="p">(</span><span class="n">circuit</span><span class="p">,</span> <span class="n">cut_locations</span><span class="p">)</span>
     <span class="n">circuit</span> <span class="o">=</span> <span class="n">_move_to_new_wire</span><span class="p">(</span><span class="n">circuit1</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
     <span class="n">subcircuits</span> <span class="o">=</span> <span class="n">_separate_subcircuits</span><span class="p">(</span><span class="n">circuit</span><span class="p">)</span>
     <span class="n">subcircuits</span> <span class="o">=</span> <span class="n">_add_cbits</span><span class="p">(</span><span class="n">subcircuits</span><span class="p">)</span>
@@ -526,6 +566,16 @@ document.write(`
         <span class="k">raise</span> <span class="n">QCutError</span><span class="p">(</span>
             <span class="s2">&quot;Invalid cuts. Check documentation to see how cuts should be placed.&quot;</span>
         <span class="p">)</span>
+    
+    <span class="c1">#TODO fix</span>
+    <span class="k">if</span> <span class="n">max_qubits</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">fixed_circs</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">max_qubits</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;if max_qubits is None:</span>
+<span class="sd">            raise QCutError(</span>
+<span class="sd">                &quot;max_qubits must be specified when automatic cut finding with &quot; \</span>
+<span class="sd">                &quot;max_qubits constraint is used.&quot;</span>
+<span class="sd">            )&quot;&quot;&quot;</span>
+        <span class="n">fixed_circs</span> <span class="o">=</span> <span class="n">construct_final_subcircuits</span><span class="p">(</span><span class="n">fixed_circs</span><span class="p">,</span> <span class="n">max_qubits</span><span class="p">)</span>
+
 
     <span class="n">map_qubits</span> <span class="o">=</span> <span class="n">get_qubit_map</span><span class="p">(</span><span class="n">fixed_circs</span><span class="p">)</span>
 

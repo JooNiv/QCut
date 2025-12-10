@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Possible future features &#8212; QCut</title>
+    <title>Gate cuts &#8212; QCut</title>
   
   
   
@@ -43,12 +43,12 @@
     <script src="_static/doctools.js?v=9a2dae69"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'FutureFeatures';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'GateCuts';</script>
     <link rel="icon" href="_static/QCut-logo.jpg"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Acknowledgements" href="Acknowledgement.html" />
-    <link rel="prev" title="QCut: Multiple cuts on single wire" href="examples/QCutMultipleCutsOnSingleWire.html" />
+    <link rel="next" title="Automatic cuts" href="AutomaticCuts.html" />
+    <link rel="prev" title="Wire cuts" href="WireCuts.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -161,9 +161,9 @@
         <p aria-level="2" class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="Usage.html">Usage</a></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="Examples.html">Examples on using QCut</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="Examples.html">Examples on using QCut</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="WireCuts.html">Wire cuts</a></li>
-<li class="toctree-l2"><a class="reference internal" href="GateCuts.html">Gate cuts</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">Gate cuts</a></li>
 <li class="toctree-l2"><a class="reference internal" href="AutomaticCuts.html">Automatic cuts</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Multiple_cuts.html">Multiple cuts</a></li>
 <li class="toctree-l2"><a class="reference internal" href="OtherObservables.html">Other than Z observables</a></li>
@@ -176,7 +176,7 @@
 <li class="toctree-l2"><a class="reference internal" href="examples/QCutMultipleCutsOnSingleWire.html">Multiple cuts on a single wire</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">Possible future features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="FutureFeatures.html">Possible future features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Acknowledgement.html">Acknowledgements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="License.html">License</a></li>
 <li class="toctree-l1"><a class="reference internal" href="QCut.html">QCut API reference</a></li>
@@ -237,7 +237,7 @@
       
       
       
-      <li><a href="_sources/FutureFeatures.rst" target="_blank"
+      <li><a href="_sources/GateCuts.rst" target="_blank"
    class="btn btn-sm btn-download-source-button dropdown-item"
    title="Download source file"
    data-bs-placement="left" data-bs-toggle="tooltip"
@@ -308,9 +308,7 @@ document.write(`
   </button>
 `);
 </script>
-<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <span class="fa-solid fa-list"></span>
-</button>
+
 </div></div>
       
     </div>
@@ -321,19 +319,11 @@ document.write(`
               
 
 <div id="jb-print-docs-body" class="onlyprint">
-    <h1>Possible future features</h1>
+    <h1>Gate cuts</h1>
     <!-- Table of contents -->
     <div id="print-main-content">
         <div id="jb-print-toc">
             
-            <div>
-                <h2> Contents </h2>
-            </div>
-            <nav aria-label="Page">
-                <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#streamline-calculating-other-than-z-observable-expectation-values">Streamline calculating other than Z observable expectation values</a></li>
-</ul>
-            </nav>
         </div>
     </div>
 </div>
@@ -343,21 +333,21 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="possible-future-features">
-<h1>Possible future features<a class="headerlink" href="#possible-future-features" title="Link to this heading">#</a></h1>
-<p>This list is not a roadmap but simpy highlights some interesting features that could be added in the future
-depending on time constraints.</p>
-<section id="streamline-calculating-other-than-z-observable-expectation-values">
-<h2>Streamline calculating other than Z observable expectation values<a class="headerlink" href="#streamline-calculating-other-than-z-observable-expectation-values" title="Link to this heading">#</a></h2>
-<p>Make it possible to define observables as an dictionary where keys correspond to a Pauli observable
-and values to qubit indices, like:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">observables</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;z&#39;</span><span class="p">:</span> <span class="p">[[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">]],</span> <span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]}</span>
+  <section id="gate-cuts">
+<h1>Gate cuts<a class="headerlink" href="#gate-cuts" title="Link to this heading">#</a></h1>
+<p>Gate cuts can be used to cut multi-qubit gates instead of cutting wires. This is done by inserting special gate cut instructions into the circuit.
+Currently only CZ gate cuts are supported so special care needs to be taken to transform other gates into CZ gates before inserting the cuts.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cut_circuit</span> <span class="o">=</span> <span class="n">QuantumCircuit</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">cut_circuit</span><span class="o">.</span><span class="n">h</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">cut_circuit</span><span class="o">.</span><span class="n">h</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">cut_circuit</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cutCZ</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">cut_circuit</span><span class="o">.</span><span class="n">h</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">cut_circuit</span><span class="o">.</span><span class="n">cx</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="n">cut_circuit</span><span class="o">.</span><span class="n">draw</span><span class="p">(</span><span class="s2">&quot;mpl&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>This could then be passed on as in the current version but would automatically calculate all the needed expectation values.
-Note that just like in the current implelemtation this would cause multiple experiment runs behind the scenes and would just
-streamline the user experience.</p>
-</section>
+<p>After this the circuit can be processed as usual with QCut (take a look at the Usage documentation for more details).</p>
 </section>
 
 
@@ -372,20 +362,20 @@ streamline the user experience.</p>
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="examples/QCutMultipleCutsOnSingleWire.html"
+       href="WireCuts.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">QCut: Multiple cuts on single wire</p>
+        <p class="prev-next-title">Wire cuts</p>
       </div>
     </a>
     <a class="right-next"
-       href="Acknowledgement.html"
+       href="AutomaticCuts.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Acknowledgements</p>
+        <p class="prev-next-title">Automatic cuts</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -395,21 +385,6 @@ streamline the user experience.</p>
             </div>
             
             
-              
-                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
-
-
-  <div class="sidebar-secondary-item">
-  <div class="page-toc tocsection onthispage">
-    <i class="fa-solid fa-list"></i> Contents
-  </div>
-  <nav class="bd-toc-nav page-toc">
-    <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#streamline-calculating-other-than-z-observable-expectation-values">Streamline calculating other than Z observable expectation values</a></li>
-</ul>
-  </nav></div>
-
-</div></div>
               
             
           </div>
