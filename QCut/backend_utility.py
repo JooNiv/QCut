@@ -8,7 +8,50 @@ import numpy as np
 from qiskit import QuantumCircuit, transpile
 
 from QCut.cutcircuit import CutCircuit
+from QCut.cutlocation import CutLocation, SingleQubitCutLocation
 
+
+def transpile_subcircuits(subcircuits: list[QuantumCircuit], 
+                          cut_locations: list,
+                          backend) -> list[QuantumCircuit]:
+    """
+    Transpile subcircuits for a given backend.
+
+    Args:
+        subcircuits (list[QuantumCircuit]): List of subcircuits to be transpiled.
+        backend: Backend to transpile to.
+    """
+
+    transpiled_subcircuits = []
+
+    basis  = []
+    
+    placeholders = []
+
+    for ind, cut in enumerate(cut_locations):
+        if isinstance(cut, SingleQubitCutLocation):
+            placeholders.append(f"Meas_{ind}")
+            placeholders.append(f"Init_{ind}")
+        elif isinstance(cut, CutLocation):
+            placeholders.append(f"cutCZ_c_{ind}")
+            placeholders.append(f"cutCZ_t_{ind}")
+
+    for i in range(sum(subcircuits.num_qubits for subcircuits in subcircuits)):
+        placeholders.append(f"obs_{i}")
+
+    try:
+        basis = backend.configuration().basis_gates
+    except Exception:
+        basis = list(backend.architecture.gates.keys())
+        basis = ["r" if gate == "prx" else gate for gate in basis]
+
+    for circ in subcircuits:
+        transpiled = transpile(circ, 
+                               basis_gates=basis + 
+                               placeholders)
+        transpiled_subcircuits.append(transpiled)
+
+    return CutCircuit(subcircuits=transpiled_subcircuits, backend=backend)
 
 def transpile_experiments(experiment_circuits: list | CutCircuit, backend) -> list:
     """
