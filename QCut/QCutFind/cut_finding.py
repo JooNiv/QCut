@@ -84,7 +84,9 @@ def add_cuts_to_circuit(circuit, cut_data, cut_data_test):
 
         if len(j) > 2:
             # Remove the original operation at the specified index§
-            qubits = list(filter(lambda x: x is not None, [q if circuit.find_bit(q).index in j[2] else None for q in qctest.qubits]))
+            qubits = list(filter(lambda x: x is not None, 
+                                 [q if circuit.find_bit(q).index in j[2] else 
+                                  None for q in qctest.qubits]))
             target_index = i[2][0] + offset
             qctest.data.pop(target_index)
 

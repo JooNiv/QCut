@@ -27,7 +27,7 @@ dependencies = [
     "numpy",
     "qiskit-aer >= 0.13.0, < 0.15",
     "qiskit-iqm==17.8",
-    "pymetis>=2025.1.1",
+    "pymetis==2025.1.1",
 ]
 
 [dependency-groups]

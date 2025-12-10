@@ -1,6 +1,5 @@
 """Define identity channel quasi probability decomposition."""
 
-from qiskit import QuantumCircuit
 
 from QCut.qpd_gates import (
     i_minus_init,

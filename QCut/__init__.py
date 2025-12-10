@@ -44,6 +44,7 @@ __all__ = [
     "run_experiments",
     "cut_wire",
     "cut",
+    "cutCZ",
     "identity_qpd",
     "find_cuts"
 ]

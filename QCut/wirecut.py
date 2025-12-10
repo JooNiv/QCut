@@ -211,7 +211,7 @@ def insert_wire_cut_qpd(
     return offset, num_id_meas, id_meas_bit, classical_bit_index, inserted_operations
 
 
-def insert_cz_cut_qpd(
+def insert_cz_cut_qpd(  # noqa: C901
     ind,
     op,
     subcircuit,
