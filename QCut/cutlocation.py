@@ -13,8 +13,8 @@ class CutLocation:
     ) -> None:
         """Init."""
         self.qubits = cut_location[0]
-        self.meas = cut_location[0][0][1]
-        self.init = cut_location[0][1][1]
+        self.control = cut_location[0][0][1]
+        self.target = cut_location[0][1][1]
         self.index = cut_location[1]
 
     def __eq__(self, other: CutLocation) -> bool:
@@ -23,15 +23,15 @@ class CutLocation:
             return NotImplemented
 
         return (
-            self.meas == other.meas
-            and self.init == other.init
+            self.control == other.control
+            and self.target == other.target
             and self.index == other.index
         )
 
     def __str__(self) -> str:
         """Format string."""
         msg = (
-            f"meas qubit: {self.meas}, init qubit: {self.init}, "
+            f"control qubit: {self.control}, target qubit: {self.target}, "
             f"cut index: {self.index}"
         )
         return msg
@@ -71,4 +71,4 @@ class SingleQubitCutLocation:
 
     def __repr__(self) -> str:
         """Represent as string."""
-        return str(self)
+        return str(self)    

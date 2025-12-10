@@ -17,9 +17,3 @@ and values to qubit indices, like:
 This could then be passed on as in the current version but would automatically calculate all the needed expectation values.
 Note that just like in the current implelemtation this would cause multiple experiment runs behind the scenes and would just
 streamline the user experience.
-
-Support for cutting with reset gates
-------------------------------------
-
-Currently not an important feature since reset gates pose large errors but could be implemented in the future.
-Allowing reset gates would reduce the number of extra qubits needed and allow gate cuts.

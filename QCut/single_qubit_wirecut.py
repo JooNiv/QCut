@@ -10,8 +10,9 @@ from qiskit.converters import circuit_to_dag, dag_to_circuit
 from qiskit_aer import AerSimulator
 
 from QCut.backend_utility import transpile_experiments
-from QCut.cutlocation import SingleQubitCutLocation
+from QCut.cutlocation import CutLocation, SingleQubitCutLocation
 from QCut.qcuterror import QCutError
+from QCut.QCutFind import construct_final_subcircuits
 from QCut.wirecut import (
     estimate_expectation_values,
     get_experiment_circuits,
@@ -32,20 +33,29 @@ def _get_cut_locations(circuit):
 
     # rename varibales to be more descriptive (namely qs)
     while index < len(circuit):
-        if circuit_data[index].operation.name == "Cut":
+        op = circuit_data[index]
+        if "Cut" in op.operation.name:
             # find qubits for Cut operation
             qubits = [
                 circuit.find_bit(qubit).registers[0]
-                for qubit in circuit_data[index].qubits
+                for qubit in op.qubits
             ]
 
             # remove the cut operation
-            circuit_data.remove(circuit_data[index])
+            circuit_data.remove(op)
 
             # append to cut_locations
-            cut_locations = np.append(
-                cut_locations, SingleQubitCutLocation((qubits[0], index))
-            )
+            if len(qubits) == 1:
+                cut_locations = np.append(
+                    cut_locations, SingleQubitCutLocation((qubits[0], index))
+                )
+            elif len(qubits) == 2:
+                cut_locations = np.append(
+                    cut_locations, CutLocation((qubits, index))
+                )
+            else:
+                raise QCutError("Cannot cut gates with more that 2 qubits." \
+                "Transpile circuit to only contain 2 qubit gates.")
 
             # adjust index to account for removed operation
             index -= 1
@@ -55,39 +65,56 @@ def _get_cut_locations(circuit):
 
 
 def _insert_cut_nodes(circuit, cut_locations):
-    placeholder_locations = []
     circuit_data = circuit.data
     cut_index = 0
     offset = 0
     for cut_location in cut_locations:
-        cur_placeholder = ()
         measure_node = QuantumCircuit(1, name=f"Meas_{cut_index}").to_instruction()
         initialize_node = QuantumCircuit(1, name=f"Init_{cut_index}").to_instruction()
+        cut_czc = QuantumCircuit(1, name=f"cutCZ_c_{cut_index}")
+        cut_czt = QuantumCircuit(1, name=f"cutCZ_t_{cut_index}")
         cut_index += 1
 
-        circuit_data.insert(
-            cut_location.index + offset,
-            CircuitInstruction(
-                operation=measure_node,
-                qubits=[Qubit(cut_location.qubits[0], cut_location.qubits[1])],
-            ),
-        )
-        meas_plcaholder = cut_location.index + offset
-        circuit_data.insert(
-            cut_location.index + offset + 1,
-            CircuitInstruction(
-                operation=initialize_node,
-                qubits=[Qubit(cut_location.qubits[0], cut_location.qubits[1])],
-            ),
-        )
-        init_placeholder = cut_location.index + offset + 1
+        cur_ops = (measure_node, initialize_node) if isinstance(cut_location, 
+                    SingleQubitCutLocation) else (cut_czc, cut_czt)
 
-        cur_placeholder = (meas_plcaholder, init_placeholder)
-        placeholder_locations.append(cur_placeholder)
+        if isinstance(cut_location, SingleQubitCutLocation):
+            for ph_op in cur_ops:
+                circuit_data.insert(
+                    cut_location.index + offset,
+                    CircuitInstruction(
+                        operation=ph_op,
+                        qubits=[Qubit(cut_location.qubits[0], cut_location.qubits[1])],
+                    ),
+                )
 
-        offset += 2
+                offset += 1
+        
+        else:
+            circuit_data.insert(
+                cut_location.index + offset,
+                CircuitInstruction(
+                    operation=cur_ops[0],
+                    qubits=[Qubit(cut_location.qubits[0][0], 
+                                    cut_location.qubits[0][1])],
+                ),
+            )
 
-    return circuit, placeholder_locations
+            offset += 1
+
+            circuit_data.insert(
+                cut_location.index + offset,
+                CircuitInstruction(
+                    operation=cur_ops[1],
+                    qubits=[Qubit(cut_location.qubits[1][0], 
+                                    cut_location.qubits[1][1])],
+                ),
+            )
+
+            offset += 1
+
+
+    return circuit
 
 def _move_to_new_wire(orig: QuantumCircuit) -> QuantumCircuit:
     # Create the new circuit and add registers
@@ -175,11 +202,18 @@ def _separate_subcircuits(circuit):
 def _add_cbits(subcircuits):
     for circ in subcircuits:
         clbits = 0
+        clbits_qpd = 0
         for i in circ:
-            if "Meas" in i.operation.name:
+            name = i.operation.name
+            if "Meas" in name:
+                clbits_qpd += 1
+            elif "cut" in name:
                 clbits += 1
-        circ.add_register(ClassicalRegister(clbits, "qpd_meas"))
-        circ.add_register(ClassicalRegister(circ.num_qubits - clbits, "meas"))
+                clbits_qpd += 1
+
+        circ.add_register(ClassicalRegister(clbits_qpd, "qpd_meas"))
+        circ.add_register(ClassicalRegister(circ.num_qubits - clbits_qpd 
+                                            + clbits, "meas"))
 
     return subcircuits
 
@@ -203,6 +237,7 @@ def get_qubit_map(subcircuits: list[QuantumCircuit]):
 
 def get_locations_and_subcircuits(
     circuit: QuantumCircuit,
+    max_qubits: list[int] | None = None,
 ):
     """Get cut locations and subcircuits with placeholder operations.
 
@@ -213,6 +248,8 @@ def get_locations_and_subcircuits(
         tuple: A tuple containing:
             - list[SingleQubitCutLocation]: Locations of the cuts as a list
             - list[QuantumCircuit]: Subcircuits with placeholder operations
+            - dict[int:int]: map of subcircuit qubit indices to original circuit
+                            qubit indices
 
     """
     circuit = circuit.copy()  # copy to avoid modifying the original circuit
@@ -221,7 +258,7 @@ def get_locations_and_subcircuits(
         obs_m = obs_m.to_instruction()
         circuit.append(obs_m, [i])
     cut_locations = _get_cut_locations(circuit)
-    circuit1, _placeholder_locations = _insert_cut_nodes(circuit, cut_locations)
+    circuit1 = _insert_cut_nodes(circuit, cut_locations)
     circuit = _move_to_new_wire(circuit1.copy())
     subcircuits = _separate_subcircuits(circuit)
     subcircuits = _add_cbits(subcircuits)
@@ -240,6 +277,16 @@ def get_locations_and_subcircuits(
         raise QCutError(
             "Invalid cuts. Check documentation to see how cuts should be placed."
         )
+    
+    #TODO fix
+    if max_qubits and len(fixed_circs) != len(max_qubits):
+        """if max_qubits is None:
+            raise QCutError(
+                "max_qubits must be specified when automatic cut finding with " \
+                "max_qubits constraint is used."
+            )"""
+        fixed_circs = construct_final_subcircuits(fixed_circs, max_qubits)
+
 
     map_qubits = get_qubit_map(fixed_circs)
 

@@ -19,7 +19,6 @@ class CutCircuit:
                     new_circuits[ind][ind_2] = circuit.assign_parameters(parameters)
                 except Exception:
                     new_circuits[ind][ind_2] = circuit
-        print(new_circuits[0])
         return new_circuits
     
     @property
