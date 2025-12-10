@@ -5,9 +5,15 @@ from qiskit import QuantumCircuit
 
 
 class CutCircuit:
-    def __init__(self, experiment_circuits: list[list[QuantumCircuit]]) -> None:
+    def __init__(self, 
+                    experiment_circuits: list[list[QuantumCircuit]]=None, 
+                    subcircuits: list[QuantumCircuit]=None,
+                    backend=None) -> None:
         """Init."""
+
+        self.subcircuits = subcircuits
         self.circuits = experiment_circuits
+        self.backend = backend
 
     def assign_parameters(self, parameters: dict) -> list[list[QuantumCircuit]]:
         """Assign parameters to the circuits. Same as qiskit
@@ -24,7 +30,7 @@ class CutCircuit:
     @property
     def num_qubits(self):
         """Number of qubits per subcircuit."""
-        return [i.num_qubits for i in self.circuits[0]]
+        return [i.num_qubits for i in self.subcircuits[0]]
     
     @property
     def num_circuits(self):
