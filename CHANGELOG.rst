@@ -2,6 +2,18 @@
 Changelog
 =========
 
+Version 0.6.0
+=============
+- Support cutting CZ gates
+    * Added support for cutting CZ gates in addition wire cuts.
+    * Check documentation for details on how to use.
+- Added automatic cut finding feature
+    * Added :code:`QCutFind` module for automatically finding good cut locations in a circuit.
+    * Check documentation for details on how to use.
+- Bug fixes
+- Drop windows support for the time being due to METIS issues
+    * Windows users should use WSL
+
 Version 0.3.0
 =============
 - Support for IQM Qiskit 17.8

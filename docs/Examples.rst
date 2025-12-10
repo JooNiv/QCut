@@ -5,5 +5,8 @@ Examples on using QCut
    :maxdepth: 3
    :caption: Contents:
 
+   WireCuts
+   GateCuts
+   AutomaticCuts
    Multiple_cuts
    OtherObservables
