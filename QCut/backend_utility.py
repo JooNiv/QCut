@@ -6,6 +6,10 @@ from __future__ import annotations
 
 import numpy as np
 from qiskit import QuantumCircuit, transpile
+from qiskit.transpiler.preset_passmanagers import generate_preset_pass_manager
+from qiskit.transpiler.passes import CommutativeCancellation
+from qiskit.converters import circuit_to_dag, dag_to_circuit
+
 
 from QCut.cutcircuit import CutCircuit
 from QCut.cutlocation import CutLocation, SingleQubitCutLocation
@@ -13,16 +17,26 @@ from QCut.cutlocation import CutLocation, SingleQubitCutLocation
 
 def transpile_subcircuits(subcircuits: list[QuantumCircuit], 
                           cut_locations: list,
-                          backend) -> list[QuantumCircuit]:
+                          backend,
+                          optimization_level: int = 0,
+                          transpile_options: dict = None) -> CutCircuit:
     """
-    Transpile subcircuits for a given backend.
+    Transpile subcircuits for a given backend. More efficient than transpiling
+    experiment circuits as it only transpiles each subcircuit once instead of
+    each experiment circuit. However, may lead to suboptimal transpilation results as
+    the tranpiler cannot use the backend object directly due to need to retain
+    some placeholder gates for cuts and observables. `transpile_options` can be used
+    to pass additional options to the transpiler. For more control over transpilation
+    of experiment circuits, use `transpile_experiments` or manually transpile them.
 
     Args:
         subcircuits (list[QuantumCircuit]): List of subcircuits to be transpiled.
         backend: Backend to transpile to.
+        optimization_level (int): Optimization level for transpilation (0-3).
+        transpile_options (dict): Arguments passed to qiskit transpile function.
+    Returns:
+        CutCircuit: Transpiled subcircuits wrapped in CutCircuit class.
     """
-
-    transpiled_subcircuits = []
 
     basis  = []
     
@@ -38,31 +52,56 @@ def transpile_subcircuits(subcircuits: list[QuantumCircuit],
 
     for i in range(sum(subcircuits.num_qubits for subcircuits in subcircuits)):
         placeholders.append(f"obs_{i}")
+    
+    if transpile_options and "basis_gates" in transpile_options:
+        basis = transpile_options["basis_gates"]
+        transpile_options.pop("basis_gates")
+    else:
+        try:
+            basis = backend.configuration().basis_gates
+        except Exception:
+            basis = list(backend.architecture.gates.keys())
+            basis = ["r" if gate == "prx" else gate for gate in basis]
+    
+    if transpile_options and "backend" in transpile_options:
+        transpile_options.pop("backend")
 
-    try:
-        basis = backend.configuration().basis_gates
-    except Exception:
-        basis = list(backend.architecture.gates.keys())
-        basis = ["r" if gate == "prx" else gate for gate in basis]
+    pm = generate_preset_pass_manager(coupling_map=backend._coupling_map,
+                                      basis_gates=basis + placeholders,
+                                      optimization_level=optimization_level,
+                                      **(transpile_options or {}))
 
-    for circ in subcircuits:
-        transpiled = transpile(circ, 
-                               basis_gates=basis + 
-                               placeholders)
-        transpiled_subcircuits.append(transpiled)
+    transpiled = transpile(subcircuits,
+                           coupling_map=backend._coupling_map,
+                           basis_gates=basis + placeholders,
+                           optimization_level=optimization_level,
+                           **(transpile_options or {}))
 
-    return CutCircuit(subcircuits=transpiled_subcircuits, backend=backend)
+    #if optimization_level == 2:
+    #    pm2 = CommutativeCancellation(basis_gates=basis)
+    #    transpiled = [dag_to_circuit(pm2.run(circuit_to_dag(circ))) 
+    #                  for circ in transpiled]
 
-def transpile_experiments(experiment_circuits: list | CutCircuit, backend) -> list:
+
+    return CutCircuit(subcircuits=transpiled, backend=backend)
+
+def transpile_experiments(experiment_circuits: list | CutCircuit, 
+                          backend,
+                          transpile_options: dict = None) -> CutCircuit:
     """
-    Transpile experiment circuits.
+    Transpile experiment circuits. Transpiles all generated experiment circuits for
+    a given backend. Most often one should use `transpile_subcircuits` instead, as that
+    only subcircuits before experiment generation which is alot more efficient. This 
+    function is mainly provided for special cases where one needs/wants extra control
+    over the tranpilation of experiment circuits.
 
     Args:
         experiment_circuits: (list): Experiment circuits to be transpiled.
         backend (str): Backend to transpile to.
+        transpile_options (dict): Arguments passed to qiskit transpile function.
 
     Returns:
-        list: A list of transpiled experiment circuits.
+        CutCircuit: Transpiled experiment circuits wrapped in CutCircuit class.
     """
 
     if isinstance(experiment_circuits, CutCircuit):
@@ -70,7 +109,7 @@ def transpile_experiments(experiment_circuits: list | CutCircuit, backend) -> li
 
     subexperiments = [
         [
-            transpile(circuit, backend, layout_method="sabre", optimization_level=3)
+            transpile(circuit, backend=backend, **(transpile_options or {}))
             for circuit in circuit_group
         ]
         for circuit_group in experiment_circuits

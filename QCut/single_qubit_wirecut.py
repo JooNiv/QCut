@@ -5,11 +5,11 @@ from copy import deepcopy
 
 import numpy as np
 from qiskit import ClassicalRegister, QuantumCircuit, QuantumRegister
-from qiskit.circuit import CircuitInstruction, Qubit
+from qiskit.circuit import CircuitInstruction, Instruction, Qubit
 from qiskit.converters import circuit_to_dag, dag_to_circuit
 from qiskit_aer import AerSimulator
 
-from QCut.backend_utility import transpile_experiments
+from QCut.backend_utility import transpile_subcircuits
 from QCut.cutlocation import CutLocation, SingleQubitCutLocation
 from QCut.qcuterror import QCutError
 from QCut.QCutFind import construct_final_subcircuits
@@ -64,15 +64,29 @@ def _get_cut_locations(circuit):
     return cut_locations
 
 
+class NonCommutingGate(Instruction):
+    def __init__(self, name="Init_1"):
+        super().__init__(name=name, num_qubits=1, num_clbits=0, params=[])
+        self._opaque = True
+
+    def __repr__(self):
+        return f"{self.name}"
+
+
 def _insert_cut_nodes(circuit, cut_locations):
     circuit_data = circuit.data
     cut_index = 0
     offset = 0
     for cut_location in cut_locations:
-        measure_node = QuantumCircuit(1, name=f"Meas_{cut_index}").to_instruction()
-        initialize_node = QuantumCircuit(1, name=f"Init_{cut_index}").to_instruction()
-        cut_czc = QuantumCircuit(1, name=f"cutCZ_c_{cut_index}")
-        cut_czt = QuantumCircuit(1, name=f"cutCZ_t_{cut_index}")
+        
+        measure_node = NonCommutingGate(f"Meas_{cut_index}")
+        
+        initialize_node = NonCommutingGate(f"Init_{cut_index}")
+
+        cut_czc = NonCommutingGate(f"cutCZ_c_{cut_index}")
+        
+        cut_czt = NonCommutingGate(f"cutCZ_t_{cut_index}")
+
         cut_index += 1
 
         cur_ops = (measure_node, initialize_node) if isinstance(cut_location, 
@@ -314,9 +328,16 @@ def run_cut_circuit(
         list: a list of expectation values
 
     """
-    subexperiments, coefs, id_meas = get_experiment_circuits(subcircuits, cut_locations)
+
     if not isinstance(backend, AerSimulator):
-        subexperiments = transpile_experiments(subexperiments.circuits, backend)
+        transpiled_subcircuits = transpile_subcircuits(subcircuits, 
+                                                       cut_locations, backend)
+    
+
+    (subexperiments, 
+    coefs, 
+    id_meas) = get_experiment_circuits(transpiled_subcircuits.subcircuits, 
+                                       cut_locations)
         
     results = run_experiments(
         subexperiments,

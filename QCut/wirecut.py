@@ -7,8 +7,9 @@ from itertools import product
 from typing import TYPE_CHECKING, Optional
 
 import numpy as np
-from qiskit import QuantumCircuit
+from qiskit import QuantumCircuit, transpile
 from qiskit.circuit import CircuitInstruction, Qubit
+from qiskit.converters import circuit_to_dag
 from qiskit_aer import AerSimulator
 
 from QCut.cutcircuit import CutCircuit
@@ -74,6 +75,14 @@ def _finalize_subcircuit(
 ) -> QuantumCircuit:
     """Finalize the subcircuit by measuring remaining qubits and decomposing."""
     meas_qubits = [i for i in range(subcircuit.num_qubits) if i not in qpd_qubits]
+
+    dag = circuit_to_dag(subcircuit)
+    idle = list(dag.idle_wires())
+
+    for wire in idle:
+        if isinstance(wire, Qubit) and wire._index in meas_qubits:
+            meas_qubits.remove(wire._index)
+
     if len(subcircuit.cregs) >= 2:
         subcircuit.measure(meas_qubits, subcircuit.cregs[1])
     else:
@@ -343,7 +352,7 @@ def insert_cz_cut_qpd(  # noqa: C901
 
 
 def get_experiment_circuits(  # noqa: C901
-    subcircuits: list[QuantumCircuit],  # noqa: C901
+    subcircuits: list[QuantumCircuit] | CutCircuit,  # noqa: C901
     cut_locations: np.ndarray[CutLocation],
 ) -> tuple[CutCircuit, list[int], list[tuple[int, int, int]]]:
     """Generate experiment circuits by inserting QPD operations on
@@ -377,6 +386,16 @@ def get_experiment_circuits(  # noqa: C901
     qpd_combinations = get_qpd_combinations(cut_locations)  # generate the QPD
     # operation combinations
 
+    if isinstance(subcircuits, CutCircuit) and subcircuits.backend is not None:
+        backend = subcircuits.backend
+        try:
+            basis = backend.configuration().basis_gates
+        except Exception:
+            basis = list(backend.architecture.gates.keys())
+        basis = ["r" if gate == "prx" else gate for gate in basis]
+        
+        subcircuits = subcircuits.subcircuits
+
     _remove_obsm(subcircuits)
 
     # initialize solution lists
@@ -396,6 +415,11 @@ def get_experiment_circuits(  # noqa: C901
     ):  # loop through all
         # QPD combinations
         coefficients[id_meas_experiment_index] = np.prod([op["c"] for op in qpd])
+
+        for sub in qpd:
+            sub["op_0"] = transpile(sub["op_0"], basis_gates=basis)
+            sub["op_1"] = transpile(sub["op_1"], basis_gates=basis)
+
         sub_experiment_circuits = []  # sub array for collecting related experiment
         # circuits
         inserted_operations = 0
