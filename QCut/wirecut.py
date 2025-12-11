@@ -386,7 +386,9 @@ def get_experiment_circuits(  # noqa: C901
     qpd_combinations = get_qpd_combinations(cut_locations)  # generate the QPD
     # operation combinations
 
-    if isinstance(subcircuits, CutCircuit) and subcircuits.backend is not None:
+    check_circuit_type = isinstance(subcircuits, CutCircuit) and subcircuits.backend is not None
+
+    if check_circuit_type:
         backend = subcircuits.backend
         try:
             basis = backend.configuration().basis_gates
@@ -416,9 +418,10 @@ def get_experiment_circuits(  # noqa: C901
         # QPD combinations
         coefficients[id_meas_experiment_index] = np.prod([op["c"] for op in qpd])
 
-        for sub in qpd:
-            sub["op_0"] = transpile(sub["op_0"], basis_gates=basis)
-            sub["op_1"] = transpile(sub["op_1"], basis_gates=basis)
+        if check_circuit_type:
+            for sub in qpd:
+                sub["op_0"] = transpile(sub["op_0"], basis_gates=basis)
+                sub["op_1"] = transpile(sub["op_1"], basis_gates=basis)
 
         sub_experiment_circuits = []  # sub array for collecting related experiment
         # circuits

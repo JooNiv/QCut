@@ -333,11 +333,15 @@ def run_cut_circuit(
         transpiled_subcircuits = transpile_subcircuits(subcircuits, 
                                                        cut_locations, backend)
     
-
-    (subexperiments, 
-    coefs, 
-    id_meas) = get_experiment_circuits(transpiled_subcircuits.subcircuits, 
-                                       cut_locations)
+        (subexperiments, 
+        coefs, 
+        id_meas) = get_experiment_circuits(transpiled_subcircuits, 
+                                        cut_locations)
+    else:
+        (subexperiments, 
+        coefs, 
+        id_meas) = get_experiment_circuits(subcircuits, 
+                                        cut_locations)
         
     results = run_experiments(
         subexperiments,
