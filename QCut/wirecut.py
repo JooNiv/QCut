@@ -75,8 +75,6 @@ def _finalize_subcircuit(
 ) -> QuantumCircuit:
     """Finalize the subcircuit by measuring remaining qubits and decomposing."""
 
-    print(subcircuit)
-
     meas_qubits = [i for i in range(subcircuit.num_qubits) if i not in qpd_qubits]
 
     dag = circuit_to_dag(subcircuit)
@@ -172,9 +170,11 @@ def insert_wire_cut_qpd(
             # remove extra classical bits and registers
             _adjust_cregs(subcircuit)
             for subop in reversed(meas_op.data):
+                print(subop)
                 subcircuit.data.insert(
                     ind + offset,
-                    CircuitInstruction(operation=subop, qubits=qubits_for_operation),
+                    CircuitInstruction(operation=subop.operation, 
+                                       qubits=qubits_for_operation),
                 )
         else:
             for i, subop in enumerate(reversed(meas_op.data)):
