@@ -20,6 +20,7 @@ ymeas.h(0)
 ymeas.measure(0, 0)
 
 idmeas = QuantumCircuit(1, name="id-meas")
+idmeas.id(0)
 
 zmeas = QuantumCircuit(1, 1, name="z-meas")
 zmeas.measure(0, 0)
@@ -27,6 +28,7 @@ zmeas.measure(0, 0)
 
 # define initialization operations
 zero_init = QuantumCircuit(1, name="0-init")
+zero_init.id(0)
 
 one_init = QuantumCircuit(1, name="1-init")
 one_init.x(0)

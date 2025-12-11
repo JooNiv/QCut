@@ -74,6 +74,9 @@ def _finalize_subcircuit(
     subcircuit: QuantumCircuit, qpd_qubits: list[int]
 ) -> QuantumCircuit:
     """Finalize the subcircuit by measuring remaining qubits and decomposing."""
+
+    print(subcircuit)
+
     meas_qubits = [i for i in range(subcircuit.num_qubits) if i not in qpd_qubits]
 
     dag = circuit_to_dag(subcircuit)

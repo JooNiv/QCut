@@ -64,7 +64,7 @@ def transpile_subcircuits(subcircuits: list[QuantumCircuit],
 
     transpiled = transpile(subcircuits,
                            coupling_map=backend._coupling_map,
-                           basis_gates=basis + placeholders,
+                           basis_gates=basis + placeholders + ["id"],
                            optimization_level=optimization_level,
                            **(transpile_options or {}))
 
