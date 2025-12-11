@@ -257,6 +257,10 @@ def get_locations_and_subcircuits(
 
     Args:
         circuit (QuantumCircuit): circuit with cuts inserted
+        max_qubits (list[int], optional):
+            list of maximum qubits per subcircuit when using automatic cut
+            finding. If None, no constraint is used. Defaults to None.
+            In general it is not necesary to manually specify this parameter.
 
     Returns:
         tuple: A tuple containing:
@@ -292,7 +296,6 @@ def get_locations_and_subcircuits(
             "Invalid cuts. Check documentation to see how cuts should be placed."
         )
     
-    #TODO fix
     if max_qubits and len(fixed_circs) != len(max_qubits):
         """if max_qubits is None:
             raise QCutError(
