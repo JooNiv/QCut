@@ -170,7 +170,6 @@ def insert_wire_cut_qpd(
             # remove extra classical bits and registers
             _adjust_cregs(subcircuit)
             for subop in reversed(meas_op.data):
-                print(subop)
                 subcircuit.data.insert(
                     ind + offset,
                     CircuitInstruction(operation=subop.operation, 
@@ -391,6 +390,7 @@ def get_experiment_circuits(  # noqa: C901
 
     check_circuit_type = (isinstance(subcircuits, CutCircuit) 
                           and subcircuits.backend is not None)
+    
 
     if check_circuit_type:
         backend = subcircuits.backend
