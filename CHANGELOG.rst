@@ -2,6 +2,16 @@
 Changelog
 =========
 
+Version 0.7.0
+=============
+- Rework transpilation workflow
+    * Transpilation now done per subcircuit instead of per experiment circuit.
+         * Per experiment transpilation still provided for more control.
+         * Users can of course still manually transpile circuits before passing to QCut.
+    * This greatly reduces the number of transpilation calls needed, improving performance.
+    * Check documentation for details on how to use.
+- Bug fixes
+
 Version 0.6.0
 =============
 - Support cutting CZ gates

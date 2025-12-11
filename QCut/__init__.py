@@ -7,6 +7,7 @@ from QCut.backend_utility import (
     run_and_expectation_value,
     run_on_backend,
     transpile_experiments,
+    transpile_subcircuits,
 )
 from QCut.helper import get_pauli_list
 from QCut.QCutFind import find_cuts
@@ -35,6 +36,7 @@ __all__ = [
     "run_on_backend",
     "run_and_expectation_value",
     "transpile_experiments",
+    "transpile_subcircuits",
     "estimate_expectation_values",
     "get_experiment_circuits",
     "get_locations_and_subcircuits",
