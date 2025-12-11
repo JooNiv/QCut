@@ -330,6 +330,7 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-0-7-0">Version 0.7.0</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-0-6-0">Version 0.6.0</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-0-3-0">Version 0.3.0</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-0-2-4">Version 0.2.4</a></li>
@@ -354,6 +355,28 @@ document.write(`
                   
   <section id="changelog">
 <span id="changes"></span><h1>Changelog<a class="headerlink" href="#changelog" title="Link to this heading">#</a></h1>
+<section id="version-0-7-0">
+<h2>Version 0.7.0<a class="headerlink" href="#version-0-7-0" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><dl class="simple">
+<dt>Rework transpilation workflow</dt><dd><ul>
+<li><dl class="simple">
+<dt>Transpilation now done per subcircuit instead of per experiment circuit.</dt><dd><ul>
+<li><p>Per experiment transpilation still provided for more control.</p></li>
+<li><p>Users can of course still manually transpile circuits before passing to QCut.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p>This greatly reduces the number of transpilation calls needed, improving performance.</p></li>
+<li><p>Check documentation for details on how to use.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p>Bug fixes</p></li>
+</ul>
+</section>
 <section id="version-0-6-0">
 <h2>Version 0.6.0<a class="headerlink" href="#version-0-6-0" title="Link to this heading">#</a></h2>
 <ul class="simple">
@@ -572,6 +595,7 @@ document.write(`
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-0-7-0">Version 0.7.0</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-0-6-0">Version 0.6.0</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-0-3-0">Version 0.3.0</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-0-2-4">Version 0.2.4</a></li>

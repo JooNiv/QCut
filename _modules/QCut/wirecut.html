@@ -294,8 +294,9 @@ document.write(`
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Optional</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit</span><span class="w"> </span><span class="kn">import</span> <span class="n">QuantumCircuit</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit</span><span class="w"> </span><span class="kn">import</span> <span class="n">QuantumCircuit</span><span class="p">,</span> <span class="n">transpile</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">qiskit.circuit</span><span class="w"> </span><span class="kn">import</span> <span class="n">CircuitInstruction</span><span class="p">,</span> <span class="n">Qubit</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit.converters</span><span class="w"> </span><span class="kn">import</span> <span class="n">circuit_to_dag</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_aer</span><span class="w"> </span><span class="kn">import</span> <span class="n">AerSimulator</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">QCut.cutcircuit</span><span class="w"> </span><span class="kn">import</span> <span class="n">CutCircuit</span>
@@ -363,7 +364,16 @@ document.write(`
     <span class="n">subcircuit</span><span class="p">:</span> <span class="n">QuantumCircuit</span><span class="p">,</span> <span class="n">qpd_qubits</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">QuantumCircuit</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Finalize the subcircuit by measuring remaining qubits and decomposing.&quot;&quot;&quot;</span>
+
     <span class="n">meas_qubits</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">subcircuit</span><span class="o">.</span><span class="n">num_qubits</span><span class="p">)</span> <span class="k">if</span> <span class="n">i</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">qpd_qubits</span><span class="p">]</span>
+
+    <span class="n">dag</span> <span class="o">=</span> <span class="n">circuit_to_dag</span><span class="p">(</span><span class="n">subcircuit</span><span class="p">)</span>
+    <span class="n">idle</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">dag</span><span class="o">.</span><span class="n">idle_wires</span><span class="p">())</span>
+
+    <span class="k">for</span> <span class="n">wire</span> <span class="ow">in</span> <span class="n">idle</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">wire</span><span class="p">,</span> <span class="n">Qubit</span><span class="p">)</span> <span class="ow">and</span> <span class="n">wire</span><span class="o">.</span><span class="n">_index</span> <span class="ow">in</span> <span class="n">meas_qubits</span><span class="p">:</span>
+            <span class="n">meas_qubits</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">wire</span><span class="o">.</span><span class="n">_index</span><span class="p">)</span>
+
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">subcircuit</span><span class="o">.</span><span class="n">cregs</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
         <span class="n">subcircuit</span><span class="o">.</span><span class="n">measure</span><span class="p">(</span><span class="n">meas_qubits</span><span class="p">,</span> <span class="n">subcircuit</span><span class="o">.</span><span class="n">cregs</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
     <span class="k">else</span><span class="p">:</span>
@@ -457,7 +467,8 @@ document.write(`
             <span class="k">for</span> <span class="n">subop</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">meas_op</span><span class="o">.</span><span class="n">data</span><span class="p">):</span>
                 <span class="n">subcircuit</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span>
                     <span class="n">ind</span> <span class="o">+</span> <span class="n">offset</span><span class="p">,</span>
-                    <span class="n">CircuitInstruction</span><span class="p">(</span><span class="n">operation</span><span class="o">=</span><span class="n">subop</span><span class="p">,</span> <span class="n">qubits</span><span class="o">=</span><span class="n">qubits_for_operation</span><span class="p">),</span>
+                    <span class="n">CircuitInstruction</span><span class="p">(</span><span class="n">operation</span><span class="o">=</span><span class="n">subop</span><span class="o">.</span><span class="n">operation</span><span class="p">,</span> 
+                                       <span class="n">qubits</span><span class="o">=</span><span class="n">qubits_for_operation</span><span class="p">),</span>
                 <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">subop</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">reversed</span><span class="p">(</span><span class="n">meas_op</span><span class="o">.</span><span class="n">data</span><span class="p">)):</span>
@@ -644,7 +655,7 @@ document.write(`
 <div class="viewcode-block" id="get_experiment_circuits">
 <a class="viewcode-back" href="../../QCut.html#QCut.wirecut.get_experiment_circuits">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_experiment_circuits</span><span class="p">(</span>  <span class="c1"># noqa: C901</span>
-    <span class="n">subcircuits</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">QuantumCircuit</span><span class="p">],</span>  <span class="c1"># noqa: C901</span>
+    <span class="n">subcircuits</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">QuantumCircuit</span><span class="p">]</span> <span class="o">|</span> <span class="n">CutCircuit</span><span class="p">,</span>  <span class="c1"># noqa: C901</span>
     <span class="n">cut_locations</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">[</span><span class="n">CutLocation</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">CutCircuit</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate experiment circuits by inserting QPD operations on</span>
@@ -678,6 +689,20 @@ document.write(`
     <span class="n">qpd_combinations</span> <span class="o">=</span> <span class="n">get_qpd_combinations</span><span class="p">(</span><span class="n">cut_locations</span><span class="p">)</span>  <span class="c1"># generate the QPD</span>
     <span class="c1"># operation combinations</span>
 
+    <span class="n">check_circuit_type</span> <span class="o">=</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">subcircuits</span><span class="p">,</span> <span class="n">CutCircuit</span><span class="p">)</span> 
+                          <span class="ow">and</span> <span class="n">subcircuits</span><span class="o">.</span><span class="n">backend</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span>
+    
+
+    <span class="k">if</span> <span class="n">check_circuit_type</span><span class="p">:</span>
+        <span class="n">backend</span> <span class="o">=</span> <span class="n">subcircuits</span><span class="o">.</span><span class="n">backend</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">basis</span> <span class="o">=</span> <span class="n">backend</span><span class="o">.</span><span class="n">configuration</span><span class="p">()</span><span class="o">.</span><span class="n">basis_gates</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="n">basis</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">backend</span><span class="o">.</span><span class="n">architecture</span><span class="o">.</span><span class="n">gates</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="n">basis</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;r&quot;</span> <span class="k">if</span> <span class="n">gate</span> <span class="o">==</span> <span class="s2">&quot;prx&quot;</span> <span class="k">else</span> <span class="n">gate</span> <span class="k">for</span> <span class="n">gate</span> <span class="ow">in</span> <span class="n">basis</span><span class="p">]</span>
+        
+        <span class="n">subcircuits</span> <span class="o">=</span> <span class="n">subcircuits</span><span class="o">.</span><span class="n">subcircuits</span>
+
     <span class="n">_remove_obsm</span><span class="p">(</span><span class="n">subcircuits</span><span class="p">)</span>
 
     <span class="c1"># initialize solution lists</span>
@@ -697,6 +722,12 @@ document.write(`
     <span class="p">):</span>  <span class="c1"># loop through all</span>
         <span class="c1"># QPD combinations</span>
         <span class="n">coefficients</span><span class="p">[</span><span class="n">id_meas_experiment_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">([</span><span class="n">op</span><span class="p">[</span><span class="s2">&quot;c&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">op</span> <span class="ow">in</span> <span class="n">qpd</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="n">check_circuit_type</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">sub</span> <span class="ow">in</span> <span class="n">qpd</span><span class="p">:</span>
+                <span class="n">sub</span><span class="p">[</span><span class="s2">&quot;op_0&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">transpile</span><span class="p">(</span><span class="n">sub</span><span class="p">[</span><span class="s2">&quot;op_0&quot;</span><span class="p">],</span> <span class="n">basis_gates</span><span class="o">=</span><span class="n">basis</span><span class="p">)</span>
+                <span class="n">sub</span><span class="p">[</span><span class="s2">&quot;op_1&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">transpile</span><span class="p">(</span><span class="n">sub</span><span class="p">[</span><span class="s2">&quot;op_1&quot;</span><span class="p">],</span> <span class="n">basis_gates</span><span class="o">=</span><span class="n">basis</span><span class="p">)</span>
+
         <span class="n">sub_experiment_circuits</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># sub array for collecting related experiment</span>
         <span class="c1"># circuits</span>
         <span class="n">inserted_operations</span> <span class="o">=</span> <span class="mi">0</span>
