@@ -6,10 +6,6 @@ from __future__ import annotations
 
 import numpy as np
 from qiskit import QuantumCircuit, transpile
-from qiskit.transpiler.preset_passmanagers import generate_preset_pass_manager
-from qiskit.transpiler.passes import CommutativeCancellation
-from qiskit.converters import circuit_to_dag, dag_to_circuit
-
 
 from QCut.cutcircuit import CutCircuit
 from QCut.cutlocation import CutLocation, SingleQubitCutLocation
@@ -66,22 +62,11 @@ def transpile_subcircuits(subcircuits: list[QuantumCircuit],
     if transpile_options and "backend" in transpile_options:
         transpile_options.pop("backend")
 
-    pm = generate_preset_pass_manager(coupling_map=backend._coupling_map,
-                                      basis_gates=basis + placeholders,
-                                      optimization_level=optimization_level,
-                                      **(transpile_options or {}))
-
     transpiled = transpile(subcircuits,
                            coupling_map=backend._coupling_map,
                            basis_gates=basis + placeholders,
                            optimization_level=optimization_level,
                            **(transpile_options or {}))
-
-    #if optimization_level == 2:
-    #    pm2 = CommutativeCancellation(basis_gates=basis)
-    #    transpiled = [dag_to_circuit(pm2.run(circuit_to_dag(circ))) 
-    #                  for circ in transpiled]
-
 
     return CutCircuit(subcircuits=transpiled, backend=backend)
 
