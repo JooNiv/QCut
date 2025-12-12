@@ -12,7 +12,7 @@ from QCut.backend_utility import (
 from QCut.helper import get_pauli_list
 from QCut.QCutFind import find_cuts
 from QCut.qpd import identity_qpd
-from QCut.qpd_gates import cut, cutCZ
+from QCut.qpd_gates import cut, cutCZ, cutGate
 from QCut.single_qubit_wirecut import (
     get_locations_and_subcircuits,
     run,
@@ -47,6 +47,7 @@ __all__ = [
     "cut_wire",
     "cut",
     "cutCZ",
+    "cutGate",
     "identity_qpd",
     "find_cuts"
 ]

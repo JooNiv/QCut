@@ -2,6 +2,14 @@
 Changelog
 =========
 
+Version 0.8.0
+=============
+- Support for cutting 2 qubit gates
+    * Added :code:`cutGate` function for cutting 2 qubit gates directly.
+    * Cutting done by transpiling the 2 qubit gate into a cut CZ gate with appropriate basis changes.
+    * For non CZ family gates this results in suboptimal decompositions. More optimised decompositions will be added in future releases.
+    * Check documentation for details on how to use.
+
 Version 0.7.0
 =============
 - Rework transpilation workflow
