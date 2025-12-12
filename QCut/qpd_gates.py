@@ -1,7 +1,7 @@
 """Helper gates for circuit knitting."""
 
 from qiskit import QuantumCircuit, transpile
-from qiskit.circuit import Gate, CircuitInstruction
+from qiskit.circuit import CircuitInstruction, Gate
 
 # define the cut location marker
 cut = QuantumCircuit(1, name="Cut")
