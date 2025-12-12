@@ -271,6 +271,7 @@ def get_locations_and_subcircuits(
 
     """
     circuit = circuit.copy()  # copy to avoid modifying the original circuit
+    circuit = circuit.decompose(["CutGate"])
     for i in range(circuit.num_qubits):
         obs_m = QuantumCircuit(1, name=f"obs_{i}")
         obs_m = obs_m.to_instruction()
