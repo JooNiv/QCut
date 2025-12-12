@@ -1,13 +1,45 @@
 """Helper gates for circuit knitting."""
 
-from qiskit import QuantumCircuit
+from qiskit import QuantumCircuit, transpile
+from qiskit.circuit import Gate, CircuitInstruction
 
 # define the cut location marker
 cut = QuantumCircuit(1, name="Cut")
-cut = cut.to_instruction()
+cut = cut.to_instruction(label="Cut")
+cut.definition = None
 
 cutCZ = QuantumCircuit(2, name="CutCZ")
-cutCZ = cutCZ.to_instruction()
+cutCZ = cutCZ.to_instruction(label="CutCZ")
+cutCZ.definition = None
+
+def cutGate(gate: Gate, control: int, target: int) -> dict:
+    """Return a cutCZ circuit with the same parameters as the input gate."""
+    if gate.num_qubits != 2:
+        raise ValueError("Input gate must be a 2-qubit gate.")
+    if control == target:
+        raise ValueError("Control and target qubits must be different.")
+    if control < 0 or target < 0:
+        raise ValueError("Control and target qubits must be non-negative.")
+
+    qc = QuantumCircuit(2, name=f"cut{gate.name.upper()}")
+    if control > target:
+        loccontrol = 1
+        loctarget = 0
+    else:
+        loccontrol = 0
+        loctarget = 1
+    qc.append(gate, [loccontrol, loctarget])
+    tr = transpile(qc, basis_gates=["cz", "r", "h", "s", "sdg", "x", "y", "z"])
+    for ind, instr in enumerate(tr.data):
+        if instr.operation.name == "cz":
+            tr.data.pop(ind)
+            test = CircuitInstruction(
+                        operation=cutCZ,
+                        qubits=tr.qubits,
+                    )
+            tr.data.insert(ind, test)
+    return {"instruction": tr.to_instruction(label="CutGate"), 
+            "qargs":[control, target]}
 
 # define measurements for different bases
 xmeas = QuantumCircuit(1, 1, name="x-meas")
