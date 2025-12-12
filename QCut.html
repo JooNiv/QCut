@@ -345,7 +345,10 @@ document.write(`
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.helper.relative_error"><code class="docutils literal notranslate"><span class="pre">relative_error()</span></code></a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-QCut.qpd_gates">QCut.qpd_gates module</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-QCut.qpd_gates">QCut.qpd_gates module</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.qpd_gates.cutGate"><code class="docutils literal notranslate"><span class="pre">cutGate()</span></code></a></li>
+</ul>
+</li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-QCut.identity_qpd">QCut.identity_qpd module</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.identity_qpd.append"><code class="docutils literal notranslate"><span class="pre">append()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.identity_qpd.clear"><code class="docutils literal notranslate"><span class="pre">clear()</span></code></a></li>
@@ -371,6 +374,7 @@ document.write(`
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-QCut">Module contents</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.cutGate"><code class="docutils literal notranslate"><span class="pre">cutGate()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.estimate_expectation_values"><code class="docutils literal notranslate"><span class="pre">estimate_expectation_values()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.expectation_values"><code class="docutils literal notranslate"><span class="pre">expectation_values()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.find_cuts"><code class="docutils literal notranslate"><span class="pre">find_cuts()</span></code></a></li>
@@ -582,6 +586,12 @@ and approximate values.</p>
 <section id="module-QCut.qpd_gates">
 <span id="qcut-qpd-gates-module"></span><h2>QCut.qpd_gates module<a class="headerlink" href="#module-QCut.qpd_gates" title="Link to this heading">#</a></h2>
 <p>Helper gates for circuit knitting.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="QCut.qpd_gates.cutGate">
+<span class="sig-prename descclassname"><span class="pre">QCut.qpd_gates.</span></span><span class="sig-name descname"><span class="pre">cutGate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Gate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">control</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="_modules/QCut/qpd_gates.html#cutGate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.qpd_gates.cutGate" title="Link to this definition">#</a></dt>
+<dd><p>Return a cutCZ circuit with the same parameters as the input gate.</p>
+</dd></dl>
+
 </section>
 <section id="module-QCut.identity_qpd">
 <span id="qcut-identity-qpd-module"></span><h2>QCut.identity_qpd module<a class="headerlink" href="#module-QCut.identity_qpd" title="Link to this heading">#</a></h2>
@@ -830,6 +840,12 @@ results from the qpd_meas class register.</p>
 <section id="module-QCut">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-QCut" title="Link to this heading">#</a></h2>
 <p>Init circuit knitting.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="QCut.cutGate">
+<span class="sig-prename descclassname"><span class="pre">QCut.</span></span><span class="sig-name descname"><span class="pre">cutGate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Gate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">control</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="_modules/QCut/qpd_gates.html#cutGate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.cutGate" title="Link to this definition">#</a></dt>
+<dd><p>Return a cutCZ circuit with the same parameters as the input gate.</p>
+</dd></dl>
+
 <dl class="py function">
 <dt class="sig sig-object py" id="QCut.estimate_expectation_values">
 <span class="sig-prename descclassname"><span class="pre">QCut.</span></span><span class="sig-name descname"><span class="pre">estimate_expectation_values</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">TotalResult</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coefficients</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cut_locations</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">CutLocation</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">observables</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">map_qubits</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/QCut/wirecut.html#estimate_expectation_values"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.estimate_expectation_values" title="Link to this definition">#</a></dt>
@@ -1271,7 +1287,10 @@ of experiment circuits, use <cite>transpile_experiments</cite> or manually trans
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.helper.relative_error"><code class="docutils literal notranslate"><span class="pre">relative_error()</span></code></a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-QCut.qpd_gates">QCut.qpd_gates module</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-QCut.qpd_gates">QCut.qpd_gates module</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.qpd_gates.cutGate"><code class="docutils literal notranslate"><span class="pre">cutGate()</span></code></a></li>
+</ul>
+</li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-QCut.identity_qpd">QCut.identity_qpd module</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.identity_qpd.append"><code class="docutils literal notranslate"><span class="pre">append()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.identity_qpd.clear"><code class="docutils literal notranslate"><span class="pre">clear()</span></code></a></li>
@@ -1297,6 +1316,7 @@ of experiment circuits, use <cite>transpile_experiments</cite> or manually trans
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-QCut">Module contents</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.cutGate"><code class="docutils literal notranslate"><span class="pre">cutGate()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.estimate_expectation_values"><code class="docutils literal notranslate"><span class="pre">estimate_expectation_values()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.expectation_values"><code class="docutils literal notranslate"><span class="pre">expectation_values()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.find_cuts"><code class="docutils literal notranslate"><span class="pre">find_cuts()</span></code></a></li>

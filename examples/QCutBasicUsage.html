@@ -338,7 +338,7 @@ document.write(`
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">QCut</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ck</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">QCut</span><span class="w"> </span><span class="kn">import</span> <span class="n">cut</span><span class="p">,</span> <span class="n">cutCZ</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">QCut</span><span class="w"> </span><span class="kn">import</span> <span class="n">cut</span><span class="p">,</span> <span class="n">cutGate</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">qiskit</span><span class="w"> </span><span class="kn">import</span> <span class="n">QuantumCircuit</span><span class="p">,</span> <span class="n">transpile</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_aer</span><span class="w"> </span><span class="kn">import</span> <span class="n">AerSimulator</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_aer.primitives</span><span class="w"> </span><span class="kn">import</span> <span class="n">Estimator</span>
@@ -373,18 +373,18 @@ document.write(`
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#insert cuts</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit.circuit.library</span><span class="w"> </span><span class="kn">import</span> <span class="n">CXGate</span>
+
 <span class="n">cut_circuit</span> <span class="o">=</span> <span class="n">QuantumCircuit</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
 
 <span class="n">mult</span> <span class="o">=</span> <span class="mf">1.635</span>
 <span class="n">cut_circuit</span><span class="o">.</span><span class="n">r</span><span class="p">(</span><span class="n">mult</span><span class="o">*</span><span class="mf">0.46262</span><span class="p">,</span> <span class="n">mult</span><span class="o">*</span><span class="mf">0.1446</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-<span class="n">cut_circuit</span><span class="o">.</span><span class="n">h</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-<span class="n">cut_circuit</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cutCZ</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
-<span class="n">cut_circuit</span><span class="o">.</span><span class="n">h</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">cut_circuit</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="o">**</span><span class="n">cutGate</span><span class="p">(</span><span class="n">CXGate</span><span class="p">(),</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span> 
 <span class="n">cut_circuit</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cut</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">])</span>
 <span class="n">cut_circuit</span><span class="o">.</span><span class="n">cx</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
 <span class="n">cut_circuit</span><span class="o">.</span><span class="n">cx</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
 
-<span class="n">cut_circuit</span><span class="o">.</span><span class="n">draw</span><span class="p">(</span><span class="s2">&quot;mpl&quot;</span><span class="p">)</span>
+<span class="n">cut_circuit</span><span class="o">.</span><span class="n">decompose</span><span class="p">([</span><span class="s2">&quot;CutGate&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">draw</span><span class="p">(</span><span class="s2">&quot;mpl&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -511,8 +511,8 @@ document.write(`
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>QCut expectation values:[0.567432 0.582619 0.629570 0.755626]
-Noisy expectation values with fake backend:[0.522461 0.627930 0.553711 0.724609]
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>QCut expectation values:[0.618428 0.537705 0.567099 0.798735]
+Noisy expectation values with fake backend:[0.516602 0.611328 0.559570 0.687500]
 Exact expectation values with ideal simulator :[0.727323 0.727323 0.727323 1.000000]
 </pre></div>
 </div>

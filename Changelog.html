@@ -330,6 +330,7 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-0-8-0">Version 0.8.0</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-0-7-0">Version 0.7.0</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-0-6-0">Version 0.6.0</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-0-3-0">Version 0.3.0</a></li>
@@ -355,6 +356,21 @@ document.write(`
                   
   <section id="changelog">
 <span id="changes"></span><h1>Changelog<a class="headerlink" href="#changelog" title="Link to this heading">#</a></h1>
+<section id="version-0-8-0">
+<h2>Version 0.8.0<a class="headerlink" href="#version-0-8-0" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><dl class="simple">
+<dt>Support for cutting 2 qubit gates</dt><dd><ul>
+<li><p>Added <code class="code docutils literal notranslate"><span class="pre">cutGate</span></code> function for cutting 2 qubit gates directly.</p></li>
+<li><p>Cutting done by transpiling the 2 qubit gate into a cut CZ gate with appropriate basis changes.</p></li>
+<li><p>For non CZ family gates this results in suboptimal decompositions. More optimised decompositions will be added in future releases.</p></li>
+<li><p>Check documentation for details on how to use.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</section>
 <section id="version-0-7-0">
 <h2>Version 0.7.0<a class="headerlink" href="#version-0-7-0" title="Link to this heading">#</a></h2>
 <ul class="simple">
@@ -595,6 +611,7 @@ document.write(`
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-0-8-0">Version 0.8.0</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-0-7-0">Version 0.7.0</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-0-6-0">Version 0.6.0</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-0-3-0">Version 0.3.0</a></li>
