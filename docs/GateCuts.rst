@@ -5,6 +5,7 @@ Gate cuts can be used to cut two-qubit gates instead of cutting wires. This is d
 Currently only CZ gate cuts are supported so all cut gates get transformed into cut CZ gates with appropriate transpilation.
 
 .. code:: python
+   
    from qiskit.circuit.library import CXGate
    from qiskit import QuantumCircuit
    from QCut import cutGate
