@@ -14,7 +14,7 @@
 
 # QCut
 
-QCut is a quantum circuit knitting package for gate cuts and resetless wire cuts. QCut has been designed to work with IQM's qpus, and therefore on the Finnish Quantum Computing Infrastructure ([FiQCI](https://fiqci.fi/)), and tested with an IQM qpus. Additionally, QCut is built to be combatible with IQM’s Qiskit fork iqm_qiskit.
+QCut is a quantum circuit knitting package built on top of qiskit for performing gate cuts and resetless wire cuts allowing simulation of larger quantum circuits on smaller quantum devices or simulators at the cost of a circuit overhead. QCut has been designed and tested to work with IQM's qpus, and the Finnish Quantum Computing Infrastructure ([FiQCI](https://fiqci.fi/)).
 
 QCut has been built at CSC - IT Center for Science (Finnish IT Center for Science).
 
@@ -73,6 +73,7 @@ from QCut import cut, cutGate
 from qiskit import QuantumCircuit
 from qiskit_aer import AerSimulator
 from qiskit_aer.primitives import Estimator
+from iqm.qiskit_iqm import IQMFakeAdonis
 ```
 
 **2: Start by defining a QuantumCircuit just like in Qiskit**
@@ -265,7 +266,7 @@ uv add qiskit-iqm==17.8
 After installation just import the backend you want to use:
 
 ```python
-from iqm.qiskit_iqm import IQMFakeAdonis()
+from iqm.qiskit_iqm import IQMFakeAdonis
 backend = IQMFakeAdonis()
 ```
 
