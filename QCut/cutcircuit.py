@@ -111,6 +111,15 @@ class CutExperiment:
         self.observables = observables
         self.id_meas = id_meas
 
+    def expv_data(self):
+        """Get data for expv calculation."""
+        return {
+            "cut_locations": self.cut_locations,
+            "map_qubit": self.map_qubit,
+            "coefficients": self.coefficients,
+            "observables": self.observables
+        }
+
     def assign_parameters(self, parameters: dict, inplace=False) -> list[dict[int, QuantumCircuit]]:
         """Assign parameters to the circuits. Same as qiskit
         QuantumCircuit.assign_parameters."""

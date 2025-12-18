@@ -969,10 +969,10 @@ def run_experiments(
     if backend is None:
         backend = AerSimulator()
 
-    results: list[dict[int, dict[str, int]]] = [0] * (cut_experiment.num_obs_groups)
+    results: list[list[int, dict[str, int]]] = [0] * (cut_experiment.num_obs_groups)
 
     for count, circuit_group in enumerate(cut_experiment.experiments):
-        group = {}
+        group = []
         for obs_ind, obs_group in enumerate(circuit_group):
             obs_res = {}
             for ind, subcircuit in obs_group.items():
@@ -981,14 +981,23 @@ def run_experiments(
                      for k, v in backend.run(subcircuit, shots=shots).result().get_counts().items()}
                 )
                 obs_res[ind] = sub_result
-            group[obs_ind] = obs_res
+            group.append(obs_res)
         results[count] = group
+
+    all_keys = results[0][0].keys()
+
+    for ind, sub_result in enumerate(results):
+        for exp_ind, experiment_run in enumerate(sub_result):
+            if experiment_run.keys() != all_keys:
+                for key, val in results[0][0].items():
+                    if key not in experiment_run:
+                        experiment_run[key] = val
 
     return _process_results(results, cut_experiment.id_meas, shots, samples)
 
 
 def _process_results_old(
-    results: list[dict[str:int]],
+    results: list[list[dict[str,int]]],
     id_meas: list[tuple[int, int, int]],
     shots: int,
     samples: int,
@@ -1041,14 +1050,15 @@ def _process_results_old(
                 i.measurements.append(np.array([-1]))
             else:
                 i.measurements[1] = np.insert(i.measurements[1], loc[2], -1)
+    
     return preocessed_results
 
 def _process_results(
-    results: list[dict[int, dict[str,int]]],
+    results: list[list[dict[str,int]]],
     id_meas: list[tuple[int, int, int]],
     shots: int,
     samples: int,
-) -> list[TotalResult]:
+) -> list[list[TotalResult]]:
     """Transform results with post processing function {0,1} -> [-1, 1].
 
     Tranform results so that we map 0 -> -1 and 1 -> 1. Gives processed results in form
@@ -1070,10 +1080,10 @@ def _process_results(
     """
     preocessed_results = []
 
-    for obs_result in results:
-        for exp_ind, experiment_run in obs_result.items():
+    for group_ind, circ_group in enumerate(results):
+        for exp_ind, experiment_run in enumerate(circ_group):
             experiment_run_results = []
-            for sub_result in experiment_run:
+            for sub_ind, sub_result in experiment_run.items():
                 circuit_results = []
                 for meassurements, count in sub_result.items():
                     # separate end measurements from mid-circuit measurements
@@ -1091,23 +1101,15 @@ def _process_results(
                         SubResult(result_eigenvalues, count / shots * samples)
                     )
                 experiment_run_results.append(circuit_results)
-            if len(preocessed_results) <= exp_ind:
-                preocessed_results.append(TotalResult(experiment_run_results))
-            else:
-                preocessed_results[exp_ind].subcircuits.extend(experiment_run_results)
-            
-            for loc in id_meas:
-                for i in preocessed_results[loc[0]].subcircuits[0][loc[1]]:
-                    if len(i.measurements) == 1:
-                        i.measurements.append(np.array([-1]))
-                    else:
-                        i.measurements[1] = np.insert(i.measurements[1], loc[2], -1)
+            if group_ind >= len(preocessed_results):
+                preocessed_results.append([])
+            preocessed_results[group_ind].append(TotalResult(experiment_run_results))
         
     return preocessed_results
 
 
 # Calculate the approx expectation values for the original circuit
-def estimate_expectation_values(
+def estimate_expectation_values_old(
     results: list[TotalResult],
     coefficients: list[int],
     cut_locations: np.ndarray[CutLocation],
@@ -1149,6 +1151,130 @@ def estimate_expectation_values(
     sum_shots = 0
     # ininialize approx expectation values of an array of ones
     expectation_values = np.ones(len(observables))
+    for experiment_run, coefficient in zip(results, coefficients):
+        # add sub results to the total approx expectation value
+        mid = (
+            np.power(-1, wire_cuts + 1)  # * (np.power(-1, cz_cuts)
+            * coefficient
+            * _get_sub_expectation_values(
+                experiment_run, observables, shots, map_qubits
+            )
+        )
+        sum_shots += shots
+        expectation_values += mid
+
+    # multiply by gamma to the power of cuts and take mean
+    return np.power(4, wire_cuts) * np.power(3, cz_cuts) * expectation_values / samples
+
+
+def _get_sub_expectation_values_old(
+    experiment_run: TotalResult,
+    observables: list[int | list[int]],
+    shots: int,
+    map_qubits: Optional[dict[int, int]] = None,
+) -> list:
+    """Calculate sub expectation value for the result.
+
+    Args:
+        experiment_run (TotalResult): results of a subcircuit pair
+        observables (list[int | list[int]]):
+            list of observables as qubit indices (Z-observables)
+        shots (int): number of shots
+
+    Returns:
+        list:
+            list of sub expectation values
+
+    """
+    # generate all possible combinations between end of circuit measurements
+    # from subcircuit group
+    sub_circuit_result_combinations = product(*experiment_run.subcircuits[0])
+
+    # initialize sub solution array
+    sub_expectation_value = np.zeros(len(observables))
+    for circuit_result in sub_circuit_result_combinations:  # loop through results
+        # concat results to one array and reverse to account for qiskit quibit ordering
+        full_result = np.concatenate(
+            [i.measurements[0] for i in reversed(circuit_result)]
+        )
+        if map_qubits is not None:
+            sorted_full_result = np.array(
+                [
+                    full_result[map_qubits[key]]
+                    for key in sorted(map_qubits.keys(), reverse=True)
+                ]
+            )
+        else:
+            sorted_full_result = full_result
+        qpd_measurement_coefficient = 1  # initial value for qpd
+        weight = shots  # initial weight
+        for res in circuit_result:  # calculate weight and qpd coefficient
+            weight *= res.count / shots
+            # if len(res.measurements) > 1:
+            qpd_measurement_coefficient *= np.prod(res.measurements[1])
+        observable_results = np.empty(len(observables))  # initialize empty array
+        # for obsrvables
+        for count, obs in enumerate(observables):  # populate observable array
+            if isinstance(obs, int):
+                observable_results[count] = sorted_full_result[obs]  # if single qubit
+            # observable just save
+            # to array
+            else:  # if multi qubit observable
+                multi_qubit_observable_eigenvalue = 1  # initial eigenvalue
+                for sub_observables in obs:  # multio qubit observable
+                    multi_qubit_observable_eigenvalue *= sorted_full_result[
+                        sub_observables
+                    ]
+                    observable_results[count] = (
+                        np.power(-1, len(obs) + 1) * multi_qubit_observable_eigenvalue
+                    )
+
+        observable_expectation_value = (
+            qpd_measurement_coefficient * observable_results * weight
+        )
+        sub_expectation_value += observable_expectation_value
+
+    return sub_expectation_value
+
+def estimate_expectation_values(
+    results: list[list[TotalResult]],
+    expv_data: dict
+) -> list[float]:
+    """Calculate the estimated expectation values.
+
+    Loop through processed results. For each result group generate all products of
+    different measurements from different subcircuits of the group. For each result
+    from qpd measurements calculate qpd coefficient and from counts calculate weight.
+    Get results for qubits corresponding to the observables. If multiqubit observable
+    multiply individual qubit eigenvalues and multiply by (-1)^(m+1) where m is number
+    of qubits in the observable. Multiply by weight and add to sub expectation value.
+    Once all results iterated over move to next circuit group. Lastly multiply
+    by 4^(2*n), where n is the number of cuts, and divide by number of samples.
+
+    Args:
+        results (list[TotalResult]): results from experiment circuits
+        coefficients (list[int]): list of coefficients for each subcircuit group
+        cut_locations (np.ndarray[CutLocation]): cut locations
+        observables (list[int | list[int]]):
+            observables to calculate expectation values for
+
+    Returns:
+        list[float]:
+            expectation values as a list of floats
+
+    """
+    cuts = len(expv_data["cut_locations"])
+    wire_cuts = len([i for i in expv_data["cut_locations"] if isinstance(i, SingleQubitCutLocation)])
+    cz_cuts = cuts - wire_cuts
+    # number of samples neede
+    samples = int(
+        (np.power(4, 2 * wire_cuts) * np.power(3, 2 * cz_cuts)) / np.power(ERROR, 2)
+    )
+    shots = int(samples / len(results))
+
+    sum_shots = 0
+    # ininialize approx expectation values of an array of ones
+    expectation_values = np.ones(len(expv_data["observables"]))
     for experiment_run, coefficient in zip(results, coefficients):
         # add sub results to the total approx expectation value
         mid = (
@@ -1233,3 +1359,4 @@ def _get_sub_expectation_values(
         sub_expectation_value += observable_expectation_value
 
     return sub_expectation_value
+
