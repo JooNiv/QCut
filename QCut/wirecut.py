@@ -1082,7 +1082,7 @@ def _process_results(
 
     for group_ind, circ_group in enumerate(results):
         for exp_ind, experiment_run in enumerate(circ_group):
-            experiment_run_results = []
+            experiment_run_results = [0] * len(experiment_run)
             for sub_ind, sub_result in experiment_run.items():
                 circuit_results = []
                 for meassurements, count in sub_result.items():
@@ -1100,7 +1100,7 @@ def _process_results(
                     circuit_results.append(
                         SubResult(result_eigenvalues, count / shots * samples)
                     )
-                experiment_run_results.append(circuit_results)
+                experiment_run_results[sub_ind] = circuit_results
             if group_ind >= len(preocessed_results):
                 preocessed_results.append([])
             preocessed_results[group_ind].append(TotalResult(experiment_run_results))
@@ -1272,16 +1272,20 @@ def estimate_expectation_values(
     )
     shots = int(samples / len(results))
 
+    measurement_settings = get_needed_measurements_per_qubit(combine_measurements(
+        expv_data["observables"]
+    ))
+
     sum_shots = 0
     # ininialize approx expectation values of an array of ones
     expectation_values = np.ones(len(expv_data["observables"]))
-    for experiment_run, coefficient in zip(results, coefficients):
+    for experiment_run, coefficient in zip(results, expv_data["coefficients"]):
         # add sub results to the total approx expectation value
         mid = (
             np.power(-1, wire_cuts + 1)  # * (np.power(-1, cz_cuts)
             * coefficient
             * _get_sub_expectation_values(
-                experiment_run, observables, shots, map_qubits
+                experiment_run, expv_data["observables"], shots, expv_data["map_qubits"], measurement_settings
             )
         )
         sum_shots += shots
@@ -1295,7 +1299,8 @@ def _get_sub_expectation_values(
     experiment_run: TotalResult,
     observables: list[int | list[int]],
     shots: int,
-    map_qubits: Optional[dict[int, int]] = None,
+    map_qubits: Optional[dict[int, int]],
+    measurement_settings: dict[int, set[str]],
 ) -> list:
     """Calculate sub expectation value for the result.
 
