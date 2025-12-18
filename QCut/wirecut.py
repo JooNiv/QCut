@@ -8,14 +8,26 @@ from typing import TYPE_CHECKING, Optional
 
 import numpy as np
 from qiskit import QuantumCircuit, transpile
+from qiskit.quantum_info import SparsePauliOp
 from qiskit.circuit import CircuitInstruction, Qubit
 from qiskit.converters import circuit_to_dag
 from qiskit_aer import AerSimulator
 
-from QCut.cutcircuit import CutCircuit
+from QCut.cutcircuit import CutCircuit, CutExperiment
 from QCut.cutlocation import CutLocation, SingleQubitCutLocation
 from QCut.qcutresult import SubResult, TotalResult
 from QCut.qpd import cz_qpd, identity_qpd
+
+from qiskit.dagcircuit import DAGCircuit
+from qiskit.circuit import QuantumCircuit, QuantumRegister, Gate, Instruction
+from qiskit.circuit.library import CXGate, ECRGate, HGate, SdgGate
+from qiskit.transpiler import PassManager
+from qiskit.transpiler.basepasses import TransformationPass
+from qiskit.quantum_info import Operator, pauli_basis
+ 
+import numpy as np
+ 
+from typing import Iterable, Optional
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -123,7 +135,18 @@ def get_placeholder_locations(subcircuits: list[QuantumCircuit]) -> list:
     return ops
 
 
-def _remove_obsm(subcircuits: list[QuantumCircuit]) -> list[QuantumCircuit]:
+def _remove_obsm(subcircuits: list[dict[int, QuantumCircuit]]) -> list[dict[int, QuantumCircuit]]:
+
+    for obs_set in subcircuits:
+        for ind, circ in obs_set.items():
+            j = 0
+            while j < len(circ.data):
+                if "obs" in circ[j].operation.name:
+                    circ.data.remove(circ[j])
+                else:
+                    j += 1
+
+def _remove_obsm_old(subcircuits: list[QuantumCircuit]) -> list[QuantumCircuit]:
     for i in subcircuits:
         j = 0
         while j < len(i.data):
@@ -131,7 +154,6 @@ def _remove_obsm(subcircuits: list[QuantumCircuit]) -> list[QuantumCircuit]:
                 i.data.remove(i[j])
             else:
                 j += 1
-
 
 def insert_wire_cut_qpd(
     ind,
@@ -353,7 +375,7 @@ def insert_cz_cut_qpd(  # noqa: C901
     return offset, num_id_meas, id_meas_bit, classical_bit_index, inserted_operations
 
 
-def get_experiment_circuits(  # noqa: C901
+def get_experiment_circuits_old(  # noqa: C901
     subcircuits: list[QuantumCircuit] | CutCircuit,  # noqa: C901
     cut_locations: np.ndarray[CutLocation],
 ) -> tuple[CutCircuit, list[int], list[tuple[int, int, int]]]:
@@ -491,6 +513,315 @@ def get_experiment_circuits(  # noqa: C901
         experiment_circuits.append(sub_experiment_circuits)
     return CutCircuit(experiment_circuits), coefficients, id_meas[:num_id_meas]
 
+def get_needed_measurements_per_qubit(op: SparsePauliOp) -> dict[int, set[str]]:
+    """Get the needed measurements per qubit for a given SparsePauliOp.
+
+    Args:
+        op (SparsePauliOp): The SparsePauliOp to analyze.
+    Returns:
+        dict[int, set[str]]: A dictionary mapping qubit indices to sets of needed measurements.
+    """
+    needed_measurements = {}
+    for pauli_string in op.paulis:
+        for qubit_index, pauli in enumerate(pauli_string.to_label()):
+            if pauli != "I":
+                if qubit_index not in needed_measurements:
+                    needed_measurements[qubit_index] = set()
+                needed_measurements[qubit_index].add(pauli)
+    return needed_measurements
+
+
+def combine_measurements(needed_measurements: dict[int, set[str]]) -> list[dict[int, str]]:
+    """Combine measurements to minimize the number of measurement settings.
+
+    Args:
+        needed_measurements (dict[int, set[str]]): A dictionary mapping qubit indices to sets of needed measurements.
+    Returns:
+        list[dict[int, str]]: A list of measurement settings, each represented as a dictionary mapping qubit indices to measurements.
+    """
+    measurement_settings = []
+    while needed_measurements:
+        setting = {}
+        for qubit_index in list(needed_measurements.keys()):
+            paulis = needed_measurements[qubit_index]
+            if paulis:
+                pauli = paulis.pop()
+                setting[qubit_index] = pauli
+                if not paulis:
+                    del needed_measurements[qubit_index]
+        measurement_settings.append(setting)
+
+    return measurement_settings
+
+class ModifyMeasurementBasis(TransformationPass):
+ 
+    def __init__(
+        self,
+        measurement_settings: list[dict[int, str]],
+        ops: dict[str, Instruction] | None = None,
+
+    ):
+        
+        self.measurement_settings = measurement_settings
+        self.ops = ops
+        super().__init__()
+ 
+    def run(
+        self,
+        dag: DAGCircuit,
+    ) -> DAGCircuit:
+        # collect all nodes in DAG and proceed if it is to be twirled
+        
+        no_obs = True
+
+        print("Modifying measurement basis for measurement settings:", self.measurement_settings)
+
+        for node in dag.op_nodes():
+            if "obs" not in node.op.name:
+                continue
+ 
+            obs_ind = int(node.op.name.split("_")[-1])
+            
+            for setting in self.measurement_settings:
+                if obs_ind not in setting:
+                    #continue
+                    dag.remove_op_node(node)
+                    break
+                
+                print("Modifying measurement basis for observation index:", obs_ind)
+                ob = setting[obs_ind]
+                no_obs = False
+                print("Measurement basis:", ob)
+                
+                mini_dag = DAGCircuit()
+                register = QuantumRegister(1)
+                mini_dag.add_qreg(register)
+
+                if ob == "X":
+                    if self.ops and "X-meas" in self.ops:
+                        mini_dag.apply_operation_back(
+                            self.ops["X-meas"], [register[0]]
+                        )
+                    else:
+                        mini_dag.apply_operation_back(
+                            HGate(), [register[0]]
+                        )
+                elif ob == "Y":
+                    if self.ops and "Y-meas" in self.ops:
+                        mini_dag.apply_operation_back(
+                            self.ops["Y-meas"], [register[0]]
+                        )
+                    else:
+                        mini_dag.apply_operation_back(
+                            SdgGate(), [register[0]]
+                        )
+                        mini_dag.apply_operation_back(
+                            HGate(), [register[0]]
+                        )
+                
+                dag.substitute_node_with_dag(node, mini_dag)
+
+        if no_obs:
+            print("No observation nodes found; returning empty DAGCircuit.")
+            return DAGCircuit()
+        return dag
+
+def get_obs_subcircuits(subcircuits: list[QuantumCircuit], 
+                        measurement_settings: list[dict[int, str]],
+                        ops: dict[str, Instruction] | None = None
+                        ) -> list[dict[int, QuantumCircuit]]:
+    print("Generating observable subcircuits for measurement settings:", measurement_settings)
+    pms = [PassManager([ModifyMeasurementBasis([setting], ops)]) for setting in measurement_settings]
+    obs_subcircuits = []
+    for pm in pms:
+        pm_circs = {}
+        for ind, subcircuit in enumerate(subcircuits):
+            modified_circuit = pm.run(subcircuit)
+            if modified_circuit.num_qubits == 0:
+                continue
+            pm_circs[ind] = modified_circuit
+        obs_subcircuits.append(pm_circs)
+    return obs_subcircuits
+
+def get_experiment_circuits(  # noqa: C901
+    cut_circuit: CutCircuit,
+    observables: SparsePauliOp,
+) -> CutExperiment:
+    """Generate experiment circuits by inserting QPD operations on
+    measure/initialize nodes.
+
+    Loop through qpd combinations. Calculate coefficient for subcircuit group by
+    taking the product of all coefficients in the current qpd row. Loop through
+    subcircuits generated in 4. Make deepcopy of subcircuit and iterate over its
+    circuit data. When hit either Meas_{ind} of Init_{ind} repace it with operation
+    found in qpd[ind]["op_0"/"op_1"]. WHile generating experiment circuits also
+    generate a list of locations that have an identity basis measurement. These
+    measurement outcomes need to be added during post-processing. Locations added as
+    [index of experiment circuit, index of subcircuit, index of classical bit
+    corresponding to measurement]. Repeat untill looped through all qpd rows.
+    sircuits reutrned as [circuit_group0, circuit_group1, ...], where circuit_goup
+    is [subciruit0, subcircuit1, ...].
+
+    Args:
+        subcircuits (list[QuantumCircuit]): subcircuits with measure/initialize nodes.
+        cut_locations (np.ndarray[CutLocation]): cut locations.
+
+    Returns:
+        tuple: A tuple containing:
+            - CutCircuit: A CutCircuit object containing the experiment circuits.
+            - list[int]: A list of coefficients for each circuit.
+            - list[tuple[int, int, int]]:
+                A list of index pointers to results that need additional post-processing
+                due to identity basis measurement.
+
+    """
+    qpd_combinations = get_qpd_combinations(cut_circuit.cut_locations)  # generate the QPD
+    # operation combinations
+
+    check_circuit_type = cut_circuit.backend is not None
+    
+    measurement_settings = combine_measurements(get_needed_measurements_per_qubit(observables))
+
+    print("Measurement settings:", measurement_settings)
+
+    backend = None
+    if check_circuit_type:
+        backend = cut_circuit.backend
+        try:
+            basis = backend.configuration().basis_gates
+        except Exception:
+            basis = list(backend.architecture.gates.keys())
+        basis = ["r" if gate == "prx" else gate for gate in basis]
+
+    obs_subcircuits = None
+
+    if check_circuit_type:
+        x_meas_ops = QuantumCircuit(1)
+        x_meas_ops.h(0)
+        x_meas_ops.name = "X-meas"
+        x_meas_ops = transpile(x_meas_ops, basis_gates=basis)
+        x_meas_ops = x_meas_ops.to_instruction()
+
+        y_meas_ops = QuantumCircuit(1)
+        y_meas_ops.sdg(0)
+        y_meas_ops.h(0)
+        y_meas_ops.name = "Y-meas"
+        y_meas_ops = transpile(y_meas_ops, basis_gates=basis)
+        y_meas_ops = y_meas_ops.to_instruction()
+
+        ops = {"X-meas": x_meas_ops, "Y-meas": y_meas_ops}
+
+        obs_subcircuits = get_obs_subcircuits(
+            cut_circuit.subcircuits, measurement_settings, ops
+        )
+    else:
+        obs_subcircuits = get_obs_subcircuits(
+            cut_circuit.subcircuits, measurement_settings
+        )
+
+
+
+    _remove_obsm(obs_subcircuits)
+
+    # initialize solution lists
+    cuts = len(cut_circuit.cut_locations)
+    cz_cuts = len([i for i in cut_circuit.cut_locations if isinstance(i, CutLocation)])
+    wire_cuts = cuts - cz_cuts
+
+    num_circs = np.power(8, wire_cuts) * np.power(6, cz_cuts)
+    experiment_circuits = []
+    num_id_meas_init = cuts * 2 * np.power(8, cuts - 1) * np.power(6, cz_cuts)
+    id_meas = np.full((num_id_meas_init, 3), None)
+    num_id_meas = 0
+    coefficients = np.empty(num_circs)
+    placeholder_locations = get_placeholder_locations(cut_circuit.subcircuits)
+    for id_meas_experiment_index, qpd in enumerate(
+        qpd_combinations
+    ):  # loop through all
+        # QPD combinations
+        coefficients[id_meas_experiment_index] = np.prod([op["c"] for op in qpd])
+
+        if check_circuit_type:
+            for sub in qpd:
+                sub["op_0"] = transpile(sub["op_0"], basis_gates=basis)
+                sub["op_1"] = transpile(sub["op_1"], basis_gates=basis)
+
+        sub_experiment_circuits = {}  # sub array for collecting related experiment
+        # circuits
+        inserted_operations = 0
+        obs_set_circuits = []
+        for obs_set in obs_subcircuits:
+            cur_set_circuits = {}
+            for id_meas_subcircuit_index, circ in obs_set.items():
+                subcircuit = pickle.loads(pickle.dumps(circ))
+                # subcircuit = deepcopy(circ)
+                offset = 0
+                classical_bit_index = 0
+                id_meas_bit = 0
+                qpd_qubits = []  # store the qubit indices of qubits used for qpd
+                # measurements
+                for op_ind in placeholder_locations[id_meas_subcircuit_index]:
+                    ind, op = op_ind
+                    if "cut" in op.operation.name:
+                        (
+                            offset,
+                            num_id_meas,
+                            id_meas_bit,
+                            classical_bit_index,
+                            inserted_operations,
+                        ) = insert_cz_cut_qpd(
+                            ind,
+                            op,
+                            subcircuit,
+                            offset,
+                            qpd_qubits,
+                            qpd,
+                            id_meas,
+                            num_id_meas,
+                            id_meas_experiment_index,
+                            id_meas_subcircuit_index,
+                            id_meas_bit,
+                            classical_bit_index,
+                            inserted_operations,
+                        )
+
+                    else:
+                        (
+                            offset,
+                            num_id_meas,
+                            id_meas_bit,
+                            classical_bit_index,
+                            inserted_operations,
+                        ) = insert_wire_cut_qpd(
+                            ind,
+                            op,
+                            subcircuit,
+                            offset,
+                            qpd_qubits,
+                            qpd,
+                            id_meas,
+                            num_id_meas,
+                            id_meas_experiment_index,
+                            id_meas_subcircuit_index,
+                            id_meas_bit,
+                            classical_bit_index,
+                            inserted_operations,
+                        )
+
+                subcircuit = _finalize_subcircuit(subcircuit, qpd_qubits)
+                cur_set_circuits[id_meas_subcircuit_index] = subcircuit
+            obs_set_circuits.append(cur_set_circuits)
+        experiment_circuits.append(obs_set_circuits)
+    return CutExperiment(
+        experiment_circuits,
+        cut_circuit.cut_locations,
+        cut_circuit.map_qubit,
+        coefficients,
+        id_meas[:num_id_meas],
+        observables,
+        backend=backend,
+    )
+
 
 def run_experiments(
     experiment_circuits: CutCircuit,
@@ -548,8 +879,115 @@ def run_experiments(
         sub_result = []
     return _process_results(results, id_meas, shots, samples)
 
+def run_experiments_old(
+    experiment_circuits: CutCircuit,
+    cut_locations: np.ndarray[CutLocation],
+    id_meas: list[tuple[int, int, int]],
+    shots: int = 2**12,
+    backend: None = None,
+) -> list[TotalResult]:
+    """Run experiment circuits.
 
-def _process_results(
+    Loop through experiment circuits and then loop through circuit group and run each
+    circuit. Store results as [group0, group1, ...] where group is [res0, res1, ...].
+    where res is "xxx yy": count xxx are the measurements from the end of circuit
+    measurements on the meas classical register and yy are the qpd basis measurement
+    results from the qpd_meas class register.
+
+    Args:
+        experiment_circuits (CutCircuit): experiment circuits
+        cut_locations (np.ndarray[CutLocation]): list of cut locations
+        id_meas (list[int, int, int]): list of identity basis measurement locations
+        shots (int): number of shots per circuit run (optional)
+        backend: backend used for running the circuits (optional)
+
+    Returns:
+        list[TotalResult]:
+            list of transformed results
+
+    """
+    wire_cuts = len([i for i in cut_locations if isinstance(i, SingleQubitCutLocation)])
+    cz_cuts = len(cut_locations) - wire_cuts
+    samples = int(
+        (np.power(4, 2 * wire_cuts) * np.power(3, 2 * cz_cuts)) / np.power(ERROR, 2)
+    )
+    samples = int(samples / experiment_circuits.num_groups)
+    if backend is None:
+        backend = AerSimulator()
+
+    results = [0] * (experiment_circuits.num_groups)
+
+    for count, subcircuit_group in enumerate(experiment_circuits.circuits):
+        sub_result = [
+            {
+                " " + k: v
+                for k, v in backend.run(i, shots=shots).result().get_counts().items()
+            }
+            if len(i.cregs) == 1 and i.cregs[0].name == "qpd_meas"
+            else {" ": shots}
+            if len(i.data) == 0 or i.data[-1].operation.name != "measure"
+            else backend.run(i, shots=shots).result().get_counts()
+            for i in subcircuit_group
+        ]
+
+        results[count] = sub_result
+
+        sub_result = []
+    return _process_results(results, id_meas, shots, samples)
+
+def run_experiments(
+    cut_experiment: CutExperiment,
+    shots: int = 2**12,
+    backend: None = None,
+) -> list[list[TotalResult]]:
+    """Run experiment circuits.
+
+    Loop through experiment circuits and then loop through circuit group and run each
+    circuit. Store results as [group0, group1, ...] where group is [res0, res1, ...].
+    where res is "xxx yy": count xxx are the measurements from the end of circuit
+    measurements on the meas classical register and yy are the qpd basis measurement
+    results from the qpd_meas class register.
+
+    Args:
+        experiment_circuits (CutCircuit): experiment circuits
+        cut_locations (np.ndarray[CutLocation]): list of cut locations
+        id_meas (list[int, int, int]): list of identity basis measurement locations
+        shots (int): number of shots per circuit run (optional)
+        backend: backend used for running the circuits (optional)
+
+    Returns:
+        list[TotalResult]:
+            list of transformed results
+
+    """
+    wire_cuts = len([i for i in cut_experiment.cut_locations if isinstance(i, SingleQubitCutLocation)])
+    cz_cuts = len(cut_experiment.cut_locations) - wire_cuts
+    samples = int(
+        (np.power(4, 2 * wire_cuts) * np.power(3, 2 * cz_cuts)) / np.power(ERROR, 2)
+    )
+    samples = int(samples / cut_experiment.num_groups)
+    if backend is None:
+        backend = AerSimulator()
+
+    results: list[dict[int, dict[str, int]]] = [0] * (cut_experiment.num_obs_groups)
+
+    for count, circuit_group in enumerate(cut_experiment.experiments):
+        group = {}
+        for obs_ind, obs_group in enumerate(circuit_group):
+            obs_res = {}
+            for ind, subcircuit in obs_group.items():
+                sub_result = (
+                    {" " + k: v
+                     for k, v in backend.run(subcircuit, shots=shots).result().get_counts().items()}
+                )
+                obs_res[ind] = sub_result
+            group[obs_ind] = obs_res
+        results[count] = group
+
+    return _process_results(results, cut_experiment.id_meas, shots, samples)
+
+
+def _process_results_old(
     results: list[dict[str:int]],
     id_meas: list[tuple[int, int, int]],
     shots: int,
@@ -603,6 +1041,68 @@ def _process_results(
                 i.measurements.append(np.array([-1]))
             else:
                 i.measurements[1] = np.insert(i.measurements[1], loc[2], -1)
+    return preocessed_results
+
+def _process_results(
+    results: list[dict[int, dict[str,int]]],
+    id_meas: list[tuple[int, int, int]],
+    shots: int,
+    samples: int,
+) -> list[TotalResult]:
+    """Transform results with post processing function {0,1} -> [-1, 1].
+
+    Tranform results so that we map 0 -> -1 and 1 -> 1. Gives processed results in form
+    [TotalResult0, TotalResult1, ...], where TotalResult is
+    [SubResult0, SubResult1, ...] and SubResult are [[[x0,x0,x0], [y0,y0], counts0],
+    [[x1,x1,x1], [y1,y1], counts1], ...].
+
+    Args:
+        results (list): results from experiment circuits
+        id_meas (list): locations of identity basis measurements
+        shots (int): number of shots per circuit run
+        samples (int): number of needed samples
+
+    Returns:
+    -------
+        list[TotalResult]:
+            list of transformed results
+
+    """
+    preocessed_results = []
+
+    for obs_result in results:
+        for exp_ind, experiment_run in obs_result.items():
+            experiment_run_results = []
+            for sub_result in experiment_run:
+                circuit_results = []
+                for meassurements, count in sub_result.items():
+                    # separate end measurements from mid-circuit measurements
+                    if meassurements == " ":
+                        separate_measurements = [meassurements.split(" ")[0]]
+                    else:
+                        separate_measurements = meassurements.split(" ")
+
+                    # map to eigenvalues
+                    result_eigenvalues = [
+                        np.array([-1 if x == "0" else 1 for x in i])
+                        for i in separate_measurements
+                    ]
+                    circuit_results.append(
+                        SubResult(result_eigenvalues, count / shots * samples)
+                    )
+                experiment_run_results.append(circuit_results)
+            if len(preocessed_results) <= exp_ind:
+                preocessed_results.append(TotalResult(experiment_run_results))
+            else:
+                preocessed_results[exp_ind].subcircuits.extend(experiment_run_results)
+            
+            for loc in id_meas:
+                for i in preocessed_results[loc[0]].subcircuits[0][loc[1]]:
+                    if len(i.measurements) == 1:
+                        i.measurements.append(np.array([-1]))
+                    else:
+                        i.measurements[1] = np.insert(i.measurements[1], loc[2], -1)
+        
     return preocessed_results
 
 

@@ -12,6 +12,7 @@ from qiskit_aer import AerSimulator
 from QCut.backend_utility import transpile_subcircuits
 from QCut.cutlocation import CutLocation, SingleQubitCutLocation
 from QCut.qcuterror import QCutError
+from QCut.cutcircuit import CutCircuit, CutExperiment
 from QCut.QCutFind import construct_final_subcircuits
 from QCut.wirecut import (
     estimate_expectation_values,
@@ -249,7 +250,7 @@ def get_qubit_map(subcircuits: list[QuantumCircuit]):
     return map_qubit
 
 
-def get_locations_and_subcircuits(
+def get_locations_and_subcircuits_old(
     circuit: QuantumCircuit,
     max_qubits: list[int] | None = None,
 ):
@@ -309,6 +310,67 @@ def get_locations_and_subcircuits(
     map_qubits = get_qubit_map(fixed_circs)
 
     return cut_locations, fixed_circs, map_qubits
+
+def get_locations_and_subcircuits(
+    circuit: QuantumCircuit,
+    max_qubits: list[int] | None = None,
+) -> CutCircuit:
+    """Get cut locations and subcircuits with placeholder operations.
+
+    Args:
+        circuit (QuantumCircuit): circuit with cuts inserted
+        max_qubits (list[int], optional):
+            list of maximum qubits per subcircuit when using automatic cut
+            finding. If None, no constraint is used. Defaults to None.
+            In general it is not necesary to manually specify this parameter.
+
+    Returns:
+        tuple: A tuple containing:
+            - list[SingleQubitCutLocation]: Locations of the cuts as a list
+            - list[QuantumCircuit]: Subcircuits with placeholder operations
+            - dict[int:int]: map of subcircuit qubit indices to original circuit
+                            qubit indices
+
+    """
+    circuit = circuit.copy()  # copy to avoid modifying the original circuit
+    circuit = circuit.decompose(["CutGate"])
+    for i in range(circuit.num_qubits):
+        obs_m = QuantumCircuit(1, name=f"obs_{i}")
+        obs_m = obs_m.to_instruction()
+        circuit.append(obs_m, [i])
+    cut_locations = _get_cut_locations(circuit)
+    circuit1 = _insert_cut_nodes(circuit, cut_locations)
+    circuit = _move_to_new_wire(circuit1.copy())
+    subcircuits = _separate_subcircuits(circuit)
+    subcircuits = _add_cbits(subcircuits)
+    fixed_circs = []
+    for i in subcircuits:
+        test = QuantumCircuit(i.num_qubits)
+        test.add_register(i.cregs[0])
+        test.add_register(i.cregs[1])
+
+        for j in i.data:
+            qubits = [test.qubits[i.qubits.index(q)] for q in j.qubits]
+            test.append(CircuitInstruction(j.operation, qubits))
+
+        fixed_circs.append(test)
+    if len(fixed_circs) <= 1:
+        raise QCutError(
+            "Invalid cuts. Check documentation to see how cuts should be placed."
+        )
+    
+    if max_qubits and len(fixed_circs) != len(max_qubits):
+        """if max_qubits is None:
+            raise QCutError(
+                "max_qubits must be specified when automatic cut finding with " \
+                "max_qubits constraint is used."
+            )"""
+        fixed_circs = construct_final_subcircuits(fixed_circs, max_qubits)
+
+
+    map_qubits = get_qubit_map(fixed_circs)
+
+    return CutCircuit(fixed_circs, cut_locations, map_qubits)
 
 
 def run_cut_circuit(
