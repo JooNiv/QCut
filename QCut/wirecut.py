@@ -553,6 +553,57 @@ def combine_measurements(needed_measurements: dict[int, set[str]]) -> list[dict[
 
     return measurement_settings
 
+def combine_pauli_ops(op: SparsePauliOp) -> list[dict[int, str]]:
+    """Combine Pauli operators that have no conflicting non-identity components.
+    
+    Args:
+        op (SparsePauliOp): The SparsePauliOp to analyze.
+    
+    Returns:
+        list[dict[int, str]]: A list of combined measurement settings, where each dict
+                              maps qubit indices to Pauli basis measurements.
+    """
+    pauli_strings = [pauli.to_label() for pauli in op.paulis]
+    
+    combined_settings = []
+    used = [False] * len(pauli_strings)
+    
+    for i, pauli_string in enumerate(pauli_strings):
+        if used[i]:
+            continue
+        
+        # Start a new combined setting with the current Pauli string
+        combined = {}
+        for qubit_index, pauli in enumerate(pauli_string):
+            if pauli != "I":
+                combined[qubit_index] = pauli
+        
+        used[i] = True
+        
+        # Try to combine with remaining Pauli strings
+        for j in range(i + 1, len(pauli_strings)):
+            if used[j]:
+                continue
+            
+            # Check if pauli_strings[j] can be combined with current combined setting
+            can_combine = True
+            for qubit_index, pauli in enumerate(pauli_strings[j]):
+                if pauli != "I":
+                    if qubit_index in combined and combined[qubit_index] != pauli:
+                        can_combine = False
+                        break
+            
+            # If compatible, add to combined setting
+            if can_combine:
+                for qubit_index, pauli in enumerate(pauli_strings[j]):
+                    if pauli != "I":
+                        combined[qubit_index] = pauli
+                used[j] = True
+        
+        combined_settings.append(combined)
+    
+    return combined_settings
+
 class ModifyMeasurementBasis(TransformationPass):
  
     def __init__(
@@ -680,7 +731,7 @@ def get_experiment_circuits(  # noqa: C901
 
     check_circuit_type = cut_circuit.backend is not None
     
-    measurement_settings = combine_measurements(get_needed_measurements_per_qubit(observables))
+    measurement_settings = combine_pauli_ops(observables)
 
     print("Measurement settings:", measurement_settings)
 
@@ -991,6 +1042,7 @@ def run_experiments(
             if experiment_run.keys() != all_keys:
                 for key, val in results[0][0].items():
                     if key not in experiment_run:
+                        print(f"Filling missing key {key} in experiment {ind}, observable group {exp_ind}")
                         experiment_run[key] = val
 
     return _process_results(results, cut_experiment.id_meas, shots, samples)
@@ -1169,7 +1221,7 @@ def estimate_expectation_values_old(
 
 def _get_sub_expectation_values_old(
     experiment_run: TotalResult,
-    observables: list[int | list[int]],
+    observables: SparsePauliOp,
     shots: int,
     map_qubits: Optional[dict[int, int]] = None,
 ) -> list:
@@ -1192,6 +1244,10 @@ def _get_sub_expectation_values_old(
 
     # initialize sub solution array
     sub_expectation_value = np.zeros(len(observables))
+
+    for obs in observables:
+
+
     for circuit_result in sub_circuit_result_combinations:  # loop through results
         # concat results to one array and reverse to account for qiskit quibit ordering
         full_result = np.concatenate(
@@ -1317,7 +1373,7 @@ def _get_sub_expectation_values(
     """
     # generate all possible combinations between end of circuit measurements
     # from subcircuit group
-    sub_circuit_result_combinations = product(*experiment_run.subcircuits[0])
+    sub_circuit_result_combinations = [product(*obs_run.subcircuits[0]) for obs_run in experiment_run]
 
     # initialize sub solution array
     sub_expectation_value = np.zeros(len(observables))
