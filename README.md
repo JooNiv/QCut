@@ -164,6 +164,8 @@ observables = SparsePauliOp(["IIIZ", "IIZI", "IZII", "IIZZ"])
 cut_experiment = ck.get_experiment_circuits(transpiled, observables)
 ```
 
+Note that both `CutCircuit` and `CutExperiment` classes implement the `assing_parameters()` function of `Qiskit.QuantumCircuit`
+
 **7: Run the experiment circuits**
 
 ```python
