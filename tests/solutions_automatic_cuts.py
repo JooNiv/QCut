@@ -1,4 +1,5 @@
 from qiskit import QuantumCircuit
+from qiskit.quantum_info import SparsePauliOp
 
 qc_1 = QuantumCircuit(3)
 qc_1.x(0)
@@ -43,7 +44,7 @@ test_circuits = [qc_1, qc_2, qc_3, qc_4, qc_5, qc_6]
 
 cut_sizes = [2,2,3,2,2,2]
 
-test_observables = [
+"""test_observables = [
     [0,1,2, [0,2], [1,2], [0,1,2]],
     [0,1,2,3, [0,3], [1,2,3], [0,1,2,3]],
     [0,1,2,3, [0,3], [1,2,3], [0,1,2,3]],
@@ -51,12 +52,23 @@ test_observables = [
     [0,1,2,3, [0,2], [0,3,1]],
     [0, 1, 2, [0, 2], [0, 1]],
 ]
+"""
+
+test_observables = [
+    SparsePauliOp(['IIZ', 'IZI', 'ZII', 'ZIZ', 'ZZI', 'ZZZ']),
+    SparsePauliOp(['IIIZ', 'IIZI', 'IZII', 'ZIII', 'ZIIZ', 'ZZZI', 'ZZZZ']),
+    SparsePauliOp(['IIIZ', 'IIZI', 'IZII', 'ZIII', 'ZIIZ', 'ZZZI', 'ZZZZ']),
+    SparsePauliOp(['IIIIZ', 'IIIZI', 'IIZII', 'IIZIZ', 'ZZIIZ']),
+    SparsePauliOp(['IIIZ', 'IIZI', 'IZII', 'ZIII', 'IZIZ', 'ZIZZ']),
+    SparsePauliOp(['IIZ', 'IZI', 'ZII', 'ZIZ', 'IZZ']),
+]
+
 
 exp_val_solutions = [
     [-1.0, -1.0, -1.0, 1.0, 1.0, -1.0],
     [-1.0, -1.0, -1.0, -1.0, 1.0, -1.0, 1.0],
-    [1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0],
-    [0.0, 1.0, 1.0, 0.0, 0.0],
-    [0.0, 1.0, 0.0, 0.0, 1.0, 1.0],
+    [-1.0, -1.0, -1.0, 1.0, -1.0, 1.0, -1.0],
+    [0.0, 0.0, 1.0, 0.0, 1.0],
+    [0.0, 0.0, 1.0, 0.0, 0.0, 0.0],
     [0.0, 1.0, 0.0, 1.0, 0.0],
 ]

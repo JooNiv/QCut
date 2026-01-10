@@ -10,9 +10,9 @@ from qiskit.converters import circuit_to_dag, dag_to_circuit
 from qiskit_aer import AerSimulator
 
 from QCut.backend_utility import transpile_subcircuits
+from QCut.cutcircuit import CutCircuit
 from QCut.cutlocation import CutLocation, SingleQubitCutLocation
 from QCut.qcuterror import QCutError
-from QCut.cutcircuit import CutCircuit, CutExperiment
 from QCut.QCutFind import construct_final_subcircuits
 from QCut.wirecut import (
     estimate_expectation_values,
@@ -372,12 +372,9 @@ def get_locations_and_subcircuits(
 
     return CutCircuit(fixed_circs, cut_locations, map_qubits)
 
-
 def run_cut_circuit(
-    subcircuits: list[QuantumCircuit],
-    cut_locations: np.ndarray[SingleQubitCutLocation],
+    cut_circuit: CutCircuit,
     observables: list[int | list[int]],
-    map_qubits: dict[int, int],
     backend=AerSimulator(),
 ) -> np.ndarray[float]:
     """After splitting the circuit run the rest of the circuit knitting sequence.
@@ -396,28 +393,23 @@ def run_cut_circuit(
     """
 
     if not isinstance(backend, AerSimulator):
-        transpiled_subcircuits = transpile_subcircuits(subcircuits, 
-                                                       cut_locations, backend)
+        transpiled_subcircuits = transpile_subcircuits(cut_circuit
+                                                       ,backend,
+                                                       optimization_level=3)
     
-        (subexperiments, 
-        coefs, 
-        id_meas) = get_experiment_circuits(transpiled_subcircuits, 
-                                        cut_locations)
+        cut_experiment = get_experiment_circuits(transpiled_subcircuits, 
+                                        observables)
     else:
-        (subexperiments, 
-        coefs, 
-        id_meas) = get_experiment_circuits(subcircuits, 
-                                        cut_locations)
+        cut_experiment = get_experiment_circuits(cut_circuit, 
+                                        observables)
         
     results = run_experiments(
-        subexperiments,
-        cut_locations,
-        id_meas=id_meas,
+        cut_experiment,
         backend=backend,
     )
 
     return estimate_expectation_values(
-        results, coefs, cut_locations, observables, map_qubits
+        results, cut_experiment.expv_data()
     )
 
 
@@ -439,6 +431,6 @@ def run(
 
     """
     # circuit = circuit.copy()
-    qss, circs, map_qubits = get_locations_and_subcircuits(circuit)
+    cut_circuit = get_locations_and_subcircuits(circuit)
 
-    return run_cut_circuit(circs, qss, observables, map_qubits, backend)
+    return run_cut_circuit(cut_circuit, observables, backend)

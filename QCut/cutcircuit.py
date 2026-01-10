@@ -2,7 +2,9 @@
 functionality as the qiskit QuantumCircuit class for a group of circuts."""
 
 from qiskit import QuantumCircuit
+
 from QCut.cutlocation import CutLocation, SingleQubitCutLocation
+
 
 class CutCircuitOld:
     def __init__(self, 
@@ -61,7 +63,8 @@ class CutCircuit:
         self.map_qubit = map_qubit
         self.backend = backend
 
-    def assign_parameters(self, parameters: dict, inplace=False) -> dict[int, QuantumCircuit]:
+    def assign_parameters(self, parameters: dict, inplace=False
+                          ) -> dict[int, QuantumCircuit]:
         """Assign parameters to the circuits. Same as qiskit
         QuantumCircuit.assign_parameters."""
         if inplace:
@@ -98,7 +101,6 @@ class CutExperiment:
                     cut_locations: list[CutLocation | SingleQubitCutLocation],
                     map_qubit: dict[int, int],
                     coefficients: list[float],
-                    id_meas,
                     observables,
                     backend=None) -> None:
         """Init."""
@@ -109,7 +111,6 @@ class CutExperiment:
         self.map_qubit = map_qubit
         self.coefficients = coefficients
         self.observables = observables
-        self.id_meas = id_meas
 
     def expv_data(self):
         """Get data for expv calculation."""
@@ -120,14 +121,16 @@ class CutExperiment:
             "observables": self.observables
         }
 
-    def assign_parameters(self, parameters: dict, inplace=False) -> list[dict[int, QuantumCircuit]]:
+    def assign_parameters(self, parameters: dict, inplace=False
+                          ) -> list[dict[int, QuantumCircuit]]:
         """Assign parameters to the circuits. Same as qiskit
         QuantumCircuit.assign_parameters."""
         if inplace:
             for exp_ind, subcircuits in enumerate(self.experiments):
                 for ind, circuit in subcircuits.items():
                     try:
-                        self.experiments[exp_ind][ind] = circuit.assign_parameters(parameters)
+                        self.experiments[exp_ind][ind] = (circuit
+                                                          .assign_parameters(parameters))
                     except Exception:
                         pass
             return self.experiments
@@ -146,7 +149,7 @@ class CutExperiment:
     @property
     def num_qubits(self):
         """Number of qubits per subcircuit."""
-        return [i.num_qubits for i in self.experiments[0].values()]
+        return [i.num_qubits for i in self.experiments[0][0].values()]
     
     @property
     def num_circuits(self):
@@ -156,13 +159,13 @@ class CutExperiment:
     @property
     def group_size(self):
         """Number of circuits in a group."""
-        return len(self.experiments[0][0])
+        return len(self.experiments[0][0][0])
     
     @property
     def num_groups(self):
         """Number of circuit groups."""
-        return len(self.experiments[0])
+        return len(self.experiments)
     
     @property
     def num_obs_groups(self):
-        return len(self.experiments)
+        return len(self.experiments[0])

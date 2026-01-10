@@ -217,10 +217,10 @@ def find_cuts(  # noqa: C901
 
     cut_circuit = add_cuts_to_circuit(circuit, cut_data, cut_data_test)
 
-    qss, circs, map_qubits = get_locations_and_subcircuits(cut_circuit)
+    final_cut_circuit = get_locations_and_subcircuits(cut_circuit)
 
     if not more_data:
-        return qss, circs, map_qubits
+        return final_cut_circuit
     else:
-        return (qss, circs, map_qubits, cut_circuit, cut_data, cut_data_test, labels, 
+        return (final_cut_circuit, cut_circuit, cut_data, cut_data_test, labels, 
                 graph, nodes_on_qubit)

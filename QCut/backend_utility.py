@@ -11,8 +11,7 @@ from QCut.cutcircuit import CutCircuit
 from QCut.cutlocation import CutLocation, SingleQubitCutLocation
 
 
-def transpile_subcircuits(subcircuits: list[QuantumCircuit], 
-                          cut_locations: list,
+def transpile_subcircuits(cut_circuit: CutCircuit,
                           backend,
                           optimization_level: int = 0,
                           transpile_options: dict = None) -> CutCircuit:
@@ -38,7 +37,7 @@ def transpile_subcircuits(subcircuits: list[QuantumCircuit],
     
     placeholders = []
 
-    for ind, cut in enumerate(cut_locations):
+    for ind, cut in enumerate(cut_circuit.cut_locations):
         if isinstance(cut, SingleQubitCutLocation):
             placeholders.append(f"Meas_{ind}")
             placeholders.append(f"Init_{ind}")
@@ -46,7 +45,8 @@ def transpile_subcircuits(subcircuits: list[QuantumCircuit],
             placeholders.append(f"cutCZ_c_{ind}")
             placeholders.append(f"cutCZ_t_{ind}")
 
-    for i in range(sum(subcircuits.num_qubits for subcircuits in subcircuits)):
+    for i in range(sum(subcircuits.num_qubits 
+                       for subcircuits in cut_circuit.subcircuits)):
         placeholders.append(f"obs_{i}")
     
     if transpile_options and "basis_gates" in transpile_options:
@@ -62,13 +62,14 @@ def transpile_subcircuits(subcircuits: list[QuantumCircuit],
     if transpile_options and "backend" in transpile_options:
         transpile_options.pop("backend")
 
-    transpiled = transpile(subcircuits,
+    transpiled = transpile(cut_circuit.subcircuits,
                            coupling_map=backend._coupling_map,
                            basis_gates=basis + placeholders + ["id"],
                            optimization_level=optimization_level,
                            **(transpile_options or {}))
 
-    return CutCircuit(subcircuits=transpiled, backend=backend)
+    return CutCircuit(subcircuits=transpiled, cut_locations=cut_circuit.cut_locations, 
+                      map_qubit=cut_circuit.map_qubit, backend=backend)
 
 def transpile_experiments(experiment_circuits: list | CutCircuit, 
                           backend,
