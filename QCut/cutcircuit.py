@@ -24,7 +24,7 @@ class CutCircuit:
         """Assign parameters to the circuits. Same as qiskit
         QuantumCircuit.assign_parameters."""
         if inplace:
-            for ind, circuit in self.subcircuits.items():
+            for ind, circuit in enumerate(self.subcircuits):
                 try:
                     self.subcircuits[ind] = circuit.assign_parameters(parameters)
                 except Exception:
@@ -33,7 +33,7 @@ class CutCircuit:
         
         else:
             new_circuits = {}
-            for ind, circuit in self.subcircuits.items():
+            for ind, circuit in enumerate(self.subcircuits):
                 try:
                     new_circuits[ind] = circuit.assign_parameters(parameters)
                 except Exception:
