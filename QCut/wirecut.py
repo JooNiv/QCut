@@ -89,7 +89,7 @@ def _finalize_subcircuit(
     return subcircuit
 
 
-def get_placeholder_locations(subcircuits: list[QuantumCircuit]) -> list:
+def _get_placeholder_locations(subcircuits: list[QuantumCircuit]) -> list:
     """
     Identify the locations of placeholder operations in a list of quantum subcircuits.
     This function scans through each quantum subcircuit provided in the input list and
@@ -133,7 +133,7 @@ def _remove_obsm(subcircuits: list[dict[int, QuantumCircuit]]
                 else:
                     j += 1
 
-def insert_wire_cut_qpd(
+def _insert_wire_cut_qpd(
     ind,
     op,
     subcircuit,
@@ -208,7 +208,7 @@ def insert_wire_cut_qpd(
     return offset, classical_bit_index, inserted_operations
 
 
-def insert_cz_cut_qpd(  # noqa: C901
+def _insert_cz_cut_qpd(  # noqa: C901
     ind,
     op,
     subcircuit,
@@ -318,51 +318,7 @@ def insert_cz_cut_qpd(  # noqa: C901
 
     return offset, classical_bit_index, inserted_operations
 
-def get_needed_measurements_per_qubit(op: SparsePauliOp) -> dict[int, set[str]]:
-    """Get the needed measurements per qubit for a given SparsePauliOp.
-
-    Args:
-        op (SparsePauliOp): The SparsePauliOp to analyze.
-    Returns:
-        dict[int, set[str]]: A dictionary mapping qubit indices to sets of
-        needed measurements.
-    """
-    needed_measurements = {}
-    for pauli_string in op.paulis:
-        for qubit_index, pauli in enumerate(pauli_string.to_label()):
-            if pauli != "I":
-                if qubit_index not in needed_measurements:
-                    needed_measurements[qubit_index] = set()
-                needed_measurements[qubit_index].add(pauli)
-    return needed_measurements
-
-
-def combine_measurements(needed_measurements: dict[int, set[str]]
-                         ) -> list[dict[int, str]]:
-    """Combine measurements to minimize the number of measurement settings.
-
-    Args:
-        needed_measurements (dict[int, set[str]]): A dictionary mapping qubit indices to
-        sets of needed measurements.
-    Returns:
-        list[dict[int, str]]: A list of measurement settings, each represented as a
-        dictionary mapping qubit indices to measurements.
-    """
-    measurement_settings = []
-    while needed_measurements:
-        setting = {}
-        for qubit_index in list(needed_measurements.keys()):
-            paulis = needed_measurements[qubit_index]
-            if paulis:
-                pauli = paulis.pop()
-                setting[qubit_index] = pauli
-                if not paulis:
-                    del needed_measurements[qubit_index]
-        measurement_settings.append(setting)
-
-    return measurement_settings
-
-def combine_pauli_ops(op: SparsePauliOp) -> list[dict[int, str]]:  # noqa: C901
+def _combine_pauli_ops(op: SparsePauliOp) -> list[dict[int, str]]:  # noqa: C901
     """Combine Pauli operators that have no conflicting non-identity components.
     
     Args:
@@ -480,7 +436,7 @@ class ModifyMeasurementBasis(TransformationPass):
             return cloned_dag
         return dag
 
-def get_obs_subcircuits(subcircuits: list[QuantumCircuit], 
+def _get_obs_subcircuits(subcircuits: list[QuantumCircuit], 
                         measurement_settings: list[dict[int, str]],
                         ops: dict[str, Instruction] | None = None
                         ) -> list[dict[int, QuantumCircuit]]:
@@ -562,7 +518,7 @@ def get_experiment_circuits(  # noqa: C901
 
     check_circuit_type = cut_circuit.backend is not None
     
-    measurement_settings = combine_pauli_ops(observables)
+    measurement_settings = _combine_pauli_ops(observables)
 
     backend = None
     if check_circuit_type:
@@ -591,11 +547,11 @@ def get_experiment_circuits(  # noqa: C901
 
         ops = {"X-meas": x_meas_ops, "Y-meas": y_meas_ops}
 
-        obs_subcircuits = get_obs_subcircuits(
+        obs_subcircuits = _get_obs_subcircuits(
             cut_circuit.subcircuits, measurement_settings, ops
         )
     else:
-        obs_subcircuits = get_obs_subcircuits(
+        obs_subcircuits = _get_obs_subcircuits(
             cut_circuit.subcircuits, measurement_settings
         )
 
@@ -613,7 +569,7 @@ def get_experiment_circuits(  # noqa: C901
     num_circs = np.power(8, wire_cuts) * np.power(6, cz_cuts)
     experiment_circuits = []
     coefficients = np.empty(num_circs)
-    placeholder_locations = get_placeholder_locations(cut_circuit.subcircuits)
+    placeholder_locations = _get_placeholder_locations(cut_circuit.subcircuits)
     for id_meas_experiment_index, qpd in enumerate(
         qpd_combinations
     ):  # loop through all
@@ -662,7 +618,7 @@ def get_experiment_circuits(  # noqa: C901
                             offset,
                             classical_bit_index,
                             inserted_operations,
-                        ) = insert_cz_cut_qpd(
+                        ) = _insert_cz_cut_qpd(
                             ind,
                             op,
                             subcircuit,
@@ -678,7 +634,7 @@ def get_experiment_circuits(  # noqa: C901
                             offset,
                             classical_bit_index,
                             inserted_operations,
-                        ) = insert_wire_cut_qpd(
+                        ) = _insert_wire_cut_qpd(
                             ind,
                             op,
                             subcircuit,
@@ -900,7 +856,7 @@ def _get_sub_expectation_values(
 
     return sub_expectation_value
 
-def get_observable_circuit_index(pauli, combined: list[dict[int, str]]):
+def _get_observable_circuit_index(pauli, combined: list[dict[int, str]]):
     """Find which measurement setting covers the non-identity letters of `pauli`,
     and return the indices of the qubits involved."""
     label = pauli
@@ -950,12 +906,12 @@ def estimate_expectation_values(
     )
     shots = int(samples / len(results))
 
-    measurement_settings = combine_pauli_ops(expv_data["observables"])
+    measurement_settings = _combine_pauli_ops(expv_data["observables"])
 
     result_for_obs = []
 
     for obs in expv_data["observables"].paulis:
-        obs_circuit_info = get_observable_circuit_index(obs, measurement_settings)
+        obs_circuit_info = _get_observable_circuit_index(obs, measurement_settings)
         result_for_obs.append(obs_circuit_info)
 
     sum_shots = 0
@@ -981,18 +937,6 @@ def estimate_expectation_values(
             )
             sum_shots += shots
             expectation_values[ind] += mid
-        
-
-    """for experiment_run, coefficient in zip(results, expv_data["coefficients"]):
-        # add sub results to the total approx expectation value
-        mid = (
-            np.power(-1, wire_cuts + 1)  # * (np.power(-1, cz_cuts)
-            * coefficient
-            * _get_sub_expectation_values_old(
-                experiment_run[0], [0,1,2], shots, expv_data["map_qubit"]            )
-        )
-        sum_shots += shots
-        expectation_values += mid"""
 
     # multiply by gamma to the power of cuts and take mean
     return np.power(4, wire_cuts) * np.power(3, cz_cuts) * expectation_values / samples
