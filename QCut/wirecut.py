@@ -68,19 +68,6 @@ def get_qpd_combinations(
     return all_combinations
 
 
-def _adjust_cregs(subcircuit: QuantumCircuit) -> None:
-    """Adjust classical registers for identity measurements."""
-    if len(subcircuit.cregs) > 1:
-        if subcircuit.cregs[0].size == 1:
-            del subcircuit.clbits[subcircuit.cregs[0].size - 1]
-            del subcircuit.cregs[0]._bits[subcircuit.cregs[0].size - 1]
-            del subcircuit.cregs[0]
-        else:
-            del subcircuit.clbits[subcircuit.cregs[0].size - 1]
-            del subcircuit.cregs[0]._bits[subcircuit.cregs[0].size - 1]
-            subcircuit.cregs[0]._size -= 1
-
-
 def _finalize_subcircuit(
     subcircuit: QuantumCircuit, qpd_qubits: list[int]
 ) -> QuantumCircuit:
@@ -724,7 +711,6 @@ def run_experiments(  # noqa: C901
     cut_experiment: CutExperiment,
     shots: int = 2**12,
     backend: None = None,
-    more_data = False,
 ) -> list[list[TotalResult]]:
     """Run experiment circuits.
 
@@ -774,17 +760,12 @@ def run_experiments(  # noqa: C901
 
     all_keys = results[0][0].keys()
 
-    old_results = results.copy()
-
     for ind, sub_result in enumerate(results):
         for exp_ind, experiment_run in enumerate(sub_result):
             if experiment_run.keys() != all_keys:
                 for key, val in results[0][0].items():
                     if key not in experiment_run:
                         experiment_run[key] = val
-
-    if more_data:
-        return (_process_results(results, shots, samples), old_results, results)
     
     return _process_results(results, shots, samples)
 
@@ -840,7 +821,7 @@ def _process_results(
         
     return preocessed_results
 
-def _get_sub_expectation_values_old(
+def _get_sub_expectation_values(
     experiment_run: TotalResult,
     observables: SparsePauliOp,
     shots: int,
@@ -994,7 +975,7 @@ def estimate_expectation_values(
             mid = (
                 np.power(-1, wire_cuts + 1)  # * (np.power(-1, cz_cuts)
                 * coefficient
-                * _get_sub_expectation_values_old(
+                * _get_sub_expectation_values(
                     experiment_run[obs_data["circuit_index"]], cur_obs,
                     shots, expv_data["map_qubit"])
             )
@@ -1015,95 +996,3 @@ def estimate_expectation_values(
 
     # multiply by gamma to the power of cuts and take mean
     return np.power(4, wire_cuts) * np.power(3, cz_cuts) * expectation_values / samples
-
-
-def _get_sub_expectation_values(
-    experiment_run: TotalResult,
-    observables: list[int | list[int]],
-    shots: int,
-    map_qubits: Optional[dict[int, int]],
-    measurement_settings: dict[int, set[str]],
-) -> list:
-    """Calculate sub expectation value for the result.
-
-    Args:
-        experiment_run (TotalResult): results of a subcircuit pair
-        observables (list[int | list[int]]):
-            list of observables as qubit indices (Z-observables)
-        shots (int): number of shots
-
-    Returns:
-        list:
-            list of sub expectation values
-
-    """
-    # generate all possible combinations between end of circuit measurements
-    # from subcircuit group
-
-    sub_circuit_result_combinations_all = []
-
-    for i in experiment_run:
-        sub_circuit_result_combinations_all.append(product(*i.subcircuits[0]))
-
-    # initialize sub solution array
-    sub_expectation_value = np.zeros(len(observables))
-
-    ind = 0
-
-    for obs in observables.paulis:  # loop through observables
-        obs_circuit_info = get_observable_circuit_index(obs, measurement_settings)
-
-        circ_index = obs_circuit_info["circuit_index"]
-        obs_indices = obs_circuit_info["obs_indices"]
-
-        sub_circuit_result_combinations = sub_circuit_result_combinations_all[circ_index]  # noqa: E501
-
-        for circuit_result in sub_circuit_result_combinations: # Loop through results
-             # concat results to one array and reverse to account for qiskit quibit
-             # ordering
-            full_result = np.concatenate(
-                [i.measurements[0] for i in reversed(circuit_result)]
-            )
-            if map_qubits is not None:
-                sorted_full_result = np.array(
-                    [
-                        full_result[map_qubits[key]]
-                        for key in sorted(map_qubits.keys())
-                    ]
-                )
-            else:
-                sorted_full_result = full_result
-            
-            qpd_measurement_coefficient = 1  # initial value for qpd
-            weight = shots  # initial weight
-            for res in circuit_result:  # calculate weight and qpd coefficient
-                weight *= res.count / shots
-                qpd_measurement_coefficient *= np.prod(res.measurements[1])
-            observable_results = 0
-
-            if len(obs_indices) == 1: # if single qubit
-                observable_results = sorted_full_result[obs_indices[0]] 
-            # observable just save
-            # to array
-            else:  # if multi qubit observable
-                multi_qubit_observable_eigenvalue = 1  # initial eigenvalue
-                for sub_observables in obs_indices:  # multio qubit observable
-                    multi_qubit_observable_eigenvalue *= sorted_full_result[
-                        sub_observables
-                    ]
-                    observable_results = (
-                        np.power(-1, len(obs_indices) + 1) * 
-                        multi_qubit_observable_eigenvalue
-                    )
-
-            observable_expectation_value = (
-                qpd_measurement_coefficient * observable_results * weight
-            )
-            sub_expectation_value[ind] += observable_expectation_value
-        ind += 1
-
-    return sub_expectation_value
-
-
-
-
