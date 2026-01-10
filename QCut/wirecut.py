@@ -934,7 +934,7 @@ def estimate_expectation_values(
                 * _get_sub_expectation_values(
                     experiment_run[obs_data["circuit_index"]], cur_obs,
                     shots, expv_data["map_qubit"])
-            )
+            )[0]
             sum_shots += shots
             expectation_values[ind] += mid
 
