@@ -554,6 +554,21 @@ def get_experiment_circuits(  # noqa: C901
                 due to identity basis measurement.
 
     """
+
+    num_qubits = 0
+    for subcircuit in cut_circuit.subcircuits:
+        crs = subcircuit.cregs
+        for cr in crs:
+            if cr.name == "meas":
+                num_qubits += cr.size
+
+    if all(len(obs) != num_qubits for obs in observables.paulis):
+        raise ValueError(
+            f"""ALL observable lengths must match 
+            the number of qubits in the original uncut circuit 
+            ({num_qubits})."""
+        )
+
     qpd_combinations = get_qpd_combinations(cut_circuit.cut_locations)  
     # generate the QPD
     # operation combinations
