@@ -38,7 +38,8 @@ class CutCircuit:
                     new_circuits[ind] = circuit.assign_parameters(parameters)
                 except Exception:
                     new_circuits[ind] = circuit
-            return new_circuits
+            return CutCircuit(new_circuits,
+                              self.cut_locations, self.map_qubit, self.backend)
             
     @property
     def num_qubits(self):
@@ -105,7 +106,9 @@ class CutExperiment:
                             new_circuits[ind] = circuit
                     new_subcircuits.append(new_circuits)
                 new_experiments.append(new_subcircuits)
-            return new_experiments
+            return CutExperiment(new_experiments,
+                                 self.cut_locations, self.map_qubit,
+                                 self.coefficients, self.observables, self.backend)
     
     @property
     def num_qubits(self):
