@@ -29,7 +29,7 @@ class CutCircuit:
                     self.subcircuits[ind] = circuit.assign_parameters(parameters)
                 except Exception:
                     pass
-            return self.subcircuits
+            #return self.subcircuits
         
         else:
             new_circuits = {}
@@ -83,23 +83,28 @@ class CutExperiment:
         QuantumCircuit.assign_parameters."""
         if inplace:
             for exp_ind, subcircuits in enumerate(self.experiments):
-                for ind, circuit in subcircuits.items():
-                    try:
-                        self.experiments[exp_ind][ind] = (circuit
-                                                          .assign_parameters(parameters))
-                    except Exception:
-                        pass
-            return self.experiments
+                for circ_ind, value in enumerate(subcircuits):
+                    for ind, circuit in value.items():
+                        try:
+                            self.experiments[exp_ind][circ_ind][ind] = (circuit
+                                                            .assign_parameters(parameters))
+                        except Exception:
+                            pass
+            #return self.experiments
         else:
             new_experiments = []
-            for subcircuits in self.experiments:
-                new_circuits = {}
-                for ind, circuit in subcircuits.items():
-                    try:
-                        new_circuits[ind] = circuit.assign_parameters(parameters)
-                    except Exception:
-                        new_circuits[ind] = circuit
-                new_experiments.append(new_circuits)
+            for exp_ind, subcircuits in enumerate(self.experiments):
+                new_subcircuits = []
+                for circ_ind, value in enumerate(subcircuits):
+                    new_circuits = {}
+                    for ind, circuit in value.items():
+                        try:
+                            new_circuits[ind] = (circuit
+                                                .assign_parameters(parameters))
+                        except Exception:
+                            new_circuits[ind] = circuit
+                    new_subcircuits.append(new_circuits)
+                new_experiments.append(new_subcircuits)
             return new_experiments
     
     @property
