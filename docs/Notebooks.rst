@@ -9,3 +9,4 @@ Notebooks
    Subsequent Wires <examples/QCutCutSubsequentWires.ipynb>
    Cut to Three parts <examples/QCutCutToThreeParts.ipynb>
    Multiple cuts on a single wire <examples/QCutMultipleCutsOnSingleWire.ipynb>
+   QAOA Example <examples/QCutQAOAExample.ipynb>
