@@ -271,16 +271,17 @@ def get_locations_and_subcircuits(
                             qubit indices
 
     """
-    circuit = circuit.copy()  # copy to avoid modifying the original circuit
-    circuit = circuit.decompose(["CutGate"])
+    circuit_copy = circuit.copy()  # copy to avoid modifying the original circuit
+    circuit_copy = circuit_copy.decompose(["CutGate"])
     for i in range(circuit.num_qubits):
         obs_m = QuantumCircuit(1, name=f"obs_{i}")
         obs_m = obs_m.to_instruction()
-        circuit.append(obs_m, [i])
-    cut_locations = _get_cut_locations(circuit)
-    circuit1 = _insert_cut_nodes(circuit, cut_locations)
-    circuit = _move_to_new_wire(circuit1.copy())
-    subcircuits = _separate_subcircuits(circuit)
+        circuit_copy.append(obs_m, [i])
+    cut_locations = _get_cut_locations(circuit_copy)
+    circuit1 = _insert_cut_nodes(circuit_copy, cut_locations)
+    circuit_new = _move_to_new_wire(circuit1.copy())
+    subcircuits = _separate_subcircuits(circuit_new)
+
     subcircuits = _add_cbits(subcircuits)
     fixed_circs = []
     for i in subcircuits:
@@ -291,7 +292,6 @@ def get_locations_and_subcircuits(
         for j in i.data:
             qubits = [test.qubits[i.qubits.index(q)] for q in j.qubits]
             test.append(CircuitInstruction(j.operation, qubits))
-
         fixed_circs.append(test)
     if len(fixed_circs) <= 1:
         raise QCutError(
