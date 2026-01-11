@@ -166,7 +166,6 @@
 <li class="toctree-l2"><a class="reference internal" href="../GateCuts.html">Gate cuts</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../AutomaticCuts.html">Automatic cuts</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../Multiple_cuts.html">Multiple cuts</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../OtherObservables.html">Other than Z observables</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="../Notebooks.html">Notebooks</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
@@ -174,9 +173,9 @@
 <li class="toctree-l2 current active"><a class="current reference internal" href="#">Subsequent Wires</a></li>
 <li class="toctree-l2"><a class="reference internal" href="QCutCutToThreeParts.html">Cut to Three parts</a></li>
 <li class="toctree-l2"><a class="reference internal" href="QCutMultipleCutsOnSingleWire.html">Multiple cuts on a single wire</a></li>
+<li class="toctree-l2"><a class="reference internal" href="QCutQAOAExample.html">QAOA Example</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1"><a class="reference internal" href="../FutureFeatures.html">Possible future features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Acknowledgement.html">Acknowledgements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../License.html">License</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../QCut.html">QCut API reference</a></li>
@@ -338,10 +337,14 @@ document.write(`
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">QCut</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ck</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">QCut</span><span class="w"> </span><span class="kn">import</span> <span class="n">cut</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit</span><span class="w"> </span><span class="kn">import</span> <span class="n">QuantumCircuit</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">QCut</span><span class="w"> </span><span class="kn">import</span> <span class="n">cut</span><span class="p">,</span> <span class="n">cutGate</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit</span><span class="w"> </span><span class="kn">import</span> <span class="n">QuantumCircuit</span><span class="p">,</span> <span class="n">transpile</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit.circuit.library</span><span class="w"> </span><span class="kn">import</span> <span class="n">CXGate</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit.quantum_info</span><span class="w"> </span><span class="kn">import</span> <span class="n">SparsePauliOp</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit.circuit.library</span><span class="w"> </span><span class="kn">import</span> <span class="n">CXGate</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_aer</span><span class="w"> </span><span class="kn">import</span> <span class="n">AerSimulator</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_aer.primitives</span><span class="w"> </span><span class="kn">import</span> <span class="n">Estimator</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit.primitives</span><span class="w"> </span><span class="kn">import</span> <span class="n">Estimator</span><span class="p">,</span> <span class="n">BackendEstimator</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">iqm.qiskit_iqm</span><span class="w"> </span><span class="kn">import</span> <span class="n">IQMFakeAdonis</span>
 </pre></div>
 </div>
 </div>
@@ -357,14 +360,12 @@ document.write(`
 <span class="n">circuit</span><span class="o">.</span><span class="n">cx</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
 <span class="n">circuit</span><span class="o">.</span><span class="n">cx</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
 
-<span class="n">circuit</span><span class="o">.</span><span class="n">measure_all</span><span class="p">()</span>
-
 <span class="n">circuit</span><span class="o">.</span><span class="n">draw</span><span class="p">(</span><span class="s2">&quot;mpl&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/edca7e752eb6475c0eebc97cfc86fa91582b5ff51bf3c97cf3aeee5b165f99e3.png" src="../_images/edca7e752eb6475c0eebc97cfc86fa91582b5ff51bf3c97cf3aeee5b165f99e3.png" />
+<img alt="../_images/289eec707e56f23d9a5eee0600f975785ffeae935508402be4be6bb1b64f31a9.png" src="../_images/289eec707e56f23d9a5eee0600f975785ffeae935508402be4be6bb1b64f31a9.png" />
 </div>
 </div>
 <div class="cell docutils container">
@@ -390,106 +391,7 @@ document.write(`
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#find cut locations and separate into subcircuits</span>
-
-<span class="n">cut_locations</span><span class="p">,</span> <span class="n">subcircuits</span><span class="p">,</span> <span class="n">map_qubit</span> <span class="o">=</span> <span class="n">ck</span><span class="o">.</span><span class="n">get_locations_and_subcircuits</span><span class="p">(</span><span class="n">cut_circuit</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">subcircuits</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">draw</span><span class="p">(</span><span class="s2">&quot;mpl&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<img alt="../_images/89490bf4f933d1beffd257442692ade72770d8a658d1820f5f521574bb98a7fe.png" src="../_images/89490bf4f933d1beffd257442692ade72770d8a658d1820f5f521574bb98a7fe.png" />
-</div>
-</div>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">subcircuits</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">draw</span><span class="p">(</span><span class="s2">&quot;mpl&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<img alt="../_images/7cf72320d374328ba7aa1c73383a7c4e7634bfa2d841a3a939ae556b39a707c6.png" src="../_images/7cf72320d374328ba7aa1c73383a7c4e7634bfa2d841a3a939ae556b39a707c6.png" />
-</div>
-</div>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#insert qpd operations to get the 8^n experiment circuits, where n is the number of cuts made</span>
-<span class="c1">#also returns coefficients used for reconstructing the expectation values</span>
-<span class="c1">#and locations of identity basis measurements that get added with post processing</span>
-
-<span class="n">experiment_circuits</span><span class="p">,</span> <span class="n">coefficients</span><span class="p">,</span> <span class="n">id_meas</span> <span class="o">=</span> <span class="n">ck</span><span class="o">.</span><span class="n">get_experiment_circuits</span><span class="p">(</span><span class="n">subcircuits</span><span class="p">,</span> <span class="n">cut_locations</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#define backend</span>
-
-<span class="n">backend</span> <span class="o">=</span> <span class="n">AerSimulator</span><span class="p">()</span>
-</pre></div>
-</div>
-</div>
-</div>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#run experiment circuits</span>
-<span class="c1">#run_experiments() also post processes the results</span>
-
-<span class="n">results</span> <span class="o">=</span> <span class="n">ck</span><span class="o">.</span><span class="n">run_experiments</span><span class="p">(</span><span class="n">experiment_circuits</span><span class="p">,</span> <span class="n">cut_locations</span><span class="p">,</span> <span class="n">id_meas</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="n">backend</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#define observables to calculate expectation values for</span>
-<span class="n">observables</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">]]</span>
-
-<span class="c1">#get the exact expectation values with ideal simulator</span>
-<span class="n">expectation_values</span> <span class="o">=</span> <span class="n">ck</span><span class="o">.</span><span class="n">estimate_expectation_values</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="n">coefficients</span><span class="p">,</span> <span class="n">cut_locations</span><span class="p">,</span> <span class="n">observables</span><span class="p">,</span> <span class="n">map_qubit</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#transform observables into a PauliList for the Qiskit Estimator</span>
-<span class="n">paulilist_observables</span> <span class="o">=</span> <span class="n">ck</span><span class="o">.</span><span class="n">get_pauli_list</span><span class="p">(</span><span class="n">observables</span><span class="p">,</span> <span class="n">circuit</span><span class="o">.</span><span class="n">num_qubits</span><span class="p">)</span>
-
-<span class="c1">#get the exact expectation values with ideal simulator</span>
-<span class="n">estimator</span> <span class="o">=</span> <span class="n">Estimator</span><span class="p">(</span><span class="n">run_options</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;shots&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">},</span> <span class="n">approximation</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">exact_expvals</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="n">estimator</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="n">circuit</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">paulilist_observables</span><span class="p">),</span>  <span class="c1"># noqa: PD011</span>
-                  <span class="nb">list</span><span class="p">(</span><span class="n">paulilist_observables</span><span class="p">))</span><span class="o">.</span><span class="n">result</span><span class="p">()</span><span class="o">.</span><span class="n">values</span>
-<span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-
-<span class="c1">#set numpy print options</span>
-<span class="n">np</span><span class="o">.</span><span class="n">set_printoptions</span><span class="p">(</span><span class="n">formatter</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;float&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">x</span><span class="si">:</span><span class="s2">0.6f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">})</span>
-<span class="n">expectation_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">expectation_values</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
-
-<span class="c1">#compare QCut to Estimator</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;QCut circuit knitting expectation values:</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">expectation_values</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Exact expectation values with ideal simulator :</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">exact_expvals</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>QCut circuit knitting expectation values:[0.987290 0.987290 0.050727 -0.018188 0.003919 -0.018188]
-Exact expectation values with ideal simulator :[1.000000 0.000000 0.000000 0.000000 0.000000 1.000000]
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Now one can continue as in othrer examples</span>
 </pre></div>
 </div>
 </div>

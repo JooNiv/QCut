@@ -1,8 +1,8 @@
 Multiple cuts
 =============
 
-Performing multiple cuts works the exact same way as a single cut. Since eats cut introduces an extra qubit one just has to 
-be careful to properly allocate the extra qubits needed by wire-cutting.
+Performing multiple cuts works the exact same way as a single cut. It is good to keep in mind
+that each wire cut adds an extra qubit and increases the number of needed circuits exponentially.
 
 Cutting to more than two parts
 ------------------------------
@@ -16,7 +16,6 @@ Cutting to more than two parts
     circuit.cx(0,1)
     circuit.cx(1,2)
     circuit.cx(2,3)
-    circuit.measure_all()
 
     circuit.draw("mpl")
 
@@ -67,7 +66,6 @@ Initial circuit:
     circuit.cx(0,2)
     circuit.cx(1,2)
     circuit.cx(1,3)
-    circuit.measure_all()
 
     circuit.draw("mpl")
 
@@ -103,7 +101,6 @@ Initial circuit:
     circuit.cx(0,1)
     circuit.cx(1,2)
     circuit.cx(0,1)
-    circuit.measure_all()
 
     circuit.draw("mpl")
 

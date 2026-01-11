@@ -15,7 +15,6 @@ A package for performing circuit knitting with wire cuts on hardware with no res
    Usage
    Examples
    Notebooks
-   FutureFeatures
    Acknowledgement
    License
    QCut

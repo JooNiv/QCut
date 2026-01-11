@@ -166,7 +166,6 @@
 <li class="toctree-l2"><a class="reference internal" href="GateCuts.html">Gate cuts</a></li>
 <li class="toctree-l2"><a class="reference internal" href="AutomaticCuts.html">Automatic cuts</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Multiple_cuts.html">Multiple cuts</a></li>
-<li class="toctree-l2"><a class="reference internal" href="OtherObservables.html">Other than Z observables</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="Notebooks.html">Notebooks</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -174,9 +173,9 @@
 <li class="toctree-l2"><a class="reference internal" href="examples/QCutCutSubsequentWires.html">Subsequent Wires</a></li>
 <li class="toctree-l2"><a class="reference internal" href="examples/QCutCutToThreeParts.html">Cut to Three parts</a></li>
 <li class="toctree-l2"><a class="reference internal" href="examples/QCutMultipleCutsOnSingleWire.html">Multiple cuts on a single wire</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/QCutQAOAExample.html">QAOA Example</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1"><a class="reference internal" href="FutureFeatures.html">Possible future features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Acknowledgement.html">Acknowledgements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="License.html">License</a></li>
 <li class="toctree-l1"><a class="reference internal" href="QCut.html">QCut API reference</a></li>
@@ -384,9 +383,13 @@ including it in your project folder.</div>
 <p><strong>1: Import needed packages</strong></p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">QCut</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ck</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">QCut</span><span class="w"> </span><span class="kn">import</span> <span class="n">cut</span><span class="p">,</span> <span class="n">cutGate</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit</span><span class="w"> </span><span class="kn">import</span> <span class="n">QuantumCircuit</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit</span><span class="w"> </span><span class="kn">import</span> <span class="n">QuantumCircuit</span><span class="p">,</span> <span class="n">transpile</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit.circuit.library</span><span class="w"> </span><span class="kn">import</span> <span class="n">CXGate</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit.quantum_info</span><span class="w"> </span><span class="kn">import</span> <span class="n">SparsePauliOp</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit.circuit.library</span><span class="w"> </span><span class="kn">import</span> <span class="n">CXGate</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_aer</span><span class="w"> </span><span class="kn">import</span> <span class="n">AerSimulator</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_aer.primitives</span><span class="w"> </span><span class="kn">import</span> <span class="n">Estimator</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit.primitives</span><span class="w"> </span><span class="kn">import</span> <span class="n">Estimator</span><span class="p">,</span> <span class="n">BackendEstimator</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">iqm.qiskit_iqm</span><span class="w"> </span><span class="kn">import</span> <span class="n">IQMFakeAdonis</span>
 </pre></div>
 </div>
 <p><strong>2: Start by defining a QuantumCircuit just like in Qiskit</strong></p>
@@ -397,8 +400,6 @@ including it in your project folder.</div>
 <span class="n">circuit</span><span class="o">.</span><span class="n">cx</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
 <span class="n">circuit</span><span class="o">.</span><span class="n">cx</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
 <span class="n">circuit</span><span class="o">.</span><span class="n">cx</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
-
-<span class="n">circuit</span><span class="o">.</span><span class="n">measure_all</span><span class="p">()</span>
 
 <span class="n">circuit</span><span class="o">.</span><span class="n">draw</span><span class="p">(</span><span class="s2">&quot;mpl&quot;</span><span class="p">)</span>
 </pre></div>
@@ -426,19 +427,19 @@ automatically handled by QCut.</p>
 <p><strong>Note</strong> that currently QCut only supports cutting Cz gates so transformation have to be done manually for the time being (hence the added H gates)</p>
 <p><strong>4. Extract cut locations from cut_circuit and split it into
 independent subcircuit.</strong></p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cut_locations</span><span class="p">,</span> <span class="n">subcircuits</span><span class="p">,</span> <span class="n">map_qubit</span> <span class="o">=</span> <span class="n">ck</span><span class="o">.</span><span class="n">get_locations_and_subcircuits</span><span class="p">(</span><span class="n">cut_circuit</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cut_circuit</span> <span class="o">=</span> <span class="n">ck</span><span class="o">.</span><span class="n">get_locations_and_subcircuits</span><span class="p">(</span><span class="n">cut_circuit</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Now we can draw our subcircuits.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">subcircuits</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">draw</span><span class="p">(</span><span class="s2">&quot;mpl&quot;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cut_circuit</span><span class="o">.</span><span class="n">subcircuits</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">draw</span><span class="p">(</span><span class="s2">&quot;mpl&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 <img alt="_images/circ3.png" src="_images/circ3.png" />
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">subcircuits</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">draw</span><span class="p">(</span><span class="s2">&quot;mpl&quot;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cut_circuit</span><span class="o">.</span><span class="n">subcircuits</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">draw</span><span class="p">(</span><span class="s2">&quot;mpl&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 <img alt="_images/circ4.png" src="_images/circ4.png" />
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">subcircuits</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">draw</span><span class="p">(</span><span class="s2">&quot;mpl&quot;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cut_circuit</span><span class="o">.</span><span class="n">subcircuits</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">draw</span><span class="p">(</span><span class="s2">&quot;mpl&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 <img alt="_images/circ11.png" src="_images/circ11.png" />
@@ -446,15 +447,17 @@ independent subcircuit.</strong></p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">fake</span> <span class="o">=</span> <span class="n">IQMFakeAdonis</span><span class="p">()</span> <span class="c1">#noisy</span>
 <span class="n">sim</span> <span class="o">=</span> <span class="n">AerSimulator</span><span class="p">()</span> <span class="c1">#ideal</span>
 
-<span class="n">transpiled</span> <span class="o">=</span> <span class="n">ck</span><span class="o">.</span><span class="n">transpile_subcircuits</span><span class="p">(</span><span class="n">subcircuits</span><span class="p">,</span> <span class="n">cut_locations</span><span class="p">,</span> <span class="n">fake</span><span class="p">,</span> <span class="n">optimization_level</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">transpiled</span> <span class="o">=</span> <span class="n">ck</span><span class="o">.</span><span class="n">transpile_subcircuits</span><span class="p">(</span><span class="n">cut_circuit</span><span class="p">,</span> <span class="n">fake</span><span class="p">,</span> <span class="n">optimization_level</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
 </pre></div>
 </div>
 <p><strong>6: Generate experiment circuits</strong></p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">experiment_circuits</span><span class="p">,</span> <span class="n">coefficients</span><span class="p">,</span> <span class="n">id_meas</span> <span class="o">=</span> <span class="n">ck</span><span class="o">.</span><span class="n">get_experiment_circuits</span><span class="p">(</span><span class="n">transpiled</span><span class="p">,</span> <span class="n">cut_locations</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">observables</span> <span class="o">=</span> <span class="n">SparsePauliOp</span><span class="p">([</span><span class="s2">&quot;IIIZ&quot;</span><span class="p">,</span> <span class="s2">&quot;IIZI&quot;</span><span class="p">,</span> <span class="s2">&quot;IZII&quot;</span><span class="p">,</span> <span class="s2">&quot;IIZZ&quot;</span><span class="p">])</span>
+
+<span class="n">cut_experiment</span> <span class="o">=</span> <span class="n">ck</span><span class="o">.</span><span class="n">get_experiment_circuits</span><span class="p">(</span><span class="n">transpiled</span><span class="p">,</span> <span class="n">observables</span><span class="p">)</span>
 </pre></div>
 </div>
 <p><strong>7: Run the experiment circuits</strong></p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">results</span> <span class="o">=</span> <span class="n">ck</span><span class="o">.</span><span class="n">run_experiments</span><span class="p">(</span><span class="n">experiment_circuits</span><span class="p">,</span> <span class="n">cut_locations</span><span class="p">,</span> <span class="n">id_meas</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="n">fake</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">results</span> <span class="o">=</span> <span class="n">ck</span><span class="o">.</span><span class="n">run_experiments</span><span class="p">(</span><span class="n">cut_experiment</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="n">fake</span><span class="p">)</span>
 </pre></div>
 </div>
 <p><strong>8. Define observables and calculate expectation values</strong></p>
@@ -465,21 +468,31 @@ observable list.</p>
 values currently this needs to be done by manually modifying the initial
 circuit to perform the basis transform.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">observables</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]]</span>
-<span class="n">expectation_values</span> <span class="o">=</span> <span class="n">ck</span><span class="o">.</span><span class="n">estimate_expectation_values</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="n">coefficients</span><span class="p">,</span> <span class="n">cut_locations</span><span class="p">,</span> <span class="n">observables</span><span class="p">,</span> <span class="n">map_qubit</span><span class="p">)</span>
+<span class="n">expectation_values</span> <span class="o">=</span> <span class="n">ck</span><span class="o">.</span><span class="n">estimate_expectation_values</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="n">cut_experiment</span><span class="o">.</span><span class="n">expv_data</span><span class="p">())</span>
 </pre></div>
 </div>
 <p><strong>9: Finally calculate the exact expectation values and compare them to
 the results calculated with QCut</strong></p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">paulilist_observables</span> <span class="o">=</span> <span class="n">ck</span><span class="o">.</span><span class="n">get_pauli_list</span><span class="p">(</span><span class="n">observables</span><span class="p">,</span> <span class="n">circuit</span><span class="o">.</span><span class="n">num_qubits</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">obs</span> <span class="o">=</span> <span class="p">[</span><span class="n">ob</span><span class="o">.</span><span class="n">to_label</span><span class="p">()</span> <span class="k">for</span> <span class="n">ob</span> <span class="ow">in</span> <span class="n">observables</span><span class="o">.</span><span class="n">paulis</span><span class="p">]</span>
 
-<span class="n">estimator</span> <span class="o">=</span> <span class="n">Estimator</span><span class="p">(</span><span class="n">run_options</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;shots&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">},</span> <span class="n">approximation</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">estimator</span> <span class="o">=</span> <span class="n">Estimator</span><span class="p">()</span>
 <span class="n">exact_expvals</span> <span class="o">=</span> <span class="p">(</span>
-   <span class="n">estimator</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="n">circuit</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">paulilist_observables</span><span class="p">),</span>  <span class="c1"># noqa: PD011</span>
-                  <span class="nb">list</span><span class="p">(</span><span class="n">paulilist_observables</span><span class="p">))</span><span class="o">.</span><span class="n">result</span><span class="p">()</span><span class="o">.</span><span class="n">values</span>
+   <span class="n">estimator</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="n">circuit</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">obs</span><span class="p">),</span> <span class="n">obs</span><span class="p">)</span><span class="o">.</span><span class="n">result</span><span class="p">()</span><span class="o">.</span><span class="n">values</span>
 <span class="p">)</span>
 
+
 <span class="n">tr</span> <span class="o">=</span> <span class="n">transpile</span><span class="p">(</span><span class="n">circuit</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="n">fake</span><span class="p">)</span>
-<span class="n">counts</span><span class="p">,</span> <span class="n">exps</span> <span class="o">=</span> <span class="n">ck</span><span class="o">.</span><span class="n">run_and_expectation_value</span><span class="p">(</span><span class="n">tr</span><span class="p">,</span> <span class="n">fake</span><span class="p">,</span> <span class="n">observables</span><span class="p">,</span> <span class="n">shots</span><span class="o">=</span><span class="mi">2048</span><span class="p">)</span>
+
+<span class="n">tr_obs</span> <span class="o">=</span> <span class="n">observables</span><span class="o">.</span><span class="n">apply_layout</span><span class="p">(</span><span class="n">tr</span><span class="o">.</span><span class="n">layout</span><span class="p">)</span>
+
+<span class="n">tr_obs_separate</span> <span class="o">=</span> <span class="p">[</span>
+   <span class="n">SparsePauliOp</span><span class="p">(</span><span class="n">pauli</span><span class="o">.</span><span class="n">to_label</span><span class="p">())</span> <span class="k">for</span> <span class="n">pauli</span> <span class="ow">in</span> <span class="n">tr_obs</span><span class="o">.</span><span class="n">paulis</span>
+<span class="p">]</span>
+
+<span class="n">fake_estimator</span> <span class="o">=</span> <span class="n">BackendEstimator</span><span class="p">(</span><span class="n">fake</span><span class="p">)</span>
+<span class="n">exps</span> <span class="o">=</span> <span class="p">(</span>
+   <span class="n">fake_estimator</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="n">tr</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">tr_obs_separate</span><span class="p">),</span> <span class="n">tr_obs_separate</span><span class="p">)</span><span class="o">.</span><span class="n">result</span><span class="p">()</span><span class="o">.</span><span class="n">values</span>
+<span class="p">)</span>
 </pre></div>
 </div>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
@@ -491,11 +504,12 @@ the results calculated with QCut</strong></p>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Exact expectation values with ideal simulator :</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">exact_expvals</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p><code class="docutils literal notranslate"><span class="pre">QCut</span> <span class="pre">circuit</span> <span class="pre">knitting</span> <span class="pre">expectation</span> <span class="pre">values:</span> <span class="pre">[0.007532</span> <span class="pre">0.007532</span> <span class="pre">-0.003662</span> <span class="pre">1.010128]</span></code></p>
-<p><code class="docutils literal notranslate"><span class="pre">Noisy</span> <span class="pre">expectation</span> <span class="pre">values</span> <span class="pre">with</span> <span class="pre">fake</span> <span class="pre">backend:[0.478516</span> <span class="pre">0.621094</span> <span class="pre">0.558594</span> <span class="pre">0.689453]</span></code></p>
-<p><code class="docutils literal notranslate"><span class="pre">Exact</span> <span class="pre">expectation</span> <span class="pre">values</span> <span class="pre">with</span> <span class="pre">ideal</span> <span class="pre">simulator</span> <span class="pre">:[0.000000</span> <span class="pre">0.000000</span> <span class="pre">0.000000</span> <span class="pre">1.000000]</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">QCut</span> <span class="pre">expectation</span> <span class="pre">values:[0.704039</span> <span class="pre">0.615275</span> <span class="pre">0.554269</span> <span class="pre">0.808868]</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">Noisy</span> <span class="pre">expectation</span> <span class="pre">values</span> <span class="pre">with</span> <span class="pre">fake</span> <span class="pre">backend:[0.587891</span> <span class="pre">0.669922</span> <span class="pre">0.500000</span> <span class="pre">0.777344]</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">Exact</span> <span class="pre">expectation</span> <span class="pre">values</span> <span class="pre">with</span> <span class="pre">ideal</span> <span class="pre">simulator</span> <span class="pre">:[0.727323</span> <span class="pre">0.727323</span> <span class="pre">0.727323</span> <span class="pre">1.000000]</span></code></p>
 <p>As we can see QCut is able to accurately reconstruct the expectation values and be more accurate that just using the fake backend as is. (Note that since this is a probabilistic method the results vary a bit each run)</p>
 <p>Additionally we can execute QCut using the ideal Aer simulator and see that we get (practically) exact results:</p>
+<p><code class="docutils literal notranslate"><span class="pre">QCut</span> <span class="pre">expectation</span> <span class="pre">values:[0.699436</span> <span class="pre">0.713172</span> <span class="pre">0.713172</span> <span class="pre">0.979377]</span></code></p>
 <p>Click <a class="reference download internal" download="" href="_downloads/27eee23723a373cf41db1df6341ef586/QCutBasicUsage.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">here</span></code></a> to download example notebook.</p>
 </section>
 <section id="basic-usage-shorthand">
@@ -505,7 +519,7 @@ aforementioned steps individually. Instead, QCut provides a function
 <code class="docutils literal notranslate"><span class="pre">run()</span></code> that executes the whole wire-cutting sequence.</p>
 <p>The same example can then be run like this:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">sim</span> <span class="o">=</span> <span class="n">AerSimulator</span><span class="p">()</span>
-<span class="n">observables</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">]]</span>
+<span class="n">observables</span> <span class="o">=</span> <span class="n">SparsePauliOp</span><span class="p">([</span><span class="s2">&quot;IIIZ&quot;</span><span class="p">,</span> <span class="s2">&quot;IIZI&quot;</span><span class="p">,</span> <span class="s2">&quot;IZII&quot;</span><span class="p">,</span> <span class="s2">&quot;IIZZ&quot;</span><span class="p">])</span>
 
 <span class="n">estimated_expectation_values</span> <span class="o">=</span> <span class="n">ck</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">cut_circuit</span><span class="p">,</span> <span class="n">observables</span><span class="p">,</span> <span class="n">sim</span><span class="p">)</span>
 </pre></div>
@@ -516,9 +530,9 @@ aforementioned steps individually. Instead, QCut provides a function
 <p>QCut comes with functionality for automatically finding good cut locations that can place both wire and gate cuts.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">QCut</span><span class="w"> </span><span class="kn">import</span> <span class="n">find_cuts</span>
 
-<span class="n">cut_locations</span><span class="p">,</span> <span class="n">subcircuits</span><span class="p">,</span> <span class="n">map_qubit</span> <span class="o">=</span> <span class="n">find_cuts</span><span class="p">(</span><span class="n">circuit</span> <span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">cuts</span><span class="o">=</span><span class="s2">&quot;both&quot;</span><span class="p">)</span>
+<span class="n">cut_circuit</span> <span class="o">=</span> <span class="n">find_cuts</span><span class="p">(</span><span class="n">circuit</span> <span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">cuts</span><span class="o">=</span><span class="s2">&quot;both&quot;</span><span class="p">)</span>
 
-<span class="n">estimated_expectation_values</span> <span class="o">=</span> <span class="n">ck</span><span class="o">.</span><span class="n">run_cut_circuit</span><span class="p">(</span><span class="n">subcircuits</span><span class="p">,</span> <span class="n">cut_locations</span><span class="p">,</span> <span class="n">observables</span><span class="p">,</span> <span class="n">map_qubit</span><span class="p">,</span> <span class="n">sim</span><span class="p">)</span>
+<span class="n">estimated_expectation_values</span> <span class="o">=</span> <span class="n">ck</span><span class="o">.</span><span class="n">run_cut_circuit</span><span class="p">(</span><span class="n">cut_circuit</span><span class="p">,</span> <span class="n">observables</span><span class="p">,</span> <span class="n">sim</span><span class="p">)</span>
 
 <span class="n">np</span><span class="o">.</span><span class="n">set_printoptions</span><span class="p">(</span><span class="n">formatter</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;float&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">x</span><span class="si">:</span><span class="s2">0.6f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">})</span>
 

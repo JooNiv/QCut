@@ -165,7 +165,6 @@
 <li class="toctree-l2"><a class="reference internal" href="../../GateCuts.html">Gate cuts</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../AutomaticCuts.html">Automatic cuts</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../Multiple_cuts.html">Multiple cuts</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../OtherObservables.html">Other than Z observables</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../Notebooks.html">Notebooks</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -173,9 +172,9 @@
 <li class="toctree-l2"><a class="reference internal" href="../../examples/QCutCutSubsequentWires.html">Subsequent Wires</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../examples/QCutCutToThreeParts.html">Cut to Three parts</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../examples/QCutMultipleCutsOnSingleWire.html">Multiple cuts on a single wire</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples/QCutQAOAExample.html">QAOA Example</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1"><a class="reference internal" href="../../FutureFeatures.html">Possible future features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../Acknowledgement.html">Acknowledgements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../License.html">License</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../QCut.html">QCut API reference</a></li>
@@ -300,8 +299,7 @@ document.write(`
 
 <div class="viewcode-block" id="transpile_subcircuits">
 <a class="viewcode-back" href="../../QCut.html#QCut.backend_utility.transpile_subcircuits">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">transpile_subcircuits</span><span class="p">(</span><span class="n">subcircuits</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">QuantumCircuit</span><span class="p">],</span> 
-                          <span class="n">cut_locations</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">transpile_subcircuits</span><span class="p">(</span><span class="n">cut_circuit</span><span class="p">:</span> <span class="n">CutCircuit</span><span class="p">,</span>
                           <span class="n">backend</span><span class="p">,</span>
                           <span class="n">optimization_level</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                           <span class="n">transpile_options</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CutCircuit</span><span class="p">:</span>
@@ -327,7 +325,7 @@ document.write(`
     
     <span class="n">placeholders</span> <span class="o">=</span> <span class="p">[]</span>
 
-    <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">cut</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">cut_locations</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">cut</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">cut_circuit</span><span class="o">.</span><span class="n">cut_locations</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cut</span><span class="p">,</span> <span class="n">SingleQubitCutLocation</span><span class="p">):</span>
             <span class="n">placeholders</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Meas_</span><span class="si">{</span><span class="n">ind</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="n">placeholders</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Init_</span><span class="si">{</span><span class="n">ind</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
@@ -335,7 +333,8 @@ document.write(`
             <span class="n">placeholders</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;cutCZ_c_</span><span class="si">{</span><span class="n">ind</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="n">placeholders</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;cutCZ_t_</span><span class="si">{</span><span class="n">ind</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">subcircuits</span><span class="o">.</span><span class="n">num_qubits</span> <span class="k">for</span> <span class="n">subcircuits</span> <span class="ow">in</span> <span class="n">subcircuits</span><span class="p">)):</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">subcircuits</span><span class="o">.</span><span class="n">num_qubits</span> 
+                       <span class="k">for</span> <span class="n">subcircuits</span> <span class="ow">in</span> <span class="n">cut_circuit</span><span class="o">.</span><span class="n">subcircuits</span><span class="p">)):</span>
         <span class="n">placeholders</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;obs_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
     
     <span class="k">if</span> <span class="n">transpile_options</span> <span class="ow">and</span> <span class="s2">&quot;basis_gates&quot;</span> <span class="ow">in</span> <span class="n">transpile_options</span><span class="p">:</span>
@@ -351,13 +350,14 @@ document.write(`
     <span class="k">if</span> <span class="n">transpile_options</span> <span class="ow">and</span> <span class="s2">&quot;backend&quot;</span> <span class="ow">in</span> <span class="n">transpile_options</span><span class="p">:</span>
         <span class="n">transpile_options</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;backend&quot;</span><span class="p">)</span>
 
-    <span class="n">transpiled</span> <span class="o">=</span> <span class="n">transpile</span><span class="p">(</span><span class="n">subcircuits</span><span class="p">,</span>
+    <span class="n">transpiled</span> <span class="o">=</span> <span class="n">transpile</span><span class="p">(</span><span class="n">cut_circuit</span><span class="o">.</span><span class="n">subcircuits</span><span class="p">,</span>
                            <span class="n">coupling_map</span><span class="o">=</span><span class="n">backend</span><span class="o">.</span><span class="n">_coupling_map</span><span class="p">,</span>
                            <span class="n">basis_gates</span><span class="o">=</span><span class="n">basis</span> <span class="o">+</span> <span class="n">placeholders</span> <span class="o">+</span> <span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">],</span>
                            <span class="n">optimization_level</span><span class="o">=</span><span class="n">optimization_level</span><span class="p">,</span>
                            <span class="o">**</span><span class="p">(</span><span class="n">transpile_options</span> <span class="ow">or</span> <span class="p">{}))</span>
 
-    <span class="k">return</span> <span class="n">CutCircuit</span><span class="p">(</span><span class="n">subcircuits</span><span class="o">=</span><span class="n">transpiled</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="n">backend</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">CutCircuit</span><span class="p">(</span><span class="n">subcircuits</span><span class="o">=</span><span class="n">transpiled</span><span class="p">,</span> <span class="n">cut_locations</span><span class="o">=</span><span class="n">cut_circuit</span><span class="o">.</span><span class="n">cut_locations</span><span class="p">,</span> 
+                      <span class="n">map_qubit</span><span class="o">=</span><span class="n">cut_circuit</span><span class="o">.</span><span class="n">map_qubit</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="n">backend</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="transpile_experiments">

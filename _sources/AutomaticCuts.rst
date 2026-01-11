@@ -8,5 +8,5 @@ Under the hood QCut uses `pymetis <https://github.com/inducer/pymetis>`__  to fi
 
 .. code:: python
 
-   cut_locations, subcircuits, map_qubit = find_cuts(circuit , 3, cuts="both")
-   estimated_expectation_values = ck.run_cut_circuit(subcircuits, cut_locations, observables, map_qubit, backend)
+   cut_circuit = find_cuts(circuit , 3, cuts="both")
+   estimated_expectation_values = ck.run_cut_circuit(cut_circuit, observables, backend)
