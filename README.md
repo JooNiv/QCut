@@ -70,9 +70,12 @@ uv sync
 ```python
 import QCut as ck
 from QCut import cut, cutGate
-from qiskit import QuantumCircuit
+from qiskit import QuantumCircuit, transpile
+from qiskit.circuit.library import CXGate
+from qiskit.quantum_info import SparsePauliOp
+from qiskit.circuit.library import CXGate
 from qiskit_aer import AerSimulator
-from qiskit_aer.primitives import Estimator
+from qiskit.primitives import Estimator, BackendEstimator
 from iqm.qiskit_iqm import IQMFakeAdonis
 ```
 
@@ -87,8 +90,6 @@ circuit.cx(0,1)
 circuit.cx(1,2)
 circuit.cx(2,3)
    
-circuit.measure_all()
-
 circuit.draw("mpl")
 ```
 
@@ -110,10 +111,10 @@ cut_circuit.append(cut, [1])
 cut_circuit.cx(1,2)
 cut_circuit.cx(2,3)
 
-cut_circuit.draw("mpl")
+cut_circuit.decompose(gates_to_decompose=["CutGate"]).draw("mpl")
 ```
 
-**Note** that currently QCut only supports cutting Cz gates so cut gates get transpiled down to cutCZ gates (hence the added H gates)
+**Note** that currently QCut only supports cutting Cz gates so cut gates get transpiled down to CutCZ gates (hence the added H gates)
 
 
 ![](./docs/_static/images/circ2.png)
@@ -121,25 +122,25 @@ cut_circuit.draw("mpl")
 **4: Extract cut locations from cut_circuit and split it into independent subcircuit.**
 
 ```python
-cut_locations, subcircuits, map_qubit = ck.get_locations_and_subcircuits(cut_circuit)
+cut_circuit = ck.get_locations_and_subcircuits(cut_circuit)
 ```
 
 Now we can draw our subcircuits.
 
 ```python
-subcircuits[0].draw("mpl")
+cut_circuit.subcircuits[0].draw("mpl")
 ```
 
 ![](./docs/_static/images/circ3.png)
 
 ```python
-subcircuits[1].draw("mpl")
+cut_circuit.subcircuits[1].draw("mpl")
 ```
 
 ![](./docs/_static/images/circ4.png)
 
 ```python
-subcircuits[2].draw("mpl")
+cut_circuit.subcircuits[2].draw("mpl")
 ```
 
 ![](./docs/_static/images/circ11.png)
@@ -152,45 +153,54 @@ sim = AerSimulator() #ideal
 ```
 
 ```python
-transpiled = ck.transpile_subcircuits(subcircuits, cut_locations, fake, optimization_level=3)
+transpiled = ck.transpile_subcircuits(cut_circuit, fake, optimization_level=3)
 ```
 
 **6: Generate experiment circuits**
 
 ```python
-experiment_circuits, coefficients, id_meas = ck.get_experiment_circuits(transpiled, cut_locations)
+observables = SparsePauliOp(["IIIZ", "IIZI", "IZII", "IIZZ"])
+
+cut_experiment = ck.get_experiment_circuits(transpiled, observables)
 ```
+
+Note that both `CutCircuit` and `CutExperiment` classes implement the `assing_parameters()` function of `Qiskit.QuantumCircuit`
 
 **7: Run the experiment circuits**
 
 ```python
-results = ck.run_experiments(experiment_circuits, cut_locations, id_meas, backend=fake)
+results = ck.run_experiments(cut_experiment, backend=fake)
 ```
 
 **8: Define observables and calculate expectation values**
 
-Observables are Pauli-Z observables and are defined as a list of qubit indices. Multi-qubit observables are defined as a list inside the observable list.
-
-If one wishes to calculate other than Pauli-Z observable expectation values currently this needs to be done by manually modifying the initial circuit to perform the basis transform.
-
 ```python
-observables = [0,1,2, [0,1]]
-expectation_values = ck.estimate_expectation_values(results, coefficients, cut_locations, observables, map_qubit)
+expectation_values = ck.estimate_expectation_values(results, cut_experiment.expv_data())
 ```
 
 **9: Finally calculate the exact and noisy expectation values of the original circuit and compare them to the results calculated with QCut**
 
 ```python
-paulilist_observables = ck.get_pauli_list(observables, circuit.num_qubits)
+obs = [ob.to_label() for ob in observables.paulis]
 
-estimator = Estimator(run_options={"shots": None}, approximation=True)
+estimator = Estimator()
 exact_expvals = (
-    estimator.run([circuit] * len(paulilist_observables),  # noqa: PD011
-                  list(paulilist_observables)).result().values
+    estimator.run([circuit] * len(obs), obs).result().values
 )
 
+
 tr = transpile(circuit, backend=fake)
-counts, exps = ck.run_and_expectation_value(tr, fake, observables, shots=2048)
+
+tr_obs = observables.apply_layout(tr.layout)
+
+tr_obs_separate = [
+    SparsePauliOp(pauli.to_label()) for pauli in tr_obs.paulis
+]
+
+fake_estimator = BackendEstimator(fake)
+exps = (
+    fake_estimator.run([tr] * len(tr_obs_separate), tr_obs_separate).result().values
+)
 ```
 
 ```python
@@ -203,18 +213,18 @@ print(f"Noisy expectation values with fake backend:{np.array(exps)}")
 print(f"Exact expectation values with ideal simulator :{np.array(exact_expvals)}")
 ```
 
-`QCut circuit knitting expectation values: [0.007532 0.007532 -0.003662 1.010128]`
+`QCut expectation values:[0.704039 0.615275 0.554269 0.808868]`
 
-`Noisy expectation values with fake backend:[0.478516 0.621094 0.558594 0.689453]`
+`Noisy expectation values with fake backend:[0.587891 0.669922 0.500000 0.777344]`
 
-`Exact expectation values with ideal simulator :[0.000000 0.000000 0.000000 1.000000]`
+`Exact expectation values with ideal simulator :[0.727323 0.727323 0.727323 1.000000]`
 
 As we can see QCut is able to accurately reconstruct the expectation values and be more accurate that just using the fake backend as is. (Note that since this is a probabilistic method the results vary a bit each run)
 
 Additionally we can execute QCut using the ideal Aer simulator and see that we get (practically) exact results:
 
 
-`QCut ideal expectation values:[0.727968 0.727968 0.727968 1.015832]`
+`QCut expectation values:[0.699436 0.713172 0.713172 0.979377]`
 
 
 ## Usage shorthand
@@ -225,7 +235,7 @@ The same example can then be run like this:
 
 ```python
 sim = AerSimulator()
-observables = [0,1,2, [0,2]]
+observables = SparsePauliOp(["IIIZ", "IIZI", "IZII", "IIZZ"])
 
 estimated_expectation_values = ck.run(cut_circuit, observables, sim)
 ```
@@ -237,9 +247,9 @@ QCut comes with functionality for automatically finding good cut locations that 
 ```python
 from QCut import find_cuts
 
-cut_locations, subcircuits, map_qubit = find_cuts(circuit , 3, cuts="both")
+cut_circuit = find_cuts(circuit , 3, cuts="both")
 
-estimated_expectation_values = ck.run_cut_circuit(subcircuits, cut_locations, observables, map_qubit, sim)
+estimated_expectation_values = ck.run_cut_circuit(cut_circuit, observables, sim)
 
 np.set_printoptions(formatter={"float": lambda x: f"{x:0.6f}"})
 
@@ -247,7 +257,7 @@ print(f"QCut expectation values:{np.array(estimated_expectation_values)}")
 print(f"Exact expectation values with ideal simulator :{np.array(exact_expvals)}")
 ```
 
-`QCut expectation values:[0.729648 0.745609 0.702871 0.992620]`
+`QCut expectation values:[0.699436 0.713172 0.713172 0.979377]`
 
 `Exact expectation values with ideal simulator :[0.727323 0.727323 0.727323 1.000000]`
 

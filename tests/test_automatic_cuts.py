@@ -17,11 +17,11 @@ def test_find_cuts() -> None:
     """
     for solution_index, circ in enumerate(sq.test_circuits):
 
-        cut_locations, subcircuits, map_qubit = find_cuts(circ.copy(), 
+        cut_circuit = find_cuts(circ.copy(), 
                                                           sq.cut_sizes[solution_index], 
                                                           cuts="both")
 
-        assert len(subcircuits) == sq.cut_sizes[solution_index]
+        assert len(cut_circuit.subcircuits) == sq.cut_sizes[solution_index]
         
 
 def test_expectation_values() -> None:
@@ -40,14 +40,14 @@ def test_expectation_values() -> None:
     for solution_index, circ in enumerate(sq.test_circuits):
         print(solution_index)
 
-        cut_locations, subcircuits, map_qubit = find_cuts(circ.copy(), 
+        cut_circuit = find_cuts(circ.copy(), 
                                                           sq.cut_sizes[solution_index], 
                                                           cuts="both")
 
         # Calculate expectation values using the run method
-        estimated_expectation_values = wc.run_cut_circuit(subcircuits, cut_locations, 
+        estimated_expectation_values = wc.run_cut_circuit(cut_circuit, 
                                                           sq.test_observables[solution_index], 
-                                                          map_qubit, sim)
+                                                          sim)
         # Check each calculated expectation value against the corresponding
         # expected value
         tolerance = 0.1

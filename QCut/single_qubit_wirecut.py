@@ -7,9 +7,11 @@ import numpy as np
 from qiskit import ClassicalRegister, QuantumCircuit, QuantumRegister
 from qiskit.circuit import CircuitInstruction, Instruction, Qubit
 from qiskit.converters import circuit_to_dag, dag_to_circuit
+from qiskit.quantum_info import SparsePauliOp
 from qiskit_aer import AerSimulator
 
 from QCut.backend_utility import transpile_subcircuits
+from QCut.cutcircuit import CutCircuit
 from QCut.cutlocation import CutLocation, SingleQubitCutLocation
 from QCut.qcuterror import QCutError
 from QCut.QCutFind import construct_final_subcircuits
@@ -173,7 +175,7 @@ def _move_to_new_wire(orig: QuantumCircuit) -> QuantumCircuit:
 
     return new
 
-def count_gates(qc: QuantumCircuit):
+def _count_gates(qc: QuantumCircuit):
     gate_count = dict.fromkeys(qc.qubits, 0)
     for gate in qc.data:
         for qubit in gate.qubits:
@@ -183,7 +185,7 @@ def count_gates(qc: QuantumCircuit):
 
 def _remove_idle_wires(qc: QuantumCircuit):
     qc_out = deepcopy(qc)
-    gate_count = count_gates(qc_out)
+    gate_count = _count_gates(qc_out)
     for qubit, count in gate_count.items():
         if count == 0:
             qc_out.qubits.remove(qubit)
@@ -248,11 +250,10 @@ def get_qubit_map(subcircuits: list[QuantumCircuit]):
 
     return map_qubit
 
-
 def get_locations_and_subcircuits(
     circuit: QuantumCircuit,
     max_qubits: list[int] | None = None,
-):
+) -> CutCircuit:
     """Get cut locations and subcircuits with placeholder operations.
 
     Args:
@@ -270,16 +271,17 @@ def get_locations_and_subcircuits(
                             qubit indices
 
     """
-    circuit = circuit.copy()  # copy to avoid modifying the original circuit
-    circuit = circuit.decompose(["CutGate"])
+    circuit_copy = circuit.copy()  # copy to avoid modifying the original circuit
+    circuit_copy = circuit_copy.decompose(["CutGate"])
     for i in range(circuit.num_qubits):
         obs_m = QuantumCircuit(1, name=f"obs_{i}")
         obs_m = obs_m.to_instruction()
-        circuit.append(obs_m, [i])
-    cut_locations = _get_cut_locations(circuit)
-    circuit1 = _insert_cut_nodes(circuit, cut_locations)
-    circuit = _move_to_new_wire(circuit1.copy())
-    subcircuits = _separate_subcircuits(circuit)
+        circuit_copy.append(obs_m, [i])
+    cut_locations = _get_cut_locations(circuit_copy)
+    circuit1 = _insert_cut_nodes(circuit_copy, cut_locations)
+    circuit_new = _move_to_new_wire(circuit1.copy())
+    subcircuits = _separate_subcircuits(circuit_new)
+
     subcircuits = _add_cbits(subcircuits)
     fixed_circs = []
     for i in subcircuits:
@@ -290,7 +292,6 @@ def get_locations_and_subcircuits(
         for j in i.data:
             qubits = [test.qubits[i.qubits.index(q)] for q in j.qubits]
             test.append(CircuitInstruction(j.operation, qubits))
-
         fixed_circs.append(test)
     if len(fixed_circs) <= 1:
         raise QCutError(
@@ -308,14 +309,11 @@ def get_locations_and_subcircuits(
 
     map_qubits = get_qubit_map(fixed_circs)
 
-    return cut_locations, fixed_circs, map_qubits
-
+    return CutCircuit(fixed_circs, cut_locations, map_qubits)
 
 def run_cut_circuit(
-    subcircuits: list[QuantumCircuit],
-    cut_locations: np.ndarray[SingleQubitCutLocation],
-    observables: list[int | list[int]],
-    map_qubits: dict[int, int],
+    cut_circuit: CutCircuit,
+    observables: SparsePauliOp,
     backend=AerSimulator(),
 ) -> np.ndarray[float]:
     """After splitting the circuit run the rest of the circuit knitting sequence.
@@ -334,34 +332,29 @@ def run_cut_circuit(
     """
 
     if not isinstance(backend, AerSimulator):
-        transpiled_subcircuits = transpile_subcircuits(subcircuits, 
-                                                       cut_locations, backend)
+        transpiled_subcircuits = transpile_subcircuits(cut_circuit
+                                                       ,backend,
+                                                       optimization_level=3)
     
-        (subexperiments, 
-        coefs, 
-        id_meas) = get_experiment_circuits(transpiled_subcircuits, 
-                                        cut_locations)
+        cut_experiment = get_experiment_circuits(transpiled_subcircuits, 
+                                        observables)
     else:
-        (subexperiments, 
-        coefs, 
-        id_meas) = get_experiment_circuits(subcircuits, 
-                                        cut_locations)
+        cut_experiment = get_experiment_circuits(cut_circuit, 
+                                        observables)
         
     results = run_experiments(
-        subexperiments,
-        cut_locations,
-        id_meas=id_meas,
+        cut_experiment,
         backend=backend,
     )
 
     return estimate_expectation_values(
-        results, coefs, cut_locations, observables, map_qubits
+        results, cut_experiment.expv_data()
     )
 
 
 def run(
     circuit: QuantumCircuit,
-    observables: list[int, list[int]],
+    observables: SparsePauliOp,
     backend=AerSimulator(),
 ) -> list[float]:
     """Run the whole circuit knitting sequence with one function call.
@@ -377,6 +370,6 @@ def run(
 
     """
     # circuit = circuit.copy()
-    qss, circs, map_qubits = get_locations_and_subcircuits(circuit)
+    cut_circuit = get_locations_and_subcircuits(circuit)
 
-    return run_cut_circuit(circs, qss, observables, map_qubits, backend)
+    return run_cut_circuit(cut_circuit, observables, backend)

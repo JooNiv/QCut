@@ -2,6 +2,13 @@
 Changelog
 =========
 
+Version 0.9.0
+=============
+- Migrate from index based Z-observables to Qiskits SparsePauliOps
+    * The observables parameter for all functions now takes a list of Qiskits :code:`SparsePauliOp` objects instead of lists of qubit indices.
+    * This allows for more general observables to be calculated, including multi-qubit observables and observables with different Pauli operators.
+    * Check documentation for details on how to use.
+
 Version 0.8.0
 =============
 - Support for cutting 2 qubit gates

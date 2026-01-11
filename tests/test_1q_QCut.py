@@ -1,12 +1,24 @@
 """Tests for CircuitKnitting package."""  # noqa: N999
 
 import numpy as np
+from qiskit import QuantumCircuit
 from qiskit_aer import AerSimulator
 
 #import QCut as ck
 import QCut.single_qubit_wirecut as wc
 import tests.solutions_1q as sq
-from QCut.wirecut import _remove_obsm
+
+
+def _remove_obsm(subcircuits: list[dict[int, QuantumCircuit]]
+                 ) -> list[dict[int, QuantumCircuit]]:
+
+    for circ in subcircuits:
+        j = 0
+        while j < len(circ.data):
+            if "obs" in circ[j].operation.name:
+                circ.data.remove(circ[j])
+            else:
+                j += 1
 
 
 def test_get_cut_locations() -> None:
@@ -34,7 +46,8 @@ def test_separate_subcircuits() -> None:
     """
     count = 0
     for solution_index, circ in enumerate(sq.test_circuits):
-        qss, circs, map_qubits = wc.get_locations_and_subcircuits(circ.copy())
+        cut_circuit = wc.get_locations_and_subcircuits(circ.copy())
+        circs = cut_circuit.subcircuits
         _remove_obsm(circs)
         print(count)
         count += 1
@@ -103,6 +116,7 @@ def test_expectation_values() -> None:
         # Check each calculated expectation value against the corresponding
         # expected value
         tolerance = 0.1
+        print("CIrcuit index: ", solution_index)
         print(expvals)
         print(sq.exp_val_solutions[solution_index])
         for check in [

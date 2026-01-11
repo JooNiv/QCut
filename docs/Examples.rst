@@ -9,4 +9,3 @@ Examples on using QCut
    GateCuts
    AutomaticCuts
    Multiple_cuts
-   OtherObservables
