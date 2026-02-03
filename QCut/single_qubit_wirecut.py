@@ -16,7 +16,6 @@ from QCut.cutlocation import CutLocation, SingleQubitCutLocation
 from QCut.qcuterror import QCutError
 from QCut.QCutFind import construct_final_subcircuits
 from QCut.wirecut import (
-    _remove_idle_wires,
     estimate_expectation_values,
     get_experiment_circuits,
     run_experiments,
@@ -206,11 +205,12 @@ def _remove_idle_wires_old(qc: QuantumCircuit):
 def _separate_subcircuits(circuit):
     dag = circuit_to_dag(circuit)
 
-    circs = dag.separable_circuits()
+    circs = dag.separable_circuits(remove_idle_qubits=True)
 
     new_circs = []
     for i in circs:
-        circ = _remove_idle_wires(dag_to_circuit(i))
+        #circ = _remove_idle_wires(dag_to_circuit(i))
+        circ = dag_to_circuit(i)
         if len(circ.qubits) == 0:
             continue
         new_circs.append(circ)
@@ -284,9 +284,7 @@ def get_locations_and_subcircuits(
     circuit1 = _insert_cut_nodes(circuit_copy, cut_locations)
     circuit_new = _move_to_new_wire(circuit1.copy())
     subcircuits = _separate_subcircuits(circuit_new)
-
-    subcircuits = [_remove_idle_wires(test) for test in subcircuits]
-
+    
     subcircuits = _add_cbits(subcircuits)
     fixed_circs = []
     for i in subcircuits:

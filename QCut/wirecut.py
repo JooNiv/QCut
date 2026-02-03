@@ -97,7 +97,6 @@ def _remove_idle_wires(circuit: QuantumCircuit) -> QuantumCircuit:
     for qubit, count in gate_count.items():
         if count == 0:
             circuit.qubits.remove(qubit)
-
     
     return circuit
 
