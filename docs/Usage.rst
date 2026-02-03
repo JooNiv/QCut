@@ -252,15 +252,18 @@ Running on IQM fake backends
 ----------------------------
 
 To use QCut with IQM’s fake backends it is required to install `Qiskit
-IQM <https://github.com/iqm-finland/qiskit-on-iqm>`__. QCut supports
-version 17.8. Installation can be done with uv:
+IQM <https://github.com/iqm-finland/qiskit-on-iqm>`__ for Qiskit <= 1.2
+or `IQM client <https://docs.meetiqm.com/iqm-client>`__ for Qiskit > 1.2.
+
+Installation can be done via uv:
 
 .. code:: bash
 
    uv pip install qiskit-iqm==17.8
-   #or
-   uv add qiskit-iqm==17.8
 
+.. code:: bash
+
+   uv pip install iqm-client[qiskit]
 
 After installation just import the backend you want to use:
 

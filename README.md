@@ -264,14 +264,21 @@ print(f"Exact expectation values with ideal simulator :{np.array(exact_expvals)}
 
 ## Running on IQM fake backends
 
-To use QCut with IQM's fake backends it is required to install [Qiskit IQM](https://github.com/iqm-finland/qiskit-on-iqm). QCut supports version 17.8. Installation can be done with uv:
+To use QCut with IQM's fake backends it is required to install [Qiskit IQM](https://github.com/iqm-finland/qiskit-on-iqm) for Qiskit <= 1.2 
+or [IQM client](https://docs.meetiqm.com/iqm-client) for Qiskit > 1.2.
+
+Installation can be doen via uv:
 
 ```bash
 uv pip install qiskit-iqm==17.8
-#or
-uv add qiskit-iqm==17.8
-
 ```
+
+or
+
+```bash
+uv pip install iqm-client[qiskit]
+```
+
 
 After installation just import the backend you want to use:
 
