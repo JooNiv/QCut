@@ -67,6 +67,39 @@ def get_qpd_combinations(
     all_combinations = product(*qpd_lists)
     return all_combinations
 
+def count_gates(circuit: QuantumCircuit) -> dict[Qubit, int]:
+    """Count the number of gates acting on each qubit in a QuantumCircuit.
+
+    Args:
+        circuit (QuantumCircuit): The input quantum circuit.
+
+    Returns:
+        dict[Qubit, int]: A dictionary mapping each qubit to the number of gates acting on it.
+    """
+    gate_count = {qubit: 0 for qubit in circuit.qubits}
+    for instruction in circuit.data:
+        for qubit in instruction.qubits:
+            gate_count[qubit] += 1
+
+    return gate_count
+
+
+def _remove_idle_wires(circuit: QuantumCircuit) -> QuantumCircuit:
+    """Remove idle wires from a QuantumCircuit.
+
+    Args:
+        circuit (QuantumCircuit): The input quantum circuit.
+
+    Returns:
+        QuantumCircuit: A new quantum circuit with idle wires removed.
+    """
+    gate_count = count_gates(circuit)
+    for qubit, count in gate_count.items():
+        if count == 0:
+            circuit.qubits.remove(qubit)
+
+    
+    return circuit
 
 def _finalize_subcircuit(
     subcircuit: QuantumCircuit, qpd_qubits: list[int]

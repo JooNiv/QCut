@@ -16,6 +16,7 @@ from QCut.cutlocation import CutLocation, SingleQubitCutLocation
 from QCut.qcuterror import QCutError
 from QCut.QCutFind import construct_final_subcircuits
 from QCut.wirecut import (
+    _remove_idle_wires,
     estimate_expectation_values,
     get_experiment_circuits,
     run_experiments,
@@ -183,7 +184,7 @@ def _count_gates(qc: QuantumCircuit):
     return gate_count
 
 
-def _remove_idle_wires(qc: QuantumCircuit):
+def _remove_idle_wires_old(qc: QuantumCircuit):
     qc_out = deepcopy(qc)
     gate_count = _count_gates(qc_out)
     for qubit, count in gate_count.items():
@@ -198,6 +199,8 @@ def _remove_idle_wires(qc: QuantumCircuit):
     qc_out.qregs[0]._bits = qc_out.qubits
     qc_out.qregs[0]._size = len(qc_out.qregs[0]._bits)
     return qc_out
+
+
 
 
 def _separate_subcircuits(circuit):
@@ -282,6 +285,8 @@ def get_locations_and_subcircuits(
     circuit_new = _move_to_new_wire(circuit1.copy())
     subcircuits = _separate_subcircuits(circuit_new)
 
+    subcircuits = [_remove_idle_wires(test) for test in subcircuits]
+
     subcircuits = _add_cbits(subcircuits)
     fixed_circs = []
     for i in subcircuits:
@@ -292,6 +297,7 @@ def get_locations_and_subcircuits(
         for j in i.data:
             qubits = [test.qubits[i.qubits.index(q)] for q in j.qubits]
             test.append(CircuitInstruction(j.operation, qubits))
+
         fixed_circs.append(test)
     if len(fixed_circs) <= 1:
         raise QCutError(
