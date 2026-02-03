@@ -74,9 +74,10 @@ def count_gates(circuit: QuantumCircuit) -> dict[Qubit, int]:
         circuit (QuantumCircuit): The input quantum circuit.
 
     Returns:
-        dict[Qubit, int]: A dictionary mapping each qubit to the number of gates acting on it.
+        dict[Qubit, int]: A dictionary mapping each qubit to the number of gates 
+        acting on it.
     """
-    gate_count = {qubit: 0 for qubit in circuit.qubits}
+    gate_count = dict.fromkeys(circuit.qubits, 0)
     for instruction in circuit.data:
         for qubit in instruction.qubits:
             gate_count[qubit] += 1
