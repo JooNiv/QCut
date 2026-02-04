@@ -367,6 +367,7 @@ document.write(`
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.wirecut.ModifyMeasurementBasis.run"><code class="docutils literal notranslate"><span class="pre">ModifyMeasurementBasis.run()</span></code></a></li>
 </ul>
 </li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.wirecut.count_gates"><code class="docutils literal notranslate"><span class="pre">count_gates()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.wirecut.estimate_expectation_values"><code class="docutils literal notranslate"><span class="pre">estimate_expectation_values()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.wirecut.get_experiment_circuits"><code class="docutils literal notranslate"><span class="pre">get_experiment_circuits()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.wirecut.get_qpd_combinations"><code class="docutils literal notranslate"><span class="pre">get_qpd_combinations()</span></code></a></li>
@@ -694,6 +695,24 @@ ascending or descending, according to their function values.</p>
 </dl>
 </dd></dl>
 
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QCut.wirecut.count_gates">
+<span class="sig-prename descclassname"><span class="pre">QCut.wirecut.</span></span><span class="sig-name descname"><span class="pre">count_gates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">circuit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">QuantumCircuit</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">Qubit</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/QCut/wirecut.html#count_gates"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.wirecut.count_gates" title="Link to this definition">#</a></dt>
+<dd><p>Count the number of gates acting on each qubit in a QuantumCircuit.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>circuit</strong> (<em>QuantumCircuit</em>) – The input quantum circuit.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A dictionary mapping each qubit to the number of gates
+acting on it.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict[Qubit, int]</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -1294,6 +1313,7 @@ of experiment circuits, use <cite>transpile_experiments</cite> or manually trans
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.wirecut.ModifyMeasurementBasis.run"><code class="docutils literal notranslate"><span class="pre">ModifyMeasurementBasis.run()</span></code></a></li>
 </ul>
 </li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.wirecut.count_gates"><code class="docutils literal notranslate"><span class="pre">count_gates()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.wirecut.estimate_expectation_values"><code class="docutils literal notranslate"><span class="pre">estimate_expectation_values()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.wirecut.get_experiment_circuits"><code class="docutils literal notranslate"><span class="pre">get_experiment_circuits()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.wirecut.get_qpd_combinations"><code class="docutils literal notranslate"><span class="pre">get_qpd_combinations()</span></code></a></li>

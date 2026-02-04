@@ -356,6 +356,42 @@ document.write(`
     <span class="k">return</span> <span class="n">all_combinations</span></div>
 
 
+<div class="viewcode-block" id="count_gates">
+<a class="viewcode-back" href="../../QCut.html#QCut.wirecut.count_gates">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">count_gates</span><span class="p">(</span><span class="n">circuit</span><span class="p">:</span> <span class="n">QuantumCircuit</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="n">Qubit</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Count the number of gates acting on each qubit in a QuantumCircuit.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        circuit (QuantumCircuit): The input quantum circuit.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict[Qubit, int]: A dictionary mapping each qubit to the number of gates </span>
+<span class="sd">        acting on it.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">gate_count</span> <span class="o">=</span> <span class="nb">dict</span><span class="o">.</span><span class="n">fromkeys</span><span class="p">(</span><span class="n">circuit</span><span class="o">.</span><span class="n">qubits</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">instruction</span> <span class="ow">in</span> <span class="n">circuit</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">qubit</span> <span class="ow">in</span> <span class="n">instruction</span><span class="o">.</span><span class="n">qubits</span><span class="p">:</span>
+            <span class="n">gate_count</span><span class="p">[</span><span class="n">qubit</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="k">return</span> <span class="n">gate_count</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_remove_idle_wires</span><span class="p">(</span><span class="n">circuit</span><span class="p">:</span> <span class="n">QuantumCircuit</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">QuantumCircuit</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Remove idle wires from a QuantumCircuit.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        circuit (QuantumCircuit): The input quantum circuit.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        QuantumCircuit: A new quantum circuit with idle wires removed.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">gate_count</span> <span class="o">=</span> <span class="n">count_gates</span><span class="p">(</span><span class="n">circuit</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">qubit</span><span class="p">,</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">gate_count</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">count</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">circuit</span><span class="o">.</span><span class="n">qubits</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">qubit</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">circuit</span>
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_finalize_subcircuit</span><span class="p">(</span>
     <span class="n">subcircuit</span><span class="p">:</span> <span class="n">QuantumCircuit</span><span class="p">,</span> <span class="n">qpd_qubits</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span>
@@ -617,7 +653,12 @@ document.write(`
 <span class="sd">        list[dict[int, str]]: A list of combined measurement settings, where each dict</span>
 <span class="sd">                              maps qubit indices to Pauli basis measurements.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Original: &quot;</span><span class="p">,</span> <span class="n">op</span><span class="p">)</span>
+
     <span class="n">pauli_strings</span> <span class="o">=</span> <span class="p">[</span><span class="n">pauli</span><span class="o">.</span><span class="n">to_label</span><span class="p">()[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">pauli</span> <span class="ow">in</span> <span class="n">op</span><span class="o">.</span><span class="n">paulis</span><span class="p">]</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Pauli strings: &quot;</span><span class="p">,</span> <span class="n">pauli_strings</span><span class="p">)</span>
     
     <span class="n">combined_settings</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">used</span> <span class="o">=</span> <span class="p">[</span><span class="kc">False</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">pauli_strings</span><span class="p">)</span>
@@ -656,6 +697,8 @@ document.write(`
         
         <span class="n">combined_settings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">combined</span><span class="p">)</span>
     
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Combined settings: &quot;</span><span class="p">,</span> <span class="n">combined_settings</span><span class="p">)</span>
+
     <span class="k">return</span> <span class="n">combined_settings</span>
 
 <div class="viewcode-block" id="ModifyMeasurementBasis">
