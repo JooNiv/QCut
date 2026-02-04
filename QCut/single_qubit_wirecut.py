@@ -183,7 +183,7 @@ def _count_gates(qc: QuantumCircuit):
     return gate_count
 
 
-def _remove_idle_wires(qc: QuantumCircuit):
+def _remove_idle_wires_old(qc: QuantumCircuit):
     qc_out = deepcopy(qc)
     gate_count = _count_gates(qc_out)
     for qubit, count in gate_count.items():
@@ -200,14 +200,17 @@ def _remove_idle_wires(qc: QuantumCircuit):
     return qc_out
 
 
+
+
 def _separate_subcircuits(circuit):
     dag = circuit_to_dag(circuit)
 
-    circs = dag.separable_circuits()
+    circs = dag.separable_circuits(remove_idle_qubits=True)
 
     new_circs = []
     for i in circs:
-        circ = _remove_idle_wires(dag_to_circuit(i))
+        #circ = _remove_idle_wires(dag_to_circuit(i))
+        circ = dag_to_circuit(i)
         if len(circ.qubits) == 0:
             continue
         new_circs.append(circ)
@@ -244,7 +247,8 @@ def get_qubit_map(subcircuits: list[QuantumCircuit]):
     map_qubit = {}
     count = 0
     for ind, i in enumerate(reversed(subcircuits)):
-        for j in sorted(filter_obs_i(i.data), key=sort_func, reverse=True):
+        for j in sorted(filter_obs_i(i.data), 
+                        key=lambda x: i.find_bit(x.qubits[0]).index, reverse=True):
             map_qubit[int(j.operation.name.split("_")[1])] = count
             count += 1
 
@@ -281,7 +285,7 @@ def get_locations_and_subcircuits(
     circuit1 = _insert_cut_nodes(circuit_copy, cut_locations)
     circuit_new = _move_to_new_wire(circuit1.copy())
     subcircuits = _separate_subcircuits(circuit_new)
-
+    
     subcircuits = _add_cbits(subcircuits)
     fixed_circs = []
     for i in subcircuits:
@@ -292,6 +296,7 @@ def get_locations_and_subcircuits(
         for j in i.data:
             qubits = [test.qubits[i.qubits.index(q)] for q in j.qubits]
             test.append(CircuitInstruction(j.operation, qubits))
+
         fixed_circs.append(test)
     if len(fixed_circs) <= 1:
         raise QCutError(

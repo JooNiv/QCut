@@ -9,6 +9,7 @@ from qiskit import QuantumCircuit, transpile
 
 from QCut.cutcircuit import CutCircuit
 from QCut.cutlocation import CutLocation, SingleQubitCutLocation
+from QCut.wirecut import _remove_idle_wires
 
 
 def transpile_subcircuits(cut_circuit: CutCircuit,
@@ -67,6 +68,8 @@ def transpile_subcircuits(cut_circuit: CutCircuit,
                            basis_gates=basis + placeholders + ["id"],
                            optimization_level=optimization_level,
                            **(transpile_options or {}))
+
+    transpiled = [_remove_idle_wires(circ) for circ in transpiled]
 
     return CutCircuit(subcircuits=transpiled, cut_locations=cut_circuit.cut_locations, 
                       map_qubit=cut_circuit.map_qubit, backend=backend)

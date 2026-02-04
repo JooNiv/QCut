@@ -2,6 +2,13 @@
 Changelog
 =========
 
+Version 0.9.1
+=============
+- Fixes for issues for subcircuit construction with Qiskit > 1.2
+    - Qiskit version requirement updated to >= 1.0, < 2.0
+- This version will be the last to support Qiskit < 2.0
+- Version 1.0 will add Qiskit 2.0+ support and drop Qiskit 1.0 support
+
 Version 0.9.0
 =============
 - Migrate from index based Z-observables to Qiskits SparsePauliOps

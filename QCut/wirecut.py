@@ -67,6 +67,39 @@ def get_qpd_combinations(
     all_combinations = product(*qpd_lists)
     return all_combinations
 
+def count_gates(circuit: QuantumCircuit) -> dict[Qubit, int]:
+    """Count the number of gates acting on each qubit in a QuantumCircuit.
+
+    Args:
+        circuit (QuantumCircuit): The input quantum circuit.
+
+    Returns:
+        dict[Qubit, int]: A dictionary mapping each qubit to the number of gates 
+        acting on it.
+    """
+    gate_count = dict.fromkeys(circuit.qubits, 0)
+    for instruction in circuit.data:
+        for qubit in instruction.qubits:
+            gate_count[qubit] += 1
+
+    return gate_count
+
+
+def _remove_idle_wires(circuit: QuantumCircuit) -> QuantumCircuit:
+    """Remove idle wires from a QuantumCircuit.
+
+    Args:
+        circuit (QuantumCircuit): The input quantum circuit.
+
+    Returns:
+        QuantumCircuit: A new quantum circuit with idle wires removed.
+    """
+    gate_count = count_gates(circuit)
+    for qubit, count in gate_count.items():
+        if count == 0:
+            circuit.qubits.remove(qubit)
+    
+    return circuit
 
 def _finalize_subcircuit(
     subcircuit: QuantumCircuit, qpd_qubits: list[int]
@@ -328,7 +361,12 @@ def _combine_pauli_ops(op: SparsePauliOp) -> list[dict[int, str]]:  # noqa: C901
         list[dict[int, str]]: A list of combined measurement settings, where each dict
                               maps qubit indices to Pauli basis measurements.
     """
+
+    print("Original: ", op)
+
     pauli_strings = [pauli.to_label()[::-1] for pauli in op.paulis]
+
+    print("Pauli strings: ", pauli_strings)
     
     combined_settings = []
     used = [False] * len(pauli_strings)
@@ -367,6 +405,8 @@ def _combine_pauli_ops(op: SparsePauliOp) -> list[dict[int, str]]:  # noqa: C901
         
         combined_settings.append(combined)
     
+    print("Combined settings: ", combined_settings)
+
     return combined_settings
 
 class ModifyMeasurementBasis(TransformationPass):
