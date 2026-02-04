@@ -247,7 +247,8 @@ def get_qubit_map(subcircuits: list[QuantumCircuit]):
     map_qubit = {}
     count = 0
     for ind, i in enumerate(reversed(subcircuits)):
-        for j in sorted(filter_obs_i(i.data), key=sort_func, reverse=True):
+        for j in sorted(filter_obs_i(i.data), 
+                        key=lambda x: i.find_bit(x.qubits[0]).index, reverse=True):
             map_qubit[int(j.operation.name.split("_")[1])] = count
             count += 1
 
