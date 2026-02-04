@@ -22,9 +22,9 @@ classifiers = [
 requires-python = ">=3.10, < 3.13"
 
 dependencies = [
-    "qiskit >= 1.0, < 2.0",
+    "qiskit < 3.0",
     "numpy",
-    "qiskit-aer >= 0.13.0, < 0.15",
+    "qiskit-aer < 0.18",
     "pymetis==2025.1.1",
 ]
 

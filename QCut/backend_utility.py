@@ -4,8 +4,9 @@ Utility functions for running on real backends.
 
 from __future__ import annotations
 
-import numpy as np
-from qiskit import QuantumCircuit, transpile
+from qiskit import transpile
+from qiskit.circuit import Gate
+from qiskit.transpiler import Target
 
 from QCut.cutcircuit import CutCircuit
 from QCut.cutlocation import CutLocation, SingleQubitCutLocation
@@ -34,38 +35,46 @@ def transpile_subcircuits(cut_circuit: CutCircuit,
         CutCircuit: Transpiled subcircuits wrapped in CutCircuit class.
     """
 
-    basis  = []
-    
-    placeholders = []
+    custom_gates = {}
+    for ind, i in enumerate(cut_circuit.cut_locations):
+        if isinstance(i, CutLocation):
+            custom_gates[f"cutCZ_t_{ind}"] = Gate(
+                num_qubits=1, name=f"cutCZ_t_{ind}", params=[], label=f"cutCZ_t_{ind}"
+            )
+            custom_gates[f"cutCZ_c_{ind}"] = Gate(
+                num_qubits=1, name=f"cutCZ_c_{ind}", params=[], label=f"cutCZ_c_{ind}"
+            )
 
-    for ind, cut in enumerate(cut_circuit.cut_locations):
-        if isinstance(cut, SingleQubitCutLocation):
-            placeholders.append(f"Meas_{ind}")
-            placeholders.append(f"Init_{ind}")
-        elif isinstance(cut, CutLocation):
-            placeholders.append(f"cutCZ_c_{ind}")
-            placeholders.append(f"cutCZ_t_{ind}")
+        elif isinstance(i, SingleQubitCutLocation):
+            custom_gates[f"Meas_{ind}"] = Gate(
+                num_qubits=1, name=f"Meas_{ind}", params=[], label=f"Meas_{ind}"
+            )
+            custom_gates[f"Init_{ind}"] = Gate(
+                num_qubits=1, name=f"Init_{ind}", params=[], label=f"Init_{ind}"
+            )
+    
+    for i in range(sum([x.num_qubits for x in cut_circuit.subcircuits])):
+        custom_gates[f"obs_{i}"] = Gate(
+            num_qubits=1, name=f"obs_{i}", params=[], label=f"obs_{i}"
+        )
 
-    for i in range(sum(subcircuits.num_qubits 
-                       for subcircuits in cut_circuit.subcircuits)):
-        placeholders.append(f"obs_{i}")
+    target = Target()
+
+    try:
+        basis_gates = list({i[0].name for i in backend._target.instructions})
+    except Exception:
+        return cut_circuit
     
-    if transpile_options and "basis_gates" in transpile_options:
-        basis = transpile_options["basis_gates"]
-        transpile_options.pop("basis_gates")
-    else:
-        try:
-            basis = backend.configuration().basis_gates
-        except Exception:
-            basis = list(backend.architecture.gates.keys())
-            basis = ["r" if gate == "prx" else gate for gate in basis]
-    
-    if transpile_options and "backend" in transpile_options:
-        transpile_options.pop("backend")
+    target = target.from_configuration(
+            num_qubits=backend.num_qubits,
+            coupling_map=backend._coupling_map,
+            basis_gates=basis_gates + list(custom_gates.keys()),
+            custom_name_mapping=custom_gates,
+        )
+
 
     transpiled = transpile(cut_circuit.subcircuits,
-                           coupling_map=backend._coupling_map,
-                           basis_gates=basis + placeholders + ["id"],
+                           target=target,
                            optimization_level=optimization_level,
                            **(transpile_options or {}))
 
@@ -105,83 +114,3 @@ def transpile_experiments(experiment_circuits: list | CutCircuit,
     ]
 
     return CutCircuit(subexperiments)
-
-
-def run_and_expectation_value(
-    circuit: QuantumCircuit, backend, observables: list, shots: int
-) -> tuple[dict, list]:
-    """Run circuit and calculate expectation value.
-
-    Args:
-        circuit (QuantumCircuit): A quantum circuit.
-        backend: Backend to run circuit on.
-        observables (list): Observables to calculate expectation values for.
-        shots (int): Number of shots.
-
-    Returns:
-        tuple: A tuple containing:
-            - dict: Counts from the circuit run.
-            - list: A list of expectation values.
-    """
-    counts = run_on_backend(circuit, backend, shots)
-    
-    exps = expectation_values(counts, observables, shots)
-
-    return counts, exps
-
-
-def expectation_values(counts: dict, observables: list, shots: int) -> list:
-    """Calculate expectation values.
-
-    Args:
-        counts (dict):
-            Counts obtained from circuit run, where keys are measurement outcomes and
-            values are the number of times each outcome was observed.
-
-        observables (list):
-            List of observables to calculate expectation values for. Each observable can
-            be an integer (index of a single qubit) or a list of integers
-            (indices of multiple qubits).
-
-        shots (int): Number of shots (total number of measurements).
-
-    Returns:
-        list: A list of expectation values for each observable.
-
-    """
-    # Convert results to a list of dicts with measurement values and counts
-    measurements = [
-        {"meas": [1 if bit == "0" else -1 for bit in meas], "count": count}
-        for meas, count in counts.items()
-    ]
-
-    # Initialize an array to store expectation values for each observable
-    exps = np.zeros(len(observables))
-
-    # Calculate expectation values
-    for measurement in measurements:
-        meas_values = measurement["meas"]
-        count = measurement["count"]
-        for idx, observable in enumerate(observables):
-            if isinstance(observable, int):
-                exps[idx] += meas_values[observable] * count
-            else:
-                exps[idx] += np.prod([meas_values[zi] for zi in observable]) * count
-
-    return np.array(exps) / shots
-
-
-def run_on_backend(circuit: QuantumCircuit, backend, shots: int) -> dict:
-    """Run a quantum circuit on a specified backend.
-
-    Args:
-        circuit (QuantumCircuit): The quantum circuit to be executed.
-        backend (Backend): The backend to use for executing the circuit.
-        shots (int): The number of shots (repetitions) to run the circuit.
-
-    Returns:
-        dict: A dictionary of counts from the circuit run.
-    """
-    job = backend.run(circuit, shots=shots)
-    result = job.result()
-    return result.get_counts()
