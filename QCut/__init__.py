@@ -3,9 +3,6 @@
 from importlib.metadata import PackageNotFoundError, version
 
 from QCut.backend_utility import (
-    expectation_values,
-    run_and_expectation_value,
-    run_on_backend,
     transpile_experiments,
     transpile_subcircuits,
 )
