@@ -78,7 +78,7 @@ def update_nodes_on_qubit(nodes_on_qubit, qubit, node):
         nodes_on_qubit[qubit].append(node)
 
 
-def circ_to_graph(circuit, gateCutWeight=1000000000, wireCutWeight=4):  # noqa: C901
+def circ_to_graph(circuit, gateCutWeight=3, wireCutWeight=4):  # noqa: C901
     """
     Convert a quantum circuit to a graph representation.
 
