@@ -341,9 +341,8 @@ document.write(`
 <span class="kn">from</span><span class="w"> </span><span class="nn">qiskit</span><span class="w"> </span><span class="kn">import</span> <span class="n">QuantumCircuit</span><span class="p">,</span> <span class="n">transpile</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">qiskit.circuit.library</span><span class="w"> </span><span class="kn">import</span> <span class="n">CXGate</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">qiskit.quantum_info</span><span class="w"> </span><span class="kn">import</span> <span class="n">SparsePauliOp</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit.circuit.library</span><span class="w"> </span><span class="kn">import</span> <span class="n">CXGate</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_aer</span><span class="w"> </span><span class="kn">import</span> <span class="n">AerSimulator</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit.primitives</span><span class="w"> </span><span class="kn">import</span> <span class="n">Estimator</span><span class="p">,</span> <span class="n">BackendEstimator</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit.primitives</span><span class="w"> </span><span class="kn">import</span> <span class="n">StatevectorEstimator</span><span class="p">,</span> <span class="n">BackendEstimatorV2</span> <span class="k">as</span> <span class="n">BackendEstimator</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">iqm.qiskit_iqm</span><span class="w"> </span><span class="kn">import</span> <span class="n">IQMFakeAdonis</span>
 </pre></div>
 </div>
@@ -372,9 +371,6 @@ document.write(`
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#insert cuts</span>
-
-<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit.circuit.library</span><span class="w"> </span><span class="kn">import</span> <span class="n">CXGate</span>
-
 <span class="n">cut_circuit</span> <span class="o">=</span> <span class="n">QuantumCircuit</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
 
 <span class="n">mult</span> <span class="o">=</span> <span class="mf">1.635</span>
@@ -389,7 +385,7 @@ document.write(`
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/0e330f1c6565882ec158bed1d4271f86924f15fceaceee9ac35b5aeae90043c9.png" src="../_images/0e330f1c6565882ec158bed1d4271f86924f15fceaceee9ac35b5aeae90043c9.png" />
+<img alt="../_images/1070e02c1bc983d3c2ea6917e0501c2a40148692415febcd46abde19265660ec.png" src="../_images/1070e02c1bc983d3c2ea6917e0501c2a40148692415febcd46abde19265660ec.png" />
 </div>
 </div>
 <div class="cell docutils container">
@@ -408,7 +404,7 @@ document.write(`
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/64b1cb41f3f483d1174c7f34b744c11022758d62307efce201a03d794867f7dc.png" src="../_images/64b1cb41f3f483d1174c7f34b744c11022758d62307efce201a03d794867f7dc.png" />
+<img alt="../_images/e6cec3d06c91953de69bdb0e8fa6e1deac094e196152ba2b29e30a628356b9a9.png" src="../_images/e6cec3d06c91953de69bdb0e8fa6e1deac094e196152ba2b29e30a628356b9a9.png" />
 </div>
 </div>
 <div class="cell docutils container">
@@ -418,7 +414,7 @@ document.write(`
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/5af4892478a23594943fcc416991cd3ec9c743feec7b6a33db42426927721a5d.png" src="../_images/5af4892478a23594943fcc416991cd3ec9c743feec7b6a33db42426927721a5d.png" />
+<img alt="../_images/1fbec1237aff02ad1e184aa09897601201c108953b918e8df11d74a3861ac212.png" src="../_images/1fbec1237aff02ad1e184aa09897601201c108953b918e8df11d74a3861ac212.png" />
 </div>
 </div>
 <div class="cell docutils container">
@@ -428,7 +424,7 @@ document.write(`
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/57c9d64faa59085ea3bc8e149f7179455325a631614041cb008e8f047966ec88.png" src="../_images/57c9d64faa59085ea3bc8e149f7179455325a631614041cb008e8f047966ec88.png" />
+<img alt="../_images/e921a806dbd827c7bf134872b36f74a5e67389da5e1f917d9a6ca7a5b166eb07.png" src="../_images/e921a806dbd827c7bf134872b36f74a5e67389da5e1f917d9a6ca7a5b166eb07.png" />
 </div>
 </div>
 <div class="cell docutils container">
@@ -481,10 +477,10 @@ document.write(`
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">obs</span> <span class="o">=</span> <span class="p">[</span><span class="n">ob</span><span class="o">.</span><span class="n">to_label</span><span class="p">()</span> <span class="k">for</span> <span class="n">ob</span> <span class="ow">in</span> <span class="n">observables</span><span class="o">.</span><span class="n">paulis</span><span class="p">]</span>
 
-<span class="n">estimator</span> <span class="o">=</span> <span class="n">Estimator</span><span class="p">()</span>
-<span class="n">exact_expvals</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="n">estimator</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="n">circuit</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">obs</span><span class="p">),</span> <span class="n">obs</span><span class="p">)</span><span class="o">.</span><span class="n">result</span><span class="p">()</span><span class="o">.</span><span class="n">values</span>
-<span class="p">)</span>
+<span class="n">estimator</span> <span class="o">=</span> <span class="n">StatevectorEstimator</span><span class="p">()</span>
+<span class="n">exact_expvals</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">evs</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span>
+    <span class="n">estimator</span><span class="o">.</span><span class="n">run</span><span class="p">([(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">([</span><span class="n">circuit</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">obs</span><span class="p">),</span> <span class="n">obs</span><span class="p">)])</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
+<span class="p">]</span>
 
 
 <span class="n">tr</span> <span class="o">=</span> <span class="n">transpile</span><span class="p">(</span><span class="n">circuit</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="n">fake</span><span class="p">)</span>
@@ -495,10 +491,10 @@ document.write(`
     <span class="n">SparsePauliOp</span><span class="p">(</span><span class="n">pauli</span><span class="o">.</span><span class="n">to_label</span><span class="p">())</span> <span class="k">for</span> <span class="n">pauli</span> <span class="ow">in</span> <span class="n">tr_obs</span><span class="o">.</span><span class="n">paulis</span>
 <span class="p">]</span>
 
-<span class="n">fake_estimator</span> <span class="o">=</span> <span class="n">BackendEstimator</span><span class="p">(</span><span class="n">fake</span><span class="p">)</span>
-<span class="n">exps</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="n">fake_estimator</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="n">tr</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">tr_obs_separate</span><span class="p">),</span> <span class="n">tr_obs_separate</span><span class="p">)</span><span class="o">.</span><span class="n">result</span><span class="p">()</span><span class="o">.</span><span class="n">values</span>
-<span class="p">)</span>
+<span class="n">fake_estimator</span> <span class="o">=</span> <span class="n">BackendEstimator</span><span class="p">(</span><span class="n">backend</span><span class="o">=</span><span class="n">fake</span><span class="p">)</span>
+<span class="n">exps</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">evs</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span>
+    <span class="n">fake_estimator</span><span class="o">.</span><span class="n">run</span><span class="p">([(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">([</span><span class="n">tr</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">tr_obs_separate</span><span class="p">),</span> <span class="n">tr_obs_separate</span><span class="p">)])</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
+<span class="p">]</span>
 </pre></div>
 </div>
 </div>
@@ -516,8 +512,8 @@ document.write(`
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>QCut expectation values:[0.618428 0.537705 0.567099 0.798735]
-Noisy expectation values with fake backend:[0.516602 0.611328 0.559570 0.687500]
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>QCut expectation values:[0.690654 0.537297 0.596472 0.714923]
+Noisy expectation values with fake backend:[0.656250 0.600586 0.625488 0.797363]
 Exact expectation values with ideal simulator :[0.727323 0.727323 0.727323 1.000000]
 </pre></div>
 </div>

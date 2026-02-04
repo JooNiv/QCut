@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>QAOA with QCut &#8212; QCut</title>
+    <title>QAOA Example &#8212; QCut</title>
   
   
   
@@ -318,7 +318,7 @@ document.write(`
               
 
 <div id="jb-print-docs-body" class="onlyprint">
-    <h1>QAOA with QCut</h1>
+    <h1>QAOA Example</h1>
     <!-- Table of contents -->
     <div id="print-main-content">
         <div id="jb-print-toc">
@@ -332,8 +332,8 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section class="tex2jax_ignore mathjax_ignore" id="qaoa-with-qcut">
-<h1>QAOA with QCut<a class="headerlink" href="#qaoa-with-qcut" title="Link to this heading">#</a></h1>
+  <section class="tex2jax_ignore mathjax_ignore" id="qaoa-example">
+<h1>QAOA Example<a class="headerlink" href="#qaoa-example" title="Link to this heading">#</a></h1>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
@@ -342,7 +342,7 @@ document.write(`
 <span class="kn">from</span><span class="w"> </span><span class="nn">iqm.qiskit_iqm</span><span class="w"> </span><span class="kn">import</span> <span class="n">IQMFakeAdonis</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">qiskit</span><span class="w"> </span><span class="kn">import</span> <span class="n">QuantumCircuit</span><span class="p">,</span> <span class="n">transpile</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">qiskit.circuit</span><span class="w"> </span><span class="kn">import</span> <span class="n">Parameter</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit.primitives</span><span class="w"> </span><span class="kn">import</span> <span class="n">BackendEstimator</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit.primitives</span><span class="w"> </span><span class="kn">import</span> <span class="n">BackendEstimatorV2</span> <span class="k">as</span> <span class="n">BackendEstimator</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">qiskit.quantum_info</span><span class="w"> </span><span class="kn">import</span> <span class="n">PauliList</span><span class="p">,</span> <span class="n">SparsePauliOp</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_aer</span><span class="w"> </span><span class="kn">import</span> <span class="n">AerSimulator</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.optimize</span><span class="w"> </span><span class="kn">import</span> <span class="n">minimize</span>
@@ -362,7 +362,7 @@ document.write(`
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/538c4308aaff7ac1c22f32ccf9df7dfed1adc0b879227f25b82d7d04527c5d11.png" src="../_images/538c4308aaff7ac1c22f32ccf9df7dfed1adc0b879227f25b82d7d04527c5d11.png" />
+<img alt="../_images/b0e3c12d48df5fa8ebec1c5949ac4f58c3efe340200354aaf8c818ff0de97732.png" src="../_images/b0e3c12d48df5fa8ebec1c5949ac4f58c3efe340200354aaf8c818ff0de97732.png" />
 </div>
 </div>
 <div class="cell docutils container">
@@ -485,14 +485,13 @@ document.write(`
 
         <span class="n">p_circuit</span> <span class="o">=</span> <span class="n">circuit</span><span class="o">.</span><span class="n">assign_parameters</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
-        <span class="n">fake_estimator</span> <span class="o">=</span> <span class="n">BackendEstimator</span><span class="p">(</span><span class="n">backend</span><span class="p">)</span>
+        <span class="n">fake_estimator</span> <span class="o">=</span> <span class="n">BackendEstimator</span><span class="p">(</span><span class="n">backend</span><span class="o">=</span><span class="n">backend</span><span class="p">)</span>
         
-        <span class="n">exps</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">fake_estimator</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="n">p_circuit</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">([</span><span class="n">observables</span><span class="p">]),</span> 
-                               <span class="p">[</span><span class="n">observables</span><span class="p">])</span><span class="o">.</span><span class="n">result</span><span class="p">()</span><span class="o">.</span><span class="n">values</span>
-        <span class="p">)</span>
+        <span class="n">exps</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">evs</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span>
+            <span class="n">fake_estimator</span><span class="o">.</span><span class="n">run</span><span class="p">([(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">([</span><span class="n">p_circuit</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">([</span><span class="n">observables</span><span class="p">]),</span> <span class="p">[</span><span class="n">observables</span><span class="p">])])</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
+        <span class="p">]</span>
 
-        <span class="n">f</span> <span class="o">=</span> <span class="n">hamiltonian</span><span class="p">[</span><span class="s2">&quot;const&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">exps</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="n">hamiltonian</span><span class="p">[</span><span class="s2">&quot;const&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="nb">sum</span><span class="p">(</span><span class="n">exps</span><span class="p">)</span>
 
         <span class="k">global</span> <span class="n">exps_uncut</span>
         <span class="n">exps_uncut</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">exps_uncut</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
@@ -549,11 +548,11 @@ document.write(`
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> message: Return from COBYLA because the trust region radius reaches its lower bound.
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> message: Optimization terminated successfully.
  success: True
-  status: 0
-     fun: -1.890625
-       x: [-1.878e+00 -2.853e+00]
+  status: 1
+     fun: -1.833984375
+       x: [-1.864e+00 -2.832e+00]
     nfev: 33
    maxcv: 0.0
 </pre></div>
@@ -574,12 +573,12 @@ document.write(`
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> message: Return from COBYLA because the trust region radius reaches its lower bound.
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> message: Optimization terminated successfully.
  success: True
-  status: 0
-     fun: -1.9163243770599214
-       x: [-2.824e+00 -3.437e+00]
-    nfev: 33
+  status: 1
+     fun: -1.8255871534347388
+       x: [-4.417e+00 -3.411e+00]
+    nfev: 31
    maxcv: 0.0
 </pre></div>
 </div>
@@ -601,7 +600,7 @@ document.write(`
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/4889e6b5c7bc8a8322e2566084770a5cf98ed46cc4082263b3d0455df2bcf4fb.png" src="../_images/4889e6b5c7bc8a8322e2566084770a5cf98ed46cc4082263b3d0455df2bcf4fb.png" />
+<img alt="../_images/29f583eb339f5a8ec4c3364fc67b4c26af4cb8f6f403fefcc58edd95eb84c8c9.png" src="../_images/29f583eb339f5a8ec4c3364fc67b4c26af4cb8f6f403fefcc58edd95eb84c8c9.png" />
 </div>
 </div>
 </section>
