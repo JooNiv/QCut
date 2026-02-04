@@ -47,7 +47,7 @@ Basic usage
    from qiskit.quantum_info import SparsePauliOp
    from qiskit.circuit.library import CXGate
    from qiskit_aer import AerSimulator
-   from qiskit.primitives import Estimator, BackendEstimator
+   from qiskit.primitives import StatevectorEstimator, BackendEstimatorV2 as BackendEstimator
    from iqm.qiskit_iqm import IQMFakeAdonis
 
 **2: Start by defining a QuantumCircuit just like in Qiskit**
@@ -165,9 +165,9 @@ the results calculated with QCut**
    obs = [ob.to_label() for ob in observables.paulis]
 
    estimator = Estimator()
-   exact_expvals = (
-      estimator.run([circuit] * len(obs), obs).result().values
-   )
+   exact_expvals = [e.data.evs for e in
+      estimator.run([(x) for x in zip([circuit] * len(obs), obs)]).result()
+   ]
 
 
    tr = transpile(circuit, backend=fake)
@@ -178,10 +178,10 @@ the results calculated with QCut**
       SparsePauliOp(pauli.to_label()) for pauli in tr_obs.paulis
    ]
 
-   fake_estimator = BackendEstimator(fake)
-   exps = (
-      fake_estimator.run([tr] * len(tr_obs_separate), tr_obs_separate).result().values
-   )
+   fake_estimator = BackendEstimator(backend=fake)
+   exps = [e.data.evs for e in
+      fake_estimator.run([(x) for x in zip([tr] * len(tr_obs_separate), tr_obs_separate)]).result()
+   ]
 
 .. code:: python
 
