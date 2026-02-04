@@ -2,7 +2,7 @@ sphinx==7.4.7
 myst-nb
 sphinx-book-theme
 sphinx_lesson
-qiskit >= 0.45.3, < 1.2
+qiskit < 3.0
 numpy
-qiskit-aer >= 0.13.0, < 0.15
+qiskit-aer < 0.18
 pymetis == 2025.1.1
