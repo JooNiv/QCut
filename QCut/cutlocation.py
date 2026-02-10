@@ -9,7 +9,7 @@ class CutLocation:
     """Storage class for storing cut locations."""
 
     def __init__(
-        self, cut_location: tuple[tuple[tuple[QuantumRegister, int]], int]
+        self, cut_location: tuple[list, int]
     ) -> None:
         """Init."""
         self.qubits = cut_location[0]
@@ -17,7 +17,7 @@ class CutLocation:
         self.target = cut_location[0][1][1]
         self.index = cut_location[1]
 
-    def __eq__(self, other: CutLocation) -> bool:
+    def __eq__(self, other) -> bool:
         """Equality."""
         if not isinstance(other, CutLocation):
             return NotImplemented
@@ -50,7 +50,7 @@ class SingleQubitCutLocation:
         self.init = cut_location[0][1]
         self.index = cut_location[1]
 
-    def __eq__(self, other: SingleQubitCutLocation) -> bool:
+    def __eq__(self, other) -> bool:
         """Equality."""
         if not isinstance(other, SingleQubitCutLocation):
             return NotImplemented

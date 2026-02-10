@@ -1,14 +1,20 @@
 """Class for nicely representing a cut circuit. Also implements some of the same
 functionality as the qiskit QuantumCircuit class for a group of circuts."""
 
+from __future__ import annotations
+
 from qiskit import QuantumCircuit
 
 from QCut.cutlocation import CutLocation, SingleQubitCutLocation
     
 
 class CutCircuit:
+    """Class for representing a cut circuit. Contains the subcircuits, cut locations, and
+    mapping of qubits. Also contains some of the same functionality as the qiskit QuantumCircuit
+    class for a group of circuits."""
+
     def __init__(self, 
-                    subcircuits: dict[int, QuantumCircuit],
+                    subcircuits: list[QuantumCircuit],
                     cut_locations: list[CutLocation | SingleQubitCutLocation],
                     map_qubit: dict[int, int],
                     backend=None) -> None:
@@ -20,7 +26,7 @@ class CutCircuit:
         self.backend = backend
 
     def assign_parameters(self, parameters: dict, inplace=False
-                          ) -> dict[int, QuantumCircuit]:
+                          ) -> CutCircuit | None:
         """Assign parameters to the circuits. Same as qiskit
         QuantumCircuit.assign_parameters."""
         if inplace:
@@ -29,15 +35,15 @@ class CutCircuit:
                     self.subcircuits[ind] = circuit.assign_parameters(parameters)
                 except Exception:
                     pass
-            #return self.subcircuits
+            return 
         
         else:
-            new_circuits = {}
+            new_circuits = []
             for ind, circuit in enumerate(self.subcircuits):
                 try:
-                    new_circuits[ind] = circuit.assign_parameters(parameters)
+                    new_circuits.append(circuit.assign_parameters(parameters))
                 except Exception:
-                    new_circuits[ind] = circuit
+                    new_circuits.append(circuit)
             return CutCircuit(new_circuits,
                               self.cut_locations, self.map_qubit, self.backend)
             
@@ -79,7 +85,7 @@ class CutExperiment:
         }
 
     def assign_parameters(self, parameters: dict, inplace=False
-                          ) -> list[dict[int, QuantumCircuit]]:
+                          ) -> CutExperiment | None:
         """Assign parameters to the circuits. Same as qiskit
         QuantumCircuit.assign_parameters."""
         if inplace:
@@ -91,7 +97,7 @@ class CutExperiment:
                                                             .assign_parameters(parameters))
                         except Exception:
                             pass
-            #return self.experiments
+            return
         else:
             new_experiments = []
             for exp_ind, subcircuits in enumerate(self.experiments):
