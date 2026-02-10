@@ -18,6 +18,8 @@ Please check the type(s) of changes made in this PR:
 - [ ] Refactor (code restructuring without changing external behaviour)
 - [ ] Other (please specify):  
 
+- For non-breaking changes remember to run `tox`to test against older qiskit versions.
+
 ---
 
 ## Checklist
