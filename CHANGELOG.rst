@@ -7,8 +7,13 @@ Version 1.0.2
 - Fix big in transpile_experiments()
 - Adjust supported qiskit and python versions to better match iqm-client
 
+Version 1.0.1
+=============
+- Fix typo in pyproject.toml
+
 Version 1.0.0
 =============
+- Yanked due to pyproject.toml typo. Please use 1.0.1 instead.
 - Support for Qiskit 2.x
 - QCut not supports Qiskit 1.0+
 
