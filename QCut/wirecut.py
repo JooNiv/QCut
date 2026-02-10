@@ -692,7 +692,7 @@ def get_experiment_circuits(  # noqa: C901
         experiment_circuits,
         cut_circuit.cut_locations,
         cut_circuit.map_qubit,
-        coefficients,
+        coefficients, # type: ignore[invalid-argument-type]
         observables,
         backend=backend,
     )
