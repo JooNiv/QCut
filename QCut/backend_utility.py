@@ -8,7 +8,7 @@ from qiskit import transpile
 from qiskit.circuit import Gate
 from qiskit.transpiler import Target
 
-from QCut.cutcircuit import CutCircuit
+from QCut.cutcircuit import CutCircuit, CutExperiment
 from QCut.cutlocation import CutLocation, SingleQubitCutLocation
 from QCut.wirecut import _remove_idle_wires
 
@@ -16,7 +16,7 @@ from QCut.wirecut import _remove_idle_wires
 def transpile_subcircuits(cut_circuit: CutCircuit,
                           backend,
                           optimization_level: int = 0,
-                          transpile_options: dict = None) -> CutCircuit:
+                          transpile_options: dict | None = None) -> CutCircuit:
     """
     Transpile subcircuits for a given backend. More efficient than transpiling
     experiment circuits as it only transpiles each subcircuit once instead of
@@ -34,6 +34,9 @@ def transpile_subcircuits(cut_circuit: CutCircuit,
     Returns:
         CutCircuit: Transpiled subcircuits wrapped in CutCircuit class.
     """
+
+    if not isinstance(cut_circuit, CutCircuit):
+        raise ValueError("cut_circuit must be of type CutCircuit.")
 
     custom_gates = {}
     for ind, i in enumerate(cut_circuit.cut_locations):
@@ -83,9 +86,10 @@ def transpile_subcircuits(cut_circuit: CutCircuit,
     return CutCircuit(subcircuits=transpiled, cut_locations=cut_circuit.cut_locations, 
                       map_qubit=cut_circuit.map_qubit, backend=backend)
 
-def transpile_experiments(experiment_circuits: list | CutCircuit, 
+def transpile_experiments(cut_experiment: CutExperiment, 
                           backend,
-                          transpile_options: dict = None) -> CutCircuit:
+                          optimization_level: int = 0,
+                          transpile_options: dict | None = None) -> CutExperiment:
     """
     Transpile experiment circuits. Transpiles all generated experiment circuits for
     a given backend. Most often one should use `transpile_subcircuits` instead, as that
@@ -94,23 +98,35 @@ def transpile_experiments(experiment_circuits: list | CutCircuit,
     over the tranpilation of experiment circuits.
 
     Args:
-        experiment_circuits: (list): Experiment circuits to be transpiled.
+        cut_experiment: (CutExperiment): Experiment circuits to be transpiled.
         backend (str): Backend to transpile to.
+        optimization_level (int): Optimization level for transpilation (0-3).
         transpile_options (dict): Arguments passed to qiskit transpile function.
 
     Returns:
-        CutCircuit: Transpiled experiment circuits wrapped in CutCircuit class.
+        CutExperiment: Transpiled experiment circuits wrapped in CutExperiment class.
     """
 
-    if isinstance(experiment_circuits, CutCircuit):
-        experiment_circuits = experiment_circuits.circuits
+    if not isinstance(cut_experiment, CutExperiment):
+        raise ValueError("cut_experiment must be of type CutExperiment.")
 
     subexperiments = [
         [
-            transpile(circuit, backend=backend, **(transpile_options or {}))
-            for circuit in circuit_group
+            {
+                ind: transpile(circ,
+                               backend=backend,
+                               optimization_level=optimization_level,
+                               **(transpile_options or {}))
+                for ind, circ in exp.items()
+            }
+            for exp in exps
         ]
-        for circuit_group in experiment_circuits
+        for exps in cut_experiment.experiments
     ]
 
-    return CutCircuit(subexperiments)
+    return CutExperiment(subexperiments,
+                         cut_locations=cut_experiment.cut_locations,
+                         map_qubit=cut_experiment.map_qubit,
+                         coefficients=cut_experiment.coefficients,
+                         observables=cut_experiment.observables,
+                         backend=backend)
