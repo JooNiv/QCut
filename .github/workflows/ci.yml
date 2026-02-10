@@ -22,10 +22,11 @@ jobs:
         with:
           filters: |
             test:
-              - 'QCut/Qcut/**'
+              - 'QCut/**'
               - 'pyproject.toml'
+              - 'tests/**'
             docs:
-              - 'QCut/Qcut/**'
+              - 'QCut/**'
               - 'docs/**'
 
   test:
