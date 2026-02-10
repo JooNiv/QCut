@@ -1,5 +1,5 @@
-from qiskit import QuantumCircuit
 import qiskit
+from qiskit import QuantumCircuit
 from qiskit.circuit.library import CXGate
 from qiskit.quantum_info import SparsePauliOp
 
@@ -20,7 +20,7 @@ if qiskit.__version__ < "2.2.0":
         backend = IQMFakeAdonis()
 
 else:
-    from qiskit.providers.fake_provider import GenericBackendV2 
+    from qiskit.providers.fake_provider import GenericBackendV2
     backend = GenericBackendV2(num_qubits=5, basis_gates=["cz", "r"])
 
 def test_transpile_subcircuits():
