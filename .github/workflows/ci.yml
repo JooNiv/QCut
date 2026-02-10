@@ -12,7 +12,11 @@ on:
 jobs:
   test:
     runs-on: ${{ matrix.platform }}
-
+    if: |
+      contains(github.event.head_commit.modified, 'QCut/Qcut/') ||
+      contains(github.event.head_commit.modified, 'pyproject.toml') ||
+      contains(github.event.head_commit.added, 'QCut/Qcut/') ||
+      contains(github.event.head_commit.added, 'pyproject.toml')
     strategy:
       matrix:
         platform: [ ubuntu-latest, macos-latest ]
