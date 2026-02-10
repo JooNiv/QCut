@@ -9,9 +9,9 @@ from QCut.cutlocation import CutLocation, SingleQubitCutLocation
     
 
 class CutCircuit:
-    """Class for representing a cut circuit. Contains the subcircuits, cut locations, and
-    mapping of qubits. Also contains some of the same functionality as the qiskit QuantumCircuit
-    class for a group of circuits."""
+    """Class for representing a cut circuit. Contains the subcircuits, cut locations,
+    and mapping of qubits. Also contains some of the same functionality as the qiskit 
+    QuantumCircuit class for a group of circuits."""
 
     def __init__(self, 
                     subcircuits: list[QuantumCircuit],

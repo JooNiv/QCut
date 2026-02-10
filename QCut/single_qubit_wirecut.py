@@ -3,7 +3,6 @@ from __future__ import annotations
 from collections import namedtuple
 from copy import deepcopy
 
-import numpy as np
 from qiskit import ClassicalRegister, QuantumCircuit, QuantumRegister
 from qiskit.circuit import CircuitInstruction, Instruction, Qubit
 from qiskit.converters import circuit_to_dag, dag_to_circuit
