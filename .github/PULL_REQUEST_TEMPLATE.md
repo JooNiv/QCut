@@ -25,6 +25,7 @@ Please check the type(s) of changes made in this PR:
 Please check all relevant boxes to ensure your pull request is ready for review:
 
 - [ ] I have tested my changes locally and they work as expected.
+    * For changes that should be backwards compatible to older Qiskit versions run `tox` in addition to pytest tests ran by CI
 - [ ] I have added/updated relevant documentation (if applicable).
 - [ ] I have formatted my code using the project’s coding style or linter.
 - [ ] I have added tests that prove my fix is effective or my feature works (if applicable).
