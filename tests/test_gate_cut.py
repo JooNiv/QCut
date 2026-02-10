@@ -1,10 +1,10 @@
-import QCut as ck
-from QCut import cut, cutGate
 from qiskit import QuantumCircuit
 from qiskit.circuit.library import CXGate
 from qiskit.quantum_info import SparsePauliOp
-from qiskit.circuit.library import CXGate
 from qiskit_aer import AerSimulator
+
+import QCut as ck
+from QCut import cut, cutGate
 
 circuit  =  QuantumCircuit(4)
 
@@ -52,7 +52,8 @@ def test_cut_gate_expectation_values():
 
     results = ck.run_experiments(cut_experiment, backend=backend)
 
-    expectation_values = ck.estimate_expectation_values(results, cut_experiment.expv_data())
+    expectation_values = ck.estimate_expectation_values(results, 
+                                                        cut_experiment.expv_data())
 
     for ind, expv in enumerate(expectation_values):
         assert abs(expv - res_expvs[ind]) < 0.1
