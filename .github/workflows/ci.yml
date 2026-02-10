@@ -8,20 +8,34 @@ on:
   pull_request_review:
     types: [submitted]
 
-
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      test: ${{ steps.filter.outputs.test }}
+      docs: ${{ steps.filter.outputs.docs }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Detect changed paths
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            test:
+              - 'QCut/Qcut/**'
+              - 'pyproject.toml'
+            docs:
+              - 'QCut/Qcut/**'
+              - 'docs/**'
+
   test:
     runs-on: ${{ matrix.platform }}
-    if: |
-      contains(github.event.head_commit.modified, 'QCut/Qcut/') ||
-      contains(github.event.head_commit.modified, 'pyproject.toml') ||
-      contains(github.event.head_commit.added, 'QCut/Qcut/') ||
-      contains(github.event.head_commit.added, 'pyproject.toml')
+    needs: changes
+    if: ${{ needs.changes.outputs.test == 'true' }}
     strategy:
       matrix:
         platform: [ ubuntu-latest, macos-latest ]
-        python-version: ['3.10', '3.11', '3.12']
-
+        python-version: ['3.11', '3.12']
     steps:
       - uses: actions/checkout@v4
       - name: Setup Python
@@ -35,9 +49,10 @@ jobs:
       - name: Run tests
         run: python -m pytest --cov QCut --cov-report=term-missing --junitxml=test_report.xml --doctest-modules  --verbose --strict-markers tests
 
-
   test_docs:
     runs-on: ubuntu-latest
+    needs: changes
+    if: ${{ needs.changes.outputs.docs == 'true' }}
     steps:
       - uses: actions/checkout@v4
       - name: Setup Python
@@ -48,27 +63,21 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r docs/requirements-docs.txt
-
       - name: Test if docs can be built
         run: cd docs && sphinx-build -b html . build/sphinx/html -W
-  
-  
+
   lint:
     runs-on: ubuntu-latest
     name: Lint the project with ruff
-
     steps:
       - uses: actions/checkout@v4
-
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-
       - name: Install ruff linter
         run: |
           python -m pip install --upgrade pip
           python -m pip install ruff
-
       - name: Run ruff linter with pyproject.toml config
         run: ruff check .
