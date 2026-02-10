@@ -27,6 +27,8 @@ For installation a UNIX-like system is currently needed due to pymetis being use
    #or
    uv add QCut
 
+If using other than the default Qiskit version (newest) it is recommended to install Qiskit first before installing QCut.
+
 Using uv is the recommended install method.
 
 | **Install from source**

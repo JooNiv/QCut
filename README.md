@@ -33,6 +33,8 @@ uv pip install QCut
 uv add QCut
 ```
 
+If using other than the default Qiskit version (newest) it is recommended to install Qiskit first before installing QCut.
+
 Uv can be installed with
 
 ```bash
