@@ -25,6 +25,7 @@ jobs:
               - 'QCut/**'
               - 'pyproject.toml'
               - 'tests/**'
+              - '.github/workflows/**'
             docs:
               - 'QCut/**'
               - 'docs/**'
