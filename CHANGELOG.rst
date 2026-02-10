@@ -2,6 +2,11 @@
 Changelog
 =========
 
+Version 1.0.2
+=============
+- Fix big in transpile_experiments()
+- Adjust supported qiskit and python versions to better match iqm-client
+
 Version 1.0.0
 =============
 - Support for Qiskit 2.x
