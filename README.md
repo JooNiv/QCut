@@ -291,7 +291,7 @@ backend = IQMFakeAdonis()
 
 ## Running on FiQCI
 
-For running on real hardware through the Lumi supercomputer's FiQCI partition follow the instructions [here](https://docs.csc.fi/computing/quantum-computing/helmi/running-on-helmi/). If you are used to using Qiskit on jupyter notebooks it is recommended to use the [Lumi web interface](https://docs.lumi-supercomputer.eu/runjobs/webui/).
+For running on real hardware using the Lumi supercomputer follow the instructions [here](https://docs.csc.fi/computing/quantum-computing/running-quantum-jobs/). If you are used to using Qiskit on jupyter notebooks it is recommended to use the [Lumi web interface](https://docs.lumi-supercomputer.eu/runjobs/webui/).
 
 ## Running on other hardware
 
