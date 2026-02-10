@@ -18,6 +18,7 @@ docs/_build/
 htmlcov/
 *.xml
 *.txt
+.tox
 
 # Lock files
 *.lock
