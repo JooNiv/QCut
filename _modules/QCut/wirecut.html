@@ -323,7 +323,7 @@ document.write(`
 <div class="viewcode-block" id="get_qpd_combinations">
 <a class="viewcode-back" href="../../QCut.html#QCut.wirecut.get_qpd_combinations">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_qpd_combinations</span><span class="p">(</span>
-    <span class="n">cut_locations</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">[</span><span class="n">CutLocation</span><span class="p">],</span>
+    <span class="n">cut_locations</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">CutLocation</span> <span class="o">|</span> <span class="n">SingleQubitCutLocation</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">dict</span><span class="p">]]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get all possible combinations of the QPD operations so that each combination</span>
 <span class="sd">    has len(cut_locations) elements.</span>
@@ -335,7 +335,7 @@ document.write(`
 <span class="sd">    be inserted to generate the experiment circuits.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        cut_locations (np.ndarray[CutLocation]): cut locations</span>
+<span class="sd">        cut_locations (list[CutLocation | SingleQubitCutLocation]): cut locations</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        Iterable[tuple[dict]]:</span>
@@ -437,7 +437,7 @@ document.write(`
     <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Meas&quot;</span><span class="p">,</span> <span class="s2">&quot;Init&quot;</span><span class="p">,</span> <span class="s2">&quot;cutCZ&quot;</span><span class="p">]</span>
     <span class="k">for</span> <span class="n">circ</span> <span class="ow">in</span> <span class="n">subcircuits</span><span class="p">:</span>
         <span class="n">subops</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">op</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">circ</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">op</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">circ</span><span class="o">.</span><span class="n">data</span><span class="p">):</span>
             <span class="c1"># if &quot;Meas&quot; in op.operation.name or &quot;Init&quot; in op.operation.name :</span>
             <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">i</span> <span class="ow">in</span> <span class="n">op</span><span class="o">.</span><span class="n">operation</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">names</span><span class="p">):</span>
                 <span class="n">subops</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">ind</span><span class="p">,</span> <span class="n">op</span><span class="p">))</span>
@@ -447,7 +447,7 @@ document.write(`
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_remove_obsm</span><span class="p">(</span><span class="n">subcircuits</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">QuantumCircuit</span><span class="p">]]</span>
-                 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">QuantumCircuit</span><span class="p">]]:</span>
+                 <span class="p">):</span>
 
     <span class="k">for</span> <span class="n">obs_set</span> <span class="ow">in</span> <span class="n">subcircuits</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">circ</span> <span class="ow">in</span> <span class="n">obs_set</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -785,8 +785,8 @@ document.write(`
         <span class="n">obs_subcircuits</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pm_circs</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">obs_subcircuits</span>
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_remove_obsm_2</span><span class="p">(</span><span class="n">subcircuits</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">QuantumCircuit</span><span class="p">]]</span>
-                 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">QuantumCircuit</span><span class="p">]]:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_remove_obsm_2</span><span class="p">(</span><span class="n">subcircuits</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">QuantumCircuit</span><span class="p">]</span>
+                 <span class="p">):</span>
 
     <span class="k">for</span> <span class="n">circ</span> <span class="ow">in</span> <span class="n">subcircuits</span><span class="p">:</span>
         <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span>
@@ -858,9 +858,9 @@ document.write(`
     <span class="k">if</span> <span class="n">check_circuit_type</span><span class="p">:</span>
         <span class="n">backend</span> <span class="o">=</span> <span class="n">cut_circuit</span><span class="o">.</span><span class="n">backend</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">basis</span> <span class="o">=</span> <span class="n">backend</span><span class="o">.</span><span class="n">configuration</span><span class="p">()</span><span class="o">.</span><span class="n">basis_gates</span>
+            <span class="n">basis</span> <span class="o">=</span> <span class="n">backend</span><span class="o">.</span><span class="n">configuration</span><span class="p">()</span><span class="o">.</span><span class="n">basis_gates</span> <span class="c1"># type: ignore[possibly-missing-attribute]</span>
         <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
-            <span class="n">basis</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">backend</span><span class="o">.</span><span class="n">architecture</span><span class="o">.</span><span class="n">gates</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+            <span class="n">basis</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">backend</span><span class="o">.</span><span class="n">architecture</span><span class="o">.</span><span class="n">gates</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="c1"># type: ignore[possibly-missing-attribute]</span>
         <span class="n">basis</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;r&quot;</span> <span class="k">if</span> <span class="n">gate</span> <span class="o">==</span> <span class="s2">&quot;prx&quot;</span> <span class="k">else</span> <span class="n">gate</span> <span class="k">for</span> <span class="n">gate</span> <span class="ow">in</span> <span class="n">basis</span><span class="p">]</span>
 
     <span class="n">obs_subcircuits</span> <span class="o">=</span> <span class="kc">None</span>
@@ -992,7 +992,7 @@ document.write(`
         <span class="n">experiment_circuits</span><span class="p">,</span>
         <span class="n">cut_circuit</span><span class="o">.</span><span class="n">cut_locations</span><span class="p">,</span>
         <span class="n">cut_circuit</span><span class="o">.</span><span class="n">map_qubit</span><span class="p">,</span>
-        <span class="n">coefficients</span><span class="p">,</span>
+        <span class="n">coefficients</span><span class="p">,</span> <span class="c1"># type: ignore[invalid-argument-type]</span>
         <span class="n">observables</span><span class="p">,</span>
         <span class="n">backend</span><span class="o">=</span><span class="n">backend</span><span class="p">,</span>
     <span class="p">)</span></div>
@@ -1003,7 +1003,7 @@ document.write(`
 <span class="k">def</span><span class="w"> </span><span class="nf">run_experiments</span><span class="p">(</span>  <span class="c1"># noqa: C901</span>
     <span class="n">cut_experiment</span><span class="p">:</span> <span class="n">CutExperiment</span><span class="p">,</span>
     <span class="n">shots</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="o">**</span><span class="mi">12</span><span class="p">,</span>
-    <span class="n">backend</span><span class="p">:</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">backend</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="n">TotalResult</span><span class="p">]]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Run experiment circuits.</span>
 
@@ -1034,7 +1034,7 @@ document.write(`
     <span class="k">if</span> <span class="n">backend</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">backend</span> <span class="o">=</span> <span class="n">AerSimulator</span><span class="p">()</span>
 
-    <span class="n">results</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">cut_experiment</span><span class="o">.</span><span class="n">num_groups</span><span class="p">)</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">cut_experiment</span><span class="o">.</span><span class="n">num_groups</span><span class="p">)</span>
 
     <span class="k">for</span> <span class="n">count</span><span class="p">,</span> <span class="n">circuit_group</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">cut_experiment</span><span class="o">.</span><span class="n">experiments</span><span class="p">):</span>
         <span class="n">group</span> <span class="o">=</span> <span class="p">[]</span>
@@ -1064,7 +1064,7 @@ document.write(`
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_process_results</span><span class="p">(</span>
-    <span class="n">results</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span><span class="nb">int</span><span class="p">]]],</span>
+    <span class="n">results</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
     <span class="n">shots</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">samples</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="n">TotalResult</span><span class="p">]]:</span>
@@ -1090,7 +1090,7 @@ document.write(`
 
     <span class="k">for</span> <span class="n">group_ind</span><span class="p">,</span> <span class="n">circ_group</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">results</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">exp_ind</span><span class="p">,</span> <span class="n">experiment_run</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">circ_group</span><span class="p">):</span>
-            <span class="n">experiment_run_results</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">experiment_run</span><span class="p">)</span>
+            <span class="n">experiment_run_results</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">for</span> <span class="n">sub_ind</span><span class="p">,</span> <span class="n">sub_result</span> <span class="ow">in</span> <span class="n">experiment_run</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                 <span class="n">circuit_results</span> <span class="o">=</span> <span class="p">[]</span>
                 <span class="k">for</span> <span class="n">meassurements</span><span class="p">,</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">sub_result</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -1108,7 +1108,7 @@ document.write(`
                     <span class="n">circuit_results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                         <span class="n">SubResult</span><span class="p">(</span><span class="n">result_eigenvalues</span><span class="p">,</span> <span class="n">count</span> <span class="o">/</span> <span class="n">shots</span> <span class="o">*</span> <span class="n">samples</span><span class="p">)</span>
                     <span class="p">)</span>
-                <span class="n">experiment_run_results</span><span class="p">[</span><span class="n">sub_ind</span><span class="p">]</span> <span class="o">=</span> <span class="n">circuit_results</span>
+                <span class="n">experiment_run_results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">circuit_results</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">group_ind</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">preocessed_results</span><span class="p">):</span>
                 <span class="n">preocessed_results</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
             <span class="n">preocessed_results</span><span class="p">[</span><span class="n">group_ind</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">TotalResult</span><span class="p">(</span><span class="n">experiment_run_results</span><span class="p">))</span>
@@ -1117,10 +1117,10 @@ document.write(`
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_get_sub_expectation_values</span><span class="p">(</span>
     <span class="n">experiment_run</span><span class="p">:</span> <span class="n">TotalResult</span><span class="p">,</span>
-    <span class="n">observables</span><span class="p">:</span> <span class="n">SparsePauliOp</span><span class="p">,</span>
+    <span class="n">observables</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
     <span class="n">shots</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">map_qubits</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate sub expectation value for the result.</span>
 
 <span class="sd">    Args:</span>
@@ -1136,7 +1136,7 @@ document.write(`
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># generate all possible combinations between end of circuit measurements</span>
     <span class="c1"># from subcircuit group</span>
-    <span class="n">sub_circuit_result_combinations</span> <span class="o">=</span> <span class="n">product</span><span class="p">(</span><span class="o">*</span><span class="n">experiment_run</span><span class="o">.</span><span class="n">subcircuits</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">sub_circuit_result_combinations</span> <span class="o">=</span> <span class="n">product</span><span class="p">(</span><span class="o">*</span><span class="n">experiment_run</span><span class="o">.</span><span class="n">subcircuits</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="c1"># type: ignore[no-matching-overload]</span>
 
     <span class="c1"># initialize sub solution array</span>
     <span class="n">sub_expectation_value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">observables</span><span class="p">))</span>

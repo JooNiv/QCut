@@ -294,7 +294,7 @@ document.write(`
 <span class="kn">from</span><span class="w"> </span><span class="nn">qiskit.circuit</span><span class="w"> </span><span class="kn">import</span> <span class="n">Gate</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">qiskit.transpiler</span><span class="w"> </span><span class="kn">import</span> <span class="n">Target</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">QCut.cutcircuit</span><span class="w"> </span><span class="kn">import</span> <span class="n">CutCircuit</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">QCut.cutcircuit</span><span class="w"> </span><span class="kn">import</span> <span class="n">CutCircuit</span><span class="p">,</span> <span class="n">CutExperiment</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">QCut.cutlocation</span><span class="w"> </span><span class="kn">import</span> <span class="n">CutLocation</span><span class="p">,</span> <span class="n">SingleQubitCutLocation</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">QCut.wirecut</span><span class="w"> </span><span class="kn">import</span> <span class="n">_remove_idle_wires</span>
 
@@ -304,7 +304,7 @@ document.write(`
 <span class="k">def</span><span class="w"> </span><span class="nf">transpile_subcircuits</span><span class="p">(</span><span class="n">cut_circuit</span><span class="p">:</span> <span class="n">CutCircuit</span><span class="p">,</span>
                           <span class="n">backend</span><span class="p">,</span>
                           <span class="n">optimization_level</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-                          <span class="n">transpile_options</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CutCircuit</span><span class="p">:</span>
+                          <span class="n">transpile_options</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CutCircuit</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Transpile subcircuits for a given backend. More efficient than transpiling</span>
 <span class="sd">    experiment circuits as it only transpiles each subcircuit once instead of</span>
@@ -322,6 +322,9 @@ document.write(`
 <span class="sd">    Returns:</span>
 <span class="sd">        CutCircuit: Transpiled subcircuits wrapped in CutCircuit class.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cut_circuit</span><span class="p">,</span> <span class="n">CutCircuit</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;cut_circuit must be of type CutCircuit.&quot;</span><span class="p">)</span>
 
     <span class="n">custom_gates</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">cut_circuit</span><span class="o">.</span><span class="n">cut_locations</span><span class="p">):</span>
@@ -374,9 +377,10 @@ document.write(`
 
 <div class="viewcode-block" id="transpile_experiments">
 <a class="viewcode-back" href="../../QCut.html#QCut.backend_utility.transpile_experiments">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">transpile_experiments</span><span class="p">(</span><span class="n">experiment_circuits</span><span class="p">:</span> <span class="nb">list</span> <span class="o">|</span> <span class="n">CutCircuit</span><span class="p">,</span> 
+<span class="k">def</span><span class="w"> </span><span class="nf">transpile_experiments</span><span class="p">(</span><span class="n">cut_experiment</span><span class="p">:</span> <span class="n">CutExperiment</span><span class="p">,</span> 
                           <span class="n">backend</span><span class="p">,</span>
-                          <span class="n">transpile_options</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CutCircuit</span><span class="p">:</span>
+                          <span class="n">optimization_level</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                          <span class="n">transpile_options</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CutExperiment</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Transpile experiment circuits. Transpiles all generated experiment circuits for</span>
 <span class="sd">    a given backend. Most often one should use `transpile_subcircuits` instead, as that</span>
@@ -385,26 +389,38 @@ document.write(`
 <span class="sd">    over the tranpilation of experiment circuits.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        experiment_circuits: (list): Experiment circuits to be transpiled.</span>
+<span class="sd">        cut_experiment: (CutExperiment): Experiment circuits to be transpiled.</span>
 <span class="sd">        backend (str): Backend to transpile to.</span>
+<span class="sd">        optimization_level (int): Optimization level for transpilation (0-3).</span>
 <span class="sd">        transpile_options (dict): Arguments passed to qiskit transpile function.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        CutCircuit: Transpiled experiment circuits wrapped in CutCircuit class.</span>
+<span class="sd">        CutExperiment: Transpiled experiment circuits wrapped in CutExperiment class.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">experiment_circuits</span><span class="p">,</span> <span class="n">CutCircuit</span><span class="p">):</span>
-        <span class="n">experiment_circuits</span> <span class="o">=</span> <span class="n">experiment_circuits</span><span class="o">.</span><span class="n">circuits</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cut_experiment</span><span class="p">,</span> <span class="n">CutExperiment</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;cut_experiment must be of type CutExperiment.&quot;</span><span class="p">)</span>
 
     <span class="n">subexperiments</span> <span class="o">=</span> <span class="p">[</span>
         <span class="p">[</span>
-            <span class="n">transpile</span><span class="p">(</span><span class="n">circuit</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="n">backend</span><span class="p">,</span> <span class="o">**</span><span class="p">(</span><span class="n">transpile_options</span> <span class="ow">or</span> <span class="p">{}))</span>
-            <span class="k">for</span> <span class="n">circuit</span> <span class="ow">in</span> <span class="n">circuit_group</span>
+            <span class="p">{</span>
+                <span class="n">ind</span><span class="p">:</span> <span class="n">transpile</span><span class="p">(</span><span class="n">circ</span><span class="p">,</span>
+                               <span class="n">backend</span><span class="o">=</span><span class="n">backend</span><span class="p">,</span>
+                               <span class="n">optimization_level</span><span class="o">=</span><span class="n">optimization_level</span><span class="p">,</span>
+                               <span class="o">**</span><span class="p">(</span><span class="n">transpile_options</span> <span class="ow">or</span> <span class="p">{}))</span>
+                <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">circ</span> <span class="ow">in</span> <span class="n">exp</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+            <span class="p">}</span>
+            <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">exps</span>
         <span class="p">]</span>
-        <span class="k">for</span> <span class="n">circuit_group</span> <span class="ow">in</span> <span class="n">experiment_circuits</span>
+        <span class="k">for</span> <span class="n">exps</span> <span class="ow">in</span> <span class="n">cut_experiment</span><span class="o">.</span><span class="n">experiments</span>
     <span class="p">]</span>
 
-    <span class="k">return</span> <span class="n">CutCircuit</span><span class="p">(</span><span class="n">subexperiments</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">CutExperiment</span><span class="p">(</span><span class="n">subexperiments</span><span class="p">,</span>
+                         <span class="n">cut_locations</span><span class="o">=</span><span class="n">cut_experiment</span><span class="o">.</span><span class="n">cut_locations</span><span class="p">,</span>
+                         <span class="n">map_qubit</span><span class="o">=</span><span class="n">cut_experiment</span><span class="o">.</span><span class="n">map_qubit</span><span class="p">,</span>
+                         <span class="n">coefficients</span><span class="o">=</span><span class="n">cut_experiment</span><span class="o">.</span><span class="n">coefficients</span><span class="p">,</span>
+                         <span class="n">observables</span><span class="o">=</span><span class="n">cut_experiment</span><span class="o">.</span><span class="n">observables</span><span class="p">,</span>
+                         <span class="n">backend</span><span class="o">=</span><span class="n">backend</span><span class="p">)</span></div>
 
 </pre></div>
 

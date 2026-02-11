@@ -12,14 +12,6 @@ QCut.backend\_utility module
    :undoc-members:
    :show-inheritance:
 
-QCut.helper module
-------------------
-
-.. automodule:: QCut.helper
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 QCut.qpd\_gates module
 -----------------------
 
