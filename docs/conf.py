@@ -35,6 +35,7 @@ else:
 
 extensions = [
     "sphinx.ext.autodoc",
+    "sphinx.ext.autosummary",
     "sphinx.ext.viewcode",
     "sphinx.ext.napoleon",
     "sphinx_rtd_theme",
@@ -43,6 +44,18 @@ extensions = [
     "sphinx.ext.githubpages",
 ]
 
+autodoc_default_options = {
+    'members': True,
+    'member-order': 'bysource',
+    'special-members': '__init__',
+    'undoc-members': False,
+    'show-inheritance': True,
+    'private-members': False,
+}
+
+autosummary_generate = True
+autosummary_ignore_patterns = []
+
 templates_path = ["_templates"]
 exclude_patterns = [
     "_build",
@@ -50,6 +63,9 @@ exclude_patterns = [
     ".DS_Store",
     "jupyter_execute",
     "build",
+    "test",
+    ".venv",
+    "docs-venv",
 ]
 
 source_suffix = {
