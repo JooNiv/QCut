@@ -1,11 +1,14 @@
 <h1>Contributing to QCut</h1>
 
-<h2>Setting up your environment</h2>
-QCut is written in Python so you will need Python installed. Currently supported Python versions are >=3.9, <3.12.
+<h2>Create a fork of QCut</h2>
 
-Once Python is installed create a virtual environment for development:
+In GitHub navigate to the QCut repository and click on fork. Once you have your fork of QCut clone it to your local machine.
+
+<h2>Prepare environment</h2>
+
+Using uv initialise the development environment:
 ```shell
-python3 -m venv ~/.venvs/qcut-dev
+uv sync
 ```
 
 Now to activate the environment run the script corresponding to your system:
@@ -25,41 +28,34 @@ Now to activate the environment run the script corresponding to your system:
 source  ~/.venvs/qcut-dev/bin/activate
 ```
 
-<h2>Install QCut dependencies</h2>
+<h2>Working on you changes</h2>
 
-Install the Python packages, that QCut depends on, in your Python virtual environment.
-
-```shell
-pip install qiskit==1.1.2 qiskit-experiments==0.7.0 numpy qiskit-aer==0.13.3
-```
-
-Additionally install some development dependencies
-
-```shell
-pip install pytest ruff sphinx
-```
-
-<h2>Create a fork of QCut</h2>
-
-In GitHub navigate to the QCut repository and click on fork. Once you have your fork of QCut clone it to your local development folder.
-Now all that is left to do is to create a new branch and start working. Once you have made your changes create a pull request to merge your changes to QCut.
-Before creating a pull request make sure that all the tests are passing:
-
-```shell
-python -m pytest
-```
-
-then lint all files to make sure you are following the proper style:
+Create a new branch for your changes. Once you are done lint and type check all files to make sure you are following the proper style:
 
 ```shell
 ruff check --fix
+uvx ty check /QCut
 ```
 
-after running ruff fix any remaining issues.
+after running ruff and ty fix any remaining issues.
 
-Also make sure that documentation is up to date and builds properly by navigating to QCut/docs/ and running:
+Also make sure that all tests pass:
 
 ```shell
-make clean
-make html
+pytest --cov
+```
+
+The pytest tests will be ran againts multiple Python versions using Github actions when you make a pull request.
+
+If your changes should retain backwards compatibility to older Qiskit versions additionally run:
+
+```shell
+tox --parallel
+```
+
+Finally make sure that documentation is up to date and builds properly by navigating to QCut/docs/ and running:
+
+```shell
+uv pip install -r requirements-docs.txt
+sphinx-build -v -b html . build/sphinx/html -W
 ```
