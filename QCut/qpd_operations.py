@@ -1,11 +1,12 @@
 """
-A module for generating the QPD operations and inserting them into the circuit at the appropriate locations.
+A module for generating the QPD operations and inserting them into the circuit at 
+the appropriate locations.
 """
 
 from __future__ import annotations
 
 from itertools import product
-from typing import TYPE_CHECKING, Iterable
+from typing import Iterable
 
 from qiskit.circuit import (
     CircuitInstruction,
@@ -14,6 +15,7 @@ from qiskit.circuit import (
 
 from QCut.cutlocation import CutLocation, SingleQubitCutLocation
 from QCut.qpd import cz_qpd, identity_qpd
+
 
 def _insert_wire_cut_qpd(
     ind,

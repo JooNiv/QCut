@@ -8,7 +8,7 @@ cut_op = QuantumCircuit(1, name="Cut")
 cut_op = cut_op.to_instruction(label="Cut")
 cut_op.definition = None
 
-def cut() -> Instruction:
+def cut() -> QuantumCircuit |Instruction:
     """Return a single qubit wire cut instruction."""
     return cut_op
 
@@ -17,7 +17,7 @@ cutCZ_op = QuantumCircuit(2, name="CutCZ")
 cutCZ_op = cutCZ_op.to_instruction(label="CutCZ")
 cutCZ_op.definition = None
 
-def cutCZ() -> Instruction:
+def cutCZ() -> QuantumCircuit | Instruction:
     """Return a two qubit cutCZ gate instruction."""
     return cutCZ_op
 

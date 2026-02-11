@@ -19,6 +19,7 @@ from qiskit.quantum_info import SparsePauliOp
 from qiskit.transpiler import PassManager
 from qiskit.transpiler.basepasses import TransformationPass
 
+
 def _combine_pauli_ops(op: SparsePauliOp) -> list[dict[int, str]]:  # noqa: C901
     """Combine Pauli operators that have no conflicting non-identity components.
     

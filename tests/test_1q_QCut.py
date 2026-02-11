@@ -4,10 +4,11 @@ import numpy as np
 from qiskit import QuantumCircuit
 from qiskit_aer import AerSimulator
 
+import tests.solutions_1q as sq
+from QCut.circuit_knitting import run
+
 #import QCut as ck
 from QCut.circuit_preparation import _get_cut_locations, get_locations_and_subcircuits
-from QCut.circuit_knitting import run
-import tests.solutions_1q as sq
 
 
 def _remove_obsm(subcircuits: list[QuantumCircuit]

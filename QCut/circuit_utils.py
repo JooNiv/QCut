@@ -1,9 +1,11 @@
 """
-Utility functions for working with quantum circuits in the context of circuit cutting and knitting.
+Utility functions for working with quantum circuits in the context of circuit 
+cutting and knitting.
 """
 
 from qiskit import QuantumCircuit
 from qiskit.circuit import Qubit
+
 
 def _count_gates(circuit: QuantumCircuit) -> dict[Qubit, int]:
     """Count the number of gates acting on each qubit in a QuantumCircuit.

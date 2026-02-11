@@ -15,6 +15,7 @@ from QCut.cutlocation import CutLocation, SingleQubitCutLocation
 from QCut.qcuterror import QCutError
 from QCut.QCutFind import construct_final_subcircuits
 
+
 def _get_cut_locations(circuit):
     index = 0  # index of the current instruction in circuit_data
     circuit_data = circuit.data

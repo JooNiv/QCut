@@ -1,6 +1,7 @@
 """
 A module for post-processing the results obtained from running the cut circuits and
-calculating the estimated expectation values based on the results and the provided observables.
+calculating the estimated expectation values based on the results and the 
+provided observables.
 """
 
 from __future__ import annotations
@@ -10,10 +11,7 @@ from typing import Optional
 
 import numpy as np
 
-from QCut.basis_transform import (
-    _combine_pauli_ops,
-    _get_observable_circuit_index
-)
+from QCut.basis_transform import _combine_pauli_ops, _get_observable_circuit_index
 from QCut.cutlocation import SingleQubitCutLocation
 from QCut.qcutresult import SubResult, TotalResult
 

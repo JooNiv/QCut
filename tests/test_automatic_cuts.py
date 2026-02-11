@@ -4,10 +4,10 @@ from qiskit import QuantumCircuit
 from qiskit_aer import AerSimulator
 
 #import QCut as ck
-
 import tests.solutions_automatic_cuts as sq
 from QCut import find_cuts
 from QCut.circuit_knitting import run_cut_circuit
+
 
 def test_find_cuts() -> None:
     """Test find_cuts function.
