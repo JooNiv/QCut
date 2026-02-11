@@ -1,5 +1,6 @@
 """Tests for CircuitKnitting package."""  # noqa: N999
 
+from qiskit import QuantumCircuit
 from qiskit_aer import AerSimulator
 
 #import QCut as ck
@@ -18,11 +19,34 @@ def test_find_cuts() -> None:
     for solution_index, circ in enumerate(sq.test_circuits):
 
         cut_circuit = find_cuts(circ.copy(), 
-                                                          sq.cut_sizes[solution_index], 
-                                                          cuts="both")
+                                sq.cut_sizes[solution_index], 
+                                cuts="both")
 
         assert len(cut_circuit.subcircuits) == sq.cut_sizes[solution_index]
-        
+
+circuit  =  QuantumCircuit(4)
+
+mult = 1.635
+circuit.r(mult*0.46262, mult*0.1446, 0)
+circuit.cx(0,1)
+circuit.cx(1,2)
+circuit.cx(2,3)
+
+def test_find_gate_cuts():
+    """Test find_cuts function on a circuit with a cut gate.
+
+    This function tests whether the find_cuts method correctly identifies the cut
+    locations in a circuit containing a cut gate by comparing the result to the
+    expected number of subcircuits.
+    """
+    cut_circuit = find_cuts(circuit.copy(), 2, cuts="both")
+
+    assert len(cut_circuit.subcircuits) == 2
+
+    for circ in cut_circuit.subcircuits:
+        for op in circ.data:
+            assert "meas" not in op.operation.name.lower()
+            assert "init" not in op.operation.name.lower()
 
 def test_expectation_values() -> None:
     """Test the expectation values of the test circuits.

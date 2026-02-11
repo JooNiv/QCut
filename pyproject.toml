@@ -9,7 +9,7 @@ authors = [
     { name = "Joonas Nivala", email = "joonas.nivala@gmail.com" },
 ]
 
-description = "A package for performing wire cuts of hardware without reset-gates or mid-circuit measurements. Built on top of qiskit"
+description = "QCut is a quantum circuit knitting package built on top of qiskit for performing gate cuts and resetless wire cuts allowing simulation of larger quantum circuits on smaller quantum devices or simulators at the cost of a circuit overhead."
 readme = "README.md"
 license = {file = "LICENSE"}
 classifiers = [
@@ -19,10 +19,10 @@ classifiers = [
     "Intended Audience :: Science/Research",
 ]
 
-requires-python = ">=3.10, < 3.13"
+requires-python = ">=3.11, < 3.13"
 
 dependencies = [
-    "qiskit >= 1.0, < 3.0",
+    "qiskit >= 1.1, < 3.0",
     "numpy",
     "qiskit-aer < 0.18",
     "pymetis==2025.1.1",
@@ -34,8 +34,11 @@ dev = [
     "notebook>=7.4.5",
     "pylatexenc>=2.10",
     "pytest>=8.4.1",
+    "tox<=5.0.0",
+    "tox-uv<=2.0.0",
     "pytest-cov>=6.2.1",
     "ruff>=0.12.1",
+    "ty >=0.0.15",
 ]
 
 

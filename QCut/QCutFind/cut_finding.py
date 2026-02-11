@@ -117,7 +117,7 @@ def add_cuts_to_circuit(circuit, cut_data, cut_data_test):
 
 def find_cuts(  # noqa: C901
     circuit,
-    num_partitions=None,
+    num_partitions: int | None =None,
     max_qubits=None,
     cuts="both",
     more_data = False
@@ -158,7 +158,7 @@ def find_cuts(  # noqa: C901
             - dict: Mapping of nodes to qubits.
     """
 
-    if (max_qubits and len(max_qubits) < 2) or num_partitions < 2:
+    if (max_qubits and len(max_qubits) < 2) or num_partitions < 2: # type: ignore[unsupported-operator]
         raise ValueError("Number of partitions has to be atleast 2")
 
     if num_partitions is None and max_qubits is not None:
@@ -172,7 +172,7 @@ def find_cuts(  # noqa: C901
                 "max_qubits must match num_partitions."
             )
 
-    if num_partitions < 1:
+    if num_partitions < 1: # type: ignore[unsupported-operator]
         raise ValueError(
             "max_qubits_per_circuit must be less than the number of qubits in the"
             "circuit."
@@ -199,7 +199,7 @@ def find_cuts(  # noqa: C901
                 labels[node] = comp_ind
         return circuit, [], [], labels, graph, nodes_on_qubit
 
-    labels = k_way_metis_partition(graph, num_partitions)
+    labels = k_way_metis_partition(graph, num_partitions) # type: ignore[invalid-argument-type]
 
     cut_data, cut_data_test = extract_cuts(graph, labels)
 

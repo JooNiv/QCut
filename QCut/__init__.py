@@ -6,7 +6,6 @@ from QCut.backend_utility import (
     transpile_experiments,
     transpile_subcircuits,
 )
-from QCut.helper import get_pauli_list
 from QCut.QCutFind import find_cuts
 from QCut.qpd import identity_qpd
 from QCut.qpd_gates import cut, cutCZ, cutGate
@@ -37,7 +36,6 @@ __all__ = [
     "estimate_expectation_values",
     "get_experiment_circuits",
     "get_locations_and_subcircuits",
-    "get_pauli_list",
     "run",
     "run_cut_circuit",
     "run_experiments",

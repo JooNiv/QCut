@@ -3,7 +3,6 @@ from __future__ import annotations
 from collections import namedtuple
 from copy import deepcopy
 
-import numpy as np
 from qiskit import ClassicalRegister, QuantumCircuit, QuantumRegister
 from qiskit.circuit import CircuitInstruction, Instruction, Qubit
 from qiskit.converters import circuit_to_dag, dag_to_circuit
@@ -27,7 +26,7 @@ BitLocations = namedtuple("BitLocations", ("index", "registers"))
 def _get_cut_locations(circuit):
     index = 0  # index of the current instruction in circuit_data
     circuit_data = circuit.data
-    cut_locations = np.array([])
+    cut_locations = []
 
     # loop through circuit instructions
     # if operation is a Cut() instruction remove it and add registers and
@@ -48,12 +47,12 @@ def _get_cut_locations(circuit):
 
             # append to cut_locations
             if len(qubits) == 1:
-                cut_locations = np.append(
-                    cut_locations, SingleQubitCutLocation((qubits[0], index))
+                cut_locations.append(
+                    SingleQubitCutLocation((qubits[0], index))
                 )
             elif len(qubits) == 2:
-                cut_locations = np.append(
-                    cut_locations, CutLocation((qubits, index))
+                cut_locations.append(
+                    CutLocation((qubits, index))
                 )
             else:
                 raise QCutError("Cannot cut gates with more that 2 qubits." \
@@ -320,7 +319,7 @@ def run_cut_circuit(
     cut_circuit: CutCircuit,
     observables: SparsePauliOp,
     backend=AerSimulator(),
-) -> np.ndarray[float]:
+) -> list[float]:
     """After splitting the circuit run the rest of the circuit knitting sequence.
 
     Args:

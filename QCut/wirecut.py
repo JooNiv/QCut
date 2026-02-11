@@ -35,7 +35,7 @@ ERROR = 0.0000001
 
 
 def get_qpd_combinations(
-    cut_locations: np.ndarray[CutLocation],
+    cut_locations: list[CutLocation | SingleQubitCutLocation],
 ) -> Iterable[tuple[dict]]:
     """Get all possible combinations of the QPD operations so that each combination
     has len(cut_locations) elements.
@@ -47,7 +47,7 @@ def get_qpd_combinations(
     be inserted to generate the experiment circuits.
 
     Args:
-        cut_locations (np.ndarray[CutLocation]): cut locations
+        cut_locations (list[CutLocation | SingleQubitCutLocation]): cut locations
 
     Returns:
         Iterable[tuple[dict]]:
@@ -145,7 +145,7 @@ def _get_placeholder_locations(subcircuits: list[QuantumCircuit]) -> list:
     names = ["Meas", "Init", "cutCZ"]
     for circ in subcircuits:
         subops = []
-        for ind, op in enumerate(circ):
+        for ind, op in enumerate(circ.data):
             # if "Meas" in op.operation.name or "Init" in op.operation.name :
             if any(i in op.operation.name for i in names):
                 subops.append((ind, op))
@@ -155,7 +155,7 @@ def _get_placeholder_locations(subcircuits: list[QuantumCircuit]) -> list:
 
 
 def _remove_obsm(subcircuits: list[dict[int, QuantumCircuit]]
-                 ) -> list[dict[int, QuantumCircuit]]:
+                 ):
 
     for obs_set in subcircuits:
         for ind, circ in obs_set.items():
@@ -487,8 +487,8 @@ def _get_obs_subcircuits(subcircuits: list[QuantumCircuit],
         obs_subcircuits.append(pm_circs)
     return obs_subcircuits
 
-def _remove_obsm_2(subcircuits: list[dict[int, QuantumCircuit]]
-                 ) -> list[dict[int, QuantumCircuit]]:
+def _remove_obsm_2(subcircuits: list[QuantumCircuit]
+                 ):
 
     for circ in subcircuits:
         j = 0
@@ -558,9 +558,9 @@ def get_experiment_circuits(  # noqa: C901
     if check_circuit_type:
         backend = cut_circuit.backend
         try:
-            basis = backend.configuration().basis_gates
+            basis = backend.configuration().basis_gates # type: ignore[possibly-missing-attribute]
         except Exception:
-            basis = list(backend.architecture.gates.keys())
+            basis = list(backend.architecture.gates.keys()) # type: ignore[possibly-missing-attribute]
         basis = ["r" if gate == "prx" else gate for gate in basis]
 
     obs_subcircuits = None
@@ -692,7 +692,7 @@ def get_experiment_circuits(  # noqa: C901
         experiment_circuits,
         cut_circuit.cut_locations,
         cut_circuit.map_qubit,
-        coefficients,
+        coefficients, # type: ignore[invalid-argument-type]
         observables,
         backend=backend,
     )
@@ -700,7 +700,7 @@ def get_experiment_circuits(  # noqa: C901
 def run_experiments(  # noqa: C901
     cut_experiment: CutExperiment,
     shots: int = 2**12,
-    backend: None = None,
+    backend = None,
 ) -> list[list[TotalResult]]:
     """Run experiment circuits.
 
@@ -731,7 +731,7 @@ def run_experiments(  # noqa: C901
     if backend is None:
         backend = AerSimulator()
 
-    results: list[list[int, dict[str, int]]] = [0] * (cut_experiment.num_groups)
+    results = [0] * (cut_experiment.num_groups)
 
     for count, circuit_group in enumerate(cut_experiment.experiments):
         group = []
@@ -760,7 +760,7 @@ def run_experiments(  # noqa: C901
     return _process_results(results, shots, samples)
 
 def _process_results(
-    results: list[list[dict[str,int]]],
+    results: list,
     shots: int,
     samples: int,
 ) -> list[list[TotalResult]]:
@@ -786,7 +786,7 @@ def _process_results(
 
     for group_ind, circ_group in enumerate(results):
         for exp_ind, experiment_run in enumerate(circ_group):
-            experiment_run_results = [0] * len(experiment_run)
+            experiment_run_results = []
             for sub_ind, sub_result in experiment_run.items():
                 circuit_results = []
                 for meassurements, count in sub_result.items():
@@ -804,7 +804,7 @@ def _process_results(
                     circuit_results.append(
                         SubResult(result_eigenvalues, count / shots * samples)
                     )
-                experiment_run_results[sub_ind] = circuit_results
+                experiment_run_results.append(circuit_results)
             if group_ind >= len(preocessed_results):
                 preocessed_results.append([])
             preocessed_results[group_ind].append(TotalResult(experiment_run_results))
@@ -813,10 +813,10 @@ def _process_results(
 
 def _get_sub_expectation_values(
     experiment_run: TotalResult,
-    observables: SparsePauliOp,
+    observables: list,
     shots: int,
     map_qubits: Optional[dict[int, int]] = None,
-) -> list:
+) -> np.ndarray:
     """Calculate sub expectation value for the result.
 
     Args:
@@ -832,7 +832,7 @@ def _get_sub_expectation_values(
     """
     # generate all possible combinations between end of circuit measurements
     # from subcircuit group
-    sub_circuit_result_combinations = product(*experiment_run.subcircuits[0])
+    sub_circuit_result_combinations = product(*experiment_run.subcircuits[0]) # type: ignore[no-matching-overload]
 
     # initialize sub solution array
     sub_expectation_value = np.zeros(len(observables))

@@ -9,8 +9,8 @@ import QCut.single_qubit_wirecut as wc
 import tests.solutions_1q as sq
 
 
-def _remove_obsm(subcircuits: list[dict[int, QuantumCircuit]]
-                 ) -> list[dict[int, QuantumCircuit]]:
+def _remove_obsm(subcircuits: list[QuantumCircuit]
+                 ):
 
     for circ in subcircuits:
         j = 0
