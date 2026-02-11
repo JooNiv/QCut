@@ -5,7 +5,8 @@ from qiskit import QuantumCircuit
 from qiskit_aer import AerSimulator
 
 #import QCut as ck
-import QCut.single_qubit_wirecut as wc
+from QCut.circuit_preparation import _get_cut_locations, get_locations_and_subcircuits
+from QCut.circuit_knitting import run
 import tests.solutions_1q as sq
 
 
@@ -31,7 +32,7 @@ def test_get_cut_locations() -> None:
     for solution_index, circ in enumerate(sq.test_circuits):
         print(solution_index)
         assert np.array_equal(
-            wc._get_cut_locations(circ.copy()),
+            _get_cut_locations(circ.copy()),
             sq.cut_location_solutions[solution_index],
         )
 
@@ -46,7 +47,7 @@ def test_separate_subcircuits() -> None:
     """
     count = 0
     for solution_index, circ in enumerate(sq.test_circuits):
-        cut_circuit = wc.get_locations_and_subcircuits(circ.copy())
+        cut_circuit = get_locations_and_subcircuits(circ.copy())
         circs = cut_circuit.subcircuits
         _remove_obsm(circs)
         count += 1
@@ -73,7 +74,7 @@ def test_expectation_values() -> None:
     for solution_index, circ in enumerate(sq.test_circuits):
         print(solution_index)
         # Calculate expectation values using the run method
-        expvals = wc.run(
+        expvals = run(
             circ, sq.test_observables[solution_index], backend=sim
         )
         # Check each calculated expectation value against the corresponding

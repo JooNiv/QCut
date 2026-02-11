@@ -4,10 +4,10 @@ from qiskit import QuantumCircuit
 from qiskit_aer import AerSimulator
 
 #import QCut as ck
-import QCut.single_qubit_wirecut as wc
+
 import tests.solutions_automatic_cuts as sq
 from QCut import find_cuts
-
+from QCut.circuit_knitting import run_cut_circuit
 
 def test_find_cuts() -> None:
     """Test find_cuts function.
@@ -69,7 +69,7 @@ def test_expectation_values() -> None:
                                                           cuts="both")
 
         # Calculate expectation values using the run method
-        estimated_expectation_values = wc.run_cut_circuit(cut_circuit, 
+        estimated_expectation_values = run_cut_circuit(cut_circuit, 
                                                           sq.test_observables[solution_index], 
                                                           sim)
         # Check each calculated expectation value against the corresponding
