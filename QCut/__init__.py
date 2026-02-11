@@ -2,22 +2,28 @@
 
 from importlib.metadata import PackageNotFoundError, version
 
+from QCut.qpd_gates import cut, cutCZ, cutGate
+
+from QCut.QCutFind import find_cuts
+
+from QCut.circuit_preparation import (
+    get_locations_and_subcircuits,
+)
+
 from QCut.backend_utility import (
     transpile_experiments,
     transpile_subcircuits,
 )
-from QCut.QCutFind import find_cuts
-from QCut.qpd import identity_qpd
-from QCut.qpd_gates import cut, cutCZ, cutGate
-from QCut.single_qubit_wirecut import (
-    get_locations_and_subcircuits,
+
+from QCut.circuit_knitting import (
+    get_experiment_circuits,
     run,
     run_cut_circuit,
-)
-from QCut.wirecut import (
-    estimate_expectation_values,
-    get_experiment_circuits,
     run_experiments,
+)
+
+from QCut.postprocess import (
+    estimate_expectation_values,
 )
 
 try:
@@ -28,9 +34,7 @@ finally:
     del version, PackageNotFoundError
 
 __all__ = [
-    "expectation_values",
     "run_on_backend",
-    "run_and_expectation_value",
     "transpile_experiments",
     "transpile_subcircuits",
     "estimate_expectation_values",
@@ -39,10 +43,8 @@ __all__ = [
     "run",
     "run_cut_circuit",
     "run_experiments",
-    "cut_wire",
     "cut",
     "cutCZ",
     "cutGate",
-    "identity_qpd",
     "find_cuts"
 ]

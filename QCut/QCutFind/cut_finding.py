@@ -1,3 +1,7 @@
+"""
+The main cut finding workflow for QCut.
+"""
+
 import rustworkx as rx
 from qiskit import transpile
 from qiskit.circuit import CircuitInstruction
@@ -5,8 +9,8 @@ from qiskit.circuit import CircuitInstruction
 from QCut.QCutFind.graph_circuit_utils import circ_to_graph
 from QCut.QCutFind.metis import k_way_metis_partition
 from QCut.QCutFind.refine import refine_cuts
-from QCut.qpd_gates import cut, cutCZ
-from QCut.single_qubit_wirecut import get_locations_and_subcircuits
+from QCut.qpd_gates import cut_op as cut, cutCZ_op as cutCZ
+from QCut.circuit_preparation import get_locations_and_subcircuits
 
 BASIS_GATES = ["cz", "r"]
 

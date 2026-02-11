@@ -10,8 +10,7 @@ from qiskit.transpiler import Target
 
 from QCut.cutcircuit import CutCircuit, CutExperiment
 from QCut.cutlocation import CutLocation, SingleQubitCutLocation
-from QCut.wirecut import _remove_idle_wires
-
+from QCut.circuit_utils import _remove_idle_wires
 
 def transpile_subcircuits(cut_circuit: CutCircuit,
                           backend,
@@ -93,9 +92,9 @@ def transpile_experiments(cut_experiment: CutExperiment,
     """
     Transpile experiment circuits. Transpiles all generated experiment circuits for
     a given backend. Most often one should use `transpile_subcircuits` instead, as that
-    only subcircuits before experiment generation which is alot more efficient. This 
+    only transpiles subcircuits before experiment generation which is a lot more efficient. This 
     function is mainly provided for special cases where one needs/wants extra control
-    over the tranpilation of experiment circuits.
+    over the transpilation of experiment circuits.
 
     Args:
         cut_experiment: (CutExperiment): Experiment circuits to be transpiled.
