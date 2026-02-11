@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>QCut.single_qubit_wirecut &#8212; QCut</title>
+    <title>QCut.circuit_preparation &#8212; QCut</title>
   
   
   
@@ -42,7 +42,7 @@
     <script src="../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/QCut/single_qubit_wirecut';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/QCut/circuit_preparation';</script>
     <link rel="icon" href="../../_static/QCut-logo.jpg"/>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
@@ -177,7 +177,10 @@
 </details></li>
 <li class="toctree-l1"><a class="reference internal" href="../../Acknowledgement.html">Acknowledgements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../License.html">License</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../QCut.html">QCut API reference</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../QCut.html">QCut API reference</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../_autosummary/QCut.html">QCut</a></li>
+</ul>
+</details></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../../Changelog.html">Changelog</a></li>
@@ -283,30 +286,22 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <h1>Source code for QCut.single_qubit_wirecut</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+  <h1>Source code for QCut.circuit_preparation</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">A module for preparing the circuit for experiment generation and the proper </span>
+<span class="sd">circuit knitting workflow, including finding cut locations,</span>
+<span class="sd">inserting placeholder operations, and separating into subcircuits.</span>
+<span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">namedtuple</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">copy</span><span class="w"> </span><span class="kn">import</span> <span class="n">deepcopy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">qiskit</span><span class="w"> </span><span class="kn">import</span> <span class="n">ClassicalRegister</span><span class="p">,</span> <span class="n">QuantumCircuit</span><span class="p">,</span> <span class="n">QuantumRegister</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">qiskit.circuit</span><span class="w"> </span><span class="kn">import</span> <span class="n">CircuitInstruction</span><span class="p">,</span> <span class="n">Instruction</span><span class="p">,</span> <span class="n">Qubit</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">qiskit.converters</span><span class="w"> </span><span class="kn">import</span> <span class="n">circuit_to_dag</span><span class="p">,</span> <span class="n">dag_to_circuit</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit.quantum_info</span><span class="w"> </span><span class="kn">import</span> <span class="n">SparsePauliOp</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_aer</span><span class="w"> </span><span class="kn">import</span> <span class="n">AerSimulator</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">QCut.backend_utility</span><span class="w"> </span><span class="kn">import</span> <span class="n">transpile_subcircuits</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">QCut.cutcircuit</span><span class="w"> </span><span class="kn">import</span> <span class="n">CutCircuit</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">QCut.cutlocation</span><span class="w"> </span><span class="kn">import</span> <span class="n">CutLocation</span><span class="p">,</span> <span class="n">SingleQubitCutLocation</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">QCut.qcuterror</span><span class="w"> </span><span class="kn">import</span> <span class="n">QCutError</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">QCut.QCutFind</span><span class="w"> </span><span class="kn">import</span> <span class="n">construct_final_subcircuits</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">QCut.wirecut</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
-    <span class="n">estimate_expectation_values</span><span class="p">,</span>
-    <span class="n">get_experiment_circuits</span><span class="p">,</span>
-    <span class="n">run_experiments</span><span class="p">,</span>
-<span class="p">)</span>
-
-<span class="n">BitLocations</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s2">&quot;BitLocations&quot;</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;index&quot;</span><span class="p">,</span> <span class="s2">&quot;registers&quot;</span><span class="p">))</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_get_cut_locations</span><span class="p">(</span><span class="n">circuit</span><span class="p">):</span>
@@ -349,7 +344,6 @@ document.write(`
         <span class="n">index</span> <span class="o">+=</span> <span class="mi">1</span>
 
     <span class="k">return</span> <span class="n">cut_locations</span>
-
 
 <span class="k">class</span><span class="w"> </span><span class="nc">NonCommutingGate</span><span class="p">(</span><span class="n">Instruction</span><span class="p">):</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Init_1&quot;</span><span class="p">):</span>
@@ -460,33 +454,6 @@ document.write(`
 
     <span class="k">return</span> <span class="n">new</span>
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_count_gates</span><span class="p">(</span><span class="n">qc</span><span class="p">:</span> <span class="n">QuantumCircuit</span><span class="p">):</span>
-    <span class="n">gate_count</span> <span class="o">=</span> <span class="nb">dict</span><span class="o">.</span><span class="n">fromkeys</span><span class="p">(</span><span class="n">qc</span><span class="o">.</span><span class="n">qubits</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">gate</span> <span class="ow">in</span> <span class="n">qc</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">qubit</span> <span class="ow">in</span> <span class="n">gate</span><span class="o">.</span><span class="n">qubits</span><span class="p">:</span>
-            <span class="n">gate_count</span><span class="p">[</span><span class="n">qubit</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
-    <span class="k">return</span> <span class="n">gate_count</span>
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">_remove_idle_wires_old</span><span class="p">(</span><span class="n">qc</span><span class="p">:</span> <span class="n">QuantumCircuit</span><span class="p">):</span>
-    <span class="n">qc_out</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">qc</span><span class="p">)</span>
-    <span class="n">gate_count</span> <span class="o">=</span> <span class="n">_count_gates</span><span class="p">(</span><span class="n">qc_out</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">qubit</span><span class="p">,</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">gate_count</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="k">if</span> <span class="n">count</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">qc_out</span><span class="o">.</span><span class="n">qubits</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">qubit</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">qc_out</span><span class="o">.</span><span class="n">qregs</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">qubit</span> <span class="ow">in</span> <span class="n">i</span><span class="o">.</span><span class="n">_bits</span><span class="p">:</span>
-                    <span class="n">i</span><span class="o">.</span><span class="n">_bits</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">qubit</span><span class="p">)</span>
-    <span class="n">qc_out</span><span class="o">.</span><span class="n">qregs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">_bit_indices</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="n">qubit</span><span class="p">:</span> <span class="n">qc_out</span><span class="o">.</span><span class="n">qubits</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">qubit</span><span class="p">)</span> <span class="k">for</span> <span class="n">qubit</span> <span class="ow">in</span> <span class="n">qc_out</span><span class="o">.</span><span class="n">qubits</span>
-    <span class="p">}</span>
-    <span class="n">qc_out</span><span class="o">.</span><span class="n">qregs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">_bits</span> <span class="o">=</span> <span class="n">qc_out</span><span class="o">.</span><span class="n">qubits</span>
-    <span class="n">qc_out</span><span class="o">.</span><span class="n">qregs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">qc_out</span><span class="o">.</span><span class="n">qregs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">_bits</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">qc_out</span>
-
-
-
-
 <span class="k">def</span><span class="w"> </span><span class="nf">_separate_subcircuits</span><span class="p">(</span><span class="n">circuit</span><span class="p">):</span>
     <span class="n">dag</span> <span class="o">=</span> <span class="n">circuit_to_dag</span><span class="p">(</span><span class="n">circuit</span><span class="p">)</span>
 
@@ -494,7 +461,6 @@ document.write(`
 
     <span class="n">new_circs</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">circs</span><span class="p">:</span>
-        <span class="c1">#circ = _remove_idle_wires(dag_to_circuit(i))</span>
         <span class="n">circ</span> <span class="o">=</span> <span class="n">dag_to_circuit</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">circ</span><span class="o">.</span><span class="n">qubits</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">continue</span>
@@ -540,7 +506,7 @@ document.write(`
     <span class="k">return</span> <span class="n">map_qubit</span>
 
 <div class="viewcode-block" id="get_locations_and_subcircuits">
-<a class="viewcode-back" href="../../QCut.html#QCut.get_locations_and_subcircuits">[docs]</a>
+<a class="viewcode-back" href="../../_autosummary/QCut.html#QCut.get_locations_and_subcircuits">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_locations_and_subcircuits</span><span class="p">(</span>
     <span class="n">circuit</span><span class="p">:</span> <span class="n">QuantumCircuit</span><span class="p">,</span>
     <span class="n">max_qubits</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -562,6 +528,8 @@ document.write(`
 <span class="sd">                            qubit indices</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">QCut.QCutFind</span><span class="w"> </span><span class="kn">import</span> <span class="n">construct_final_subcircuits</span>
+
     <span class="n">circuit_copy</span> <span class="o">=</span> <span class="n">circuit</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>  <span class="c1"># copy to avoid modifying the original circuit</span>
     <span class="n">circuit_copy</span> <span class="o">=</span> <span class="n">circuit_copy</span><span class="o">.</span><span class="n">decompose</span><span class="p">([</span><span class="s2">&quot;CutGate&quot;</span><span class="p">])</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">circuit</span><span class="o">.</span><span class="n">num_qubits</span><span class="p">):</span>
@@ -602,75 +570,6 @@ document.write(`
     <span class="n">map_qubits</span> <span class="o">=</span> <span class="n">get_qubit_map</span><span class="p">(</span><span class="n">fixed_circs</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">CutCircuit</span><span class="p">(</span><span class="n">fixed_circs</span><span class="p">,</span> <span class="n">cut_locations</span><span class="p">,</span> <span class="n">map_qubits</span><span class="p">)</span></div>
-
-
-<div class="viewcode-block" id="run_cut_circuit">
-<a class="viewcode-back" href="../../QCut.html#QCut.run_cut_circuit">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">run_cut_circuit</span><span class="p">(</span>
-    <span class="n">cut_circuit</span><span class="p">:</span> <span class="n">CutCircuit</span><span class="p">,</span>
-    <span class="n">observables</span><span class="p">:</span> <span class="n">SparsePauliOp</span><span class="p">,</span>
-    <span class="n">backend</span><span class="o">=</span><span class="n">AerSimulator</span><span class="p">(),</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;After splitting the circuit run the rest of the circuit knitting sequence.</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        subcircuits (list[QuantumCircuit]):</span>
-<span class="sd">            subcircuits containing the placeholder operations</span>
-<span class="sd">        cut_locations (np.ndarray[CutLocation]): list of cut locations</span>
-<span class="sd">        observables (list[int | list[int]]):</span>
-<span class="sd">            list of observables as qubit indices (Z observable)</span>
-<span class="sd">        backend: backend to use for running experiment circuits (optional)</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">        list: a list of expectation values</span>
-
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">backend</span><span class="p">,</span> <span class="n">AerSimulator</span><span class="p">):</span>
-        <span class="n">transpiled_subcircuits</span> <span class="o">=</span> <span class="n">transpile_subcircuits</span><span class="p">(</span><span class="n">cut_circuit</span>
-                                                       <span class="p">,</span><span class="n">backend</span><span class="p">,</span>
-                                                       <span class="n">optimization_level</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
-    
-        <span class="n">cut_experiment</span> <span class="o">=</span> <span class="n">get_experiment_circuits</span><span class="p">(</span><span class="n">transpiled_subcircuits</span><span class="p">,</span> 
-                                        <span class="n">observables</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">cut_experiment</span> <span class="o">=</span> <span class="n">get_experiment_circuits</span><span class="p">(</span><span class="n">cut_circuit</span><span class="p">,</span> 
-                                        <span class="n">observables</span><span class="p">)</span>
-        
-    <span class="n">results</span> <span class="o">=</span> <span class="n">run_experiments</span><span class="p">(</span>
-        <span class="n">cut_experiment</span><span class="p">,</span>
-        <span class="n">backend</span><span class="o">=</span><span class="n">backend</span><span class="p">,</span>
-    <span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">estimate_expectation_values</span><span class="p">(</span>
-        <span class="n">results</span><span class="p">,</span> <span class="n">cut_experiment</span><span class="o">.</span><span class="n">expv_data</span><span class="p">()</span>
-    <span class="p">)</span></div>
-
-
-
-<div class="viewcode-block" id="run">
-<a class="viewcode-back" href="../../QCut.html#QCut.run">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span>
-    <span class="n">circuit</span><span class="p">:</span> <span class="n">QuantumCircuit</span><span class="p">,</span>
-    <span class="n">observables</span><span class="p">:</span> <span class="n">SparsePauliOp</span><span class="p">,</span>
-    <span class="n">backend</span><span class="o">=</span><span class="n">AerSimulator</span><span class="p">(),</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Run the whole circuit knitting sequence with one function call.</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        circuit (QuantumCircuit): circuit with cut experiments</span>
-<span class="sd">        observables (list[int | list[int]]):</span>
-<span class="sd">            list of observbles in the form of qubit indices (Z-obsevable).</span>
-<span class="sd">        backend: backend to use for running experiment circuits (optional)</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">        list: a list of expectation values</span>
-
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1"># circuit = circuit.copy()</span>
-    <span class="n">cut_circuit</span> <span class="o">=</span> <span class="n">get_locations_and_subcircuits</span><span class="p">(</span><span class="n">circuit</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">run_cut_circuit</span><span class="p">(</span><span class="n">cut_circuit</span><span class="p">,</span> <span class="n">observables</span><span class="p">,</span> <span class="n">backend</span><span class="p">)</span></div>
 
 </pre></div>
 

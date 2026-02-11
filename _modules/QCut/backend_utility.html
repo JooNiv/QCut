@@ -177,7 +177,10 @@
 </details></li>
 <li class="toctree-l1"><a class="reference internal" href="../../Acknowledgement.html">Acknowledgements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../License.html">License</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../QCut.html">QCut API reference</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../QCut.html">QCut API reference</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../_autosummary/QCut.html">QCut</a></li>
+</ul>
+</details></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../../Changelog.html">Changelog</a></li>
@@ -294,13 +297,13 @@ document.write(`
 <span class="kn">from</span><span class="w"> </span><span class="nn">qiskit.circuit</span><span class="w"> </span><span class="kn">import</span> <span class="n">Gate</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">qiskit.transpiler</span><span class="w"> </span><span class="kn">import</span> <span class="n">Target</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">QCut.circuit_utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">_remove_idle_wires</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">QCut.cutcircuit</span><span class="w"> </span><span class="kn">import</span> <span class="n">CutCircuit</span><span class="p">,</span> <span class="n">CutExperiment</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">QCut.cutlocation</span><span class="w"> </span><span class="kn">import</span> <span class="n">CutLocation</span><span class="p">,</span> <span class="n">SingleQubitCutLocation</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">QCut.wirecut</span><span class="w"> </span><span class="kn">import</span> <span class="n">_remove_idle_wires</span>
 
 
 <div class="viewcode-block" id="transpile_subcircuits">
-<a class="viewcode-back" href="../../QCut.html#QCut.backend_utility.transpile_subcircuits">[docs]</a>
+<a class="viewcode-back" href="../../_autosummary/QCut.html#QCut.transpile_subcircuits">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">transpile_subcircuits</span><span class="p">(</span><span class="n">cut_circuit</span><span class="p">:</span> <span class="n">CutCircuit</span><span class="p">,</span>
                           <span class="n">backend</span><span class="p">,</span>
                           <span class="n">optimization_level</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
@@ -376,7 +379,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="transpile_experiments">
-<a class="viewcode-back" href="../../QCut.html#QCut.backend_utility.transpile_experiments">[docs]</a>
+<a class="viewcode-back" href="../../_autosummary/QCut.html#QCut.transpile_experiments">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">transpile_experiments</span><span class="p">(</span><span class="n">cut_experiment</span><span class="p">:</span> <span class="n">CutExperiment</span><span class="p">,</span> 
                           <span class="n">backend</span><span class="p">,</span>
                           <span class="n">optimization_level</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
@@ -384,9 +387,9 @@ document.write(`
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Transpile experiment circuits. Transpiles all generated experiment circuits for</span>
 <span class="sd">    a given backend. Most often one should use `transpile_subcircuits` instead, as that</span>
-<span class="sd">    only subcircuits before experiment generation which is alot more efficient. This </span>
-<span class="sd">    function is mainly provided for special cases where one needs/wants extra control</span>
-<span class="sd">    over the tranpilation of experiment circuits.</span>
+<span class="sd">    only transpiles subcircuits before experiment generation which is a lot more </span>
+<span class="sd">    efficient. This function is mainly provided for special cases where one needs/wants</span>
+<span class="sd">    extra control over the transpilation of experiment circuits.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        cut_experiment: (CutExperiment): Experiment circuits to be transpiled.</span>

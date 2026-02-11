@@ -177,7 +177,10 @@
 </details></li>
 <li class="toctree-l1"><a class="reference internal" href="../../Acknowledgement.html">Acknowledgements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../License.html">License</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../QCut.html">QCut API reference</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../QCut.html">QCut API reference</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../_autosummary/QCut.html">QCut</a></li>
+</ul>
+</details></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../../Changelog.html">Changelog</a></li>
@@ -287,19 +290,35 @@ document.write(`
 <span></span><span class="sd">&quot;&quot;&quot;Helper gates for circuit knitting.&quot;&quot;&quot;</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">qiskit</span><span class="w"> </span><span class="kn">import</span> <span class="n">QuantumCircuit</span><span class="p">,</span> <span class="n">transpile</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit.circuit</span><span class="w"> </span><span class="kn">import</span> <span class="n">CircuitInstruction</span><span class="p">,</span> <span class="n">Gate</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit.circuit</span><span class="w"> </span><span class="kn">import</span> <span class="n">CircuitInstruction</span><span class="p">,</span> <span class="n">Gate</span><span class="p">,</span> <span class="n">Instruction</span>
 
 <span class="c1"># define the cut location marker</span>
-<span class="n">cut</span> <span class="o">=</span> <span class="n">QuantumCircuit</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Cut&quot;</span><span class="p">)</span>
-<span class="n">cut</span> <span class="o">=</span> <span class="n">cut</span><span class="o">.</span><span class="n">to_instruction</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;Cut&quot;</span><span class="p">)</span>
-<span class="n">cut</span><span class="o">.</span><span class="n">definition</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="n">cut_op</span> <span class="o">=</span> <span class="n">QuantumCircuit</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Cut&quot;</span><span class="p">)</span>
+<span class="n">cut_op</span> <span class="o">=</span> <span class="n">cut_op</span><span class="o">.</span><span class="n">to_instruction</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;Cut&quot;</span><span class="p">)</span>
+<span class="n">cut_op</span><span class="o">.</span><span class="n">definition</span> <span class="o">=</span> <span class="kc">None</span>
 
-<span class="n">cutCZ</span> <span class="o">=</span> <span class="n">QuantumCircuit</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;CutCZ&quot;</span><span class="p">)</span>
-<span class="n">cutCZ</span> <span class="o">=</span> <span class="n">cutCZ</span><span class="o">.</span><span class="n">to_instruction</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;CutCZ&quot;</span><span class="p">)</span>
-<span class="n">cutCZ</span><span class="o">.</span><span class="n">definition</span> <span class="o">=</span> <span class="kc">None</span>
+<div class="viewcode-block" id="cut">
+<a class="viewcode-back" href="../../_autosummary/QCut.html#QCut.cut">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">cut</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">QuantumCircuit</span> <span class="o">|</span><span class="n">Instruction</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a single qubit wire cut instruction.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">cut_op</span></div>
+
+
+
+<span class="n">cutCZ_op</span> <span class="o">=</span> <span class="n">QuantumCircuit</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;CutCZ&quot;</span><span class="p">)</span>
+<span class="n">cutCZ_op</span> <span class="o">=</span> <span class="n">cutCZ_op</span><span class="o">.</span><span class="n">to_instruction</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;CutCZ&quot;</span><span class="p">)</span>
+<span class="n">cutCZ_op</span><span class="o">.</span><span class="n">definition</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="cutCZ">
+<a class="viewcode-back" href="../../_autosummary/QCut.html#QCut.cutCZ">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">cutCZ</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">QuantumCircuit</span> <span class="o">|</span> <span class="n">Instruction</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a two qubit cutCZ gate instruction.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">cutCZ_op</span></div>
+
+
 
 <div class="viewcode-block" id="cutGate">
-<a class="viewcode-back" href="../../QCut.html#QCut.qpd_gates.cutGate">[docs]</a>
+<a class="viewcode-back" href="../../_autosummary/QCut.html#QCut.cutGate">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">cutGate</span><span class="p">(</span><span class="n">gate</span><span class="p">:</span> <span class="n">Gate</span><span class="p">,</span> <span class="n">control</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a cutCZ circuit with the same parameters as the input gate.&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">gate</span><span class="o">.</span><span class="n">num_qubits</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
@@ -322,7 +341,7 @@ document.write(`
         <span class="k">if</span> <span class="n">instr</span><span class="o">.</span><span class="n">operation</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;cz&quot;</span><span class="p">:</span>
             <span class="n">tr</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span>
             <span class="n">test</span> <span class="o">=</span> <span class="n">CircuitInstruction</span><span class="p">(</span>
-                        <span class="n">operation</span><span class="o">=</span><span class="n">cutCZ</span><span class="p">,</span>
+                        <span class="n">operation</span><span class="o">=</span><span class="n">cutCZ_op</span><span class="p">,</span>
                         <span class="n">qubits</span><span class="o">=</span><span class="n">tr</span><span class="o">.</span><span class="n">qubits</span><span class="p">,</span>
                     <span class="p">)</span>
             <span class="n">tr</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">test</span><span class="p">)</span>
