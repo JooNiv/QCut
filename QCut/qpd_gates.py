@@ -44,7 +44,7 @@ def cutGate(gate: Gate, control: int, target: int) -> dict:
         if instr.operation.name == "cz":
             tr.data.pop(ind)
             test = CircuitInstruction(
-                        operation=cutCZ,
+                        operation=cutCZ_op,
                         qubits=tr.qubits,
                     )
             tr.data.insert(ind, test)
