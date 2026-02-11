@@ -1,16 +1,26 @@
 """Helper gates for circuit knitting."""
 
 from qiskit import QuantumCircuit, transpile
-from qiskit.circuit import CircuitInstruction, Gate
+from qiskit.circuit import CircuitInstruction, Gate, Instruction
 
 # define the cut location marker
-cut = QuantumCircuit(1, name="Cut")
-cut = cut.to_instruction(label="Cut")
-cut.definition = None
+cut_op = QuantumCircuit(1, name="Cut")
+cut_op = cut_op.to_instruction(label="Cut")
+cut_op.definition = None
 
-cutCZ = QuantumCircuit(2, name="CutCZ")
-cutCZ = cutCZ.to_instruction(label="CutCZ")
-cutCZ.definition = None
+def cut() -> QuantumCircuit |Instruction:
+    """Return a single qubit wire cut instruction."""
+    return cut_op
+
+
+cutCZ_op = QuantumCircuit(2, name="CutCZ")
+cutCZ_op = cutCZ_op.to_instruction(label="CutCZ")
+cutCZ_op.definition = None
+
+def cutCZ() -> QuantumCircuit | Instruction:
+    """Return a two qubit cutCZ gate instruction."""
+    return cutCZ_op
+
 
 def cutGate(gate: Gate, control: int, target: int) -> dict:
     """Return a cutCZ circuit with the same parameters as the input gate."""
@@ -34,7 +44,7 @@ def cutGate(gate: Gate, control: int, target: int) -> dict:
         if instr.operation.name == "cz":
             tr.data.pop(ind)
             test = CircuitInstruction(
-                        operation=cutCZ,
+                        operation=cutCZ_op,
                         qubits=tr.qubits,
                     )
             tr.data.insert(ind, test)

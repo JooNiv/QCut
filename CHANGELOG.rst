@@ -2,6 +2,14 @@
 Changelog
 =========
 
+Version 1.1.0
+=============
+- Small syntax change for placing wire cuts or cz cuts directly
+    * Instead of :code:`cut_circuit.append(cut, [1])` now use :code:`cut_circuit.append(cut(), [1])`
+    * Instead of :code:`cut_circuit.append(cutCZ, [0,1])` now use :code:`cut_circuit.append(**cutGate(CZGate(), 0, 1))`
+    * Check documentation for details on how to use.
+- Comprehensive refactor of codebase and documentation to improve readability and maintainability.
+
 Version 1.0.2
 =============
 - Fix bug in transpile_experiments()
@@ -143,4 +151,4 @@ Version 0.1.1
 Version 0.1.0
 =============
 
-- First stable release
+- First release

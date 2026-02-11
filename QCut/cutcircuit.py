@@ -1,5 +1,6 @@
-"""Class for nicely representing a cut circuit. Also implements some of the same
-functionality as the qiskit QuantumCircuit class for a group of circuts."""
+"""Class for nicely representing a cut circuit/experiment. Also implements 
+some of the same functionality as the qiskit QuantumCircuit class for
+a group of circuts."""
 
 from __future__ import annotations
 

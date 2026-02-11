@@ -1,3 +1,8 @@
+"""
+Custom refinement algorithm for improving cut locations in a quantum circuit
+partitioning.
+"""
+
 from itertools import groupby
 
 

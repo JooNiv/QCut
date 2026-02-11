@@ -11,7 +11,7 @@ cut_circ = QuantumCircuit(4)
 mult = 1.635
 cut_circ.r(mult*0.46262, mult*0.1446, 0)
 cut_circ.append(**cutGate(CXGate(), 0, 1)) 
-cut_circ.append(cut, [1])
+cut_circ.append(cut(), [1])
 cut_circ.cx(1,2)
 cut_circ.cx(2,3)
 
