@@ -6,6 +6,9 @@ Version 1.0.2
 =============
 - Fix bug in transpile_experiments()
 - Adjust supported qiskit and python versions to better match iqm-client
+    * Drop Python 3.10 support
+    * Drop qiskit 1.0 support
+    * Supported versions now Python >= 3.11, < 3.13 and qiskit >= 1.1, < 3.0
 
 Version 1.0.1
 =============
