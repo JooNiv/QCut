@@ -124,7 +124,8 @@ class CutExperiment:
     @property
     def num_circuits(self):
         """Total number of circuits."""
-        return sum(len(subcircuits) * len(subcircuits[0]) for subcircuits in self.experiments)
+        return sum(len(subcircuits) * len(subcircuits[0]) 
+                   for subcircuits in self.experiments)
     
     @property
     def group_size(self):

@@ -1,10 +1,10 @@
-import QCut as ck
-from QCut import cut, cutGate
 from qiskit import QuantumCircuit
+from qiskit.circuit import Parameter
 from qiskit.circuit.library import CXGate
 from qiskit.quantum_info import SparsePauliOp
-from qiskit.circuit.library import CXGate
-from qiskit.circuit import Parameter
+
+import QCut as ck
+from QCut import cut, cutGate
 
 cut_qc = QuantumCircuit(4)
 

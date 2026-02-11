@@ -1,7 +1,6 @@
 """Tests for CircuitKnitting package."""  # noqa: N999
 
 from qiskit import QuantumCircuit
-
 from qiskit_aer import AerSimulator
 
 #import QCut as ck
