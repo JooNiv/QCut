@@ -13,7 +13,6 @@ from qiskit.converters import circuit_to_dag, dag_to_circuit
 from QCut.cutcircuit import CutCircuit
 from QCut.cutlocation import CutLocation, SingleQubitCutLocation
 from QCut.qcuterror import QCutError
-from QCut.QCutFind import construct_final_subcircuits
 
 
 def _get_cut_locations(circuit):
@@ -238,6 +237,8 @@ def get_locations_and_subcircuits(
                             qubit indices
 
     """
+    from QCut.QCutFind import construct_final_subcircuits
+
     circuit_copy = circuit.copy()  # copy to avoid modifying the original circuit
     circuit_copy = circuit_copy.decompose(["CutGate"])
     for i in range(circuit.num_qubits):
