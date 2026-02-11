@@ -1,3 +1,7 @@
+"""
+Utility function for combining subcircuits into larger subcircuits that fit within specified qubit limits.
+"""
+
 from qiskit import ClassicalRegister, QuantumCircuit, QuantumRegister
 
 

@@ -1,3 +1,7 @@
+"""
+The Metis graph partitioning utility for QCut.
+"""
+
 from collections import defaultdict
 
 import numpy as np

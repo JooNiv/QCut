@@ -1,5 +1,9 @@
-import rustworkx as rx
+"""
+Utility functions for converting quantum circuits to graph representations and vice versa, 
+as well as functions for updating node and edge information in the graph.
+"""
 
+import rustworkx as rx
 
 def weight_fn(edge_data):
     """
