@@ -5,13 +5,13 @@ from qiskit import QuantumCircuit
 from qiskit.quantum_info import SparsePauliOp
 from qiskit_aer import AerSimulator
 
+import QCut as ck
 import tests.solutions_1q as sq
 from QCut.circuit_knitting import run
 
 #import QCut as ck
 from QCut.circuit_preparation import _get_cut_locations, get_locations_and_subcircuits
-import QCut as ck
-from QCut.qcutresult import TotalResult, SubResult
+from QCut.qcutresult import SubResult, TotalResult
 
 
 def _remove_obsm(subcircuits: list[QuantumCircuit]
