@@ -5,4 +5,4 @@ sphinx_lesson
 qiskit < 3.0
 numpy
 qiskit-aer < 0.18
-pymetis == 2025.1.1
+pymetis == 2025.2.2

@@ -1,6 +1,6 @@
-import qiskit
 from qiskit import QuantumCircuit
 from qiskit.circuit.library import CXGate
+from qiskit.providers.fake_provider import GenericBackendV2
 from qiskit.quantum_info import SparsePauliOp
 
 import QCut as ck
@@ -15,13 +15,8 @@ cut_circ.append(cut(), [1])
 cut_circ.cx(1,2)
 cut_circ.cx(2,3)
 
-if qiskit.__version__ < "2.2.0":
-        from iqm.qiskit_iqm import IQMFakeAdonis
-        backend = IQMFakeAdonis()
-
-else:
-    from qiskit.providers.fake_provider import GenericBackendV2
-    backend = GenericBackendV2(num_qubits=5, basis_gates=["cz", "r"])
+backend = GenericBackendV2(num_qubits=5, basis_gates=["cz", "r"])
+    
 
 def test_transpile_subcircuits():
     """Test transpilation of subcircuits with custom gates.
