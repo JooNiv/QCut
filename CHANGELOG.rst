@@ -2,6 +2,10 @@
 Changelog
 =========
 
+Version 1.1.1
+=============
+- Fix `find_cut()` not passing `max_qubits` parameter to `get_locations_and_subcircuits()`, which caused the `max_qubits` parameter to be ignored when using `find_cuts()`.
+
 Version 1.1.0
 =============
 - Small syntax change for placing wire cuts or cz cuts directly
