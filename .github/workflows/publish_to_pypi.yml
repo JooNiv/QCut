@@ -27,6 +27,9 @@ jobs:
 
     - name: Set up Python
       run: uv python install 3.11
+
+    - name: Create venv
+      run: uv venv --python 3.11
         
     - name: Install pypa/build
       run: uv pip install build
