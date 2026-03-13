@@ -4,7 +4,7 @@ Changelog
 
 Version 1.1.1
 =============
-- Fix `find_cut()` not passing `max_qubits` parameter to `get_locations_and_subcircuits()`, which caused the `max_qubits` parameter to be ignored when using `find_cuts()`.
+- Fix `find_cut()` not passing `max_qubits` parameter to `get_locations_and_subcircuits()`, which caused incorrect subcircuit sizes to be returned.
 
 Version 1.1.0
 =============
