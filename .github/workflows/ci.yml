@@ -56,6 +56,7 @@ jobs:
       - name: Run tests
         run: |
           uv run python -m pytest --cov QCut --cov-report=term-missing --junitxml=test_report.xml --doctest-modules  --verbose --strict-markers tests
+          uv pip install coveralls
           uv run coveralls
           
   test_docs:
