@@ -7,6 +7,7 @@ from qiskit_aer import AerSimulator
 import tests.solutions_automatic_cuts as sq
 from QCut import find_cuts
 from QCut.circuit_knitting import run_cut_circuit
+from QCut.QCutFind.combine_subcircuits import construct_final_subcircuits
 
 
 def test_find_cuts() -> None:
@@ -47,6 +48,64 @@ def test_find_gate_cuts():
         for op in circ.data:
             assert "meas" not in op.operation.name.lower()
             assert "init" not in op.operation.name.lower()
+
+circuit  =  QuantumCircuit(4)
+
+mult = 1.635
+circuit.r(mult*0.46262, mult*0.1446, 0)
+circuit.cx(0,1)
+
+circuit.cx(1,2)
+circuit.cx(1,2)
+circuit.cx(1,2)
+
+circuit.cx(2,3)
+
+def test_auto_refine_wire():
+    """Test find_cuts function on a circuit with a cut gate.
+
+    This function tests whether the find_cuts method correctly identifies the cut
+    locations in a circuit containing a cut gate by comparing the result to the
+    expected number of subcircuits.
+    """
+    cut_circuit = find_cuts(circuit.copy(), num_partitions=2, max_qubits=[2,2], 
+                            cuts="wire")
+
+    assert len(cut_circuit.subcircuits) == 2
+
+
+def test_auto_refine_gate():
+    """Test find_cuts function on a circuit with a cut gate.
+
+    This function tests whether the find_cuts method correctly identifies the cut
+    locations in a circuit containing a cut gate by comparing the result to the
+    expected number of subcircuits.
+    """
+    cut_circuit = find_cuts(circuit.copy(), num_partitions=2, max_qubits=[2,2], 
+                                cuts="gate")
+
+    assert len(cut_circuit.subcircuits) == 2
+
+    for circ in cut_circuit.subcircuits:
+        for op in circ.data:
+            assert "meas" not in op.operation.name.lower()
+            assert "init" not in op.operation.name.lower()
+
+def test_construct_final_subcircuits():
+    """Test the construction of final subcircuits.
+
+    This function tests whether the final subcircuits are correctly constructed
+    after identifying cut locations by comparing the operations in the generated
+    subcircuits to the expected operations.
+    """
+    cut_circuit = find_cuts(circuit.copy(), num_partitions=2, max_qubits=[2,2], 
+                            cuts="gate")
+    
+    final_circs = construct_final_subcircuits(cut_circuit.subcircuits,
+                                              [circuit.num_qubits])
+
+    assert len(final_circs) == 1
+
 
 def test_expectation_values() -> None:
     """Test the expectation values of the test circuits.
