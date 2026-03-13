@@ -23,6 +23,9 @@ jobs:
       - name: Set up Python
         run: uv python install 3.11
 
+      - name: Create venv
+        run: uv venv --python 3.11
+
       - name: Install dependencies
         run: uv pip install -r docs/requirements-docs.txt
 
