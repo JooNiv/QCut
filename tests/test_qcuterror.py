@@ -19,7 +19,7 @@ def test_qcuterror() -> None:
     result to the pre-defined solutions.
     """
     try:
-        cut_circuit = get_locations_and_subcircuits(qc)
+        _cut_circuit = get_locations_and_subcircuits(qc)
     except Exception as e:
         assert isinstance(e, QCutError), "Expected a QCutError to be raised."
 
