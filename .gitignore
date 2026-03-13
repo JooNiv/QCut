@@ -20,9 +20,6 @@ htmlcov/
 *.txt
 .tox
 
-# Lock files
-*.lock
-
 # Editor settings
 .vscode
 
