@@ -16,7 +16,7 @@ jobs:
       docs: ${{ steps.filter.outputs.docs }}
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Detect changed paths
         uses: dorny/paths-filter@v3
         id: filter
@@ -99,7 +99,7 @@ jobs:
   
   type-check:
     runs-on: ubuntu-latest
-    name: Type check the project with mypy
+    name: Type check the project with ty
     steps:
       - uses: actions/checkout@v4
 
