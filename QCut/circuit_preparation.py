@@ -42,13 +42,10 @@ def _get_cut_locations(circuit):
                 cut_locations.append(
                     SingleQubitCutLocation((qubits[0], index))
                 )
-            elif len(qubits) == 2:
+            else:
                 cut_locations.append(
                     CutLocation((qubits, index))
                 )
-            else:
-                raise QCutError("Cannot cut gates with more that 2 qubits." \
-                "Transpile circuit to only contain 2 qubit gates.")
 
             # adjust index to account for removed operation
             index -= 1
