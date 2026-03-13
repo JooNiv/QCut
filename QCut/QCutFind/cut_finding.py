@@ -222,7 +222,11 @@ def find_cuts(  # noqa: C901
 
     cut_circuit = add_cuts_to_circuit(circuit, cut_data, cut_data_test)
 
-    final_cut_circuit = get_locations_and_subcircuits(cut_circuit)
+    if max_qubits is not None:
+        final_cut_circuit = get_locations_and_subcircuits(cut_circuit,
+                                                          max_qubits=max_qubits)
+    else:
+        final_cut_circuit = get_locations_and_subcircuits(cut_circuit)
 
     if not more_data:
         return final_cut_circuit
