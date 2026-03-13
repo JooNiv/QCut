@@ -1,4 +1,4 @@
-[![Version](https://img.shields.io/badge/version-1.1.0-green)](https://github.com/JooNiv/QCut/main/CHANGELOG.rst)
+[![Version](https://img.shields.io/badge/version-1.1.1-green)](https://github.com/JooNiv/QCut/main/CHANGELOG.rst)
 [![Coverage Status](https://coveralls.io/repos/github/JooNiv/QCut/badge.svg?branch=main)](https://coveralls.io/github/JooNiv/QCut?branch=main)
 ![Python](https://img.shields.io/badge/python-3.10_|_3.11-blue)
 [![License](https://img.shields.io/badge/license-Apache_2.0-orange)](https://opensource.org/licenses/Apache-2.0)
