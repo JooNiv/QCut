@@ -1,3 +1,7 @@
+[![Version](https://img.shields.io/badge/Version-1.1.0-green?style=for-the-badge)](https://github.com/JooNiv/QCut/main/CHANGELOG.rst)
+![Python](https://img.shields.io/badge/Python-3.10_|_3.11-blue?style=for-the-badge)
+[![License](https://img.shields.io/badge/License-Apache_2.0-orange?style=for-the-badge)](https://opensource.org/licenses/Apache-2.0)
+
 - [QCut](#qcut)
 - [Installation](#installation)
 - [Usage](#usage)
