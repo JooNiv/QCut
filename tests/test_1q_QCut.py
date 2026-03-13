@@ -2,6 +2,7 @@
 
 import numpy as np
 from qiskit import QuantumCircuit
+from qiskit.quantum_info import SparsePauliOp
 from qiskit_aer import AerSimulator
 
 import tests.solutions_1q as sq
@@ -9,6 +10,8 @@ from QCut.circuit_knitting import run
 
 #import QCut as ck
 from QCut.circuit_preparation import _get_cut_locations, get_locations_and_subcircuits
+import QCut as ck
+from QCut.qcutresult import TotalResult, SubResult
 
 
 def _remove_obsm(subcircuits: list[QuantumCircuit]
@@ -58,6 +61,30 @@ def test_separate_subcircuits() -> None:
         for circ_index, subcirc in enumerate(circs):
 
             assert len(subcirc.data) == sq.subcircuit_len[solution_index][circ_index]
+
+def test_results_exist() -> None:
+    circ = QuantumCircuit(2)
+    circ.h(0)
+    circ.append(ck.cutCZ(), [0, 1])
+
+    cut_circuit = get_locations_and_subcircuits(circ)
+
+    obs = SparsePauliOp.from_list([("ZZ", 1)])
+
+    cut_experiment = ck.get_experiment_circuits(cut_circuit, obs)
+
+    res = ck.run_experiments(cut_experiment, backend=AerSimulator())
+
+    assert isinstance(res[0][0], TotalResult)
+
+    assert str(res[0][0])
+
+    assert isinstance(res[0][0].subcircuits[0][0][0], SubResult)
+
+    assert str(res[0][0].subcircuits[0][0][0])
+
+
+
 
 def test_expectation_values() -> None:
     """Test the expectation values of the test circuits.
