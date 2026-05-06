@@ -297,5 +297,5 @@ Running on other hardware
 -------------------------
 
 Running on other providers such as IBM is untested at the moment but as
-long as the hardware can be accessed with Qiskit version < 1.0 the QCut
+long as the hardware can be accessed with Qiskit version > 1.0 the QCut
 should be compatible.
