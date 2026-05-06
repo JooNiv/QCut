@@ -347,11 +347,12 @@ def run_experiments(  # noqa: C901
                 else:
                     empty_locations.append((key, subcircuit.num_clbits))
 
+    num_batches = len(runnable) // max_batch_size + (1 if len(runnable) % max_batch_size
+                                                      else 0)
     logger.info(f"Running {len(runnable)} circuits on the"
                 f" backend {backend} with {shots} shots each")
     logger.info("Circuits will be split into "
-                 f"{len(runnable) // max_batch_size + (1 if len(runnable) % max_batch_size
-                                                    else 0)}"
+                f"{num_batches}"
                 f" batches of size {max_batch_size} for execution.")
     for start in range(0, len(runnable), max_batch_size):
         batch = runnable[start : start + max_batch_size]

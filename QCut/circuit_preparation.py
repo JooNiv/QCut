@@ -281,11 +281,13 @@ def get_locations_and_subcircuits(
 
     map_qubits = get_qubit_map(fixed_circs)
 
+    num_wire_cuts = len([loc for loc in cut_locations 
+                         if isinstance(loc, SingleQubitCutLocation)])
+    num_gate_cuts = len([loc for loc in cut_locations if isinstance(loc, CutLocation)])
+
     logger.info(f"Found {len(cut_locations)} cut locations"
-                f"({len([isinstance(loc, SingleQubitCutLocation) 
-                         for loc in cut_locations])}"
-                f" wire cut(s) and {len([isinstance(loc, CutLocation) 
-                                      for loc in cut_locations])} gate cut(s))"
+                f"({num_wire_cuts})"
+                f" wire cut(s) and {num_gate_cuts} gate cut(s))"
                 f" and separated into {len(fixed_circs)} subcircuits.")
 
     return CutCircuit(fixed_circs, cut_locations, map_qubits)
