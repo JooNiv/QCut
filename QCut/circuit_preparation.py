@@ -18,6 +18,7 @@ from QCut.qcuterror import QCutError
 
 logger: logging.Logger = logging.getLogger(__name__)
 
+
 def _get_cut_locations(circuit):
     index = 0  # index of the current instruction in circuit_data
     circuit_data = circuit.data
@@ -281,13 +282,16 @@ def get_locations_and_subcircuits(
 
     map_qubits = get_qubit_map(fixed_circs)
 
-    num_wire_cuts = len([loc for loc in cut_locations 
-                         if isinstance(loc, SingleQubitCutLocation)])
+    num_wire_cuts = len(
+        [loc for loc in cut_locations if isinstance(loc, SingleQubitCutLocation)]
+    )
     num_gate_cuts = len([loc for loc in cut_locations if isinstance(loc, CutLocation)])
 
-    logger.info(f"Found {len(cut_locations)} cut locations"
-                f"({num_wire_cuts})"
-                f" wire cut(s) and {num_gate_cuts} gate cut(s))"
-                f" and separated into {len(fixed_circs)} subcircuits.")
+    logger.info(
+        f"Found {len(cut_locations)} cut locations"
+        f"({num_wire_cuts})"
+        f" wire cut(s) and {num_gate_cuts} gate cut(s))"
+        f" and separated into {len(fixed_circs)} subcircuits."
+    )
 
     return CutCircuit(fixed_circs, cut_locations, map_qubits)
