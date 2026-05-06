@@ -1,5 +1,5 @@
 """
-Utility functions for working with quantum circuits in the context of circuit 
+Utility functions for working with quantum circuits in the context of circuit
 cutting and knitting.
 """
 
@@ -14,7 +14,7 @@ def _count_gates(circuit: QuantumCircuit) -> dict[Qubit, int]:
         circuit (QuantumCircuit): The input quantum circuit.
 
     Returns:
-        dict[Qubit, int]: A dictionary mapping each qubit to the number of gates 
+        dict[Qubit, int]: A dictionary mapping each qubit to the number of gates
         acting on it.
     """
     gate_count = dict.fromkeys(circuit.qubits, 0)
@@ -38,11 +38,11 @@ def _remove_idle_wires(circuit: QuantumCircuit) -> QuantumCircuit:
     for qubit, count in gate_count.items():
         if count == 0:
             circuit.qubits.remove(qubit)
-    
+
     return circuit
 
-def _remove_obsm(subcircuits: list[dict[int, QuantumCircuit]]
-                 ):
+
+def _remove_obsm(subcircuits: list[dict[int, QuantumCircuit]]):
 
     for obs_set in subcircuits:
         for ind, circ in obs_set.items():
@@ -53,8 +53,8 @@ def _remove_obsm(subcircuits: list[dict[int, QuantumCircuit]]
                 else:
                     j += 1
 
-def _remove_obsm_2(subcircuits: list[QuantumCircuit]
-                 ):
+
+def _remove_obsm_2(subcircuits: list[QuantumCircuit]):
 
     for circ in subcircuits:
         j = 0
