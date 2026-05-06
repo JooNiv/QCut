@@ -310,9 +310,9 @@ Check out [jooniv.github.io/QCut/](https://jooniv.github.io/QCut/) for documenta
 The docs are built with sphinx using the sphinx book theme. To build the docs:
 
 ```bash
+uv sync --group docs
 cd docs
-uv pip install -r requirements-docs.txt
-sphinx-build -v -b html . build/sphinx/html -W
+uv run sphinx-build -v -b html . build/sphinx/html -W
 ```
 
 HTML files can then be found under `build/sphinx/html/`

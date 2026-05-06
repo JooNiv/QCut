@@ -53,9 +53,10 @@ If your changes should retain backwards compatibility to older Qiskit versions a
 tox --parallel
 ```
 
-Finally make sure that documentation is up to date and builds properly by navigating to QCut/docs/ and running:
+Finally make sure that documentation is up to date and builds properly by running:
 
 ```shell
-uv pip install -r requirements-docs.txt
-sphinx-build -v -b html . build/sphinx/html -W
+uv sync --group docs
+cd docs
+uv run sphinx-build -v -b html . build/sphinx/html -W
 ```

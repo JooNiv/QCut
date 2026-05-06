@@ -41,6 +41,12 @@ dev = [
     "ruff>=0.12.1",
     "ty >=0.0.15",
 ]
+docs = [
+    "sphinx==9.0.4",
+    "myst-nb",
+    "sphinx-book-theme",
+    "sphinx_lesson",
+]
 
 
 [project.urls]
