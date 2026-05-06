@@ -54,6 +54,10 @@ def _finalize_subcircuit(
     return subcircuit
 
 
+def _has_measurements(circuit: QuantumCircuit) -> bool:
+    return circuit.count_ops().get("measure", 0) > 0
+
+
 def _get_placeholder_locations(subcircuits: list[QuantumCircuit]) -> list:
     """
     Identify the locations of placeholder operations in a list of quantum subcircuits.
@@ -275,6 +279,7 @@ def run_experiments(  # noqa: C901
     cut_experiment: CutExperiment,
     shots: int = 2**12,
     backend = None,
+    max_batch_size: int = 100,
 ) -> list[list[TotalResult]]:
     """Run experiment circuits.
 
@@ -289,13 +294,15 @@ def run_experiments(  # noqa: C901
         cut_locations (np.ndarray[CutLocation]): list of cut locations
         shots (int): number of shots per circuit run (optional)
         backend: backend used for running the circuits (optional)
+        max_batch_size (int): maximum number of circuits submitted per backend.run
+            call. Larger batches reduce per-job overhead on real hardware.
 
     Returns:
         list[TotalResult]:
             list of transformed results
 
     """
-    wire_cuts = len([i for i in cut_experiment.cut_locations 
+    wire_cuts = len([i for i in cut_experiment.cut_locations
                      if isinstance(i, SingleQubitCutLocation)])
     cz_cuts = len(cut_experiment.cut_locations) - wire_cuts
     samples = int(
@@ -305,22 +312,33 @@ def run_experiments(  # noqa: C901
     if backend is None:
         backend = AerSimulator()
 
-    results = [0] * (cut_experiment.num_groups)
+    results: list[list[dict[int, dict[str, int]]]] = [
+        [{} for _ in group] for group in cut_experiment.experiments
+    ]
 
-    for count, circuit_group in enumerate(cut_experiment.experiments):
-        group = []
-        for obs_ind, obs_group in enumerate(circuit_group):
-            obs_res = {}
-            for ind, subcircuit in obs_group.items():
-                try:
-                    sub_result = dict(backend.run(
-                            subcircuit, shots=shots
-                        ).result().get_counts().items())
-                except Exception:
-                    sub_result = {" " + "0"*subcircuit.num_clbits: shots}
-                obs_res[ind] = sub_result
-            group.append(obs_res)
-        results[count] = group
+    runnable: list[tuple[tuple[int, int, int], QuantumCircuit]] = []
+    empty_locations: list[tuple[tuple[int, int, int], int]] = []
+    for group_idx, circuit_group in enumerate(cut_experiment.experiments):
+        for obs_idx, obs_group in enumerate(circuit_group):
+            for sub_idx, subcircuit in obs_group.items():
+                key = (group_idx, obs_idx, sub_idx)
+                if _has_measurements(subcircuit):
+                    runnable.append((key, subcircuit))
+                else:
+                    empty_locations.append((key, subcircuit.num_clbits))
+
+    for start in range(0, len(runnable), max_batch_size):
+        batch = runnable[start : start + max_batch_size]
+        batch_circuits = [circ for _, circ in batch]
+        counts = backend.run(batch_circuits, shots=shots).result().get_counts()
+        if isinstance(counts, dict):
+            counts = [counts]
+        for (key, _circ), circ_counts in zip(batch, counts):
+            group_idx, obs_idx, sub_idx = key
+            results[group_idx][obs_idx][sub_idx] = dict(circ_counts.items())
+
+    for (group_idx, obs_idx, sub_idx), num_clbits in empty_locations:
+        results[group_idx][obs_idx][sub_idx] = {" " + "0" * num_clbits: shots}
 
     all_keys = results[0][0].keys()
 
@@ -339,6 +357,7 @@ def run_cut_circuit(
     cut_circuit: CutCircuit,
     observables: SparsePauliOp,
     backend=AerSimulator(),
+    max_batch_size: int = 100,
 ) -> list[float]:
     """After splitting the circuit run the rest of the circuit knitting sequence.
 
@@ -349,6 +368,8 @@ def run_cut_circuit(
         observables (list[int | list[int]]):
             list of observables as qubit indices (Z observable)
         backend: backend to use for running experiment circuits (optional)
+        max_batch_size (int): maximum number of circuits submitted per backend.run
+            call (optional)
 
     Returns:
         list: a list of expectation values
@@ -359,16 +380,17 @@ def run_cut_circuit(
         transpiled_subcircuits = transpile_subcircuits(cut_circuit
                                                        ,backend,
                                                        optimization_level=3)
-    
-        cut_experiment = get_experiment_circuits(transpiled_subcircuits, 
+
+        cut_experiment = get_experiment_circuits(transpiled_subcircuits,
                                         observables)
     else:
-        cut_experiment = get_experiment_circuits(cut_circuit, 
+        cut_experiment = get_experiment_circuits(cut_circuit,
                                         observables)
-        
+
     results = run_experiments(
         cut_experiment,
         backend=backend,
+        max_batch_size=max_batch_size,
     )
 
     return estimate_expectation_values(
@@ -380,6 +402,7 @@ def run(
     circuit: QuantumCircuit,
     observables: SparsePauliOp,
     backend=AerSimulator(),
+    max_batch_size: int = 100,
 ) -> list[float]:
     """Run the whole circuit knitting sequence with one function call.
 
@@ -388,6 +411,8 @@ def run(
         observables (list[int | list[int]]):
             list of observbles in the form of qubit indices (Z-obsevable).
         backend: backend to use for running experiment circuits (optional)
+        max_batch_size (int): maximum number of circuits submitted per backend.run
+            call (optional)
 
     Returns:
         list: a list of expectation values
@@ -396,4 +421,4 @@ def run(
     # circuit = circuit.copy()
     cut_circuit = get_locations_and_subcircuits(circuit)
 
-    return run_cut_circuit(cut_circuit, observables, backend)
+    return run_cut_circuit(cut_circuit, observables, backend, max_batch_size)
