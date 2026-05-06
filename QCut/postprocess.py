@@ -1,6 +1,6 @@
 """
 A module for post-processing the results obtained from running the cut circuits and
-calculating the estimated expectation values based on the results and the 
+calculating the estimated expectation values based on the results and the
 provided observables.
 """
 
@@ -13,9 +13,10 @@ import numpy as np
 
 from QCut.basis_transform import _combine_pauli_ops, _get_observable_circuit_index
 from QCut.cutlocation import SingleQubitCutLocation
-from QCut.qcutresult import SubResult, TotalResult
+from QCut.qcutresult import RawResult, SubResult, TotalResult
 
 ERROR = 0.0000001
+
 
 def _process_results(
     results: list,
@@ -66,8 +67,9 @@ def _process_results(
             if group_ind >= len(preocessed_results):
                 preocessed_results.append([])
             preocessed_results[group_ind].append(TotalResult(experiment_run_results))
-        
+
     return preocessed_results
+
 
 def _get_sub_expectation_values(
     experiment_run: TotalResult,
@@ -90,12 +92,12 @@ def _get_sub_expectation_values(
     """
     # generate all possible combinations between end of circuit measurements
     # from subcircuit group
-    sub_circuit_result_combinations = product(*experiment_run.subcircuits[0]) # type: ignore[no-matching-overload]
+    sub_circuit_result_combinations = product(*experiment_run.subcircuits[0])
 
     # initialize sub solution array
     sub_expectation_value = np.zeros(len(observables))
 
-    for ind, circuit_result in enumerate(sub_circuit_result_combinations):  
+    for ind, circuit_result in enumerate(sub_circuit_result_combinations):
         # loop through results
         # concat results to one array and reverse to account for qiskit quibit ordering
         full_result = np.concatenate(
@@ -105,7 +107,7 @@ def _get_sub_expectation_values(
         if full_result.size == 0:
             raise ValueError("No measurement results found. This should not happen.")
             continue
-        
+
         if map_qubits is not None:
             sorted_full_result = np.array(
                 [
@@ -115,7 +117,7 @@ def _get_sub_expectation_values(
             )
         else:
             sorted_full_result = full_result
-        
+
         sorted_full_result = list(reversed(sorted_full_result))
 
         qpd_measurement_coefficient = 1  # initial value for qpd
@@ -148,10 +150,8 @@ def _get_sub_expectation_values(
 
     return sub_expectation_value
 
-def estimate_expectation_values(
-    results: list[list[TotalResult]],
-    expv_data: dict
-) -> list[float]:
+
+def estimate_expectation_values(results: RawResult, expv_data: dict) -> list[float]:
     """Calculate the estimated expectation values.
 
     Loop through processed results. For each result group generate all products of
@@ -164,7 +164,7 @@ def estimate_expectation_values(
     by total cut cost and divide by number of samples.
 
     Args:
-        results (list[TotalResult]): results from experiment circuits
+        results (RawResult): raw results from experiment circuits
         coefficients (list[int]): list of coefficients for each subcircuit group
         cut_locations (np.ndarray[CutLocation]): cut locations
         observables (list[int | list[int]]):
@@ -175,15 +175,21 @@ def estimate_expectation_values(
             expectation values as a list of floats
 
     """
+    raw_results = results
+    results_processed = _process_results(
+        raw_results.results, raw_results._shots, raw_results._samples
+    )
+
     cuts = len(expv_data["cut_locations"])
-    wire_cuts = len([i for i in expv_data["cut_locations"] 
-                      if isinstance(i, SingleQubitCutLocation)])
+    wire_cuts = len(
+        [i for i in expv_data["cut_locations"] if isinstance(i, SingleQubitCutLocation)]
+    )
     cz_cuts = cuts - wire_cuts
     # number of samples neede
     samples = int(
         (np.power(4, 2 * wire_cuts) * np.power(3, 2 * cz_cuts)) / np.power(ERROR, 2)
     )
-    shots = int(samples / len(results))
+    shots = int(samples / len(results_processed))
 
     measurement_settings = _combine_pauli_ops(expv_data["observables"])
 
@@ -201,18 +207,25 @@ def estimate_expectation_values(
         if obs_data["circuit_index"] is None:
             raise ValueError("""Observable cannot be measured 
                              with given measurement settings.""")
-        
-        for experiment_run, coefficient in zip(results, expv_data["coefficients"]):
-        # add sub results to the total approx expectation value
-            cur_obs = (obs_data["obs_indices"] 
-                       if len(obs_data["obs_indices"]) == 1 
-                       else [obs_data["obs_indices"]])
+
+        for experiment_run, coefficient in zip(
+            results_processed, expv_data["coefficients"]
+        ):
+            # add sub results to the total approx expectation value
+            cur_obs = (
+                obs_data["obs_indices"]
+                if len(obs_data["obs_indices"]) == 1
+                else [obs_data["obs_indices"]]
+            )
             mid = (
                 np.power(-1, wire_cuts + 1)  # * (np.power(-1, cz_cuts)
                 * coefficient
                 * _get_sub_expectation_values(
-                    experiment_run[obs_data["circuit_index"]], cur_obs,
-                    shots, expv_data["map_qubit"])
+                    experiment_run[obs_data["circuit_index"]],
+                    cur_obs,
+                    shots,
+                    expv_data["map_qubit"],
+                )
             )[0]
             sum_shots += shots
             expectation_values[ind] += mid

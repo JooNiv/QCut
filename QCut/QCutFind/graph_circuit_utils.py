@@ -17,7 +17,7 @@ def weight_fn(edge_data):
     return edge_data[1]
 
 
-max_added = None
+max_added: int | None = None
 
 
 def update_added(added_set, added, op):
@@ -31,26 +31,24 @@ def update_added(added_set, added, op):
     q0, q1 = op[1][2]  # the two qubit indices
 
     # lazy initialize on first call
-    if max_added is None:
-        if added:
-            max_added = max(added)
-        else:
-            # for the very first gate, we'll set it below
-            max_added = None
+    if max_added is None and added:
+        max_added = max(added)
 
     # both qubits have been seen before → allocate two brand-new nodes
     if q0 in added_set and q1 in added_set:
-        a = max_added + 1 # type: ignore[unsupported-operator]
-        b = max_added + 2 # type: ignore[unsupported-operator]
+        assert max_added is not None
+        a = max_added + 1
+        b = max_added + 2
         added.extend([a, b])
         added_set.add(a)
         added_set.add(b)
-        max_added += 2 # type: ignore[unsupported-operator]
+        max_added += 2
 
     # only q0 seen → reuse q1 and allocate one fresh node
     elif q0 in added_set:
         a = q1
-        max_added = max(max_added, a) # type: ignore[invalid-argument-type]
+        assert max_added is not None
+        max_added = max(max_added, a)
         b = max_added + 1
         added.extend([a, b])
         added_set.add(b)
@@ -60,7 +58,8 @@ def update_added(added_set, added, op):
     # only q1 seen → reuse q0 and allocate one fresh node
     elif q1 in added_set:
         a = q0
-        max_added = max(max_added, a)  # type: ignore[invalid-argument-type]
+        assert max_added is not None
+        max_added = max(max_added, a)
         b = max_added + 1
         added.extend([a, b])
         added_set.add(b)
