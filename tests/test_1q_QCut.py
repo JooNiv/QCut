@@ -11,6 +11,7 @@ from QCut.circuit_knitting import run
 
 # import QCut as ck
 from QCut.circuit_preparation import _get_cut_locations, get_locations_and_subcircuits
+from QCut.postprocess import _process_results
 from QCut.qcutresult import SubResult, TotalResult
 
 
@@ -74,13 +75,15 @@ def test_results_exist() -> None:
 
     res = ck.run_experiments(cut_experiment, backend=AerSimulator())
 
-    assert isinstance(res[0][0], TotalResult)
+    result = _process_results(res.result(), res._shots, res._samples)
 
-    assert str(res[0][0])
+    assert isinstance(result[0][0], TotalResult)
 
-    assert isinstance(res[0][0].subcircuits[0][0][0], SubResult)
+    assert str(result[0][0])
 
-    assert str(res[0][0].subcircuits[0][0][0])
+    assert isinstance(result[0][0].subcircuits[0][0][0], SubResult)
+
+    assert str(result[0][0].subcircuits[0][0][0])
 
 
 def test_expectation_values() -> None:

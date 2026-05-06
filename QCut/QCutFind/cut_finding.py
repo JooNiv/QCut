@@ -169,25 +169,19 @@ def find_cuts(  # noqa: C901
             - dict: Mapping of nodes to qubits.
     """
 
-    if (max_qubits and len(max_qubits) < 2) or num_partitions < 2:  # type: ignore[unsupported-operator]
+    if num_partitions is None:
+        if max_qubits is None:
+            raise ValueError("Either num_partitions or max_qubits must be specified.")
+        num_partitions = len(max_qubits)
+    elif max_qubits is not None and len(max_qubits) != num_partitions:
+        raise ValueError(
+            "If both num_partitions and max_qubits are specified, length of"
+            "max_qubits must match num_partitions."
+        )
+
+    if (max_qubits is not None and len(max_qubits) < 2) or num_partitions < 2:
         raise ValueError("Number of partitions has to be atleast 2")
 
-    if num_partitions is None and max_qubits is not None:
-        num_partitions = len(max_qubits)
-    elif num_partitions is None and max_qubits is None:
-        raise ValueError("Either num_partitions or max_qubits must be specified.")
-    elif num_partitions is not None and max_qubits is not None:
-        if len(max_qubits) != num_partitions:
-            raise ValueError(
-                "If both num_partitions and max_qubits are specified, length of"
-                "max_qubits must match num_partitions."
-            )
-
-    if num_partitions < 1:  # type: ignore[unsupported-operator]
-        raise ValueError(
-            "max_qubits_per_circuit must be less than the number of qubits in the"
-            "circuit."
-        )
     if num_partitions == 1:
         return circuit, [], []
 
@@ -210,7 +204,7 @@ def find_cuts(  # noqa: C901
                 labels[node] = comp_ind
         return circuit, [], [], labels, graph, nodes_on_qubit
 
-    labels = k_way_metis_partition(graph, num_partitions)  # type: ignore[invalid-argument-type]
+    labels = k_way_metis_partition(graph, num_partitions)
 
     cut_data, cut_data_test = extract_cuts(graph, labels)
 

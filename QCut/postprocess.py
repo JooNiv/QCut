@@ -92,7 +92,7 @@ def _get_sub_expectation_values(
     """
     # generate all possible combinations between end of circuit measurements
     # from subcircuit group
-    sub_circuit_result_combinations = product(*experiment_run.subcircuits[0])  # type: ignore[no-matching-overload]
+    sub_circuit_result_combinations = product(*experiment_run.subcircuits[0])
 
     # initialize sub solution array
     sub_expectation_value = np.zeros(len(observables))
@@ -208,8 +208,9 @@ def estimate_expectation_values(results: RawResult, expv_data: dict) -> list[flo
             raise ValueError("""Observable cannot be measured 
                              with given measurement settings.""")
 
-        for experiment_run, coefficient in zip(results_processed, 
-                                               expv_data["coefficients"]):
+        for experiment_run, coefficient in zip(
+            results_processed, expv_data["coefficients"]
+        ):
             # add sub results to the total approx expectation value
             cur_obs = (
                 obs_data["obs_indices"]

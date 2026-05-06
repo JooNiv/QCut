@@ -23,7 +23,7 @@ class SubResult:
 class TotalResult:
     """Storage class for easier access to the results of a subcircuit group."""
 
-    def __init__(self, *subcircuits: list[SubResult]) -> None:
+    def __init__(self, *subcircuits: list[list[SubResult]]) -> None:
         """Init."""
         self.subcircuits = subcircuits
 
