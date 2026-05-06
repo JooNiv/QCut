@@ -41,7 +41,7 @@
 
     <script src="../../_static/jquery.js?v=5d32c60e"></script>
     <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-    <script src="../../_static/documentation_options.js?v=26b4ff82"></script>
+    <script src="../../_static/documentation_options.js?v=f72668ed"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/scripts/sphinx-book-theme.js?v=fab101a9"></script>
@@ -51,7 +51,7 @@
     <link rel="search" title="Search" href="../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="1.1.1.post1.dev2+gc39ef84d5" />
+  <meta name="docsearch:version" content="1.1.1.post1.dev3+g6618a24d9" />
   </head>
   
   
@@ -283,9 +283,10 @@
 <span class="n">cut_op</span> <span class="o">=</span> <span class="n">cut_op</span><span class="o">.</span><span class="n">to_instruction</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;Cut&quot;</span><span class="p">)</span>
 <span class="n">cut_op</span><span class="o">.</span><span class="n">definition</span> <span class="o">=</span> <span class="kc">None</span>
 
+
 <div class="viewcode-block" id="cut">
 <a class="viewcode-back" href="../../_autosummary/QCut.html#QCut.cut">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">cut</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">QuantumCircuit</span> <span class="o">|</span><span class="n">Instruction</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">cut</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">QuantumCircuit</span> <span class="o">|</span> <span class="n">Instruction</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a single qubit wire cut instruction.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">cut_op</span></div>
 
@@ -294,6 +295,7 @@
 <span class="n">cutCZ_op</span> <span class="o">=</span> <span class="n">QuantumCircuit</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;CutCZ&quot;</span><span class="p">)</span>
 <span class="n">cutCZ_op</span> <span class="o">=</span> <span class="n">cutCZ_op</span><span class="o">.</span><span class="n">to_instruction</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;CutCZ&quot;</span><span class="p">)</span>
 <span class="n">cutCZ_op</span><span class="o">.</span><span class="n">definition</span> <span class="o">=</span> <span class="kc">None</span>
+
 
 <div class="viewcode-block" id="cutCZ">
 <a class="viewcode-back" href="../../_autosummary/QCut.html#QCut.cutCZ">[docs]</a>
@@ -327,12 +329,15 @@
         <span class="k">if</span> <span class="n">instr</span><span class="o">.</span><span class="n">operation</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;cz&quot;</span><span class="p">:</span>
             <span class="n">tr</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span>
             <span class="n">test</span> <span class="o">=</span> <span class="n">CircuitInstruction</span><span class="p">(</span>
-                        <span class="n">operation</span><span class="o">=</span><span class="n">cutCZ_op</span><span class="p">,</span>
-                        <span class="n">qubits</span><span class="o">=</span><span class="n">tr</span><span class="o">.</span><span class="n">qubits</span><span class="p">,</span>
-                    <span class="p">)</span>
+                <span class="n">operation</span><span class="o">=</span><span class="n">cutCZ_op</span><span class="p">,</span>
+                <span class="n">qubits</span><span class="o">=</span><span class="n">tr</span><span class="o">.</span><span class="n">qubits</span><span class="p">,</span>
+            <span class="p">)</span>
             <span class="n">tr</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">test</span><span class="p">)</span>
-    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;instruction&quot;</span><span class="p">:</span> <span class="n">tr</span><span class="o">.</span><span class="n">to_instruction</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;CutGate&quot;</span><span class="p">),</span> 
-            <span class="s2">&quot;qargs&quot;</span><span class="p">:[</span><span class="n">control</span><span class="p">,</span> <span class="n">target</span><span class="p">]}</span></div>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">&quot;instruction&quot;</span><span class="p">:</span> <span class="n">tr</span><span class="o">.</span><span class="n">to_instruction</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;CutGate&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;qargs&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">control</span><span class="p">,</span> <span class="n">target</span><span class="p">],</span>
+    <span class="p">}</span></div>
+
 
 
 <span class="c1"># define measurements for different bases</span>

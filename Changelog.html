@@ -42,7 +42,7 @@
 
     <script src="_static/jquery.js?v=5d32c60e"></script>
     <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-    <script src="_static/documentation_options.js?v=26b4ff82"></script>
+    <script src="_static/documentation_options.js?v=f72668ed"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/scripts/sphinx-book-theme.js?v=fab101a9"></script>
@@ -53,7 +53,7 @@
     <link rel="prev" title="QCut" href="_autosummary/QCut.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="1.1.1.post1.dev2+gc39ef84d5" />
+  <meta name="docsearch:version" content="1.1.1.post1.dev3+g6618a24d9" />
   </head>
   
   
@@ -318,6 +318,12 @@
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-1-2-0">Version 1.2.0</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#refactor-run-experiments">Refactor <cite>run_experiments()</cite></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#add-rawresults-class">Add <cite>RawResults</cite> class</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#add-logging">Add logging</a></li>
+</ul>
+</li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-1-1-1">Version 1.1.1</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-1-1-0">Version 1.1.0</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-1-0-2">Version 1.0.2</a></li>
@@ -352,6 +358,49 @@
                   
   <section id="changelog">
 <span id="changes"></span><h1>Changelog<a class="headerlink" href="#changelog" title="Link to this heading">#</a></h1>
+<section id="version-1-2-0">
+<h2>Version 1.2.0<a class="headerlink" href="#version-1-2-0" title="Link to this heading">#</a></h2>
+<section id="refactor-run-experiments">
+<h3>Refactor <cite>run_experiments()</cite><a class="headerlink" href="#refactor-run-experiments" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Refactor <cite>run_experiments()</cite> to improve performance, flexibility, and code quality.</p></li>
+<li><dl class="simple">
+<dt><cite>run_experiments()</cite> now batches circuits into groups for more efficient execution on real hardware.</dt><dd><ul>
+<li><p>By default, circuits are grouped into batches of 100, but this can be adjusted with the <cite>max_batch_size</cite> parameter in <cite>run_experiments()</cite>.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><cite>run_experiments()</cite> now returns a <cite>RawResults</cite> object instead of a list of preprocessed results. This is to allow for more flexible postprocessing of results, including support for custom postprocessing functions.</dt><dd><ul>
+<li><p>post processing now automatically happens when calling <cite>get_expectation_values()</cite> that now takes a <cite>RawResults</cite> object as an argument.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</section>
+<section id="add-rawresults-class">
+<h3>Add <cite>RawResults</cite> class<a class="headerlink" href="#add-rawresults-class" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><dl class="simple">
+<dt>The <cite>RawResults</cite> object contains the raw results from the backend, as well as metadata such as the number of shots and samples used.</dt><dd><ul>
+<li><p>This allows for more flexible postprocessing of results, including support for custom postprocessing functions.</p></li>
+<li><p>Like a qiskit result object the <cite>RawResults</cite> has a <cite>result()</cite> method that returns the raw results from the backend. The format is currently quite messy and could be improved in future releases.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</section>
+<section id="add-logging">
+<h3>Add logging<a class="headerlink" href="#add-logging" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Added logging to the codebase to improve debuggability and provide more information about the execution of the code.</p></li>
+<li><p>Examples on how to use the logging can be found in the documentation.</p></li>
+</ul>
+</section>
+</section>
 <section id="version-1-1-1">
 <h2>Version 1.1.1<a class="headerlink" href="#version-1-1-1" title="Link to this heading">#</a></h2>
 <ul class="simple">
@@ -691,6 +740,12 @@
   </div>
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-1-2-0">Version 1.2.0</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#refactor-run-experiments">Refactor <cite>run_experiments()</cite></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#add-rawresults-class">Add <cite>RawResults</cite> class</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#add-logging">Add logging</a></li>
+</ul>
+</li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-1-1-1">Version 1.1.1</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-1-1-0">Version 1.1.0</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-1-0-2">Version 1.0.2</a></li>
