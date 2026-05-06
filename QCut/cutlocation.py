@@ -8,9 +8,7 @@ from qiskit import QuantumRegister
 class CutLocation:
     """Storage class for storing cut locations."""
 
-    def __init__(
-        self, cut_location: tuple[list, int]
-    ) -> None:
+    def __init__(self, cut_location: tuple[list, int]) -> None:
         """Init."""
         self.qubits = cut_location[0]
         self.control = cut_location[0][0][1]
@@ -40,6 +38,7 @@ class CutLocation:
         """Represent as string."""
         return str(self)
 
+
 class SingleQubitCutLocation:
     """Storage class for storing cut locations."""
 
@@ -64,11 +63,10 @@ class SingleQubitCutLocation:
     def __str__(self) -> str:
         """Format string."""
         msg = (
-            f"meas qubit: {self.meas}, init qubit: {self.init}, "
-            f"cut index: {self.index}"
+            f"meas qubit: {self.meas}, init qubit: {self.init}, cut index: {self.index}"
         )
         return msg
 
     def __repr__(self) -> str:
         """Represent as string."""
-        return str(self)    
+        return str(self)
