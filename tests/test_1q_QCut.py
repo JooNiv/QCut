@@ -9,13 +9,13 @@ import QCut as ck
 import tests.solutions_1q as sq
 from QCut.circuit_knitting import run
 
-#import QCut as ck
+# import QCut as ck
 from QCut.circuit_preparation import _get_cut_locations, get_locations_and_subcircuits
+from QCut.postprocess import _process_results
 from QCut.qcutresult import SubResult, TotalResult
 
 
-def _remove_obsm(subcircuits: list[QuantumCircuit]
-                 ):
+def _remove_obsm(subcircuits: list[QuantumCircuit]):
 
     for circ in subcircuits:
         j = 0
@@ -59,8 +59,8 @@ def test_separate_subcircuits() -> None:
         assert len(circs) == sq.number_of_subcircuits[solution_index]
 
         for circ_index, subcirc in enumerate(circs):
-
             assert len(subcirc.data) == sq.subcircuit_len[solution_index][circ_index]
+
 
 def test_results_exist() -> None:
     circ = QuantumCircuit(2)
@@ -75,15 +75,15 @@ def test_results_exist() -> None:
 
     res = ck.run_experiments(cut_experiment, backend=AerSimulator())
 
-    assert isinstance(res[0][0], TotalResult)
+    result = _process_results(res.result(), res._shots, res._samples)
 
-    assert str(res[0][0])
+    assert isinstance(result[0][0], TotalResult)
 
-    assert isinstance(res[0][0].subcircuits[0][0][0], SubResult)
+    assert str(result[0][0])
 
-    assert str(res[0][0].subcircuits[0][0][0])
+    assert isinstance(result[0][0].subcircuits[0][0][0], SubResult)
 
-
+    assert str(result[0][0].subcircuits[0][0][0])
 
 
 def test_expectation_values() -> None:
@@ -102,9 +102,7 @@ def test_expectation_values() -> None:
     for solution_index, circ in enumerate(sq.test_circuits):
         print(solution_index)
         # Calculate expectation values using the run method
-        expvals = run(
-            circ, sq.test_observables[solution_index], backend=sim
-        )
+        expvals = run(circ, sq.test_observables[solution_index], backend=sim)
         # Check each calculated expectation value against the corresponding
         # expected value
         tolerance = 0.1

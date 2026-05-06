@@ -9,14 +9,14 @@ from QCut import cut, cutGate
 cut_circ = QuantumCircuit(4)
 
 mult = 1.635
-cut_circ.r(mult*0.46262, mult*0.1446, 0)
-cut_circ.append(**cutGate(CXGate(), 0, 1)) 
+cut_circ.r(mult * 0.46262, mult * 0.1446, 0)
+cut_circ.append(**cutGate(CXGate(), 0, 1))
 cut_circ.append(cut(), [1])
-cut_circ.cx(1,2)
-cut_circ.cx(2,3)
+cut_circ.cx(1, 2)
+cut_circ.cx(2, 3)
 
 backend = GenericBackendV2(num_qubits=5, basis_gates=["cz", "r"])
-    
+
 
 def test_transpile_subcircuits():
     """Test transpilation of subcircuits with custom gates.
@@ -41,12 +41,15 @@ def test_transpile_subcircuits():
 
     for subcircuit in transpiled.subcircuits:
         for op in subcircuit.data:
-            assert (op.operation.name.lower() in basis 
-                    or "cut" in op.operation.name.lower() 
-                    or "meas" in op.operation.name.lower()
-                    or "init" in op.operation.name.lower()
-                    or "obs" in op.operation.name.lower())
-            
+            assert (
+                op.operation.name.lower() in basis
+                or "cut" in op.operation.name.lower()
+                or "meas" in op.operation.name.lower()
+                or "init" in op.operation.name.lower()
+                or "obs" in op.operation.name.lower()
+            )
+
+
 def test_transpile_experiments():
     """Test transpilation of experiments with custom gates.
 
@@ -74,8 +77,10 @@ def test_transpile_experiments():
         for exp_dict in exp:
             for circ in exp_dict.values():
                 for op in circ.data:
-                    assert (op.operation.name.lower() in basis 
-                            or "cut" in op.operation.name.lower() 
-                            or "meas" in op.operation.name.lower()
-                            or "init" in op.operation.name.lower()
-                            or "obs" in op.operation.name.lower())
+                    assert (
+                        op.operation.name.lower() in basis
+                        or "cut" in op.operation.name.lower()
+                        or "meas" in op.operation.name.lower()
+                        or "init" in op.operation.name.lower()
+                        or "obs" in op.operation.name.lower()
+                    )

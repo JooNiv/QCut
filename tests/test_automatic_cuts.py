@@ -3,7 +3,7 @@
 from qiskit import QuantumCircuit
 from qiskit_aer import AerSimulator
 
-#import QCut as ck
+# import QCut as ck
 import tests.solutions_automatic_cuts as sq
 from QCut import find_cuts
 from QCut.circuit_knitting import run_cut_circuit
@@ -18,20 +18,19 @@ def test_find_cuts() -> None:
     pre-defined solutions.
     """
     for solution_index, circ in enumerate(sq.test_circuits):
-
-        cut_circuit = find_cuts(circ.copy(), 
-                                sq.cut_sizes[solution_index], 
-                                cuts="both")
+        cut_circuit = find_cuts(circ.copy(), sq.cut_sizes[solution_index], cuts="both")
 
         assert len(cut_circuit.subcircuits) == sq.cut_sizes[solution_index]
 
-circuit  =  QuantumCircuit(4)
+
+circuit = QuantumCircuit(4)
 
 mult = 1.635
-circuit.r(mult*0.46262, mult*0.1446, 0)
-circuit.cx(0,1)
-circuit.cx(1,2)
-circuit.cx(2,3)
+circuit.r(mult * 0.46262, mult * 0.1446, 0)
+circuit.cx(0, 1)
+circuit.cx(1, 2)
+circuit.cx(2, 3)
+
 
 def test_find_gate_cuts():
     """Test find_cuts function on a circuit with a cut gate.
@@ -49,17 +48,19 @@ def test_find_gate_cuts():
             assert "meas" not in op.operation.name.lower()
             assert "init" not in op.operation.name.lower()
 
-circuit  =  QuantumCircuit(4)
+
+circuit = QuantumCircuit(4)
 
 mult = 1.635
-circuit.r(mult*0.46262, mult*0.1446, 0)
-circuit.cx(0,1)
+circuit.r(mult * 0.46262, mult * 0.1446, 0)
+circuit.cx(0, 1)
 
-circuit.cx(1,2)
-circuit.cx(1,2)
-circuit.cx(1,2)
+circuit.cx(1, 2)
+circuit.cx(1, 2)
+circuit.cx(1, 2)
 
-circuit.cx(2,3)
+circuit.cx(2, 3)
+
 
 def test_auto_refine_wire():
     """Test find_cuts function on a circuit with a cut gate.
@@ -68,8 +69,9 @@ def test_auto_refine_wire():
     locations in a circuit containing a cut gate by comparing the result to the
     expected number of subcircuits.
     """
-    cut_circuit = find_cuts(circuit.copy(), num_partitions=2, max_qubits=[2,2], 
-                            cuts="wire")
+    cut_circuit = find_cuts(
+        circuit.copy(), num_partitions=2, max_qubits=[2, 2], cuts="wire"
+    )
 
     assert len(cut_circuit.subcircuits) == 2
 
@@ -81,8 +83,9 @@ def test_auto_refine_gate():
     locations in a circuit containing a cut gate by comparing the result to the
     expected number of subcircuits.
     """
-    cut_circuit = find_cuts(circuit.copy(), num_partitions=2, max_qubits=[2,2], 
-                                cuts="gate")
+    cut_circuit = find_cuts(
+        circuit.copy(), num_partitions=2, max_qubits=[2, 2], cuts="gate"
+    )
 
     assert len(cut_circuit.subcircuits) == 2
 
@@ -91,6 +94,7 @@ def test_auto_refine_gate():
             assert "meas" not in op.operation.name.lower()
             assert "init" not in op.operation.name.lower()
 
+
 def test_construct_final_subcircuits():
     """Test the construction of final subcircuits.
 
@@ -98,11 +102,13 @@ def test_construct_final_subcircuits():
     after identifying cut locations by comparing the operations in the generated
     subcircuits to the expected operations.
     """
-    cut_circuit = find_cuts(circuit.copy(), num_partitions=2, max_qubits=[2,2], 
-                            cuts="gate")
-    
-    final_circs = construct_final_subcircuits(cut_circuit.subcircuits,
-                                              [circuit.num_qubits])
+    cut_circuit = find_cuts(
+        circuit.copy(), num_partitions=2, max_qubits=[2, 2], cuts="gate"
+    )
+
+    final_circs = construct_final_subcircuits(
+        cut_circuit.subcircuits, [circuit.num_qubits]
+    )
 
     assert len(final_circs) == 1
 
@@ -123,14 +129,12 @@ def test_expectation_values() -> None:
     for solution_index, circ in enumerate(sq.test_circuits):
         print(solution_index)
 
-        cut_circuit = find_cuts(circ.copy(), 
-                                                          sq.cut_sizes[solution_index], 
-                                                          cuts="both")
+        cut_circuit = find_cuts(circ.copy(), sq.cut_sizes[solution_index], cuts="both")
 
         # Calculate expectation values using the run method
-        estimated_expectation_values = run_cut_circuit(cut_circuit, 
-                                                          sq.test_observables[solution_index], 
-                                                          sim)
+        estimated_expectation_values = run_cut_circuit(
+            cut_circuit, sq.test_observables[solution_index], sim
+        )
         # Check each calculated expectation value against the corresponding
         # expected value
         tolerance = 0.1
@@ -138,7 +142,8 @@ def test_expectation_values() -> None:
         print(sq.exp_val_solutions[solution_index])
         for check in [
             abs(a - b) <= tolerance
-            for a, b in zip(estimated_expectation_values, 
-                            sq.exp_val_solutions[solution_index])
+            for a, b in zip(
+                estimated_expectation_values, sq.exp_val_solutions[solution_index]
+            )
         ]:
             assert check  # noqa: S101

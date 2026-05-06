@@ -2,6 +2,32 @@
 Changelog
 =========
 
+Version 1.2.0
+=============
+
+Refactor `run_experiments()`
+----------------------------
+
+- Refactor `run_experiments()` to improve performance, flexibility, and code quality.
+- `run_experiments()` now batches circuits into groups for more efficient execution on real hardware.
+    * By default, circuits are grouped into batches of 100, but this can be adjusted with the `max_batch_size` parameter in `run_experiments()`.
+- `run_experiments()` now returns a `RawResults` object instead of a list of preprocessed results. This is to allow for more flexible postprocessing of results, including support for custom postprocessing functions.
+    * post processing now automatically happens when calling `get_expectation_values()` that now takes a `RawResults` object as an argument.
+
+Add `RawResults` class
+-----------------------
+
+- The `RawResults` object contains the raw results from the backend, as well as metadata such as the number of shots and samples used.
+    * This allows for more flexible postprocessing of results, including support for custom postprocessing functions.
+    * Like a qiskit result object the `RawResults` has a `result()` method that returns the raw results from the backend. The format is currently quite messy and could be improved in future releases. 
+
+
+Add logging
+------------
+
+- Added logging to the codebase to improve debuggability and provide more information about the execution of the code.
+- Examples on how to use the logging can be found in the documentation.
+
 Version 1.1.1
 =============
 - Fix `find_cut()` not passing `max_qubits` parameter to `get_locations_and_subcircuits()`, which caused incorrect cut_circuits to be returned.

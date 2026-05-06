@@ -2,7 +2,7 @@
 
 from qiskit import QuantumCircuit
 
-#import QCut as ck
+# import QCut as ck
 from QCut.circuit_preparation import get_locations_and_subcircuits
 from QCut.qcuterror import QCutError
 
@@ -26,8 +26,12 @@ def test_qcuterror() -> None:
     try:
         raise QCutError("Test error message", code=123)
     except QCutError as e:
-        assert str(e) == "[Error 123] Test error message", "QCutError string representation is incorrect."  # noqa: E501
+        assert str(e) == "[Error 123] Test error message", (
+            "QCutError string representation is incorrect."
+        )  # noqa: E501
     try:
         raise QCutError("Test error message without code")
     except QCutError as e:
-        assert str(e) == "Test error message without code", "QCutError string representation is incorrect when no code is provided."  # noqa: E501
+        assert str(e) == "Test error message without code", (
+            "QCutError string representation is incorrect when no code is provided."
+        )  # noqa: E501

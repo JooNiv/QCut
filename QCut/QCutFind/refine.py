@@ -354,7 +354,7 @@ def refine_cuts(
     max_qubits,
     nodes_on_qubit,
     circuit,
-    cuts
+    cuts,
 ):
     if len(cut_data_in) == 0 or len(cut_data_test_in) == 0:
         return cut_data_in, cut_data_test_in, labels_in
@@ -362,7 +362,7 @@ def refine_cuts(
     cut_data_test_loc = cut_data_test_in.copy()
     labels_loc = labels_in.copy()
     if cuts == "gate":
-        #remove all wirecuts that slipped through
+        # remove all wirecuts that slipped through
         extra_wire_cuts_val = len([i for i in cut_data_test_loc if len(i) == 2])
     else:
         extra_wire_cuts_val = extra_wire_cuts(circuit, max_qubits, cut_data_test_loc)
