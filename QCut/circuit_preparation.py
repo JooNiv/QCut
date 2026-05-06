@@ -6,6 +6,8 @@ inserting placeholder operations, and separating into subcircuits.
 
 from __future__ import annotations
 
+import logging
+
 from qiskit import ClassicalRegister, QuantumCircuit, QuantumRegister
 from qiskit.circuit import CircuitInstruction, Instruction, Qubit
 from qiskit.converters import circuit_to_dag, dag_to_circuit
@@ -14,6 +16,7 @@ from QCut.cutcircuit import CutCircuit
 from QCut.cutlocation import CutLocation, SingleQubitCutLocation
 from QCut.qcuterror import QCutError
 
+logger: logging.Logger = logging.getLogger(__name__)
 
 def _get_cut_locations(circuit):
     index = 0  # index of the current instruction in circuit_data
@@ -277,5 +280,12 @@ def get_locations_and_subcircuits(
         fixed_circs = construct_final_subcircuits(fixed_circs, max_qubits)
 
     map_qubits = get_qubit_map(fixed_circs)
+
+    logger.info(f"Found {len(cut_locations)} cut locations"
+                f"({len([isinstance(loc, SingleQubitCutLocation) 
+                         for loc in cut_locations])}"
+                f" wire cut(s) and {len([isinstance(loc, CutLocation) 
+                                      for loc in cut_locations])} gate cut(s))"
+                f" and separated into {len(fixed_circs)} subcircuits.")
 
     return CutCircuit(fixed_circs, cut_locations, map_qubits)

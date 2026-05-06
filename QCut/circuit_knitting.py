@@ -4,6 +4,7 @@ A module for the main circuit knitting workflow.
 
 from __future__ import annotations
 
+import logging
 import pickle
 
 import numpy as np
@@ -31,6 +32,8 @@ from QCut.qpd_operations import (
     _insert_wire_cut_qpd,
     get_qpd_combinations,
 )
+
+logger: logging.Logger = logging.getLogger(__name__)
 
 
 def _finalize_subcircuit(
@@ -132,6 +135,10 @@ def get_experiment_circuits(  # noqa: C901
     check_circuit_type = cut_circuit.backend is not None
 
     measurement_settings = _combine_pauli_ops(observables)
+
+    if len(measurement_settings) > 1:
+        logger.info(f"Found {len(measurement_settings)} conflicting observables. Extra" 
+                    f" circuits will be generated to evaluate all expectation values.")
 
     backend = None
     if check_circuit_type:
@@ -268,7 +275,8 @@ def get_experiment_circuits(  # noqa: C901
                 cur_set_circuits[id_meas_subcircuit_index] = subcircuit
             obs_set_circuits.append(cur_set_circuits)
         experiment_circuits.append(obs_set_circuits)
-    return CutExperiment(
+
+    cut_experiment = CutExperiment(
         experiment_circuits,
         cut_circuit.cut_locations,
         cut_circuit.map_qubit,
@@ -276,6 +284,10 @@ def get_experiment_circuits(  # noqa: C901
         observables,
         backend=backend,
     )
+
+    logger.info(f"Generated  {cut_experiment.num_circuits} circuits for the experiment.")
+    
+    return cut_experiment
 
 
 def run_experiments(  # noqa: C901
@@ -335,10 +347,18 @@ def run_experiments(  # noqa: C901
                 else:
                     empty_locations.append((key, subcircuit.num_clbits))
 
+    logger.info(f"Running {len(runnable)} circuits on the"
+                f" backend {backend} with {shots} shots each")
+    logger.info("Circuits will be split into "
+                 f"{len(runnable) // max_batch_size + (1 if len(runnable) % max_batch_size
+                                                    else 0)}"
+                f" batches of size {max_batch_size} for execution.")
     for start in range(0, len(runnable), max_batch_size):
         batch = runnable[start : start + max_batch_size]
         batch_circuits = [circ for _, circ in batch]
+        logger.info(f"Running batch of {len(batch_circuits)} circuits...")
         counts = backend.run(batch_circuits, shots=shots).result().get_counts()
+        logger.info(f"Finished running batch of {len(batch_circuits)} circuits.")
         if isinstance(counts, dict):
             counts = [counts]
         for (key, _circ), circ_counts in zip(batch, counts):
