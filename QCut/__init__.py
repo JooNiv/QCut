@@ -41,5 +41,5 @@ __all__ = [
     "cut",
     "cutCZ",
     "cutGate",
-    "find_cuts"
+    "find_cuts",
 ]

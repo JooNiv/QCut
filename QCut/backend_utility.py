@@ -13,10 +13,12 @@ from QCut.cutcircuit import CutCircuit, CutExperiment
 from QCut.cutlocation import CutLocation, SingleQubitCutLocation
 
 
-def transpile_subcircuits(cut_circuit: CutCircuit,
-                          backend,
-                          optimization_level: int = 0,
-                          transpile_options: dict | None = None) -> CutCircuit:
+def transpile_subcircuits(
+    cut_circuit: CutCircuit,
+    backend,
+    optimization_level: int = 0,
+    transpile_options: dict | None = None,
+) -> CutCircuit:
     """
     Transpile subcircuits for a given backend. More efficient than transpiling
     experiment circuits as it only transpiles each subcircuit once instead of
@@ -55,7 +57,7 @@ def transpile_subcircuits(cut_circuit: CutCircuit,
             custom_gates[f"Init_{ind}"] = Gate(
                 num_qubits=1, name=f"Init_{ind}", params=[], label=f"Init_{ind}"
             )
-    
+
     for i in range(sum([x.num_qubits for x in cut_circuit.subcircuits])):
         custom_gates[f"obs_{i}"] = Gate(
             num_qubits=1, name=f"obs_{i}", params=[], label=f"obs_{i}"
@@ -67,33 +69,41 @@ def transpile_subcircuits(cut_circuit: CutCircuit,
         basis_gates = list({i[0].name for i in backend._target.instructions})
     except Exception:
         return cut_circuit
-    
+
     target = target.from_configuration(
-            num_qubits=backend.num_qubits,
-            coupling_map=backend._coupling_map,
-            basis_gates=basis_gates + list(custom_gates.keys()),
-            custom_name_mapping=custom_gates,
-        )
+        num_qubits=backend.num_qubits,
+        coupling_map=backend._coupling_map,
+        basis_gates=basis_gates + list(custom_gates.keys()),
+        custom_name_mapping=custom_gates,
+    )
 
-
-    transpiled = transpile(cut_circuit.subcircuits,
-                           target=target,
-                           optimization_level=optimization_level,
-                           **(transpile_options or {}))
+    transpiled = transpile(
+        cut_circuit.subcircuits,
+        target=target,
+        optimization_level=optimization_level,
+        **(transpile_options or {}),
+    )
 
     transpiled = [_remove_idle_wires(circ) for circ in transpiled]
 
-    return CutCircuit(subcircuits=transpiled, cut_locations=cut_circuit.cut_locations, 
-                      map_qubit=cut_circuit.map_qubit, backend=backend)
+    return CutCircuit(
+        subcircuits=transpiled,
+        cut_locations=cut_circuit.cut_locations,
+        map_qubit=cut_circuit.map_qubit,
+        backend=backend,
+    )
 
-def transpile_experiments(cut_experiment: CutExperiment, 
-                          backend,
-                          optimization_level: int = 0,
-                          transpile_options: dict | None = None) -> CutExperiment:
+
+def transpile_experiments(
+    cut_experiment: CutExperiment,
+    backend,
+    optimization_level: int = 0,
+    transpile_options: dict | None = None,
+) -> CutExperiment:
     """
     Transpile experiment circuits. Transpiles all generated experiment circuits for
     a given backend. Most often one should use `transpile_subcircuits` instead, as that
-    only transpiles subcircuits before experiment generation which is a lot more 
+    only transpiles subcircuits before experiment generation which is a lot more
     efficient. This function is mainly provided for special cases where one needs/wants
     extra control over the transpilation of experiment circuits.
 
@@ -113,10 +123,12 @@ def transpile_experiments(cut_experiment: CutExperiment,
     subexperiments = [
         [
             {
-                ind: transpile(circ,
-                               backend=backend,
-                               optimization_level=optimization_level,
-                               **(transpile_options or {}))
+                ind: transpile(
+                    circ,
+                    backend=backend,
+                    optimization_level=optimization_level,
+                    **(transpile_options or {}),
+                )
                 for ind, circ in exp.items()
             }
             for exp in exps
@@ -124,9 +136,11 @@ def transpile_experiments(cut_experiment: CutExperiment,
         for exps in cut_experiment.experiments
     ]
 
-    return CutExperiment(subexperiments,
-                         cut_locations=cut_experiment.cut_locations,
-                         map_qubit=cut_experiment.map_qubit,
-                         coefficients=cut_experiment.coefficients,
-                         observables=cut_experiment.observables,
-                         backend=backend)
+    return CutExperiment(
+        subexperiments,
+        cut_locations=cut_experiment.cut_locations,
+        map_qubit=cut_experiment.map_qubit,
+        coefficients=cut_experiment.coefficients,
+        observables=cut_experiment.observables,
+        backend=backend,
+    )
