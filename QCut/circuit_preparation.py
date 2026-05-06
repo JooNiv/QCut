@@ -1,5 +1,5 @@
 """
-A module for preparing the circuit for experiment generation and the proper 
+A module for preparing the circuit for experiment generation and the proper
 circuit knitting workflow, including finding cut locations,
 inserting placeholder operations, and separating into subcircuits.
 """
@@ -29,29 +29,23 @@ def _get_cut_locations(circuit):
         op = circuit_data[index]
         if "Cut" in op.operation.name:
             # find qubits for Cut operation
-            qubits = [
-                circuit.find_bit(qubit).registers[0]
-                for qubit in op.qubits
-            ]
+            qubits = [circuit.find_bit(qubit).registers[0] for qubit in op.qubits]
 
             # remove the cut operation
             circuit_data.remove(op)
 
             # append to cut_locations
             if len(qubits) == 1:
-                cut_locations.append(
-                    SingleQubitCutLocation((qubits[0], index))
-                )
+                cut_locations.append(SingleQubitCutLocation((qubits[0], index)))
             else:
-                cut_locations.append(
-                    CutLocation((qubits, index))
-                )
+                cut_locations.append(CutLocation((qubits, index)))
 
             # adjust index to account for removed operation
             index -= 1
         index += 1
 
     return cut_locations
+
 
 class NonCommutingGate(Instruction):
     def __init__(self, name="Init_1"):
@@ -67,19 +61,21 @@ def _insert_cut_nodes(circuit, cut_locations):
     cut_index = 0
     offset = 0
     for cut_location in cut_locations:
-        
         measure_node = NonCommutingGate(f"Meas_{cut_index}")
-        
+
         initialize_node = NonCommutingGate(f"Init_{cut_index}")
 
         cut_czc = NonCommutingGate(f"cutCZ_c_{cut_index}")
-        
+
         cut_czt = NonCommutingGate(f"cutCZ_t_{cut_index}")
 
         cut_index += 1
 
-        cur_ops = (measure_node, initialize_node) if isinstance(cut_location, 
-                    SingleQubitCutLocation) else (cut_czc, cut_czt)
+        cur_ops = (
+            (measure_node, initialize_node)
+            if isinstance(cut_location, SingleQubitCutLocation)
+            else (cut_czc, cut_czt)
+        )
 
         if isinstance(cut_location, SingleQubitCutLocation):
             for ph_op in cur_ops:
@@ -92,14 +88,15 @@ def _insert_cut_nodes(circuit, cut_locations):
                 )
 
                 offset += 1
-        
+
         else:
             circuit_data.insert(
                 cut_location.index + offset,
                 CircuitInstruction(
                     operation=cur_ops[0],
-                    qubits=[Qubit(cut_location.qubits[0][0], 
-                                    cut_location.qubits[0][1])],
+                    qubits=[
+                        Qubit(cut_location.qubits[0][0], cut_location.qubits[0][1])
+                    ],
                 ),
             )
 
@@ -109,15 +106,16 @@ def _insert_cut_nodes(circuit, cut_locations):
                 cut_location.index + offset,
                 CircuitInstruction(
                     operation=cur_ops[1],
-                    qubits=[Qubit(cut_location.qubits[1][0], 
-                                    cut_location.qubits[1][1])],
+                    qubits=[
+                        Qubit(cut_location.qubits[1][0], cut_location.qubits[1][1])
+                    ],
                 ),
             )
 
             offset += 1
 
-
     return circuit
+
 
 def _move_to_new_wire(orig: QuantumCircuit) -> QuantumCircuit:
     # Create the new circuit and add registers
@@ -151,7 +149,7 @@ def _move_to_new_wire(orig: QuantumCircuit) -> QuantumCircuit:
             q_fresh = Qubit()
             new.add_bits([q_fresh])
             new.qubits.remove(q_fresh)
-            new.qubits.insert(orig.find_bit(qargs[0]).index+1+offset, q_fresh)
+            new.qubits.insert(orig.find_bit(qargs[0]).index + 1 + offset, q_fresh)
             offset += 1
             # update the mapping so q_old -> q_fresh going forward
             qubit_map[qargs[0]] = q_fresh
@@ -161,6 +159,7 @@ def _move_to_new_wire(orig: QuantumCircuit) -> QuantumCircuit:
             new.append(inst, mapped_qs, cargs)
 
     return new
+
 
 def _separate_subcircuits(circuit):
     dag = circuit_to_dag(circuit)
@@ -190,8 +189,9 @@ def _add_cbits(subcircuits):
                 clbits_qpd += 1
 
         circ.add_register(ClassicalRegister(clbits_qpd, "qpd_meas"))
-        circ.add_register(ClassicalRegister(circ.num_qubits - clbits_qpd 
-                                            + clbits, "meas"))
+        circ.add_register(
+            ClassicalRegister(circ.num_qubits - clbits_qpd + clbits, "meas")
+        )
 
     return subcircuits
 
@@ -206,12 +206,16 @@ def get_qubit_map(subcircuits: list[QuantumCircuit]):
     map_qubit = {}
     count = 0
     for ind, i in enumerate(reversed(subcircuits)):
-        for j in sorted(filter_obs_i(i.data), 
-                        key=lambda x: i.find_bit(x.qubits[0]).index, reverse=True):
+        for j in sorted(
+            filter_obs_i(i.data),
+            key=lambda x: i.find_bit(x.qubits[0]).index,
+            reverse=True,
+        ):
             map_qubit[int(j.operation.name.split("_")[1])] = count
             count += 1
 
     return map_qubit
+
 
 def get_locations_and_subcircuits(
     circuit: QuantumCircuit,
@@ -246,7 +250,7 @@ def get_locations_and_subcircuits(
     circuit1 = _insert_cut_nodes(circuit_copy, cut_locations)
     circuit_new = _move_to_new_wire(circuit1.copy())
     subcircuits = _separate_subcircuits(circuit_new)
-    
+
     subcircuits = _add_cbits(subcircuits)
     fixed_circs = []
     for i in subcircuits:
@@ -263,7 +267,7 @@ def get_locations_and_subcircuits(
         raise QCutError(
             "Invalid cuts. Check documentation to see how cuts should be placed."
         )
-    
+
     if max_qubits and len(fixed_circs) != len(max_qubits):
         """if max_qubits is None:
             raise QCutError(
@@ -271,7 +275,6 @@ def get_locations_and_subcircuits(
                 "max_qubits constraint is used."
             )"""
         fixed_circs = construct_final_subcircuits(fixed_circs, max_qubits)
-
 
     map_qubits = get_qubit_map(fixed_circs)
 

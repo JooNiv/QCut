@@ -40,17 +40,17 @@ def update_added(added_set, added, op):
 
     # both qubits have been seen before → allocate two brand-new nodes
     if q0 in added_set and q1 in added_set:
-        a = max_added + 1 # type: ignore[unsupported-operator]
-        b = max_added + 2 # type: ignore[unsupported-operator]
+        a = max_added + 1  # type: ignore[unsupported-operator]
+        b = max_added + 2  # type: ignore[unsupported-operator]
         added.extend([a, b])
         added_set.add(a)
         added_set.add(b)
-        max_added += 2 # type: ignore[unsupported-operator]
+        max_added += 2  # type: ignore[unsupported-operator]
 
     # only q0 seen → reuse q1 and allocate one fresh node
     elif q0 in added_set:
         a = q1
-        max_added = max(max_added, a) # type: ignore[invalid-argument-type]
+        max_added = max(max_added, a)  # type: ignore[invalid-argument-type]
         b = max_added + 1
         added.extend([a, b])
         added_set.add(b)

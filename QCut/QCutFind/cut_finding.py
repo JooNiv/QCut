@@ -15,6 +15,7 @@ from QCut.qpd_gates import cutCZ_op as cutCZ
 
 BASIS_GATES = ["cz", "r"]
 
+
 def extract_cuts(graph, labels):  # noqa: C901
     cut_edges = []
 
@@ -86,12 +87,17 @@ def add_cuts_to_circuit(circuit, cut_data, cut_data_test):
     )
 
     for ind, (i, j) in enumerate(zipped_data):
-
         if len(j) > 2:
             # Remove the original operation at the specified index§
-            qubits = list(filter(lambda x: x is not None, 
-                                 [q if circuit.find_bit(q).index in j[2] else 
-                                  None for q in qctest.qubits]))
+            qubits = list(
+                filter(
+                    lambda x: x is not None,
+                    [
+                        q if circuit.find_bit(q).index in j[2] else None
+                        for q in qctest.qubits
+                    ],
+                )
+            )
             target_index = i[2][0] + offset
             qctest.data.pop(target_index)
 
@@ -122,10 +128,10 @@ def add_cuts_to_circuit(circuit, cut_data, cut_data_test):
 
 def find_cuts(  # noqa: C901
     circuit,
-    num_partitions: int | None =None,
+    num_partitions: int | None = None,
     max_qubits=None,
     cuts="both",
-    more_data = False
+    more_data=False,
 ):
     """Partition a quantum circuit into subcircuits by inserting cut operations.
 
@@ -163,7 +169,7 @@ def find_cuts(  # noqa: C901
             - dict: Mapping of nodes to qubits.
     """
 
-    if (max_qubits and len(max_qubits) < 2) or num_partitions < 2: # type: ignore[unsupported-operator]
+    if (max_qubits and len(max_qubits) < 2) or num_partitions < 2:  # type: ignore[unsupported-operator]
         raise ValueError("Number of partitions has to be atleast 2")
 
     if num_partitions is None and max_qubits is not None:
@@ -177,7 +183,7 @@ def find_cuts(  # noqa: C901
                 "max_qubits must match num_partitions."
             )
 
-    if num_partitions < 1: # type: ignore[unsupported-operator]
+    if num_partitions < 1:  # type: ignore[unsupported-operator]
         raise ValueError(
             "max_qubits_per_circuit must be less than the number of qubits in the"
             "circuit."
@@ -187,7 +193,7 @@ def find_cuts(  # noqa: C901
 
     gate_cut_weight = 3 if (cuts == "both" or cuts == "gate") else 100000000000
     wire_cut_weight = 4 if (cuts == "both" or cuts == "wire") else 100000000000
-    
+
     circuit.remove_final_measurements()
 
     circuit = transpile(circuit, basis_gates=BASIS_GATES)
@@ -204,7 +210,7 @@ def find_cuts(  # noqa: C901
                 labels[node] = comp_ind
         return circuit, [], [], labels, graph, nodes_on_qubit
 
-    labels = k_way_metis_partition(graph, num_partitions) # type: ignore[invalid-argument-type]
+    labels = k_way_metis_partition(graph, num_partitions)  # type: ignore[invalid-argument-type]
 
     cut_data, cut_data_test = extract_cuts(graph, labels)
 
@@ -217,19 +223,27 @@ def find_cuts(  # noqa: C901
             max_qubits,
             nodes_on_qubit,
             circuit,
-            cuts
+            cuts,
         )
 
     cut_circuit = add_cuts_to_circuit(circuit, cut_data, cut_data_test)
 
     if max_qubits is not None:
-        final_cut_circuit = get_locations_and_subcircuits(cut_circuit,
-                                                          max_qubits=max_qubits)
+        final_cut_circuit = get_locations_and_subcircuits(
+            cut_circuit, max_qubits=max_qubits
+        )
     else:
         final_cut_circuit = get_locations_and_subcircuits(cut_circuit)
 
     if not more_data:
         return final_cut_circuit
     else:
-        return (final_cut_circuit, cut_circuit, cut_data, cut_data_test, labels, 
-                graph, nodes_on_qubit)
+        return (
+            final_cut_circuit,
+            cut_circuit,
+            cut_data,
+            cut_data_test,
+            labels,
+            graph,
+            nodes_on_qubit,
+        )

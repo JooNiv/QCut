@@ -24,8 +24,8 @@ from QCut.circuit_preparation import get_locations_and_subcircuits
 from QCut.circuit_utils import _remove_obsm, _remove_obsm_2
 from QCut.cutcircuit import CutCircuit, CutExperiment
 from QCut.cutlocation import CutLocation, SingleQubitCutLocation
-from QCut.postprocess import ERROR, _process_results, estimate_expectation_values
-from QCut.qcutresult import TotalResult
+from QCut.postprocess import ERROR, estimate_expectation_values
+from QCut.qcutresult import RawResult
 from QCut.qpd_operations import (
     _insert_cz_cut_qpd,
     _insert_wire_cut_qpd,
@@ -55,7 +55,7 @@ def _finalize_subcircuit(
 
 
 def _has_measurements(circuit: QuantumCircuit) -> bool:
-    return circuit.count_ops().get("measure", 0) > 0
+    return "measure" in circuit.count_ops()
 
 
 def _get_placeholder_locations(subcircuits: list[QuantumCircuit]) -> list:
@@ -88,6 +88,7 @@ def _get_placeholder_locations(subcircuits: list[QuantumCircuit]) -> list:
         ops.append(subops)
 
     return ops
+
 
 def get_experiment_circuits(  # noqa: C901
     cut_circuit: CutCircuit,
@@ -124,21 +125,21 @@ def get_experiment_circuits(  # noqa: C901
             ({num_qubits})."""
         )
 
-    qpd_combinations = get_qpd_combinations(cut_circuit.cut_locations)  
+    qpd_combinations = get_qpd_combinations(cut_circuit.cut_locations)
     # generate the QPD
     # operation combinations
 
     check_circuit_type = cut_circuit.backend is not None
-    
+
     measurement_settings = _combine_pauli_ops(observables)
 
     backend = None
     if check_circuit_type:
         backend = cut_circuit.backend
         try:
-            basis = backend.configuration().basis_gates # type: ignore[possibly-missing-attribute]
+            basis = backend.configuration().basis_gates  # type: ignore[possibly-missing-attribute]
         except Exception:
-            basis = list(backend.architecture.gates.keys()) # type: ignore[possibly-missing-attribute]
+            basis = list(backend.architecture.gates.keys())  # type: ignore[possibly-missing-attribute]
         basis = ["r" if gate == "prx" else gate for gate in basis]
 
     obs_subcircuits = None
@@ -166,8 +167,6 @@ def get_experiment_circuits(  # noqa: C901
         obs_subcircuits = _get_obs_subcircuits(
             cut_circuit.subcircuits, measurement_settings
         )
-
-
 
     _remove_obsm(obs_subcircuits)
 
@@ -209,21 +208,24 @@ def get_experiment_circuits(  # noqa: C901
                     ind, op = op_ind
 
                     actual_op = subcircuit.data[ind + offset]
-                    
+
                     if actual_op.operation.name != op.operation.name:
                         cur_ind = ind + offset
                         for i in range(len(subcircuit.data)):
                             cur_ind_minus = cur_ind - i
                             cur_ind_plus = cur_ind + i
-                            if op.operation.name == subcircuit.data[
-                                cur_ind_minus].operation.name:
+                            if (
+                                op.operation.name
+                                == subcircuit.data[cur_ind_minus].operation.name
+                            ):
                                 ind = cur_ind_minus - offset
                                 break
-                            if op.operation.name == subcircuit.data[
-                                cur_ind_plus].operation.name:
+                            if (
+                                op.operation.name
+                                == subcircuit.data[cur_ind_plus].operation.name
+                            ):
                                 ind = cur_ind_plus - offset
                                 break
-                            
 
                     if "cut" in op.operation.name:
                         (
@@ -275,12 +277,13 @@ def get_experiment_circuits(  # noqa: C901
         backend=backend,
     )
 
+
 def run_experiments(  # noqa: C901
     cut_experiment: CutExperiment,
     shots: int = 2**12,
-    backend = None,
+    backend=None,
     max_batch_size: int = 100,
-) -> list[list[TotalResult]]:
+) -> RawResult:
     """Run experiment circuits.
 
     Loop through experiment circuits and then loop through circuit group and run each
@@ -302,8 +305,13 @@ def run_experiments(  # noqa: C901
             list of transformed results
 
     """
-    wire_cuts = len([i for i in cut_experiment.cut_locations
-                     if isinstance(i, SingleQubitCutLocation)])
+    wire_cuts = len(
+        [
+            i
+            for i in cut_experiment.cut_locations
+            if isinstance(i, SingleQubitCutLocation)
+        ]
+    )
     cz_cuts = len(cut_experiment.cut_locations) - wire_cuts
     samples = int(
         (np.power(4, 2 * wire_cuts) * np.power(3, 2 * cz_cuts)) / np.power(ERROR, 2)
@@ -348,9 +356,8 @@ def run_experiments(  # noqa: C901
                 for key, val in results[0][0].items():
                     if key not in experiment_run:
                         experiment_run[key] = val
-    
-    return _process_results(results, shots, samples)
 
+    return RawResult(results, samples, shots)
 
 
 def run_cut_circuit(
@@ -377,15 +384,13 @@ def run_cut_circuit(
     """
 
     if not isinstance(backend, AerSimulator):
-        transpiled_subcircuits = transpile_subcircuits(cut_circuit
-                                                       ,backend,
-                                                       optimization_level=3)
+        transpiled_subcircuits = transpile_subcircuits(
+            cut_circuit, backend, optimization_level=3
+        )
 
-        cut_experiment = get_experiment_circuits(transpiled_subcircuits,
-                                        observables)
+        cut_experiment = get_experiment_circuits(transpiled_subcircuits, observables)
     else:
-        cut_experiment = get_experiment_circuits(cut_circuit,
-                                        observables)
+        cut_experiment = get_experiment_circuits(cut_circuit, observables)
 
     results = run_experiments(
         cut_experiment,
@@ -393,9 +398,7 @@ def run_cut_circuit(
         max_batch_size=max_batch_size,
     )
 
-    return estimate_expectation_values(
-        results, cut_experiment.expv_data()
-    )
+    return estimate_expectation_values(results, cut_experiment.expv_data())
 
 
 def run(

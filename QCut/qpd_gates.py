@@ -8,7 +8,8 @@ cut_op = QuantumCircuit(1, name="Cut")
 cut_op = cut_op.to_instruction(label="Cut")
 cut_op.definition = None
 
-def cut() -> QuantumCircuit |Instruction:
+
+def cut() -> QuantumCircuit | Instruction:
     """Return a single qubit wire cut instruction."""
     return cut_op
 
@@ -16,6 +17,7 @@ def cut() -> QuantumCircuit |Instruction:
 cutCZ_op = QuantumCircuit(2, name="CutCZ")
 cutCZ_op = cutCZ_op.to_instruction(label="CutCZ")
 cutCZ_op.definition = None
+
 
 def cutCZ() -> QuantumCircuit | Instruction:
     """Return a two qubit cutCZ gate instruction."""
@@ -44,12 +46,15 @@ def cutGate(gate: Gate, control: int, target: int) -> dict:
         if instr.operation.name == "cz":
             tr.data.pop(ind)
             test = CircuitInstruction(
-                        operation=cutCZ_op,
-                        qubits=tr.qubits,
-                    )
+                operation=cutCZ_op,
+                qubits=tr.qubits,
+            )
             tr.data.insert(ind, test)
-    return {"instruction": tr.to_instruction(label="CutGate"), 
-            "qargs":[control, target]}
+    return {
+        "instruction": tr.to_instruction(label="CutGate"),
+        "qargs": [control, target],
+    }
+
 
 # define measurements for different bases
 xmeas = QuantumCircuit(1, 1, name="x-meas")
