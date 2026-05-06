@@ -1,5 +1,5 @@
 """
-QCutFind is a QCut module for automatically finding cut locations in a quantum circuit. 
+QCutFind is a QCut module for automatically finding cut locations in a quantum circuit.
 It includes functions for extracting cut data from a graph representation of the
 circuit, inserting or appending instructions to a circuit, and refining cut locations.
 

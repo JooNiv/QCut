@@ -1,5 +1,5 @@
 """
-A module for generating the QPD operations and inserting them into the circuit at 
+A module for generating the QPD operations and inserting them into the circuit at
 the appropriate locations.
 """
 
@@ -39,12 +39,13 @@ def _insert_wire_cut_qpd(
         if meas_op.name == "id-meas":  # if identity measure channel
             # store indices
             # remove extra classical bits and registers
-            #_adjust_cregs(subcircuit)
+            # _adjust_cregs(subcircuit)
             for subop in reversed(meas_op.data):
                 subcircuit.data.insert(
                     ind + offset,
-                    CircuitInstruction(operation=subop.operation, 
-                                       qubits=qubits_for_operation),
+                    CircuitInstruction(
+                        operation=subop.operation, qubits=qubits_for_operation
+                    ),
                 )
         else:
             for i, subop in enumerate(reversed(meas_op.data)):
@@ -116,7 +117,7 @@ def _insert_cz_cut_qpd(  # noqa: C901
             # if identity measure channel
             # store indices
             # remove extra classical bits and registers
-            #if meas_op.name != "id-meas":
+            # if meas_op.name != "id-meas":
             #    _adjust_cregs(subcircuit)
             for subop in reversed(meas_op.data):
                 subcircuit.data.insert(
@@ -163,9 +164,9 @@ def _insert_cz_cut_qpd(  # noqa: C901
         if meas_op.name in ["id-meas", "s", "sdg", "z"]:
             # if identity measure channel
             # store indices
-            
+
             # remove extra classical bits and registers
-            #if meas_op.name != "id-meas":
+            # if meas_op.name != "id-meas":
             #    _adjust_cregs(subcircuit)
             for subop in reversed(meas_op.data):
                 subcircuit.data.insert(
@@ -201,6 +202,7 @@ def _insert_cz_cut_qpd(  # noqa: C901
         offset += len(meas_op) - 1
 
     return offset, classical_bit_index, inserted_operations
+
 
 def get_qpd_combinations(
     cut_locations: list[CutLocation | SingleQubitCutLocation],
