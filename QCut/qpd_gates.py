@@ -1,7 +1,10 @@
 """Helper gates for circuit knitting."""
 
 from qiskit import QuantumCircuit, transpile
-from qiskit.circuit import CircuitInstruction, Gate, Instruction
+from qiskit.circuit import Gate, Instruction, QuantumRegister
+from qiskit.dagcircuit import DAGCircuit
+from qiskit.transpiler import PassManager
+from qiskit.transpiler.basepasses import TransformationPass
 
 # define the cut location marker
 cut_op = QuantumCircuit(1, name="Cut")
@@ -24,35 +27,72 @@ def cutCZ() -> QuantumCircuit | Instruction:
     return cutCZ_op
 
 
-def cutGate(gate: Gate, control: int, target: int) -> dict:
-    """Return a cutCZ circuit with the same parameters as the input gate."""
-    if gate.num_qubits != 2:
-        raise ValueError("Input gate must be a 2-qubit gate.")
-    if control == target:
-        raise ValueError("Control and target qubits must be different.")
-    if control < 0 or target < 0:
-        raise ValueError("Control and target qubits must be non-negative.")
+# "u" (UGate = U(θ,φ,λ)) is Qiskit's universal single-qubit rotation — any single-qubit
+# unitary decomposes to it. Override via cutGate(single_qubit_basis=...) or replace
+# this list to match a backend's native single-qubit gates.
+QPD_DECOMPOSITION_SQ_BASIS: list[str] = ["u"]
 
-    qc = QuantumCircuit(2, name=f"cut{gate.name.upper()}")
-    if control > target:
-        loccontrol = 1
-        loctarget = 0
-    else:
-        loccontrol = 0
-        loctarget = 1
-    qc.append(gate, [loccontrol, loctarget])
-    tr = transpile(qc, basis_gates=["cz", "r", "h", "s", "sdg", "x", "y", "z"])
-    for ind, instr in enumerate(tr.data):
-        if instr.operation.name == "cz":
-            tr.data.pop(ind)
-            test = CircuitInstruction(
-                operation=cutCZ_op,
-                qubits=tr.qubits,
-            )
-            tr.data.insert(ind, test)
+# Maps 2-qubit gate name -> cut instruction. Add new QPD gates here only.
+QPD_GATE_REGISTRY: dict[str, Instruction] = {
+    "cz": cutCZ_op,
+    # "swap": cutSWAP_op,  add here when SWAP QPD is implemented
+}
+
+
+class _ReplaceWithCutGates(TransformationPass):
+    def __init__(self, registry: dict[str, Instruction]):
+        self.registry = registry
+        super().__init__()
+
+    def run(self, dag: DAGCircuit) -> DAGCircuit:
+        for node in dag.op_nodes():
+            if node.op.name not in self.registry:
+                continue
+            cut_op = self.registry[node.op.name]
+            mini_dag = DAGCircuit()
+            qreg = QuantumRegister(node.op.num_qubits)
+            mini_dag.add_qreg(qreg)
+            mini_dag.apply_operation_back(cut_op, list(qreg))
+            dag.substitute_node_with_dag(node, mini_dag)
+        return dag
+
+
+def cutGate(
+    gate: Gate,
+    control: int | list[int],
+    target: int | list[int],
+    single_qubit_basis: list[str] | None = None,
+) -> dict:
+    """Return a CutGate circuit decomposing the input gate with QPD cut markers.
+
+    control and target together define the ordered physical qubit mapping for
+    gate inputs 0..n-1: gate input i maps to physical qubit (controls + targets)[i].
+    """
+    controls = [control] if isinstance(control, int) else list(control)
+    targets = [target] if isinstance(target, int) else list(target)
+    all_qargs = controls + targets
+
+    if gate.num_qubits < 2:
+        raise ValueError("Input gate must have at least 2 qubits.")
+    if len(all_qargs) != gate.num_qubits:
+        raise ValueError(
+            f"Expected {gate.num_qubits} qubit arguments, got {len(all_qargs)}."
+        )
+    if len(set(all_qargs)) != len(all_qargs):
+        raise ValueError("Qubit arguments must be unique.")
+    if any(q < 0 for q in all_qargs):
+        raise ValueError("Qubit arguments must be non-negative.")
+
+    qc = QuantumCircuit(gate.num_qubits, name=f"cut{gate.name.upper()}")
+    qc.append(gate, list(range(gate.num_qubits)))
+
+    sq_basis = single_qubit_basis if single_qubit_basis is not None else QPD_DECOMPOSITION_SQ_BASIS
+    tr = transpile(qc, basis_gates=sq_basis + list(QPD_GATE_REGISTRY.keys()))
+    tr = PassManager([_ReplaceWithCutGates(QPD_GATE_REGISTRY)]).run(tr)
+
     return {
         "instruction": tr.to_instruction(label="CutGate"),
-        "qargs": [control, target],
+        "qargs": all_qargs,
     }
 
 
