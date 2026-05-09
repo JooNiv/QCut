@@ -1,10 +1,12 @@
 """Helper gates for circuit knitting."""
 
-from qiskit import QuantumCircuit, transpile
+from qiskit import QuantumCircuit
 from qiskit.circuit import Gate, Instruction, QuantumRegister
+from qiskit.circuit.equivalence_library import SessionEquivalenceLibrary
 from qiskit.dagcircuit import DAGCircuit
 from qiskit.transpiler import PassManager
 from qiskit.transpiler.basepasses import TransformationPass
+from qiskit.transpiler.passes import BasisTranslator, UnrollCustomDefinitions
 
 # define the cut location marker
 cut_op = QuantumCircuit(1, name="Cut")
@@ -97,9 +99,19 @@ def cutGate(
     qc = QuantumCircuit(gate.num_qubits, name=f"cut{gate.name.upper()}")
     qc.append(gate, list(range(gate.num_qubits)))
 
-    sq_basis = single_qubit_basis if single_qubit_basis is not None else QPD_DECOMPOSITION_SQ_BASIS
-    tr = transpile(qc, basis_gates=sq_basis + list(QPD_GATE_REGISTRY.keys()), optimization_level=0)
-    tr = PassManager([_ReplaceWithCutGates(QPD_GATE_REGISTRY)]).run(tr)
+    sq_basis = (
+        single_qubit_basis
+        if single_qubit_basis is not None
+        else QPD_DECOMPOSITION_SQ_BASIS
+    )
+    basis = sq_basis + list(QPD_GATE_REGISTRY.keys())
+    tr = PassManager(
+        [
+            UnrollCustomDefinitions(SessionEquivalenceLibrary, basis_gates=basis),
+            BasisTranslator(SessionEquivalenceLibrary, basis),
+            _ReplaceWithCutGates(QPD_GATE_REGISTRY),
+        ]
+    ).run(qc)
 
     return {
         "instruction": tr.to_instruction(label="CutGate"),
