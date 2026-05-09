@@ -46,5 +46,5 @@ cz_qpd = [
 # SWAP has Weyl coords (π/4, π/4, π/4), y=7 -> 14 terms each with |c|=1/2.
 # iSWAP has Weyl coords (π/4, π/4, 0),  y=5 -> 10 terms each with |c|=1/2.
 # Use the same +-1 coefficient convention as cz_qpd (true coefficients are +-1/2).
-swap_qpd: list[dict] = []   # TODO: fill in from paper
+swap_qpd: list[dict] = []  # TODO: fill in from paper
 iswap_qpd: list[dict] = []  # TODO: fill in from paper

@@ -14,7 +14,7 @@ from qiskit.circuit import (
 )
 
 from QCut.cutlocation import CutLocation, SingleQubitCutLocation
-from QCut.qpd import cz_qpd, identity_qpd, iswap_qpd, swap_qpd
+from QCut.qpd import cz_qpd, identity_qpd
 
 # Maps gate_name (from CutLocation.gate_name) to its QPD list.
 # Add new gates here once their QPD terms are derived in qpd.py.

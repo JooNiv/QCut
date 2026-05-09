@@ -70,7 +70,11 @@ def _insert_cut_nodes(circuit, cut_locations):
 
         initialize_node = NonCommutingGate(f"Init_{cut_index}")
 
-        prefix = f"cut{cut_location.gate_name.upper()}" if isinstance(cut_location, CutLocation) else ""
+        prefix = (
+            f"cut{cut_location.gate_name.upper()}"
+            if isinstance(cut_location, CutLocation)
+            else ""
+        )
         cut_czc = NonCommutingGate(f"{prefix}_c_{cut_index}")
 
         cut_czt = NonCommutingGate(f"{prefix}_t_{cut_index}")

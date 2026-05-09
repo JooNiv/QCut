@@ -85,8 +85,10 @@ def _get_placeholder_locations(subcircuits: list[QuantumCircuit]) -> list:
         subops = []
         for ind, op in enumerate(circ.data):
             name = op.operation.name
-            if name.startswith("Meas") or name.startswith("Init") or (
-                name.startswith("cut") and "_" in name
+            if (
+                name.startswith("Meas")
+                or name.startswith("Init")
+                or (name.startswith("cut") and "_" in name)
             ):
                 subops.append((ind, op))
         ops.append(subops)
