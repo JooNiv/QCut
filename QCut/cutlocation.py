@@ -8,12 +8,13 @@ from qiskit import QuantumRegister
 class CutLocation:
     """Storage class for storing cut locations."""
 
-    def __init__(self, cut_location: tuple[list, int]) -> None:
+    def __init__(self, cut_location: tuple[list, int], gate_name: str = "cz") -> None:
         """Init."""
         self.qubits = cut_location[0]
         self.control = cut_location[0][0][1]
         self.target = cut_location[0][1][1]
         self.index = cut_location[1]
+        self.gate_name = gate_name
 
     def __eq__(self, other) -> bool:
         """Equality."""
@@ -24,13 +25,14 @@ class CutLocation:
             self.control == other.control
             and self.target == other.target
             and self.index == other.index
+            and self.gate_name == other.gate_name
         )
 
     def __str__(self) -> str:
         """Format string."""
         msg = (
             f"control qubit: {self.control}, target qubit: {self.target}, "
-            f"cut index: {self.index}"
+            f"gate: {self.gate_name}, cut index: {self.index}"
         )
         return msg
 
