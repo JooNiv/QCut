@@ -40,3 +40,11 @@ cz_qpd = [
     {"op_0": idmeas, "op_1": sdg_meas, "c": 1},
     {"op_0": z, "op_1": sdg_meas, "c": -1},
 ]
+
+# swap_qpd and iswap_qpd are not yet implemented.
+# Derive from Mitarai & Fujii, PRA 2021 (doi:10.1103/PhysRevA.104.062421).
+# SWAP has Weyl coords (π/4, π/4, π/4), y=7 -> 14 terms each with |c|=1/2.
+# iSWAP has Weyl coords (π/4, π/4, 0),  y=5 -> 10 terms each with |c|=1/2.
+# Use the same +-1 coefficient convention as cz_qpd (true coefficients are +-1/2).
+swap_qpd: list[dict] = []   # TODO: fill in from paper
+iswap_qpd: list[dict] = []  # TODO: fill in from paper

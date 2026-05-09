@@ -21,6 +21,14 @@ cutCZ_op = QuantumCircuit(2, name="CutCZ")
 cutCZ_op = cutCZ_op.to_instruction(label="CutCZ")
 cutCZ_op.definition = None
 
+cutSWAP_op = QuantumCircuit(2, name="CutSWAP")
+cutSWAP_op = cutSWAP_op.to_instruction(label="CutSWAP")
+cutSWAP_op.definition = None
+
+cutISWAP_op = QuantumCircuit(2, name="CutISWAP")
+cutISWAP_op = cutISWAP_op.to_instruction(label="CutISWAP")
+cutISWAP_op.definition = None
+
 
 def cutCZ() -> QuantumCircuit | Instruction:
     """Return a two qubit cutCZ gate instruction."""
@@ -32,10 +40,13 @@ def cutCZ() -> QuantumCircuit | Instruction:
 # this list to match a backend's native single-qubit gates.
 QPD_DECOMPOSITION_SQ_BASIS: list[str] = ["u"]
 
-# Maps 2-qubit gate name -> cut instruction. Add new QPD gates here only.
+# Maps 2-qubit gate name -> cut instruction.
+# Add here once the QPD terms are implemented in qpd.py and QPD_REGISTRY in
+# qpd_operations.py is updated — both must be done together.
 QPD_GATE_REGISTRY: dict[str, Instruction] = {
     "cz": cutCZ_op,
-    # "swap": cutSWAP_op,  add here when SWAP QPD is implemented
+    "swap": cutSWAP_op,
+    "iswap": cutISWAP_op,
 }
 
 
@@ -87,7 +98,7 @@ def cutGate(
     qc.append(gate, list(range(gate.num_qubits)))
 
     sq_basis = single_qubit_basis if single_qubit_basis is not None else QPD_DECOMPOSITION_SQ_BASIS
-    tr = transpile(qc, basis_gates=sq_basis + list(QPD_GATE_REGISTRY.keys()))
+    tr = transpile(qc, basis_gates=sq_basis + list(QPD_GATE_REGISTRY.keys()), optimization_level=0)
     tr = PassManager([_ReplaceWithCutGates(QPD_GATE_REGISTRY)]).run(tr)
 
     return {

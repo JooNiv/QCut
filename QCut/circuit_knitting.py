@@ -28,7 +28,7 @@ from QCut.cutlocation import CutLocation, SingleQubitCutLocation
 from QCut.postprocess import ERROR, estimate_expectation_values
 from QCut.qcutresult import RawResult
 from QCut.qpd_operations import (
-    _insert_cz_cut_qpd,
+    _insert_2qubit_gate_cut_qpd,
     _insert_wire_cut_qpd,
     get_qpd_combinations,
 )
@@ -81,12 +81,13 @@ def _get_placeholder_locations(subcircuits: list[QuantumCircuit]) -> list:
 
     """
     ops = []
-    names = ["Meas", "Init", "cutCZ"]
     for circ in subcircuits:
         subops = []
         for ind, op in enumerate(circ.data):
-            # if "Meas" in op.operation.name or "Init" in op.operation.name :
-            if any(i in op.operation.name for i in names):
+            name = op.operation.name
+            if name.startswith("Meas") or name.startswith("Init") or (
+                name.startswith("cut") and "_" in name
+            ):
                 subops.append((ind, op))
         ops.append(subops)
 
@@ -241,7 +242,7 @@ def get_experiment_circuits(  # noqa: C901
                             offset,
                             classical_bit_index,
                             inserted_operations,
-                        ) = _insert_cz_cut_qpd(
+                        ) = _insert_2qubit_gate_cut_qpd(
                             ind,
                             op,
                             subcircuit,
