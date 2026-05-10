@@ -14,14 +14,14 @@ from qiskit.circuit import (
 )
 
 from QCut.cutlocation import CutLocation, SingleQubitCutLocation
-from QCut.qpd import cz_qpd, identity_qpd, swap_qpd
+from QCut.qpd import cz_qpd, identity_qpd, swap_qpd, iswap_qpd
 
 # Maps gate_name (from CutLocation.gate_name) to its QPD list.
 # Add new gates here once their QPD terms are derived in qpd.py.
 QPD_REGISTRY: dict[str, list] = {
     "cz": cz_qpd,
     "swap": swap_qpd,
-    # "iswap": iswap_qpd,  # uncomment when iswap_qpd terms are filled in
+    "iswap": iswap_qpd,
 }
 
 def _insert_wire_cut_qpd(
