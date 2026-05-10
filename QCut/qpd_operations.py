@@ -14,13 +14,13 @@ from qiskit.circuit import (
 )
 
 from QCut.cutlocation import CutLocation, SingleQubitCutLocation
-from QCut.qpd import cz_qpd, identity_qpd
+from QCut.qpd import cz_qpd, identity_qpd, swap_qpd
 
 # Maps gate_name (from CutLocation.gate_name) to its QPD list.
 # Add new gates here once their QPD terms are derived in qpd.py.
 QPD_REGISTRY: dict[str, list] = {
     "cz": cz_qpd,
-    # "swap": swap_qpd,    # uncomment when swap_qpd terms are filled in
+    "swap": swap_qpd,
     # "iswap": iswap_qpd,  # uncomment when iswap_qpd terms are filled in
 }
 
@@ -136,7 +136,7 @@ def _insert_2qubit_gate_cut_qpd(  # noqa: C901
                 )
         else:
             for i, subop in enumerate(reversed(meas_op.data)):
-                if i == 0:
+                if subop.operation.name in ["measure"]:
                     subcircuit.data.insert(
                         ind + offset,
                         CircuitInstruction(
@@ -185,7 +185,7 @@ def _insert_2qubit_gate_cut_qpd(  # noqa: C901
                 )
         else:
             for i, subop in enumerate(reversed(meas_op.data)):
-                if i == 0:
+                if subop.operation.name in ["measure"]:
                     subcircuit.data.insert(
                         ind + offset,
                         CircuitInstruction(
