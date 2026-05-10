@@ -24,7 +24,6 @@ QPD_REGISTRY: dict[str, list] = {
     # "iswap": iswap_qpd,  # uncomment when iswap_qpd terms are filled in
 }
 
-
 def _insert_wire_cut_qpd(
     ind,
     op,
@@ -56,8 +55,8 @@ def _insert_wire_cut_qpd(
                     ),
                 )
         else:
-            for i, subop in enumerate(reversed(meas_op.data)):
-                if i == 0:
+            for subop in reversed(meas_op.data):
+                if subop.operation.name == "measure":
                     subcircuit.data.insert(
                         ind + offset,
                         CircuitInstruction(
