@@ -1,5 +1,6 @@
 """Helper gates for circuit knitting."""
 
+import numpy as np
 from qiskit import QuantumCircuit
 from qiskit.circuit import Gate, Instruction, QuantumRegister
 from qiskit.circuit.equivalence_library import SessionEquivalenceLibrary
@@ -171,3 +172,74 @@ z.z(0)
 sdg_meas = QuantumCircuit(1, 1, name="sdg_meas")
 sdg_meas.sdg(0)
 sdg_meas.measure(0, 0)
+
+i_gate = QuantumCircuit(1, name="I")
+i_gate.id(0)
+ 
+x_gate = QuantumCircuit(1, name="X")
+x_gate.x(0)
+ 
+y_gate = QuantumCircuit(1, name="Y")
+y_gate.y(0)
+ 
+z_gate = QuantumCircuit(1, name="Z")
+z_gate.z(0)
+ 
+axyp = QuantumCircuit(1, name="Axyp")
+axyp.y(0)
+axyp.s(0)
+ 
+axym = QuantumCircuit(1, name="Axym")
+axym.y(0)
+axym.s(0)
+axym.z(0)
+ 
+ayzp = QuantumCircuit(1, name="Ayzp")
+ayzp.z(0)
+ayzp.sx(0)
+ 
+ayzm = QuantumCircuit(1, name="Ayzm")
+ayzm.z(0)
+ayzm.sx(0)
+ayzm.x(0)
+ 
+azxp = QuantumCircuit(1, name="Azxp")
+azxp.h(0)
+ 
+azxm = QuantumCircuit(1, name="Azxm")
+azxm.h(0)
+azxm.y(0)
+  
+sx_gate = QuantumCircuit(1, name="SX")
+sx_gate.sx(0)
+ 
+sxdg_gate = QuantumCircuit(1, name="SXdg")
+sxdg_gate.sxdg(0)
+ 
+ry_p = QuantumCircuit(1, name="RY+")
+ry_p.ry(np.pi / 2, 0)
+ 
+ry_m = QuantumCircuit(1, name="RY-")
+ry_m.ry(-np.pi / 2, 0)
+ 
+s_gate = QuantumCircuit(1, name="S")
+s_gate.s(0)
+ 
+sdg_gate = QuantumCircuit(1, name="Sdg")
+sdg_gate.sdg(0)
+ 
+bxy = QuantumCircuit(1, 1, name="Bxy")
+bxy.measure(0, 0)
+bxy.x(0)
+ 
+byz = QuantumCircuit(1, 1, name="Byz")
+byz.h(0)
+byz.measure(0, 0)
+byz.h(0)
+byz.y(0)
+ 
+bzx = QuantumCircuit(1, 1, name="Bzx")
+bzx.sx(0)
+bzx.measure(0, 0)
+bzx.sxdg(0)
+bzx.z(0)
