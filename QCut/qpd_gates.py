@@ -38,14 +38,8 @@ def cutCZ() -> QuantumCircuit | Instruction:
     return cutCZ_op
 
 
-# "u" (UGate = U(θ,φ,λ)) is Qiskit's universal single-qubit rotation — any single-qubit
-# unitary decomposes to it. Override via cutGate(single_qubit_basis=...) or replace
-# this list to match a backend's native single-qubit gates.
 QPD_DECOMPOSITION_SQ_BASIS: list[str] = ["u"]
 
-# Maps 2-qubit gate name -> cut instruction.
-# Add here once the QPD terms are implemented in qpd.py and QPD_REGISTRY in
-# qpd_operations.py is updated — both must be done together.
 QPD_GATE_REGISTRY: dict[str, Instruction] = {
     "cz": cutCZ_op,
     "swap": cutSWAP_op,
