@@ -2,6 +2,18 @@
 Changelog
 =========
 
+Version 1.3.0
+=============
+
+Support for cutting SWAP and iSWAP gates
+----------------------------------------
+
+- Added support for cutting SWAP and iSWAP gates in addition to CZ gates and single qubit cuts.
+    * Uses optimal QPDs instead of naively decomposing into CZ gates, resulting in significantly fewer subcircuits needed for the same number of cuts.
+    * QCutFind also supports finding optimal cut locations for cutting SWAP and iSWAP gates.
+    * Refactored codebase to support cutting arbitrary gates in a more modular way, making it easier to add support for cutting more gates in the future.
+    * Check documentation for details on how to use.
+
 Version 1.2.0
 =============
 
