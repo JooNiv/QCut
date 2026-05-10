@@ -3,6 +3,7 @@ some of the same functionality as the qiskit QuantumCircuit class for
 a group of circuts."""
 
 from __future__ import annotations
+
 from typing import Iterable
 
 from qiskit import QuantumCircuit
