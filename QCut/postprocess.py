@@ -197,15 +197,12 @@ def estimate_expectation_values(results: RawResult, expv_data: dict) -> list[flo
         raw_results.results, raw_results._shots, raw_results._samples
     )
 
-    cuts = len(expv_data["cut_locations"])
     wire_cuts = len(
         [i for i in expv_data["cut_locations"] if isinstance(i, SingleQubitCutLocation)]
     )
-    cz_cuts = cuts - wire_cuts
-    # number of samples neede
-    samples = int(
-        (np.power(4, 2 * wire_cuts) * np.power(3, 2 * cz_cuts)) / np.power(ERROR, 2)
-    )
+
+    gamma = sum(abs(c) for c in expv_data["coefficients"])
+    samples = int(np.power(gamma, 2) / np.power(ERROR, 2))
     shots = int(samples / len(results_processed))
 
     measurement_settings = _combine_pauli_ops(expv_data["observables"])
@@ -253,5 +250,5 @@ def estimate_expectation_values(results: RawResult, expv_data: dict) -> list[flo
             sum_shots += shots
             expectation_values[ind] += mid
 
-    # multiply by gamma to the power of cuts and take mean
-    return np.power(4, wire_cuts) * np.power(3, cz_cuts) * expectation_values / samples
+    gamma = sum(abs(c) for c in expv_data["coefficients"])
+    return gamma * expectation_values / samples

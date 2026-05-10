@@ -24,7 +24,7 @@ from QCut.basis_transform import (
 from QCut.circuit_preparation import get_locations_and_subcircuits
 from QCut.circuit_utils import _remove_obsm, _remove_obsm_2
 from QCut.cutcircuit import CutCircuit, CutExperiment
-from QCut.cutlocation import CutLocation, SingleQubitCutLocation
+from QCut.cutlocation import CutLocation
 from QCut.postprocess import ERROR, estimate_expectation_values
 from QCut.qcutresult import RawResult
 from QCut.qpd_operations import (
@@ -186,16 +186,12 @@ def get_experiment_circuits(  # noqa: C901
     _remove_obsm_2(cut_circuit.subcircuits)
 
     # initialize solution lists
-    cuts = len(cut_circuit.cut_locations)
-    gate_cuts = len([i for i in cut_circuit.cut_locations if isinstance(i, CutLocation)])
-    
-    wire_cuts = cuts - gate_cuts
-
-    gates_cut = set(i.gate_name for i in cut_circuit.cut_locations if isinstance(i, CutLocation))
-
-    num_circs = np.power(8, wire_cuts) * [np.power(len(QPD_REGISTRY[gate]), gate_cuts) for gate in gates_cut]
-
-    #num_circs = np.power(8, wire_cuts) * np.power(6, gate_cuts)
+    num_circs = 1
+    for cut_loc in cut_circuit.cut_locations:
+        if isinstance(cut_loc, CutLocation):
+            num_circs *= len(QPD_REGISTRY[cut_loc.gate_name])
+        else:
+            num_circs *= 8
     experiment_circuits = []
     coefficients = np.empty(num_circs)
     placeholder_locations = _get_placeholder_locations(cut_circuit.subcircuits)
@@ -328,17 +324,8 @@ def run_experiments(  # noqa: C901
             list of transformed results
 
     """
-    wire_cuts = len(
-        [
-            i
-            for i in cut_experiment.cut_locations
-            if isinstance(i, SingleQubitCutLocation)
-        ]
-    )
-    cz_cuts = len(cut_experiment.cut_locations) - wire_cuts
-    samples = int(
-        (np.power(4, 2 * wire_cuts) * np.power(3, 2 * cz_cuts)) / np.power(ERROR, 2)
-    )
+    gamma = sum(abs(c) for c in cut_experiment.coefficients)
+    samples = int(np.power(gamma, 2) / np.power(ERROR, 2))
     samples = int(samples / cut_experiment.num_groups)
     if backend is None:
         backend = AerSimulator()

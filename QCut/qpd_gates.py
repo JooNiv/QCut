@@ -124,11 +124,14 @@ def cutGate(
 xmeas = QuantumCircuit(1, 1, name="x-meas")
 xmeas.h(0)
 xmeas.measure(0, 0)
+xmeas.h(0)
 
 ymeas = QuantumCircuit(1, 1, name="y-meas")
 ymeas.sdg(0)
 ymeas.h(0)
 ymeas.measure(0, 0)
+ymeas.h(0)
+ymeas.s(0)
 
 idmeas = QuantumCircuit(1, name="id-meas")
 idmeas.id(0)
