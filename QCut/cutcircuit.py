@@ -87,6 +87,7 @@ class CutExperiment:
             "map_qubit": self.map_qubit,
             "coefficients": self.coefficients,
             "observables": self.observables,
+            "num_exp_groups": self.num_groups,
         }
 
     def assign_parameters(
