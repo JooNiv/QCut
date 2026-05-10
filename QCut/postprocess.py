@@ -60,9 +60,7 @@ def _process_results(
                         np.array([-1 if x == "0" else 1 for x in i])
                         for i in separate_measurements
                     ]
-                    circuit_results.append(
-                        SubResult(result_eigenvalues, count / shots * samples)
-                    )
+                    circuit_results.append(SubResult(result_eigenvalues, count / shots * samples))
                 experiment_run_results.append(circuit_results)
             if group_ind >= len(preocessed_results):
                 preocessed_results.append([])
@@ -151,6 +149,25 @@ def _get_sub_expectation_values(
     return sub_expectation_value
 
 
+def _get_weights(coefficients: list[float], num_exp_groups: int):
+    """
+    Get weights for each subcircuit group based on the coefficients.
+    The sum of the weights is equal to the number of experiment groups.
+
+    Args:
+        coefficients (list[float]): list of coefficients for each subcircuit group
+        num_exp_groups (int): number of experiment groups
+    Returns:
+        Generator:
+            generator of weights for each subcircuit group
+    """
+
+    total_coefficient = sum(abs(coef) for coef in coefficients)
+    if total_coefficient == 0:
+        raise ValueError("Total coefficient cannot be zero.")
+    for coef in coefficients:
+        yield num_exp_groups * abs(coef) / total_coefficient
+
 def estimate_expectation_values(results: RawResult, expv_data: dict) -> list[float]:
     """Calculate the estimated expectation values.
 
@@ -208,6 +225,8 @@ def estimate_expectation_values(results: RawResult, expv_data: dict) -> list[flo
             raise ValueError("""Observable cannot be measured 
                              with given measurement settings.""")
 
+        weights = _get_weights(expv_data["coefficients"], expv_data["num_exp_groups"])
+
         for experiment_run, coefficient in zip(
             results_processed, expv_data["coefficients"]
         ):
@@ -217,9 +236,13 @@ def estimate_expectation_values(results: RawResult, expv_data: dict) -> list[flo
                 if len(obs_data["obs_indices"]) == 1
                 else [obs_data["obs_indices"]]
             )
+
+            weight = next(weights)
+
             mid = (
                 np.power(-1, wire_cuts + 1)  # * (np.power(-1, cz_cuts)
-                * coefficient
+                * np.sign(coefficient)
+                * weight
                 * _get_sub_expectation_values(
                     experiment_run[obs_data["circuit_index"]],
                     cur_obs,
