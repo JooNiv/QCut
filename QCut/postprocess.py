@@ -60,7 +60,9 @@ def _process_results(
                         np.array([-1 if x == "0" else 1 for x in i])
                         for i in separate_measurements
                     ]
-                    circuit_results.append(SubResult(result_eigenvalues, count / shots * samples))
+                    circuit_results.append(
+                        SubResult(result_eigenvalues, count / shots * samples)
+                    )
                 experiment_run_results.append(circuit_results)
             if group_ind >= len(preocessed_results):
                 preocessed_results.append([])
@@ -167,6 +169,7 @@ def _get_weights(coefficients: list[float], num_exp_groups: int):
         raise ValueError("Total coefficient cannot be zero.")
     for coef in coefficients:
         yield num_exp_groups * abs(coef) / total_coefficient
+
 
 def estimate_expectation_values(results: RawResult, expv_data: dict) -> list[float]:
     """Calculate the estimated expectation values.

@@ -3,6 +3,7 @@ some of the same functionality as the qiskit QuantumCircuit class for
 a group of circuts."""
 
 from __future__ import annotations
+from typing import Iterable
 
 from qiskit import QuantumCircuit
 
@@ -67,7 +68,7 @@ class CutExperiment:
         experiment_circuits: list[list[dict[int, QuantumCircuit]]],
         cut_locations: list[CutLocation | SingleQubitCutLocation],
         map_qubit: dict[int, int],
-        coefficients: list[float],
+        coefficients: Iterable[float],
         observables,
         backend=None,
     ) -> None:
