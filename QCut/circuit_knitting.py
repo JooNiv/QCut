@@ -4,6 +4,7 @@ A module for the main circuit knitting workflow.
 
 from __future__ import annotations
 
+import itertools
 import logging
 import pickle
 
@@ -28,6 +29,7 @@ from QCut.cutlocation import CutLocation, SingleQubitCutLocation
 from QCut.postprocess import ERROR, estimate_expectation_values
 from QCut.qcutresult import RawResult
 from QCut.qpd_operations import (
+    QPD_REGISTRY,
     _insert_2qubit_gate_cut_qpd,
     _insert_wire_cut_qpd,
     get_qpd_combinations,
@@ -186,10 +188,15 @@ def get_experiment_circuits(  # noqa: C901
 
     # initialize solution lists
     cuts = len(cut_circuit.cut_locations)
-    cz_cuts = len([i for i in cut_circuit.cut_locations if isinstance(i, CutLocation)])
-    wire_cuts = cuts - cz_cuts
+    gate_cuts = len([i for i in cut_circuit.cut_locations if isinstance(i, CutLocation)])
+    
+    wire_cuts = cuts - gate_cuts
 
-    num_circs = np.power(8, wire_cuts) * np.power(6, cz_cuts)
+    gates_cut = set(i.gate_name for i in cut_circuit.cut_locations if isinstance(i, CutLocation))
+
+    num_circs = np.power(8, wire_cuts) * [np.power(len(QPD_REGISTRY[gate]), gate_cuts) for gate in gates_cut]
+
+    #num_circs = np.power(8, wire_cuts) * np.power(6, gate_cuts)
     experiment_circuits = []
     coefficients = np.empty(num_circs)
     placeholder_locations = _get_placeholder_locations(cut_circuit.subcircuits)
