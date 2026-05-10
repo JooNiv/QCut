@@ -13,7 +13,7 @@ from QCut.QCutFind.refine import refine_cuts
 from QCut.qpd_gates import cut_op as cut
 from QCut.qpd_gates import cutCZ_op as cutCZ
 
-BASIS_GATES = ["cz", "r"]
+BASIS_GATES = ["cz", "swap", "iswap", "r"]
 
 
 def extract_cuts(graph, labels):  # noqa: C901
