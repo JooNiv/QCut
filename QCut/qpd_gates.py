@@ -166,9 +166,29 @@ s.s(0)
 z = QuantumCircuit(1, 1, name="z")
 z.z(0)
 
+zs = QuantumCircuit(1, 1, name="zs")
+zs.z(0)
+zs.s(0)
+
+sz = QuantumCircuit(1, 1, name="sz")
+sz.s(0)
+sz.z(0)
+
+ss = QuantumCircuit(1, 1, name="ss")
+ss.s(0)
+ss.s(0)
+
+z_meas_s = QuantumCircuit(1, 1, name="z-meas-")
+z_meas_s.measure(0, 0)
+z_meas_s.s(0)
+
 sdg_meas = QuantumCircuit(1, 1, name="sdg_meas")
 sdg_meas.sdg(0)
 sdg_meas.measure(0, 0)
+
+s_meas = QuantumCircuit(1, 1, name="s_meas")
+s_meas.s(0)
+s_meas.measure(0, 0)
 
 i_gate = QuantumCircuit(1, name="I")
 i_gate.id(0)
