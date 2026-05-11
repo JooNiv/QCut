@@ -64,7 +64,7 @@ Here Meas is the computational basis measurement and Z S means first applying th
 
 ## Appendix
 
-### 1. Explicitly calculate term 3 matrices
+### Explicitly calculate term 3 matrices
 
 $
 \begin{aligned}
@@ -130,7 +130,7 @@ $
 
 These are exactly the 0 and 1 projectors (the factor of 2 gets absorbed by the coefficient)
 
-### 2. Calculating coefficients
+### Calculating coefficients
 
 The coefficients follow immediately from the coefficients of [equation 2](#eq2). Let us go term wise:
 
