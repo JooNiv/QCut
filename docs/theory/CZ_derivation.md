@@ -41,11 +41,11 @@ In less mathematical terms we can decompose any gate of form $S(\exp(i\theta A_1
 Let us look at the structure that repeats twice in the sum:
 $S((I+\alpha_1A_1) \otimes S(I+i\alpha_2A_2))$
 
-We can see that the superoperator acts separately on each qubit so we can look at in in two parts. By calculating out the matrices [Appendix 1](#1-explicitly-calculate-term-3-matrices) we can see that the imaginary term is just the S gate (for $\alpha=-1$) and the $S^\dagger$ gate for $\alpha=+1$. Similarly we can see that the real term is the $\ket{0}\bra{0}$ projector for $\alpha=+1$ and the $\ket{1}\bra{1}$ for $\alpha=-1$. The total operation from the third term then becomes either measure + apply S/$S^\dagger$ or apply S/$S^\dagger$ + measure.
+We can see that the superoperator acts separately on each qubit so we can look at in in two parts. By calculating out the matrices [Appendix 1](#explicitly-calculate-term-3-matrices) we can see that the imaginary term is just the S gate (for $\alpha=-1$) and the $S^\dagger$ gate for $\alpha=+1$. Similarly we can see that the real term is the $\ket{0}\bra{0}$ projector for $\alpha=+1$ and the $\ket{1}\bra{1}$ for $\alpha=-1$. The total operation from the third term then becomes either measure + apply S/$S^\dagger$ or apply S/$S^\dagger$ + measure.
 
 ----
 
-Now we can get the full decomposition by applying the extra terms from [equation 1](#eq1), which are also just S gates and calculating the coefficients [Appendix 2](#2-calculating-coefficients). The full decomposition is then:
+Now we can get the full decomposition by applying the extra terms from [equation 1](#eq1), which are also just S gates and calculating the coefficients [Appendix 2](#calculating-coefficients). The full decomposition is then:
 
 | Qubit 1 | Qubit 2 | Coef |
 | :---    |  :---:  | ---: |
