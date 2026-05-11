@@ -71,7 +71,6 @@ exclude_patterns = [
 source_suffix = {
     '.rst': 'restructuredtext',
     '.ipynb': 'myst-nb',
-    '.md': 'myst-nb',
 }
 
 myst_enable_extensions = [
