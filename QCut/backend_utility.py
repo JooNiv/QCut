@@ -44,10 +44,16 @@ def transpile_subcircuits(
     for ind, i in enumerate(cut_circuit.cut_locations):
         if isinstance(i, CutLocation):
             custom_gates[f"cut{i.gate_name.upper()}_t_{ind}"] = Gate(
-                num_qubits=1, name=f"cut{i.gate_name.upper()}_t_{ind}", params=[], label=f"cut{i.gate_name.upper()}_t_{ind}"
+                num_qubits=1,
+                name=f"cut{i.gate_name.upper()}_t_{ind}",
+                params=[],
+                label=f"cut{i.gate_name.upper()}_t_{ind}",
             )
             custom_gates[f"cut{i.gate_name.upper()}_c_{ind}"] = Gate(
-                num_qubits=1, name=f"cut{i.gate_name.upper()}_c_{ind}", params=[], label=f"cut{i.gate_name.upper()}_c_{ind}"
+                num_qubits=1,
+                name=f"cut{i.gate_name.upper()}_c_{ind}",
+                params=[],
+                label=f"cut{i.gate_name.upper()}_c_{ind}",
             )
 
         elif isinstance(i, SingleQubitCutLocation):
@@ -63,15 +69,13 @@ def transpile_subcircuits(
             num_qubits=1, name=f"obs_{i}", params=[], label=f"obs_{i}"
         )
 
-
     print(custom_gates)
 
     target = Target()
 
     try:
         basis_gates = list({i[0].name for i in backend._target.instructions})
-        
-        
+
     except Exception as e:
         raise ValueError(f"Error accessing backend target instructions: {e}")
 

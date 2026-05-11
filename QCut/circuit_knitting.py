@@ -47,11 +47,16 @@ def _finalize_subcircuit(
     dag = circuit_to_dag(subcircuit)
     idle = list(dag.idle_wires())
 
-    creg_to_use = subcircuit.cregs[1] if len(subcircuit.cregs) >= 2 else subcircuit.cregs[0]
+    creg_to_use = (
+        subcircuit.cregs[1] if len(subcircuit.cregs) >= 2 else subcircuit.cregs[0]
+    )
 
     for wire in idle:
-        if (isinstance(wire, Qubit) and wire._index in meas_qubits 
-            and len(meas_qubits) > len(creg_to_use)):
+        if (
+            isinstance(wire, Qubit)
+            and wire._index in meas_qubits
+            and len(meas_qubits) > len(creg_to_use)
+        ):
             meas_qubits.remove(wire._index)
 
     print(subcircuit)
@@ -60,7 +65,7 @@ def _finalize_subcircuit(
 
     if len(meas_qubits) == 0:
         return subcircuit
-    
+
     subcircuit.measure(meas_qubits, creg_to_use)
 
     return subcircuit
