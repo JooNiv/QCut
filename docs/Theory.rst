@@ -2,7 +2,7 @@ Theory
 ======================
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 1
    :caption: Contents:
 
    CZ QPD derivation <theory/CZ_derivation.md>
