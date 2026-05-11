@@ -17,7 +17,7 @@ identity_qpd = [
 
 cz_qpd = [
     {"op_0": s, "op_1": s, "c": 1 / 2},
-    {"op_0": zs, "op_1": zs, "c": 1 / 2},
+    {"op_0": sdg, "op_1": sdg, "c": 1 / 2},
     {"op_0": zmeas, "op_1": z, "c": -1 / 2},
     {"op_0": zmeas, "op_1": i_gate, "c": 1 / 2},
     {"op_0": z, "op_1": zmeas, "c": -1 / 2},
