@@ -1,5 +1,6 @@
+import pytest
 from qiskit import QuantumCircuit
-from qiskit.circuit.library import CXGate
+from qiskit.circuit.library import CXGate, XGate
 from qiskit.quantum_info import SparsePauliOp
 from qiskit_aer import AerSimulator
 
@@ -61,3 +62,30 @@ def test_cut_gate_expectation_values():
 
     for ind, expv in enumerate(expectation_values):
         assert abs(expv - res_expvs[ind]) < 0.1
+
+
+def test_cutGate_list_args():
+    result_int = cutGate(CXGate(), 0, 1)
+    result_list = cutGate(CXGate(), [0], [1])
+    assert result_int["qargs"] == result_list["qargs"]
+    assert result_int["instruction"].name == result_list["instruction"].name
+
+
+def test_cutGate_single_qubit_raises():
+    with pytest.raises(ValueError, match="at least 2 qubits"):
+        cutGate(XGate(), 0, 1)
+
+
+def test_cutGate_wrong_num_qargs_raises():
+    with pytest.raises(ValueError, match="Expected 2 qubit arguments"):
+        cutGate(CXGate(), [0, 1], [2])
+
+
+def test_cutGate_duplicate_qargs_raises():
+    with pytest.raises(ValueError, match="unique"):
+        cutGate(CXGate(), 0, 0)
+
+
+def test_cutGate_negative_qarg_raises():
+    with pytest.raises(ValueError, match="non-negative"):
+        cutGate(CXGate(), -1, 0)

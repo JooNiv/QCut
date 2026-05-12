@@ -9,6 +9,23 @@ from QCut import find_cuts
 from QCut.circuit_knitting import run_cut_circuit
 from QCut.QCutFind.combine_subcircuits import construct_final_subcircuits
 
+mult = 1.635
+
+circuit1 = QuantumCircuit(4)
+circuit1.r(mult * 0.46262, mult * 0.1446, 0)
+circuit1.cx(0, 1)
+circuit1.cx(1, 2)
+circuit1.cx(2, 3)
+
+circuit2 = QuantumCircuit(4)
+circuit2.r(mult * 0.46262, mult * 0.1446, 0)
+circuit2.cx(0, 1)
+
+circuit2.cx(1, 2)
+circuit2.cx(1, 2)
+circuit2.cx(1, 2)
+
+circuit2.cx(2, 3)
 
 def test_find_cuts() -> None:
     """Test find_cuts function.
@@ -22,16 +39,6 @@ def test_find_cuts() -> None:
 
         assert len(cut_circuit.subcircuits) == sq.cut_sizes[solution_index]
 
-
-circuit = QuantumCircuit(4)
-
-mult = 1.635
-circuit.r(mult * 0.46262, mult * 0.1446, 0)
-circuit.cx(0, 1)
-circuit.cx(1, 2)
-circuit.cx(2, 3)
-
-
 def test_find_gate_cuts():
     """Test find_cuts function on a circuit with a cut gate.
 
@@ -39,28 +46,17 @@ def test_find_gate_cuts():
     locations in a circuit containing a cut gate by comparing the result to the
     expected number of subcircuits.
     """
-    cut_circuit = find_cuts(circuit.copy(), 2, cuts="both")
+    cut_circuit = find_cuts(circuit1.copy(), 2, cuts="both")
 
     assert len(cut_circuit.subcircuits) == 2
+
+    print(cut_circuit.subcircuits[0])
+    print(cut_circuit.subcircuits[1])
 
     for circ in cut_circuit.subcircuits:
         for op in circ.data:
             assert "meas" not in op.operation.name.lower()
             assert "init" not in op.operation.name.lower()
-
-
-circuit = QuantumCircuit(4)
-
-mult = 1.635
-circuit.r(mult * 0.46262, mult * 0.1446, 0)
-circuit.cx(0, 1)
-
-circuit.cx(1, 2)
-circuit.cx(1, 2)
-circuit.cx(1, 2)
-
-circuit.cx(2, 3)
-
 
 def test_auto_refine_wire():
     """Test find_cuts function on a circuit with a cut gate.
@@ -70,7 +66,7 @@ def test_auto_refine_wire():
     expected number of subcircuits.
     """
     cut_circuit = find_cuts(
-        circuit.copy(), num_partitions=2, max_qubits=[2, 2], cuts="wire"
+        circuit2.copy(), num_partitions=2, max_qubits=[2, 2], cuts="wire"
     )
 
     assert len(cut_circuit.subcircuits) == 2
@@ -84,7 +80,7 @@ def test_auto_refine_gate():
     expected number of subcircuits.
     """
     cut_circuit = find_cuts(
-        circuit.copy(), num_partitions=2, max_qubits=[2, 2], cuts="gate"
+        circuit2.copy(), num_partitions=2, max_qubits=[2, 2], cuts="gate"
     )
 
     assert len(cut_circuit.subcircuits) == 2
@@ -103,11 +99,11 @@ def test_construct_final_subcircuits():
     subcircuits to the expected operations.
     """
     cut_circuit = find_cuts(
-        circuit.copy(), num_partitions=2, max_qubits=[2, 2], cuts="gate"
+        circuit2.copy(), num_partitions=2, max_qubits=[2, 2], cuts="gate"
     )
 
     final_circs = construct_final_subcircuits(
-        cut_circuit.subcircuits, [circuit.num_qubits]
+        cut_circuit.subcircuits, [circuit2.num_qubits]
     )
 
     assert len(final_circs) == 1

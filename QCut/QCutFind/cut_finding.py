@@ -10,8 +10,8 @@ from QCut.circuit_preparation import get_locations_and_subcircuits
 from QCut.QCutFind.graph_circuit_utils import circ_to_graph
 from QCut.QCutFind.metis import k_way_metis_partition
 from QCut.QCutFind.refine import refine_cuts
+from QCut.qpd_gates import QPD_GATE_REGISTRY
 from QCut.qpd_gates import cut_op as cut
-from QCut.qpd_gates import cutCZ_op as cutCZ
 
 BASIS_GATES = ["cz", "swap", "iswap", "r"]
 
@@ -101,11 +101,18 @@ def add_cuts_to_circuit(circuit, cut_data, cut_data_test):
             target_index = i[2][0] + offset
             qctest.data.pop(target_index)
 
+            gate_name = j[1]
+            if gate_name not in QPD_GATE_REGISTRY:
+                raise NotImplementedError(
+                    f"No cut marker registered for gate '{gate_name}'."
+                )
+            cut_marker = QPD_GATE_REGISTRY[gate_name]
+
             # Insert the cut operation
             insert_or_append(
                 qctest,
                 target_index,
-                CircuitInstruction(cutCZ, qubits),
+                CircuitInstruction(cut_marker, qubits),
             )
 
         else:
@@ -190,7 +197,7 @@ def find_cuts(  # noqa: C901
 
     circuit.remove_final_measurements()
 
-    circuit = transpile(circuit, basis_gates=BASIS_GATES)
+    circuit = transpile(circuit, optimization_level=0, basis_gates=BASIS_GATES)
 
     graph, nodes_on_qubit = circ_to_graph(
         circuit, gateCutWeight=gate_cut_weight, wireCutWeight=wire_cut_weight
