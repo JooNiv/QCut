@@ -2,7 +2,7 @@ Gate cuts
 =========
 
 Gate cuts can be used to cut two-qubit gates instead of cutting wires. This is done by inserting special gate cut instructions into the circuit.
-Currently only CZ gate cuts are supported so all cut gates get transformed into cut CZ gates with appropriate transpilation.
+Currently only CZ, SWAP, and iSWAP gate cuts are natively supported. All cut gates get transformed into cut supported gates with appropriate transpilation.
 
 .. code:: python
    
