@@ -4,6 +4,8 @@ a group of circuts."""
 
 from __future__ import annotations
 
+from typing import Iterable
+
 from qiskit import QuantumCircuit
 
 from QCut.cutlocation import CutLocation, SingleQubitCutLocation
@@ -67,7 +69,7 @@ class CutExperiment:
         experiment_circuits: list[list[dict[int, QuantumCircuit]]],
         cut_locations: list[CutLocation | SingleQubitCutLocation],
         map_qubit: dict[int, int],
-        coefficients: list[float],
+        coefficients: Iterable[float],
         observables,
         backend=None,
     ) -> None:
@@ -87,6 +89,7 @@ class CutExperiment:
             "map_qubit": self.map_qubit,
             "coefficients": self.coefficients,
             "observables": self.observables,
+            "num_exp_groups": self.num_groups,
         }
 
     def assign_parameters(

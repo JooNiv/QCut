@@ -42,7 +42,8 @@ def _get_cut_locations(circuit):
             if len(qubits) == 1:
                 cut_locations.append(SingleQubitCutLocation((qubits[0], index)))
             else:
-                cut_locations.append(CutLocation((qubits, index)))
+                gate_name = op.operation.name.replace("Cut", "").lower()
+                cut_locations.append(CutLocation((qubits, index), gate_name=gate_name))
 
             # adjust index to account for removed operation
             index -= 1
@@ -69,9 +70,14 @@ def _insert_cut_nodes(circuit, cut_locations):
 
         initialize_node = NonCommutingGate(f"Init_{cut_index}")
 
-        cut_czc = NonCommutingGate(f"cutCZ_c_{cut_index}")
+        prefix = (
+            f"cut{cut_location.gate_name.upper()}"
+            if isinstance(cut_location, CutLocation)
+            else ""
+        )
+        cut_czc = NonCommutingGate(f"{prefix}_c_{cut_index}")
 
-        cut_czt = NonCommutingGate(f"cutCZ_t_{cut_index}")
+        cut_czt = NonCommutingGate(f"{prefix}_t_{cut_index}")
 
         cut_index += 1
 

@@ -14,7 +14,15 @@ from qiskit.circuit import (
 )
 
 from QCut.cutlocation import CutLocation, SingleQubitCutLocation
-from QCut.qpd import cz_qpd, identity_qpd
+from QCut.qpd import cz_qpd, identity_qpd, iswap_qpd, swap_qpd
+
+# Maps gate_name (from CutLocation.gate_name) to its QPD list.
+# Add new gates here once their QPD terms are derived in qpd.py.
+QPD_REGISTRY: dict[str, list] = {
+    "cz": cz_qpd,
+    "swap": swap_qpd,
+    "iswap": iswap_qpd,
+}
 
 
 def _insert_wire_cut_qpd(
@@ -48,8 +56,8 @@ def _insert_wire_cut_qpd(
                     ),
                 )
         else:
-            for i, subop in enumerate(reversed(meas_op.data)):
-                if i == 0:
+            for subop in reversed(meas_op.data):
+                if subop.operation.name == "measure":
                     subcircuit.data.insert(
                         ind + offset,
                         CircuitInstruction(
@@ -93,7 +101,7 @@ def _insert_wire_cut_qpd(
     return offset, classical_bit_index, inserted_operations
 
 
-def _insert_cz_cut_qpd(  # noqa: C901
+def _insert_2qubit_gate_cut_qpd(  # noqa: C901
     ind,
     op,
     subcircuit,
@@ -128,7 +136,7 @@ def _insert_cz_cut_qpd(  # noqa: C901
                 )
         else:
             for i, subop in enumerate(reversed(meas_op.data)):
-                if i == 0:
+                if subop.operation.name in ["measure"]:
                     subcircuit.data.insert(
                         ind + offset,
                         CircuitInstruction(
@@ -177,7 +185,7 @@ def _insert_cz_cut_qpd(  # noqa: C901
                 )
         else:
             for i, subop in enumerate(reversed(meas_op.data)):
-                if i == 0:
+                if subop.operation.name in ["measure"]:
                     subcircuit.data.insert(
                         ind + offset,
                         CircuitInstruction(
@@ -223,7 +231,11 @@ def get_qpd_combinations(
         if isinstance(cut, SingleQubitCutLocation):
             qpd_lists.append(identity_qpd)
         elif isinstance(cut, CutLocation):
-            qpd_lists.append(cz_qpd)
+            if cut.gate_name not in QPD_REGISTRY:
+                raise NotImplementedError(
+                    f"No QPD implemented for gate '{cut.gate_name}'. "
+                )
+            qpd_lists.append(QPD_REGISTRY[cut.gate_name])
         else:
             raise TypeError(f"Unknown cut type: {type(cut)}")
 

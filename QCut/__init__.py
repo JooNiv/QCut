@@ -19,7 +19,7 @@ from QCut.postprocess import (
     estimate_expectation_values,
 )
 from QCut.QCutFind import find_cuts
-from QCut.qpd_gates import cut, cutCZ, cutGate
+from QCut.qpd_gates import cut, cutCZ, cutGate, cutISWAP, cutSWAP
 
 try:
     __version__ = version("QCut")
@@ -40,6 +40,8 @@ __all__ = [
     "run_experiments",
     "cut",
     "cutCZ",
+    "cutSWAP",
+    "cutISWAP",
     "cutGate",
     "find_cuts",
 ]

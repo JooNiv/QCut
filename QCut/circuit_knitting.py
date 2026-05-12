@@ -24,11 +24,12 @@ from QCut.basis_transform import (
 from QCut.circuit_preparation import get_locations_and_subcircuits
 from QCut.circuit_utils import _remove_obsm, _remove_obsm_2
 from QCut.cutcircuit import CutCircuit, CutExperiment
-from QCut.cutlocation import CutLocation, SingleQubitCutLocation
+from QCut.cutlocation import CutLocation
 from QCut.postprocess import ERROR, estimate_expectation_values
 from QCut.qcutresult import RawResult
 from QCut.qpd_operations import (
-    _insert_cz_cut_qpd,
+    QPD_REGISTRY,
+    _insert_2qubit_gate_cut_qpd,
     _insert_wire_cut_qpd,
     get_qpd_combinations,
 )
@@ -46,14 +47,23 @@ def _finalize_subcircuit(
     dag = circuit_to_dag(subcircuit)
     idle = list(dag.idle_wires())
 
+    creg_to_use = (
+        subcircuit.cregs[1] if len(subcircuit.cregs) >= 2 else subcircuit.cregs[0]
+    )
+
     for wire in idle:
-        if isinstance(wire, Qubit) and wire._index in meas_qubits:
+        if (
+            isinstance(wire, Qubit)
+            and wire._index in meas_qubits
+            and len(meas_qubits) > len(creg_to_use)
+        ):
             meas_qubits.remove(wire._index)
 
-    if len(subcircuit.cregs) >= 2:
-        subcircuit.measure(meas_qubits, subcircuit.cregs[1])
-    else:
-        subcircuit.measure(meas_qubits, subcircuit.cregs[0])
+    if len(meas_qubits) == 0:
+        return subcircuit
+
+    subcircuit.measure(meas_qubits, creg_to_use)
+
     return subcircuit
 
 
@@ -81,12 +91,15 @@ def _get_placeholder_locations(subcircuits: list[QuantumCircuit]) -> list:
 
     """
     ops = []
-    names = ["Meas", "Init", "cutCZ"]
     for circ in subcircuits:
         subops = []
         for ind, op in enumerate(circ.data):
-            # if "Meas" in op.operation.name or "Init" in op.operation.name :
-            if any(i in op.operation.name for i in names):
+            name = op.operation.name
+            if (
+                name.startswith("Meas")
+                or name.startswith("Init")
+                or (name.startswith("cut") and "_" in name)
+            ):
                 subops.append((ind, op))
         ops.append(subops)
 
@@ -182,11 +195,12 @@ def get_experiment_circuits(  # noqa: C901
     _remove_obsm_2(cut_circuit.subcircuits)
 
     # initialize solution lists
-    cuts = len(cut_circuit.cut_locations)
-    cz_cuts = len([i for i in cut_circuit.cut_locations if isinstance(i, CutLocation)])
-    wire_cuts = cuts - cz_cuts
-
-    num_circs = np.power(8, wire_cuts) * np.power(6, cz_cuts)
+    num_circs = 1
+    for cut_loc in cut_circuit.cut_locations:
+        if isinstance(cut_loc, CutLocation):
+            num_circs *= len(QPD_REGISTRY[cut_loc.gate_name])
+        else:
+            num_circs *= 8
     experiment_circuits = []
     coefficients = np.empty(num_circs)
     placeholder_locations = _get_placeholder_locations(cut_circuit.subcircuits)
@@ -241,7 +255,7 @@ def get_experiment_circuits(  # noqa: C901
                             offset,
                             classical_bit_index,
                             inserted_operations,
-                        ) = _insert_cz_cut_qpd(
+                        ) = _insert_2qubit_gate_cut_qpd(
                             ind,
                             op,
                             subcircuit,
@@ -319,17 +333,8 @@ def run_experiments(  # noqa: C901
             list of transformed results
 
     """
-    wire_cuts = len(
-        [
-            i
-            for i in cut_experiment.cut_locations
-            if isinstance(i, SingleQubitCutLocation)
-        ]
-    )
-    cz_cuts = len(cut_experiment.cut_locations) - wire_cuts
-    samples = int(
-        (np.power(4, 2 * wire_cuts) * np.power(3, 2 * cz_cuts)) / np.power(ERROR, 2)
-    )
+    gamma = sum(abs(c) for c in cut_experiment.coefficients)
+    samples = int(np.power(gamma, 2) / np.power(ERROR, 2))
     samples = int(samples / cut_experiment.num_groups)
     if backend is None:
         backend = AerSimulator()

@@ -19,7 +19,7 @@ class SubResult:
         return str(self)
 
 
-# Store total results of all sub-circuits (two for now)
+# Store total results of all sub-circuits for a single experiment run
 class TotalResult:
     """Storage class for easier access to the results of a subcircuit group."""
 
