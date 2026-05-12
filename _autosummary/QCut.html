@@ -42,7 +42,7 @@
 
     <script src="../_static/jquery.js?v=5d32c60e"></script>
     <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-    <script src="../_static/documentation_options.js?v=eae07d4c"></script>
+    <script src="../_static/documentation_options.js?v=1abe2725"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/sphinx-book-theme.js?v=fab101a9"></script>
@@ -54,7 +54,7 @@
     <link rel="prev" title="QCut API reference" href="../QCut.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="1.2.0.post1.dev17+g4f6237eee" />
+  <meta name="docsearch:version" content="1.2.0.post1.dev18+g2faf706da" />
   </head>
   
   
@@ -163,6 +163,12 @@
 <li class="toctree-l2"><a class="reference internal" href="../examples/QCutCutToThreeParts.html">Cut to Three parts</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../examples/QCutMultipleCutsOnSingleWire.html">Multiple cuts on a single wire</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../examples/QCutQAOAExample.html">QAOA Example</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../Theory.html">Theory</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../theory/CZ_derivation.html">CZ QPD derivation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../theory/SWAP_derivation.html">SWAP QPD derivation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../theory/Wire_derivation.html">Wire Cut QPD derivation</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1"><a class="reference internal" href="../Acknowledgement.html">Acknowledgements</a></li>
@@ -329,6 +335,8 @@
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.run_experiments"><code class="docutils literal notranslate"><span class="pre">run_experiments()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.cut"><code class="docutils literal notranslate"><span class="pre">cut()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.cutCZ"><code class="docutils literal notranslate"><span class="pre">cutCZ()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.cutSWAP"><code class="docutils literal notranslate"><span class="pre">cutSWAP()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.cutISWAP"><code class="docutils literal notranslate"><span class="pre">cutISWAP()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.cutGate"><code class="docutils literal notranslate"><span class="pre">cutGate()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.find_cuts"><code class="docutils literal notranslate"><span class="pre">find_cuts()</span></code></a></li>
 </ul>
@@ -586,9 +594,23 @@ call. Larger batches reduce per-job overhead on real hardware.</p></li>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="QCut.cutSWAP">
+<span class="sig-prename descclassname"><span class="pre">QCut.</span></span><span class="sig-name descname"><span class="pre">cutSWAP</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">QuantumCircuit</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Instruction</span></span></span><a class="reference internal" href="../_modules/QCut/qpd_gates.html#cutSWAP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.cutSWAP" title="Link to this definition">#</a></dt>
+<dd><p>Return a two qubit cutSWAP gate instruction.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QCut.cutISWAP">
+<span class="sig-prename descclassname"><span class="pre">QCut.</span></span><span class="sig-name descname"><span class="pre">cutISWAP</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">QuantumCircuit</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Instruction</span></span></span><a class="reference internal" href="../_modules/QCut/qpd_gates.html#cutISWAP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.cutISWAP" title="Link to this definition">#</a></dt>
+<dd><p>Return a two qubit cutISWAP gate instruction.</p>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="QCut.cutGate">
-<span class="sig-prename descclassname"><span class="pre">QCut.</span></span><span class="sig-name descname"><span class="pre">cutGate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Gate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">control</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="../_modules/QCut/qpd_gates.html#cutGate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.cutGate" title="Link to this definition">#</a></dt>
-<dd><p>Return a cutCZ circuit with the same parameters as the input gate.</p>
+<span class="sig-prename descclassname"><span class="pre">QCut.</span></span><span class="sig-name descname"><span class="pre">cutGate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Gate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">control</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">single_qubit_basis</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="../_modules/QCut/qpd_gates.html#cutGate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.cutGate" title="Link to this definition">#</a></dt>
+<dd><p>Return a CutGate circuit decomposing the input gate with QPD cut markers.</p>
+<p>control and target together define the ordered physical qubit mapping for
+gate inputs 0..n-1: gate input i maps to physical qubit (controls + targets)[i].</p>
 </dd></dl>
 
 <dl class="py function">
@@ -702,6 +724,8 @@ analysis. Defaults to False.</p></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.run_experiments"><code class="docutils literal notranslate"><span class="pre">run_experiments()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.cut"><code class="docutils literal notranslate"><span class="pre">cut()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.cutCZ"><code class="docutils literal notranslate"><span class="pre">cutCZ()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.cutSWAP"><code class="docutils literal notranslate"><span class="pre">cutSWAP()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.cutISWAP"><code class="docutils literal notranslate"><span class="pre">cutISWAP()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.cutGate"><code class="docutils literal notranslate"><span class="pre">cutGate()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.find_cuts"><code class="docutils literal notranslate"><span class="pre">find_cuts()</span></code></a></li>
 </ul>

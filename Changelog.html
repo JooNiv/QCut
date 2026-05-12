@@ -42,7 +42,7 @@
 
     <script src="_static/jquery.js?v=5d32c60e"></script>
     <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-    <script src="_static/documentation_options.js?v=eae07d4c"></script>
+    <script src="_static/documentation_options.js?v=1abe2725"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/scripts/sphinx-book-theme.js?v=fab101a9"></script>
@@ -53,7 +53,7 @@
     <link rel="prev" title="QCut" href="_autosummary/QCut.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="1.2.0.post1.dev17+g4f6237eee" />
+  <meta name="docsearch:version" content="1.2.0.post1.dev18+g2faf706da" />
   </head>
   
   
@@ -162,6 +162,12 @@
 <li class="toctree-l2"><a class="reference internal" href="examples/QCutCutToThreeParts.html">Cut to Three parts</a></li>
 <li class="toctree-l2"><a class="reference internal" href="examples/QCutMultipleCutsOnSingleWire.html">Multiple cuts on a single wire</a></li>
 <li class="toctree-l2"><a class="reference internal" href="examples/QCutQAOAExample.html">QAOA Example</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="Theory.html">Theory</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="theory/CZ_derivation.html">CZ QPD derivation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="theory/SWAP_derivation.html">SWAP QPD derivation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="theory/Wire_derivation.html">Wire Cut QPD derivation</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1"><a class="reference internal" href="Acknowledgement.html">Acknowledgements</a></li>
@@ -318,7 +324,11 @@
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-1-2-0">Version 1.2.0</a><ul class="nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-1-3-0"><strong>Version 1.3.0</strong></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#support-for-cutting-swap-and-iswap-gates">Support for cutting SWAP and iSWAP gates</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-1-2-0"><strong>Version 1.2.0</strong></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#refactor-run-experiments">Refactor <cite>run_experiments()</cite></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#add-rawresults-class">Add <cite>RawResults</cite> class</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#add-logging">Add logging</a></li>
@@ -358,8 +368,26 @@
                   
   <section id="changelog">
 <span id="changes"></span><h1>Changelog<a class="headerlink" href="#changelog" title="Link to this heading">#</a></h1>
+<section id="version-1-3-0">
+<h2><strong>Version 1.3.0</strong><a class="headerlink" href="#version-1-3-0" title="Link to this heading">#</a></h2>
+<section id="support-for-cutting-swap-and-iswap-gates">
+<h3>Support for cutting SWAP and iSWAP gates<a class="headerlink" href="#support-for-cutting-swap-and-iswap-gates" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><dl class="simple">
+<dt>Added support for cutting SWAP and iSWAP gates in addition to CZ gates and wire cuts.</dt><dd><ul>
+<li><p>Uses optimal QPDs instead of naively decomposing into CZ gates, resulting in significantly fewer subcircuits needed for the same number of cuts.</p></li>
+<li><p>QCutFind also supports finding optimal cut locations for cutting SWAP and iSWAP gates.</p></li>
+<li><p>Refactored codebase to support cutting arbitrary gates in a more modular way, making it easier to add support for cutting more gates in the future.</p></li>
+<li><p>Check documentation for details on how to use.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</section>
+</section>
 <section id="version-1-2-0">
-<h2>Version 1.2.0<a class="headerlink" href="#version-1-2-0" title="Link to this heading">#</a></h2>
+<h2><strong>Version 1.2.0</strong><a class="headerlink" href="#version-1-2-0" title="Link to this heading">#</a></h2>
 <section id="refactor-run-experiments">
 <h3>Refactor <cite>run_experiments()</cite><a class="headerlink" href="#refactor-run-experiments" title="Link to this heading">#</a></h3>
 <ul class="simple">
@@ -740,7 +768,11 @@
   </div>
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-1-2-0">Version 1.2.0</a><ul class="nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-1-3-0"><strong>Version 1.3.0</strong></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#support-for-cutting-swap-and-iswap-gates">Support for cutting SWAP and iSWAP gates</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-1-2-0"><strong>Version 1.2.0</strong></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#refactor-run-experiments">Refactor <cite>run_experiments()</cite></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#add-rawresults-class">Add <cite>RawResults</cite> class</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#add-logging">Add logging</a></li>

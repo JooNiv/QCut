@@ -41,7 +41,7 @@
 
     <script src="../../_static/jquery.js?v=5d32c60e"></script>
     <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-    <script src="../../_static/documentation_options.js?v=eae07d4c"></script>
+    <script src="../../_static/documentation_options.js?v=1abe2725"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/scripts/sphinx-book-theme.js?v=fab101a9"></script>
@@ -51,7 +51,7 @@
     <link rel="search" title="Search" href="../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="1.2.0.post1.dev17+g4f6237eee" />
+  <meta name="docsearch:version" content="1.2.0.post1.dev18+g2faf706da" />
   </head>
   
   
@@ -162,6 +162,12 @@
 <li class="toctree-l2"><a class="reference internal" href="../../examples/QCutCutToThreeParts.html">Cut to Three parts</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../examples/QCutMultipleCutsOnSingleWire.html">Multiple cuts on a single wire</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../examples/QCutQAOAExample.html">QAOA Example</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../Theory.html">Theory</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../theory/CZ_derivation.html">CZ QPD derivation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../theory/SWAP_derivation.html">SWAP QPD derivation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../theory/Wire_derivation.html">Wire Cut QPD derivation</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1"><a class="reference internal" href="../../Acknowledgement.html">Acknowledgements</a></li>
@@ -275,8 +281,14 @@
   <h1>Source code for QCut.qpd_gates</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Helper gates for circuit knitting.&quot;&quot;&quot;</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit</span><span class="w"> </span><span class="kn">import</span> <span class="n">QuantumCircuit</span><span class="p">,</span> <span class="n">transpile</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit.circuit</span><span class="w"> </span><span class="kn">import</span> <span class="n">CircuitInstruction</span><span class="p">,</span> <span class="n">Gate</span><span class="p">,</span> <span class="n">Instruction</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit</span><span class="w"> </span><span class="kn">import</span> <span class="n">QuantumCircuit</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit.circuit</span><span class="w"> </span><span class="kn">import</span> <span class="n">Gate</span><span class="p">,</span> <span class="n">Instruction</span><span class="p">,</span> <span class="n">QuantumRegister</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit.circuit.equivalence_library</span><span class="w"> </span><span class="kn">import</span> <span class="n">SessionEquivalenceLibrary</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit.dagcircuit</span><span class="w"> </span><span class="kn">import</span> <span class="n">DAGCircuit</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit.transpiler</span><span class="w"> </span><span class="kn">import</span> <span class="n">PassManager</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit.transpiler.basepasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransformationPass</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit.transpiler.passes</span><span class="w"> </span><span class="kn">import</span> <span class="n">BasisTranslator</span><span class="p">,</span> <span class="n">UnrollCustomDefinitions</span>
 
 <span class="c1"># define the cut location marker</span>
 <span class="n">cut_op</span> <span class="o">=</span> <span class="n">QuantumCircuit</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Cut&quot;</span><span class="p">)</span>
@@ -296,6 +308,14 @@
 <span class="n">cutCZ_op</span> <span class="o">=</span> <span class="n">cutCZ_op</span><span class="o">.</span><span class="n">to_instruction</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;CutCZ&quot;</span><span class="p">)</span>
 <span class="n">cutCZ_op</span><span class="o">.</span><span class="n">definition</span> <span class="o">=</span> <span class="kc">None</span>
 
+<span class="n">cutSWAP_op</span> <span class="o">=</span> <span class="n">QuantumCircuit</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;CutSWAP&quot;</span><span class="p">)</span>
+<span class="n">cutSWAP_op</span> <span class="o">=</span> <span class="n">cutSWAP_op</span><span class="o">.</span><span class="n">to_instruction</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;CutSWAP&quot;</span><span class="p">)</span>
+<span class="n">cutSWAP_op</span><span class="o">.</span><span class="n">definition</span> <span class="o">=</span> <span class="kc">None</span>
+
+<span class="n">cutISWAP_op</span> <span class="o">=</span> <span class="n">QuantumCircuit</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;CutISWAP&quot;</span><span class="p">)</span>
+<span class="n">cutISWAP_op</span> <span class="o">=</span> <span class="n">cutISWAP_op</span><span class="o">.</span><span class="n">to_instruction</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;CutISWAP&quot;</span><span class="p">)</span>
+<span class="n">cutISWAP_op</span><span class="o">.</span><span class="n">definition</span> <span class="o">=</span> <span class="kc">None</span>
+
 
 <div class="viewcode-block" id="cutCZ">
 <a class="viewcode-back" href="../../_autosummary/QCut.html#QCut.cutCZ">[docs]</a>
@@ -305,37 +325,97 @@
 
 
 
+<div class="viewcode-block" id="cutSWAP">
+<a class="viewcode-back" href="../../_autosummary/QCut.html#QCut.cutSWAP">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">cutSWAP</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">QuantumCircuit</span> <span class="o">|</span> <span class="n">Instruction</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a two qubit cutSWAP gate instruction.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">cutSWAP_op</span></div>
+
+
+
+<div class="viewcode-block" id="cutISWAP">
+<a class="viewcode-back" href="../../_autosummary/QCut.html#QCut.cutISWAP">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">cutISWAP</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">QuantumCircuit</span> <span class="o">|</span> <span class="n">Instruction</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a two qubit cutISWAP gate instruction.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">cutISWAP_op</span></div>
+
+
+
+<span class="n">QPD_DECOMPOSITION_SQ_BASIS</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;u&quot;</span><span class="p">]</span>
+
+<span class="n">QPD_GATE_REGISTRY</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Instruction</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;cz&quot;</span><span class="p">:</span> <span class="n">cutCZ_op</span><span class="p">,</span>
+    <span class="s2">&quot;swap&quot;</span><span class="p">:</span> <span class="n">cutSWAP_op</span><span class="p">,</span>
+    <span class="s2">&quot;iswap&quot;</span><span class="p">:</span> <span class="n">cutISWAP_op</span><span class="p">,</span>
+<span class="p">}</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">_ReplaceWithCutGates</span><span class="p">(</span><span class="n">TransformationPass</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">registry</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Instruction</span><span class="p">]):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">registry</span> <span class="o">=</span> <span class="n">registry</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dag</span><span class="p">:</span> <span class="n">DAGCircuit</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DAGCircuit</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">dag</span><span class="o">.</span><span class="n">op_nodes</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">registry</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">cut_op</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+            <span class="n">mini_dag</span> <span class="o">=</span> <span class="n">DAGCircuit</span><span class="p">()</span>
+            <span class="n">qreg</span> <span class="o">=</span> <span class="n">QuantumRegister</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="n">num_qubits</span><span class="p">)</span>
+            <span class="n">mini_dag</span><span class="o">.</span><span class="n">add_qreg</span><span class="p">(</span><span class="n">qreg</span><span class="p">)</span>
+            <span class="n">mini_dag</span><span class="o">.</span><span class="n">apply_operation_back</span><span class="p">(</span><span class="n">cut_op</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">qreg</span><span class="p">))</span>
+            <span class="n">dag</span><span class="o">.</span><span class="n">substitute_node_with_dag</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">mini_dag</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">dag</span>
+
+
 <div class="viewcode-block" id="cutGate">
 <a class="viewcode-back" href="../../_autosummary/QCut.html#QCut.cutGate">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">cutGate</span><span class="p">(</span><span class="n">gate</span><span class="p">:</span> <span class="n">Gate</span><span class="p">,</span> <span class="n">control</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a cutCZ circuit with the same parameters as the input gate.&quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">gate</span><span class="o">.</span><span class="n">num_qubits</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Input gate must be a 2-qubit gate.&quot;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">control</span> <span class="o">==</span> <span class="n">target</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Control and target qubits must be different.&quot;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">control</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">target</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Control and target qubits must be non-negative.&quot;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">cutGate</span><span class="p">(</span>
+    <span class="n">gate</span><span class="p">:</span> <span class="n">Gate</span><span class="p">,</span>
+    <span class="n">control</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+    <span class="n">target</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+    <span class="n">single_qubit_basis</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a CutGate circuit decomposing the input gate with QPD cut markers.</span>
 
-    <span class="n">qc</span> <span class="o">=</span> <span class="n">QuantumCircuit</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;cut</span><span class="si">{</span><span class="n">gate</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">control</span> <span class="o">&gt;</span> <span class="n">target</span><span class="p">:</span>
-        <span class="n">loccontrol</span> <span class="o">=</span> <span class="mi">1</span>
-        <span class="n">loctarget</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">loccontrol</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="n">loctarget</span> <span class="o">=</span> <span class="mi">1</span>
-    <span class="n">qc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">gate</span><span class="p">,</span> <span class="p">[</span><span class="n">loccontrol</span><span class="p">,</span> <span class="n">loctarget</span><span class="p">])</span>
-    <span class="n">tr</span> <span class="o">=</span> <span class="n">transpile</span><span class="p">(</span><span class="n">qc</span><span class="p">,</span> <span class="n">basis_gates</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;cz&quot;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="s2">&quot;h&quot;</span><span class="p">,</span> <span class="s2">&quot;s&quot;</span><span class="p">,</span> <span class="s2">&quot;sdg&quot;</span><span class="p">,</span> <span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;z&quot;</span><span class="p">])</span>
-    <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">instr</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">tr</span><span class="o">.</span><span class="n">data</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">instr</span><span class="o">.</span><span class="n">operation</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;cz&quot;</span><span class="p">:</span>
-            <span class="n">tr</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span>
-            <span class="n">test</span> <span class="o">=</span> <span class="n">CircuitInstruction</span><span class="p">(</span>
-                <span class="n">operation</span><span class="o">=</span><span class="n">cutCZ_op</span><span class="p">,</span>
-                <span class="n">qubits</span><span class="o">=</span><span class="n">tr</span><span class="o">.</span><span class="n">qubits</span><span class="p">,</span>
-            <span class="p">)</span>
-            <span class="n">tr</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">test</span><span class="p">)</span>
+<span class="sd">    control and target together define the ordered physical qubit mapping for</span>
+<span class="sd">    gate inputs 0..n-1: gate input i maps to physical qubit (controls + targets)[i].</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">controls</span> <span class="o">=</span> <span class="p">[</span><span class="n">control</span><span class="p">]</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">control</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="k">else</span> <span class="nb">list</span><span class="p">(</span><span class="n">control</span><span class="p">)</span>
+    <span class="n">targets</span> <span class="o">=</span> <span class="p">[</span><span class="n">target</span><span class="p">]</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="k">else</span> <span class="nb">list</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+    <span class="n">all_qargs</span> <span class="o">=</span> <span class="n">controls</span> <span class="o">+</span> <span class="n">targets</span>
+
+    <span class="k">if</span> <span class="n">gate</span><span class="o">.</span><span class="n">num_qubits</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Input gate must have at least 2 qubits.&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_qargs</span><span class="p">)</span> <span class="o">!=</span> <span class="n">gate</span><span class="o">.</span><span class="n">num_qubits</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Expected </span><span class="si">{</span><span class="n">gate</span><span class="o">.</span><span class="n">num_qubits</span><span class="si">}</span><span class="s2"> qubit arguments, got </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">all_qargs</span><span class="p">)</span><span class="si">}</span><span class="s2">.&quot;</span>
+        <span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">all_qargs</span><span class="p">))</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_qargs</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Qubit arguments must be unique.&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">q</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="n">all_qargs</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Qubit arguments must be non-negative.&quot;</span><span class="p">)</span>
+
+    <span class="n">qc</span> <span class="o">=</span> <span class="n">QuantumCircuit</span><span class="p">(</span><span class="n">gate</span><span class="o">.</span><span class="n">num_qubits</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;cut</span><span class="si">{</span><span class="n">gate</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">qc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">gate</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">gate</span><span class="o">.</span><span class="n">num_qubits</span><span class="p">)))</span>
+
+    <span class="n">sq_basis</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">single_qubit_basis</span>
+        <span class="k">if</span> <span class="n">single_qubit_basis</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="k">else</span> <span class="n">QPD_DECOMPOSITION_SQ_BASIS</span>
+    <span class="p">)</span>
+    <span class="n">basis</span> <span class="o">=</span> <span class="n">sq_basis</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">QPD_GATE_REGISTRY</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+    <span class="n">tr</span> <span class="o">=</span> <span class="n">PassManager</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="n">UnrollCustomDefinitions</span><span class="p">(</span><span class="n">SessionEquivalenceLibrary</span><span class="p">,</span> <span class="n">basis_gates</span><span class="o">=</span><span class="n">basis</span><span class="p">),</span>
+            <span class="n">BasisTranslator</span><span class="p">(</span><span class="n">SessionEquivalenceLibrary</span><span class="p">,</span> <span class="n">basis</span><span class="p">),</span>
+            <span class="n">_ReplaceWithCutGates</span><span class="p">(</span><span class="n">QPD_GATE_REGISTRY</span><span class="p">),</span>
+        <span class="p">]</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">qc</span><span class="p">)</span>
+
     <span class="k">return</span> <span class="p">{</span>
         <span class="s2">&quot;instruction&quot;</span><span class="p">:</span> <span class="n">tr</span><span class="o">.</span><span class="n">to_instruction</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;CutGate&quot;</span><span class="p">),</span>
-        <span class="s2">&quot;qargs&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">control</span><span class="p">,</span> <span class="n">target</span><span class="p">],</span>
+        <span class="s2">&quot;qargs&quot;</span><span class="p">:</span> <span class="n">all_qargs</span><span class="p">,</span>
     <span class="p">}</span></div>
 
 
@@ -344,18 +424,20 @@
 <span class="n">xmeas</span> <span class="o">=</span> <span class="n">QuantumCircuit</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;x-meas&quot;</span><span class="p">)</span>
 <span class="n">xmeas</span><span class="o">.</span><span class="n">h</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 <span class="n">xmeas</span><span class="o">.</span><span class="n">measure</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="n">xmeas</span><span class="o">.</span><span class="n">h</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 
 <span class="n">ymeas</span> <span class="o">=</span> <span class="n">QuantumCircuit</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;y-meas&quot;</span><span class="p">)</span>
 <span class="n">ymeas</span><span class="o">.</span><span class="n">sdg</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 <span class="n">ymeas</span><span class="o">.</span><span class="n">h</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 <span class="n">ymeas</span><span class="o">.</span><span class="n">measure</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="n">ymeas</span><span class="o">.</span><span class="n">h</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">ymeas</span><span class="o">.</span><span class="n">s</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 
 <span class="n">idmeas</span> <span class="o">=</span> <span class="n">QuantumCircuit</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;id-meas&quot;</span><span class="p">)</span>
 <span class="n">idmeas</span><span class="o">.</span><span class="n">id</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 
 <span class="n">zmeas</span> <span class="o">=</span> <span class="n">QuantumCircuit</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;z-meas&quot;</span><span class="p">)</span>
 <span class="n">zmeas</span><span class="o">.</span><span class="n">measure</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-
 
 <span class="c1"># define initialization operations</span>
 <span class="n">zero_init</span> <span class="o">=</span> <span class="n">QuantumCircuit</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;0-init&quot;</span><span class="p">)</span>
@@ -380,18 +462,80 @@
 <span class="n">i_minus_init</span><span class="o">.</span><span class="n">z</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 <span class="n">i_minus_init</span><span class="o">.</span><span class="n">s</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 
-<span class="n">sdg</span> <span class="o">=</span> <span class="n">QuantumCircuit</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;sdg&quot;</span><span class="p">)</span>
-<span class="n">sdg</span><span class="o">.</span><span class="n">sdg</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-
-<span class="n">s</span> <span class="o">=</span> <span class="n">QuantumCircuit</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;s&quot;</span><span class="p">)</span>
-<span class="n">s</span><span class="o">.</span><span class="n">s</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-
-<span class="n">z</span> <span class="o">=</span> <span class="n">QuantumCircuit</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;z&quot;</span><span class="p">)</span>
-<span class="n">z</span><span class="o">.</span><span class="n">z</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-
 <span class="n">sdg_meas</span> <span class="o">=</span> <span class="n">QuantumCircuit</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;sdg_meas&quot;</span><span class="p">)</span>
 <span class="n">sdg_meas</span><span class="o">.</span><span class="n">sdg</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 <span class="n">sdg_meas</span><span class="o">.</span><span class="n">measure</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+<span class="n">i_gate</span> <span class="o">=</span> <span class="n">QuantumCircuit</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;I&quot;</span><span class="p">)</span>
+<span class="n">i_gate</span><span class="o">.</span><span class="n">id</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="n">x_gate</span> <span class="o">=</span> <span class="n">QuantumCircuit</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;X&quot;</span><span class="p">)</span>
+<span class="n">x_gate</span><span class="o">.</span><span class="n">x</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="n">y_gate</span> <span class="o">=</span> <span class="n">QuantumCircuit</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Y&quot;</span><span class="p">)</span>
+<span class="n">y_gate</span><span class="o">.</span><span class="n">y</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="n">z_gate</span> <span class="o">=</span> <span class="n">QuantumCircuit</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Z&quot;</span><span class="p">)</span>
+<span class="n">z_gate</span><span class="o">.</span><span class="n">z</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="n">axyp</span> <span class="o">=</span> <span class="n">QuantumCircuit</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Axyp&quot;</span><span class="p">)</span>
+<span class="n">axyp</span><span class="o">.</span><span class="n">y</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">axyp</span><span class="o">.</span><span class="n">s</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="n">axym</span> <span class="o">=</span> <span class="n">QuantumCircuit</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Axym&quot;</span><span class="p">)</span>
+<span class="n">axym</span><span class="o">.</span><span class="n">y</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">axym</span><span class="o">.</span><span class="n">s</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">axym</span><span class="o">.</span><span class="n">z</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="n">ayzp</span> <span class="o">=</span> <span class="n">QuantumCircuit</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Ayzp&quot;</span><span class="p">)</span>
+<span class="n">ayzp</span><span class="o">.</span><span class="n">z</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">ayzp</span><span class="o">.</span><span class="n">sx</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="n">ayzm</span> <span class="o">=</span> <span class="n">QuantumCircuit</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Ayzm&quot;</span><span class="p">)</span>
+<span class="n">ayzm</span><span class="o">.</span><span class="n">z</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">ayzm</span><span class="o">.</span><span class="n">sx</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">ayzm</span><span class="o">.</span><span class="n">x</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="n">azxp</span> <span class="o">=</span> <span class="n">QuantumCircuit</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Azxp&quot;</span><span class="p">)</span>
+<span class="n">azxp</span><span class="o">.</span><span class="n">h</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="n">azxm</span> <span class="o">=</span> <span class="n">QuantumCircuit</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Azxm&quot;</span><span class="p">)</span>
+<span class="n">azxm</span><span class="o">.</span><span class="n">h</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">azxm</span><span class="o">.</span><span class="n">y</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="n">sx_gate</span> <span class="o">=</span> <span class="n">QuantumCircuit</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;SX&quot;</span><span class="p">)</span>
+<span class="n">sx_gate</span><span class="o">.</span><span class="n">sx</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="n">sxdg_gate</span> <span class="o">=</span> <span class="n">QuantumCircuit</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;SXdg&quot;</span><span class="p">)</span>
+<span class="n">sxdg_gate</span><span class="o">.</span><span class="n">sxdg</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="n">ry_p</span> <span class="o">=</span> <span class="n">QuantumCircuit</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;RY+&quot;</span><span class="p">)</span>
+<span class="n">ry_p</span><span class="o">.</span><span class="n">ry</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+<span class="n">ry_m</span> <span class="o">=</span> <span class="n">QuantumCircuit</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;RY-&quot;</span><span class="p">)</span>
+<span class="n">ry_m</span><span class="o">.</span><span class="n">ry</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+<span class="n">s_gate</span> <span class="o">=</span> <span class="n">QuantumCircuit</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;S&quot;</span><span class="p">)</span>
+<span class="n">s_gate</span><span class="o">.</span><span class="n">s</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="n">sdg_gate</span> <span class="o">=</span> <span class="n">QuantumCircuit</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Sdg&quot;</span><span class="p">)</span>
+<span class="n">sdg_gate</span><span class="o">.</span><span class="n">sdg</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="n">bxy</span> <span class="o">=</span> <span class="n">QuantumCircuit</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Bxy&quot;</span><span class="p">)</span>
+<span class="n">bxy</span><span class="o">.</span><span class="n">measure</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="n">bxy</span><span class="o">.</span><span class="n">x</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="n">byz</span> <span class="o">=</span> <span class="n">QuantumCircuit</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Byz&quot;</span><span class="p">)</span>
+<span class="n">byz</span><span class="o">.</span><span class="n">h</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">byz</span><span class="o">.</span><span class="n">measure</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="n">byz</span><span class="o">.</span><span class="n">h</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">byz</span><span class="o">.</span><span class="n">y</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="n">bzx</span> <span class="o">=</span> <span class="n">QuantumCircuit</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Bzx&quot;</span><span class="p">)</span>
+<span class="n">bzx</span><span class="o">.</span><span class="n">sx</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">bzx</span><span class="o">.</span><span class="n">measure</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="n">bzx</span><span class="o">.</span><span class="n">sxdg</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">bzx</span><span class="o">.</span><span class="n">z</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 </pre></div>
 
                 </article>

@@ -41,7 +41,7 @@
 
     <script src="../../_static/jquery.js?v=5d32c60e"></script>
     <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-    <script src="../../_static/documentation_options.js?v=eae07d4c"></script>
+    <script src="../../_static/documentation_options.js?v=1abe2725"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/scripts/sphinx-book-theme.js?v=fab101a9"></script>
@@ -51,7 +51,7 @@
     <link rel="search" title="Search" href="../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="1.2.0.post1.dev17+g4f6237eee" />
+  <meta name="docsearch:version" content="1.2.0.post1.dev18+g2faf706da" />
   </head>
   
   
@@ -162,6 +162,12 @@
 <li class="toctree-l2"><a class="reference internal" href="../../examples/QCutCutToThreeParts.html">Cut to Three parts</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../examples/QCutMultipleCutsOnSingleWire.html">Multiple cuts on a single wire</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../examples/QCutQAOAExample.html">QAOA Example</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../Theory.html">Theory</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../theory/CZ_derivation.html">CZ QPD derivation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../theory/SWAP_derivation.html">SWAP QPD derivation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../theory/Wire_derivation.html">Wire Cut QPD derivation</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1"><a class="reference internal" href="../../Acknowledgement.html">Acknowledgements</a></li>
@@ -426,6 +432,26 @@
     <span class="k">return</span> <span class="n">sub_expectation_value</span>
 
 
+<span class="k">def</span><span class="w"> </span><span class="nf">_get_weights</span><span class="p">(</span><span class="n">coefficients</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">num_exp_groups</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get weights for each subcircuit group based on the coefficients.</span>
+<span class="sd">    The sum of the weights is equal to the number of experiment groups.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        coefficients (list[float]): list of coefficients for each subcircuit group</span>
+<span class="sd">        num_exp_groups (int): number of experiment groups</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        Generator:</span>
+<span class="sd">            generator of weights for each subcircuit group</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">total_coefficient</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">coef</span><span class="p">)</span> <span class="k">for</span> <span class="n">coef</span> <span class="ow">in</span> <span class="n">coefficients</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">total_coefficient</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Total coefficient cannot be zero.&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">coef</span> <span class="ow">in</span> <span class="n">coefficients</span><span class="p">:</span>
+        <span class="k">yield</span> <span class="n">num_exp_groups</span> <span class="o">*</span> <span class="nb">abs</span><span class="p">(</span><span class="n">coef</span><span class="p">)</span> <span class="o">/</span> <span class="n">total_coefficient</span>
+
+
 <div class="viewcode-block" id="estimate_expectation_values">
 <a class="viewcode-back" href="../../_autosummary/QCut.html#QCut.estimate_expectation_values">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">estimate_expectation_values</span><span class="p">(</span><span class="n">results</span><span class="p">:</span> <span class="n">RawResult</span><span class="p">,</span> <span class="n">expv_data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
@@ -457,15 +483,12 @@
         <span class="n">raw_results</span><span class="o">.</span><span class="n">results</span><span class="p">,</span> <span class="n">raw_results</span><span class="o">.</span><span class="n">_shots</span><span class="p">,</span> <span class="n">raw_results</span><span class="o">.</span><span class="n">_samples</span>
     <span class="p">)</span>
 
-    <span class="n">cuts</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">expv_data</span><span class="p">[</span><span class="s2">&quot;cut_locations&quot;</span><span class="p">])</span>
     <span class="n">wire_cuts</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span>
         <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">expv_data</span><span class="p">[</span><span class="s2">&quot;cut_locations&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">SingleQubitCutLocation</span><span class="p">)]</span>
     <span class="p">)</span>
-    <span class="n">cz_cuts</span> <span class="o">=</span> <span class="n">cuts</span> <span class="o">-</span> <span class="n">wire_cuts</span>
-    <span class="c1"># number of samples neede</span>
-    <span class="n">samples</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span>
-        <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">wire_cuts</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">cz_cuts</span><span class="p">))</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">ERROR</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-    <span class="p">)</span>
+
+    <span class="n">gamma</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">expv_data</span><span class="p">[</span><span class="s2">&quot;coefficients&quot;</span><span class="p">])</span>
+    <span class="n">samples</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">gamma</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">ERROR</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
     <span class="n">shots</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">samples</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">results_processed</span><span class="p">))</span>
 
     <span class="n">measurement_settings</span> <span class="o">=</span> <span class="n">_combine_pauli_ops</span><span class="p">(</span><span class="n">expv_data</span><span class="p">[</span><span class="s2">&quot;observables&quot;</span><span class="p">])</span>
@@ -485,6 +508,8 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;Observable cannot be measured </span>
 <span class="s2">                             with given measurement settings.&quot;&quot;&quot;</span><span class="p">)</span>
 
+        <span class="n">weights</span> <span class="o">=</span> <span class="n">_get_weights</span><span class="p">(</span><span class="n">expv_data</span><span class="p">[</span><span class="s2">&quot;coefficients&quot;</span><span class="p">],</span> <span class="n">expv_data</span><span class="p">[</span><span class="s2">&quot;num_exp_groups&quot;</span><span class="p">])</span>
+
         <span class="k">for</span> <span class="n">experiment_run</span><span class="p">,</span> <span class="n">coefficient</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
             <span class="n">results_processed</span><span class="p">,</span> <span class="n">expv_data</span><span class="p">[</span><span class="s2">&quot;coefficients&quot;</span><span class="p">]</span>
         <span class="p">):</span>
@@ -494,9 +519,13 @@
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">obs_data</span><span class="p">[</span><span class="s2">&quot;obs_indices&quot;</span><span class="p">])</span> <span class="o">==</span> <span class="mi">1</span>
                 <span class="k">else</span> <span class="p">[</span><span class="n">obs_data</span><span class="p">[</span><span class="s2">&quot;obs_indices&quot;</span><span class="p">]]</span>
             <span class="p">)</span>
+
+            <span class="n">weight</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">weights</span><span class="p">)</span>
+
             <span class="n">mid</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">wire_cuts</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>  <span class="c1"># * (np.power(-1, cz_cuts)</span>
-                <span class="o">*</span> <span class="n">coefficient</span>
+                <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">coefficient</span><span class="p">)</span>
+                <span class="o">*</span> <span class="n">weight</span>
                 <span class="o">*</span> <span class="n">_get_sub_expectation_values</span><span class="p">(</span>
                     <span class="n">experiment_run</span><span class="p">[</span><span class="n">obs_data</span><span class="p">[</span><span class="s2">&quot;circuit_index&quot;</span><span class="p">]],</span>
                     <span class="n">cur_obs</span><span class="p">,</span>
@@ -507,8 +536,8 @@
             <span class="n">sum_shots</span> <span class="o">+=</span> <span class="n">shots</span>
             <span class="n">expectation_values</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">+=</span> <span class="n">mid</span>
 
-    <span class="c1"># multiply by gamma to the power of cuts and take mean</span>
-    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">wire_cuts</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">cz_cuts</span><span class="p">)</span> <span class="o">*</span> <span class="n">expectation_values</span> <span class="o">/</span> <span class="n">samples</span></div>
+    <span class="n">gamma</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">expv_data</span><span class="p">[</span><span class="s2">&quot;coefficients&quot;</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">gamma</span> <span class="o">*</span> <span class="n">expectation_values</span> <span class="o">/</span> <span class="n">samples</span></div>
 
 </pre></div>
 
