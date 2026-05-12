@@ -57,9 +57,10 @@ jobs:
         run: |
           uv run python -m pytest --cov QCut --cov-report=term-missing --junitxml=test_report.xml --doctest-modules  --verbose --strict-markers tests
           uv pip install coveralls
-          uv run coveralls
+          uv run coveralls || true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COVERALLS_SERVICE_NAME: github-actions
           
   test_docs:
     runs-on: ubuntu-latest
