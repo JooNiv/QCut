@@ -204,16 +204,15 @@ def find_cuts(  # noqa: C901
     )
 
     components = rx.connected_components(graph)
-    labels = {}
     if len(components) == num_partitions:
+        labels = {}
         for comp_ind, comp in enumerate(components):
             for node in comp:
                 labels[node] = comp_ind
-        return circuit, [], [], labels, graph, nodes_on_qubit
-
-    labels = k_way_metis_partition(graph, num_partitions)
-
-    cut_data, cut_data_test = extract_cuts(graph, labels)
+        cut_data, cut_data_test = [], []
+    else:
+        labels = k_way_metis_partition(graph, num_partitions)
+        cut_data, cut_data_test = extract_cuts(graph, labels)
 
     if max_qubits is not None:
         cut_data, cut_data_test, labels = refine_cuts(
