@@ -56,7 +56,7 @@ Now we can get the full decomposition by applying the extra terms from [equation
 | Z       | Meas    | -1/2 |
 | I       | Meas    |  1/2 | 
 
-Here Meas is the computational basis measurement and Z S means first applying the Z gate and the the S gate. I is the identity gate. Z S could also be simplified to the $S^\dagger$ gate here since they are equal upto a global phase.
+Here Meas is the computational basis measurement and Z S means first applying the Z gate and the the S gate. I is the identity gate. Z S could also be simplified to the $S^\dagger$ gate here since they are equal.
 
 (references)=
 ## References
