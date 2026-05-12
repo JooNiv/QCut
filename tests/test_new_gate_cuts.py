@@ -37,6 +37,7 @@ def test_cutISWAP_can_be_appended():
     qc.append(ck.cutISWAP(), [0, 1])
     assert any("CutISWAP" in op.operation.name for op in qc.data)
 
+
 def _make_cut_location(gate_name=None):
     from qiskit import QuantumRegister
 
@@ -73,6 +74,7 @@ def test_cut_location_str_includes_gate_name():
     loc = _make_cut_location(gate_name="iswap")
     assert "iswap" in str(loc)
 
+
 def test_qpd_registry_contains_expected_gates():
     assert "cz" in QPD_REGISTRY
     assert "swap" in QPD_REGISTRY
@@ -95,6 +97,7 @@ def test_qpd_registry_swap_length():
 
 def test_qpd_registry_iswap_length():
     assert len(QPD_REGISTRY["iswap"]) == len(iswap_qpd)
+
 
 def test_get_qpd_combinations_unknown_gate_raises():
     loc = _make_cut_location(gate_name="unknown_gate")
@@ -135,6 +138,7 @@ def test_get_qpd_combinations_mixed_cuts():
     gate_loc = _make_cut_location(gate_name="cz")
     combos = list(get_qpd_combinations([wire_loc, gate_loc]))
     assert len(combos) == len(identity_qpd) * len(cz_qpd)
+
 
 def test_get_weights_sum_equals_num_groups():
     coefficients = [1 / 2, 1 / 2, -1 / 2, 1 / 2]
@@ -200,6 +204,7 @@ def test_iswap_cut_expectation_values():
     expvs = ck.estimate_expectation_values(results, cut_exp.expv_data())
     for computed, expected in zip(expvs, _iswap_expected):
         assert abs(computed - expected) < 0.15
+
 
 def test_find_cuts_basis_includes_swap_and_iswap():
     from QCut.QCutFind.cut_finding import BASIS_GATES
