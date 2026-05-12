@@ -1,6 +1,6 @@
 # Deriving optimal QPD for the CZ gate
 
-**Here we will briefly go over where the decomposition for the CZ gate used comes from and how that is transfromed to operations implementable on a quantum computer. The derivation is based on [1].**
+**Here we will briefly go over where the decomposition for the CZ gate used comes from and how that is transfromed to operations implementable on a quantum computer. The derivation is based on [[1]](#references).**
 
 ## Background
 
@@ -57,6 +57,8 @@ Now we can get the full decomposition by applying the extra terms from [equation
 | I       | Meas    |  1/2 | 
 
 Here Meas is the computational basis measurement and Z S means first applying the Z gate and the the S gate. I is the identity gate. Z S could also be simplified to the $S^\dagger$ gate here since they are equal.
+
+Summing over the absolute coefficients we get $\gamma=3$ which is optimal (without communication).
 
 (references)=
 ## References
