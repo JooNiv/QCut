@@ -59,10 +59,6 @@ def _finalize_subcircuit(
         ):
             meas_qubits.remove(wire._index)
 
-    print(subcircuit)
-    print(subcircuit.cregs)
-    print(meas_qubits)
-
     if len(meas_qubits) == 0:
         return subcircuit
 

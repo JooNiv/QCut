@@ -69,8 +69,6 @@ def transpile_subcircuits(
             num_qubits=1, name=f"obs_{i}", params=[], label=f"obs_{i}"
         )
 
-    print(custom_gates)
-
     target = Target()
 
     try:
