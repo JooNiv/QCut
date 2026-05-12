@@ -2,6 +2,10 @@
 Changelog
 =========
 
+**Version 1.3.1**
+=================
+- Fix bug in `find_cuts()` where on circuits that already had the desired partition early return condition would return incorrect type.
+
 **Version 1.3.0**
 =================
 
