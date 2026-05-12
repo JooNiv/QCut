@@ -37,6 +37,14 @@ def cutCZ() -> QuantumCircuit | Instruction:
     """Return a two qubit cutCZ gate instruction."""
     return cutCZ_op
 
+def cutSWAP() -> QuantumCircuit | Instruction:
+    """Return a two qubit cutSWAP gate instruction."""
+    return cutSWAP_op
+
+def cutISWAP() -> QuantumCircuit | Instruction:
+    """Return a two qubit cutISWAP gate instruction."""
+    return cutISWAP_op
+
 
 QPD_DECOMPOSITION_SQ_BASIS: list[str] = ["u"]
 
