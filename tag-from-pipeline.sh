@@ -20,16 +20,17 @@ function get_version_in_changelog() {
   for i in 1 2 3 4 5 6 7
   do
     version_line=$(sed "${i}q;d" CHANGELOG.rst) # Get ith line of file
-    set -- $version_line
-    version=$2
-    if [[ $version =~ ^v?[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-      echo $version $3
+    # Extract version from both "Version x.x.x" and "**Version x.x.x**" formats
+    if [[ $version_line =~ \*\*?Version[[:space:]]+(v?[0-9]+\.[0-9]+\.[0-9]+) ]]; then
+      version="${BASH_REMATCH[1]}"
+     
+      echo $version
       return
     fi
   done
   if [[ ! $version ]]
   then
-    printf "\033[0;31mChangelog file is incorrect, one of the first seven lines should be of the format 'Version xx.xx.x' or 'vX.X.X'.\033[0m";
+    printf "\033[0;31mChangelog file is incorrect, one of the first seven lines should be of the format 'Version xx.xx.x', '**Version xx.xx.x**', or 'vX.X.X'.\033[0m";
     return 171
   fi
 }
