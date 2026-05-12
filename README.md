@@ -122,7 +122,7 @@ cut_circuit.cx(2,3)
 cut_circuit.decompose(gates_to_decompose=["CutGate"]).draw("mpl")
 ```
 
-**Note** that currently QCut only supports cutting Cz gates so cut gates get transpiled down to CutCZ gates (hence the added H gates)
+**Note** that currently QCut only supports cutting CZ, SWAP, and iSWAP gates so all two qubit gates get decomposed to them, hence some cuts resulting in extra gates.
 
 
 ![](./docs/_static/images/circ2.png)
