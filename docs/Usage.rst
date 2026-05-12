@@ -91,8 +91,7 @@ automatically handled by QCut.
 
 .. image:: _static/images/circ2.png
 
-**Note** that currently QCut only supports cutting Cz gates so transformation have to be done manually for the time being (hence the added H gates)
-
+**Note** that currently QCut only supports cutting CZ, SWAP, and iSWAP gates so all two qubit gates get decomposed to them, hence some cuts resulting in extra gates.
 
 **4. Extract cut locations from cut_circuit and split it into
 independent subcircuit.**
