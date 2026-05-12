@@ -27,6 +27,7 @@ circuit2.cx(1, 2)
 
 circuit2.cx(2, 3)
 
+
 def test_find_cuts() -> None:
     """Test find_cuts function.
 
@@ -38,6 +39,7 @@ def test_find_cuts() -> None:
         cut_circuit = find_cuts(circ.copy(), sq.cut_sizes[solution_index], cuts="both")
 
         assert len(cut_circuit.subcircuits) == sq.cut_sizes[solution_index]
+
 
 def test_find_gate_cuts():
     """Test find_cuts function on a circuit with a cut gate.
@@ -57,6 +59,7 @@ def test_find_gate_cuts():
         for op in circ.data:
             assert "meas" not in op.operation.name.lower()
             assert "init" not in op.operation.name.lower()
+
 
 def test_auto_refine_wire():
     """Test find_cuts function on a circuit with a cut gate.
