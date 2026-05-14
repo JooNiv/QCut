@@ -2,6 +2,10 @@
 Changelog
 =========
 
+**Version 1.3.2**
+=================
+- Fix bug in how weights for different gates were being handled by `QCutFind`.
+
 **Version 1.3.1**
 =================
 - Fix bug in `find_cuts()` where on circuits that already had the desired partition early return condition would return incorrect type.
