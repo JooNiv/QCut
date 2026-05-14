@@ -192,16 +192,11 @@ def find_cuts(  # noqa: C901
     if num_partitions == 1:
         return circuit, [], []
 
-    gate_cut_weight = 3 if (cuts == "both" or cuts == "gate") else 100000000000
-    wire_cut_weight = 4 if (cuts == "both" or cuts == "wire") else 100000000000
-
     circuit.remove_final_measurements()
 
     circuit = transpile(circuit, optimization_level=0, basis_gates=BASIS_GATES)
 
-    graph, nodes_on_qubit = circ_to_graph(
-        circuit, mode=cuts
-    )
+    graph, nodes_on_qubit = circ_to_graph(circuit, mode=cuts)
 
     components = rx.connected_components(graph)
     if len(components) == num_partitions:

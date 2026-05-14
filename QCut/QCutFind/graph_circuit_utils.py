@@ -4,7 +4,9 @@ vice versa, as well as functions for updating node and edge information in the g
 """
 
 import rustworkx as rx
+
 from QCut.qpd_operations import QPD_REGISTRY
+
 
 def weight_fn(edge_data):
     """
@@ -81,15 +83,17 @@ def update_nodes_on_qubit(nodes_on_qubit, qubit, node):
     else:
         nodes_on_qubit[qubit].append(node)
 
+
 def get_gate_weight(gate_name, mode="gate"):
     """
-    Get the weight of a gate based on its name and the specified mode (gate or wire or both).
+    Get the weight of a gate based on its name and the specified mode
+    (gate or wire or both).
     Args:
         gate_name: The name of the gate.
         mode: The mode for calculating weight ("gate", "wire", or "both").
     Returns:
         The weight of the gate.
-    """ 
+    """
     if mode == "wire":
         return 100000000000
     if gate_name not in QPD_REGISTRY:
@@ -97,7 +101,8 @@ def get_gate_weight(gate_name, mode="gate"):
     else:
         qpd = QPD_REGISTRY[gate_name]
         return int(sum([(abs(x["c"])) for x in qpd]))
-    
+
+
 def get_wire_weight(mode="wire"):
     """
     Get the weight of a wire based on the specified mode (gate or wire or both).
@@ -105,10 +110,11 @@ def get_wire_weight(mode="wire"):
         mode: The mode for calculating weight ("gate", "wire", or "both").
     Returns:
         The weight of the wire.
-    """ 
+    """
     if mode == "gate":
         return 100000000000
     return 4
+
 
 def circ_to_graph(circuit, mode="both"):  # noqa: C901
     """
@@ -199,7 +205,9 @@ def circ_to_graph(circuit, mode="both"):  # noqa: C901
                 G.add_edge(op[1][2][0], added[-1], (op[1][2][0], get_wire_weight(mode)))
             else:
                 if len(ind) == 1:
-                    G.add_edge(ind[-1], op[1][2][0], (op[1][2][0], get_wire_weight(mode)))
+                    G.add_edge(
+                        ind[-1], op[1][2][0], (op[1][2][0], get_wire_weight(mode))
+                    )
                 else:
                     G.add_edge(ind[-1], ind[-2], (op[1][2][0], get_wire_weight(mode)))
         elif op[1][2][0] not in track_nodes.keys():
@@ -225,7 +233,9 @@ def circ_to_graph(circuit, mode="both"):  # noqa: C901
                 G.add_edge(op[1][2][1], added[-1], (op[1][2][1], get_wire_weight(mode)))
             else:
                 if len(ind) == 1:
-                    G.add_edge(ind[-1], op[1][2][1], (op[1][2][1], get_wire_weight(mode)))
+                    G.add_edge(
+                        ind[-1], op[1][2][1], (op[1][2][1], get_wire_weight(mode))
+                    )
                 else:
                     G.add_edge(ind[-1], ind[-2], (op[1][2][1], get_wire_weight(mode)))
         else:
@@ -247,14 +257,18 @@ def circ_to_graph(circuit, mode="both"):  # noqa: C901
                 G.add_edge(op[1][2][0], added[-1], (op[1][2][0], get_wire_weight(mode)))
             else:
                 if len(ind0) == 1:
-                    G.add_edge(ind0[-1], op[1][2][0], (op[1][2][0], get_wire_weight(mode)))
+                    G.add_edge(
+                        ind0[-1], op[1][2][0], (op[1][2][0], get_wire_weight(mode))
+                    )
                 else:
                     G.add_edge(ind0[-1], ind0[-2], (op[1][2][0], get_wire_weight(mode)))
             if ind1 == []:
                 G.add_edge(op[1][2][1], added[-2], (op[1][2][1], get_wire_weight(mode)))
             else:
                 if len(ind1) == 1:
-                    G.add_edge(ind1[-1], op[1][2][1], (op[1][2][1], get_wire_weight(mode)))
+                    G.add_edge(
+                        ind1[-1], op[1][2][1], (op[1][2][1], get_wire_weight(mode))
+                    )
                 else:
                     G.add_edge(ind1[-1], ind1[-2], (op[1][2][1], get_wire_weight(mode)))
 
