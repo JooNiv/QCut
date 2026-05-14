@@ -200,7 +200,7 @@ def find_cuts(  # noqa: C901
     circuit = transpile(circuit, optimization_level=0, basis_gates=BASIS_GATES)
 
     graph, nodes_on_qubit = circ_to_graph(
-        circuit, gateCutWeight=gate_cut_weight, wireCutWeight=wire_cut_weight
+        circuit, mode=cuts
     )
 
     components = rx.connected_components(graph)
