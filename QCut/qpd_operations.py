@@ -214,7 +214,7 @@ def _insert_2qubit_gate_cut_qpd(  # noqa: C901
 
 def get_qpd_combinations(
     cut_locations: list[CutLocation | SingleQubitCutLocation],
-) -> Iterable[tuple[dict]]:
+) -> Iterable[tuple[dict, ...]]:
     """Get all possible combinations of the QPD operations so that each combination
     has len(cut_locations) elements.
 
@@ -222,7 +222,7 @@ def get_qpd_combinations(
         cut_locations (list[CutLocation | SingleQubitCutLocation]): cut locations
 
     Returns:
-        Iterable[tuple[dict]]:
+        Iterable[tuple[dict, ...]]:
             Iterable of the possible QPD operations
 
     """
