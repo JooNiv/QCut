@@ -147,7 +147,10 @@ def _move_to_new_wire(orig: QuantumCircuit) -> QuantumCircuit:
     new.add_bits(new_qubits)
 
     # 3) Replay every instruction, splitting on Measure
-    for inst, qargs, cargs in orig.data:
+    for instruction in orig.data:
+        inst = instruction.operation
+        qargs = instruction.qubits
+        cargs = instruction.clbits
         # map every qarg via our current mapping
         mapped_qs = [qubit_map[q] for q in qargs]
 

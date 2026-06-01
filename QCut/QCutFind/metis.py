@@ -64,9 +64,7 @@ def k_way_metis_partition(graph: rx.PyGraph, k: int):
 
     obj_val, parts = pymetis.part_graph(
         nparts=k,  # nparts
-        adjacency=None,  # adjacency (pythonic)
-        xadj=xadj,  # xadj
-        adjncy=adjncy,  # adjncy
+        adjacency=pymetis.CSRAdjacency(xadj, adjncy),  # CSR adjacency
         vweights=None,  # vweights
         eweights=eweights,  # adjwgt (edge weights)
         recursive=True,  # recursive
