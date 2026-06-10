@@ -8,12 +8,19 @@ from QCut.backend_utility import (
 )
 from QCut.circuit_knitting import (
     get_experiment_circuits,
+    mpi_run,
     run,
     run_cut_circuit,
     run_experiments,
 )
 from QCut.circuit_preparation import (
     get_locations_and_subcircuits,
+)
+from QCut.executors import (
+    MPIExecutor,
+    MultiprocessingExecutor,
+    SerialExecutor,
+    get_default_executor,
 )
 from QCut.postprocess import (
     estimate_expectation_values,
@@ -38,6 +45,11 @@ __all__ = [
     "run",
     "run_cut_circuit",
     "run_experiments",
+    "mpi_run",
+    "SerialExecutor",
+    "MultiprocessingExecutor",
+    "MPIExecutor",
+    "get_default_executor",
     "cut",
     "cutCZ",
     "cutSWAP",

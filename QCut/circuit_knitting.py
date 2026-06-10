@@ -5,7 +5,7 @@ A module for the main circuit knitting workflow.
 from __future__ import annotations
 
 import logging
-import pickle
+import os
 
 import numpy as np
 from qiskit import QuantumCircuit, transpile
@@ -221,8 +221,11 @@ def get_experiment_circuits(  # noqa: C901
         for obs_set in obs_subcircuits:
             cur_set_circuits = {}
             for id_meas_subcircuit_index, circ in obs_set.items():
-                subcircuit = pickle.loads(pickle.dumps(circ))
-                # subcircuit = deepcopy(circ)
+                # QuantumCircuit.copy() deep-copies the instruction data and is
+                # markedly faster than a pickle round-trip; this runs once per
+                # (QPD combination x observable set x subcircuit), i.e. the
+                # innermost hot loop of experiment generation.
+                subcircuit = circ.copy()
                 offset = 0
                 classical_bit_index = 0
                 qpd_qubits = []  # store the qubit indices of qubits used for qpd
@@ -311,6 +314,8 @@ def run_experiments(  # noqa: C901
     shots: int = 2**12,
     backend=None,
     max_batch_size: int = 100,
+    executor="auto",
+    n_workers: int | None = None,
 ) -> RawResult:
     """Run experiment circuits.
 
@@ -327,6 +332,11 @@ def run_experiments(  # noqa: C901
         backend: backend used for running the circuits (optional)
         max_batch_size (int): maximum number of circuits submitted per backend.run
             call. Larger batches reduce per-job overhead on real hardware.
+        executor: how to run the (independent) experiment circuits. Either a
+            ``CircuitExecutor`` instance or one of ``"auto"`` (default, serial),
+            ``"serial"``, ``"multiprocessing"``, ``"mpi"``. See ``QCut.executors``.
+            For multi-node MPI runs prefer the ``QCut.mpi_run`` entry point.
+        n_workers (int): worker count for the multiprocessing executor (optional).
 
     Returns:
         list[TotalResult]:
@@ -354,29 +364,20 @@ def run_experiments(  # noqa: C901
                 else:
                     empty_locations.append((key, subcircuit.num_clbits))
 
-    num_batches = len(runnable) // max_batch_size + (
-        1 if len(runnable) % max_batch_size else 0
-    )
+    from QCut.executors import get_default_executor
+
+    ex = get_default_executor(backend, executor, n_workers)
     logger.info(
-        f"Running {len(runnable)} circuits on the"
-        f" backend {backend} with {shots} shots each"
+        f"Running {len(runnable)} circuits via {type(ex).__name__}"
+        f" with {shots} shots each"
     )
-    logger.info(
-        "Circuits will be split into "
-        f"{num_batches}"
-        f" batches of size {max_batch_size} for execution."
-    )
-    for start in range(0, len(runnable), max_batch_size):
-        batch = runnable[start : start + max_batch_size]
-        batch_circuits = [circ for _, circ in batch]
-        logger.info(f"Running batch of {len(batch_circuits)} circuits...")
-        counts = backend.run(batch_circuits, shots=shots).result().get_counts()
-        logger.info(f"Finished running batch of {len(batch_circuits)} circuits.")
-        if isinstance(counts, dict):
-            counts = [counts]
-        for (key, _circ), circ_counts in zip(batch, counts):
-            group_idx, obs_idx, sub_idx = key
-            results[group_idx][obs_idx][sub_idx] = dict(circ_counts.items())
+    # Sort by key so the per-(group, obs) result dicts are populated in ascending
+    # sub_idx order regardless of the executor's return order. Downstream
+    # reconstruction combines subcircuit results by dict order, so this ordering
+    # must be deterministic and match the serial path.
+    for key, circ_counts in sorted(ex.run(runnable, shots, max_batch_size)):
+        group_idx, obs_idx, sub_idx = key
+        results[group_idx][obs_idx][sub_idx] = dict(circ_counts)
 
     for (group_idx, obs_idx, sub_idx), num_clbits in empty_locations:
         results[group_idx][obs_idx][sub_idx] = {" " + "0" * num_clbits: shots}
@@ -398,6 +399,8 @@ def run_cut_circuit(
     observables: SparsePauliOp,
     backend=AerSimulator(),
     max_batch_size: int = 100,
+    executor="auto",
+    n_workers: int | None = None,
 ) -> list[float]:
     """After splitting the circuit run the rest of the circuit knitting sequence.
 
@@ -410,13 +413,18 @@ def run_cut_circuit(
         backend: backend to use for running experiment circuits (optional)
         max_batch_size (int): maximum number of circuits submitted per backend.run
             call (optional)
+        executor: execution strategy passed to ``run_experiments`` (optional).
+        n_workers (int): worker count for the multiprocessing executor (optional).
 
     Returns:
         list: a list of expectation values
 
     """
+    from QCut.executors import _is_sampler
 
-    if not isinstance(backend, AerSimulator):
+    # Transpile subcircuits to a hardware/fake backend (not for ideal Aer or for
+    # samplers, which expect already-transpiled circuits).
+    if not isinstance(backend, AerSimulator) and not _is_sampler(backend):
         transpiled_subcircuits = transpile_subcircuits(
             cut_circuit, backend, optimization_level=3
         )
@@ -429,6 +437,8 @@ def run_cut_circuit(
         cut_experiment,
         backend=backend,
         max_batch_size=max_batch_size,
+        executor=executor,
+        n_workers=n_workers,
     )
 
     return estimate_expectation_values(results, cut_experiment.expv_data())
@@ -439,6 +449,8 @@ def run(
     observables: SparsePauliOp,
     backend=AerSimulator(),
     max_batch_size: int = 100,
+    executor="auto",
+    n_workers: int | None = None,
 ) -> list[float]:
     """Run the whole circuit knitting sequence with one function call.
 
@@ -449,6 +461,8 @@ def run(
         backend: backend to use for running experiment circuits (optional)
         max_batch_size (int): maximum number of circuits submitted per backend.run
             call (optional)
+        executor: execution strategy passed to ``run_experiments`` (optional).
+        n_workers (int): worker count for the multiprocessing executor (optional).
 
     Returns:
         list: a list of expectation values
@@ -457,4 +471,78 @@ def run(
     # circuit = circuit.copy()
     cut_circuit = get_locations_and_subcircuits(circuit)
 
-    return run_cut_circuit(cut_circuit, observables, backend, max_batch_size)
+    return run_cut_circuit(
+        cut_circuit,
+        observables,
+        backend,
+        max_batch_size,
+        executor=executor,
+        n_workers=n_workers,
+    )
+
+
+def mpi_run(
+    circuit: QuantumCircuit,
+    observables: SparsePauliOp,
+    backend=None,
+    shots: int = 2**12,
+    max_batch_size: int = 100,
+    base_seed: int = 1234,
+) -> list[float] | None:
+    """Run the full circuit-knitting pipeline under MPI (LUMI task-farm).
+
+    Launch with ``srun python job.py`` / ``mpirun -np N python job.py``. Every rank
+    executes this function; rank 0 builds the experiment circuits and drives the
+    pipeline, while worker ranks participate only in the execution scatter/gather.
+    Rank 0 returns the expectation values; worker ranks return ``None``.
+
+    Replicable simulators (Aer, IQM fake backends) are farmed across all ranks. For
+    a remote QPU backend or a sampler the work cannot be parallelized this way, so
+    only rank 0 runs (serially) and workers return immediately.
+
+    Args:
+        circuit (QuantumCircuit): circuit containing cut markers.
+        observables (SparsePauliOp): observables to estimate.
+        backend: execution backend; defaults to a per-rank ``AerSimulator``.
+        shots (int): shots per circuit.
+        max_batch_size (int): circuits per backend.run call within a rank.
+        base_seed (int): rank ``r`` uses ``base_seed + r`` so shot noise is
+            decorrelated across ranks (Aer backends).
+
+    Returns:
+        list of expectation values on rank 0, ``None`` on worker ranks.
+
+    """
+    from mpi4py import MPI
+
+    from QCut.executors import BackendAdapter, MPIExecutor
+
+    comm = MPI.COMM_WORLD
+    rank, size = comm.Get_rank(), comm.Get_size()
+    replicable = BackendAdapter(backend).replicable and size > 1
+
+    def _pipeline(ex) -> list[float]:
+        cut_circuit = get_locations_and_subcircuits(circuit)
+        cut_experiment = get_experiment_circuits(cut_circuit, observables)
+        results = run_experiments(
+            cut_experiment,
+            shots=shots,
+            backend=backend,
+            max_batch_size=max_batch_size,
+            executor=ex,
+        )
+        return estimate_expectation_values(results, cut_experiment.expv_data())
+
+    if not replicable:
+        # Single-submitter: only rank 0 does the work.
+        return _pipeline("serial") if rank == 0 else None
+
+    threads = int(os.environ.get("OMP_NUM_THREADS", "0")) or None
+    mpi_ex = MPIExecutor(
+        backend=backend, comm=comm, threads=threads, base_seed=base_seed
+    )
+    if rank == 0:
+        return _pipeline(mpi_ex)
+    # Workers contribute to the collective inside MPIExecutor.run, then exit.
+    mpi_ex.run(None, shots, max_batch_size)
+    return None

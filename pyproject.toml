@@ -57,6 +57,11 @@ changelog = "https://github.com/JooNiv/QCut/blob/main/CHANGELOG.rst"
 
 [project.optional-dependencies]
 dev = ["pytest", "pytest-cov", "ruff"]
+# MPI task-farm execution (QCut.mpi_run / MPIExecutor). On LUMI prefer the
+# Cray-provided mpi4py from `module load cray-python` (built against cray-mpich)
+# over this PyPI wheel, which bundles a generic MPI and will silently run each
+# rank as an independent size-1 job.
+mpi = ["mpi4py>=3.1"]
 
 [tool.setuptools.packages.find]
 where = ["."]
