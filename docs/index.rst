@@ -13,6 +13,7 @@ A package for performing circuit knitting with wire cuts on hardware with no res
    :caption: Contents:
 
    Usage
+   Options
    Examples
    Notebooks
    Theory
