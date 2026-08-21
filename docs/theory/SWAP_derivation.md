@@ -209,7 +209,7 @@ From [[1]](#ref) equation 19 with $u_\alpha u_{\alpha'}^*$=1/4 (all real and equ
     U=\sum_\alpha|u_\alpha|^2\sigma_\alpha^{\otimes 2} + \sum_{\alpha<\alpha'}2Re(u_\alpha u_{\alpha'}^*)(A_{\alpha\alpha'}^{\otimes2}-B_{\alpha\alpha}^{\otimes 2})
 \end{equation}
 
-Note that here we omit the last term of the equation since for SWAP it is 0. However if deriving the QPD for e.g an iSWAP gate the last term would also be relevant.
+Note that here we omit the last term of the equation since for SWAP it is 0. However if deriving the QPD for e.g an iSWAP gate the last term would also be relevant. That general case is worked through in [General two-qubit QPD derivation](General_2q_derivation.md), which QCut uses to generate a QPD for any two-qubit gate.
 
 The first term is simple for it just applies a Pauli gate to both qubits with coefficient of $|u_\alpha|^2=\frac{1}{4}$. The entries are then:
 
