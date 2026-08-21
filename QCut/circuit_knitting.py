@@ -24,6 +24,7 @@ from QCut.basis_transform import (
 from QCut.circuit_preparation import get_locations_and_subcircuits
 from QCut.circuit_utils import _remove_obsm, _remove_obsm_2
 from QCut.cutcircuit import CutCircuit, CutExperiment
+from QCut.options import CutOptions
 from QCut.postprocess import ERROR, estimate_expectation_values
 from QCut.qcutresult import RawResult
 from QCut.qpd_operations import (
@@ -31,6 +32,7 @@ from QCut.qpd_operations import (
     _insert_wire_cut_qpd,
     get_qpd_combinations,
     qpd_for_location,
+    sample_qpd_combinations,
 )
 
 logger: logging.Logger = logging.getLogger(__name__)
@@ -140,10 +142,6 @@ def get_experiment_circuits(  # noqa: C901
             ({num_qubits})."""
         )
 
-    qpd_combinations = get_qpd_combinations(cut_circuit.cut_locations)
-    # generate the QPD
-    # operation combinations
-
     check_circuit_type = cut_circuit.backend is not None
 
     measurement_settings = _combine_pauli_ops(observables)
@@ -193,24 +191,41 @@ def get_experiment_circuits(  # noqa: C901
 
     _remove_obsm_2(cut_circuit.subcircuits)
 
-    # initialize solution lists. Must use the same resolver as get_qpd_combinations,
-    # or the coefficient array and the combinations disagree.
-    num_circs = 1
+    # Enumerating every combination costs the product of the per-cut term counts, so
+    # past a threshold the decomposition is sampled instead. Both paths must agree with
+    # qpd_for_location on the term counts, or the coefficients and the combinations
+    # would not line up.
+    options = cut_circuit.options
+    exact_groups = 1
     for cut_loc in cut_circuit.cut_locations:
-        num_circs *= len(qpd_for_location(cut_loc))
-    logger.debug(
-        "expanding %d cut(s) into %d experiment group(s)",
-        len(cut_circuit.cut_locations),
-        num_circs,
-    )
+        exact_groups *= len(qpd_for_location(cut_loc))
+
+    if options.should_sample(exact_groups):
+        qpd_combinations, coefficients, num_draws = sample_qpd_combinations(
+            cut_circuit.cut_locations, options.sample_count, options.seed
+        )
+        logger.info(
+            f"Sampling {num_draws} draws over {exact_groups} possible groups, "
+            f"giving {len(qpd_combinations)} distinct circuit groups."
+        )
+    else:
+        qpd_combinations = get_qpd_combinations(cut_circuit.cut_locations)
+        coefficients = np.empty(exact_groups)
+        num_draws = None
+        logger.debug(
+            "expanding %d cut(s) into %d experiment group(s)",
+            len(cut_circuit.cut_locations),
+            exact_groups,
+        )
+
     experiment_circuits = []
-    coefficients = np.empty(num_circs)
     placeholder_locations = _get_placeholder_locations(cut_circuit.subcircuits)
     for id_meas_experiment_index, qpd in enumerate(
         qpd_combinations
     ):  # loop through all
         # QPD combinations
-        coefficients[id_meas_experiment_index] = np.prod([op["c"] for op in qpd])
+        if num_draws is None:
+            coefficients[id_meas_experiment_index] = np.prod([op["c"] for op in qpd])
 
         if check_circuit_type:
             for sub in qpd:
@@ -301,6 +316,8 @@ def get_experiment_circuits(  # noqa: C901
         coefficients,
         observables,
         backend=backend,
+        options=options,
+        num_draws=num_draws,
     )
 
     logger.info(f"Generated {cut_experiment.num_circuits} circuits for the experiment.")
@@ -400,6 +417,7 @@ def run_cut_circuit(
     observables: SparsePauliOp,
     backend=AerSimulator(),
     max_batch_size: int = 100,
+    options: CutOptions | None = None,
 ) -> list[float]:
     """After splitting the circuit run the rest of the circuit knitting sequence.
 
@@ -412,11 +430,15 @@ def run_cut_circuit(
         backend: backend to use for running experiment circuits (optional)
         max_batch_size (int): maximum number of circuits submitted per backend.run
             call (optional)
+        options (CutOptions): configuration, overriding what the CutCircuit carries
+            (optional)
 
     Returns:
         list: a list of expectation values
 
     """
+    if options is not None:
+        cut_circuit.options = options
 
     if not isinstance(backend, AerSimulator):
         transpiled_subcircuits = transpile_subcircuits(
@@ -441,6 +463,7 @@ def run(
     observables: SparsePauliOp,
     backend=AerSimulator(),
     max_batch_size: int = 100,
+    options: CutOptions | None = None,
 ) -> list[float]:
     """Run the whole circuit knitting sequence with one function call.
 
@@ -451,12 +474,13 @@ def run(
         backend: backend to use for running experiment circuits (optional)
         max_batch_size (int): maximum number of circuits submitted per backend.run
             call (optional)
+        options (CutOptions): configuration for the run (optional)
 
     Returns:
         list: a list of expectation values
 
     """
     # circuit = circuit.copy()
-    cut_circuit = get_locations_and_subcircuits(circuit)
+    cut_circuit = get_locations_and_subcircuits(circuit, options=options)
 
     return run_cut_circuit(cut_circuit, observables, backend, max_batch_size)
