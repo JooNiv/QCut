@@ -70,6 +70,7 @@ exclude_patterns = [
 
 source_suffix = {
     '.rst': 'restructuredtext',
+    '.md': 'myst-nb',
     '.ipynb': 'myst-nb',
 }
 
@@ -77,6 +78,18 @@ myst_enable_extensions = [
     "amsmath",
     "dollarmath",
 ]
+
+# The theory pages use \ket and \bra, which MathJax does not define by default.
+mathjax3_config = {
+    "tex": {
+        "macros": {
+            "ket": [r"\left|#1\right\rangle", 1],
+            "bra": [r"\left\langle#1\right|", 1],
+            "braket": [r"\left\langle#1\middle|#2\right\rangle", 2],
+            "Tr": r"\operatorname{Tr}",
+        }
+    }
+}
 
 nb_execution_mode = "off"
 
