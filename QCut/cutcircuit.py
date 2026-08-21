@@ -9,6 +9,7 @@ from typing import Iterable
 from qiskit import QuantumCircuit
 
 from QCut.cutlocation import CutLocation, SingleQubitCutLocation
+from QCut.options import CutOptions, resolve
 
 
 class CutCircuit:
@@ -22,6 +23,7 @@ class CutCircuit:
         cut_locations: list[CutLocation | SingleQubitCutLocation],
         map_qubit: dict[int, int],
         backend=None,
+        options: CutOptions | None = None,
     ) -> None:
         """Init."""
 
@@ -29,6 +31,7 @@ class CutCircuit:
         self.cut_locations = cut_locations
         self.map_qubit = map_qubit
         self.backend = backend
+        self.options = resolve(options)
 
     def assign_parameters(self, parameters: dict, inplace=False) -> CutCircuit | None:
         """Assign parameters to the circuits. Same as qiskit
@@ -61,7 +64,11 @@ class CutCircuit:
                 except Exception:
                     new_circuits.append(circuit)
             return CutCircuit(
-                new_circuits, bound_locations, self.map_qubit, self.backend
+                new_circuits,
+                bound_locations,
+                self.map_qubit,
+                self.backend,
+                self.options,
             )
 
     @property
@@ -84,8 +91,15 @@ class CutExperiment:
         coefficients: Iterable[float],
         observables,
         backend=None,
+        options: CutOptions | None = None,
+        num_draws: int | None = None,
     ) -> None:
-        """Init."""
+        """Init.
+
+        ``num_draws`` records how many samples were drawn when the decomposition was
+        sampled rather than enumerated. It is informational. The estimator does not need
+        it, because the sampled coefficients already carry their multiplicity.
+        """
 
         self.experiments = experiment_circuits
         self.backend = backend
@@ -93,6 +107,8 @@ class CutExperiment:
         self.map_qubit = map_qubit
         self.coefficients = coefficients
         self.observables = observables
+        self.options = resolve(options)
+        self._num_draws = num_draws
 
     def expv_data(self):
         """Get data for expv calculation."""
@@ -140,6 +156,8 @@ class CutExperiment:
                 self.coefficients,
                 self.observables,
                 self.backend,
+                self.options,
+                self._num_draws,
             )
 
     @property
@@ -163,6 +181,18 @@ class CutExperiment:
     def num_groups(self):
         """Number of circuit groups."""
         return len(self.experiments)
+
+    @property
+    def num_draws(self):
+        """How many samples were drawn, or the group count if fully enumerated."""
+        if self._num_draws is None:
+            return self.num_groups
+        return self._num_draws
+
+    @property
+    def sampled(self):
+        """Whether the decomposition was sampled rather than fully enumerated."""
+        return self._num_draws is not None
 
     @property
     def num_obs_groups(self):
