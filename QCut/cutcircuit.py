@@ -32,13 +32,25 @@ class CutCircuit:
 
     def assign_parameters(self, parameters: dict, inplace=False) -> CutCircuit | None:
         """Assign parameters to the circuits. Same as qiskit
-        QuantumCircuit.assign_parameters."""
+        QuantumCircuit.assign_parameters.
+
+        Parameters on a cut gate are bound too. Those live on the cut location rather
+        than in any subcircuit, but a generated QPD needs them numeric.
+        """
+        bound_locations = [
+            location.assign_parameters(parameters)
+            if isinstance(location, CutLocation)
+            else location
+            for location in self.cut_locations
+        ]
+
         if inplace:
             for ind, circuit in enumerate(self.subcircuits):
                 try:
                     self.subcircuits[ind] = circuit.assign_parameters(parameters)
                 except Exception:
                     pass
+            self.cut_locations = bound_locations
             return
 
         else:
@@ -49,7 +61,7 @@ class CutCircuit:
                 except Exception:
                     new_circuits.append(circuit)
             return CutCircuit(
-                new_circuits, self.cut_locations, self.map_qubit, self.backend
+                new_circuits, bound_locations, self.map_qubit, self.backend
             )
 
     @property

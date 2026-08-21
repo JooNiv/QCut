@@ -43,7 +43,15 @@ def _get_cut_locations(circuit):
                 cut_locations.append(SingleQubitCutLocation((qubits[0], index)))
             else:
                 gate_name = op.operation.name.replace("Cut", "").lower()
-                cut_locations.append(CutLocation((qubits, index), gate_name=gate_name))
+                # CutTwoQubitGate markers carry the gate so a QPD can be generated
+                # from it. The per-gate markers do not need to.
+                cut_locations.append(
+                    CutLocation(
+                        (qubits, index),
+                        gate_name=gate_name,
+                        gate=getattr(op.operation, "gate", None),
+                    )
+                )
 
             # adjust index to account for removed operation
             index -= 1

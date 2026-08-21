@@ -10,10 +10,34 @@ from QCut.circuit_preparation import get_locations_and_subcircuits
 from QCut.QCutFind.graph_circuit_utils import circ_to_graph
 from QCut.QCutFind.metis import k_way_metis_partition
 from QCut.QCutFind.refine import refine_cuts
-from QCut.qpd_gates import QPD_GATE_REGISTRY
+from QCut.qpd_gates import QPD_GATE_REGISTRY, CutTwoQubitGate
 from QCut.qpd_gates import cut_op as cut
 
-BASIS_GATES = ["cz", "swap", "iswap", "r"]
+#: Basis the circuit is transpiled into before the interaction graph is built. The
+#: two-qubit entries stop transpilation from breaking apart gates that could be cut
+#: whole, which would cost one cut per cz rather than one cut at the gate's own gamma.
+BASIS_GATES = [
+    "r",
+    "u",
+    "cz",
+    "swap",
+    "iswap",
+    "cx",
+    "cy",
+    "ch",
+    "ecr",
+    "dcx",
+    "rxx",
+    "ryy",
+    "rzz",
+    "rzx",
+    "crx",
+    "cry",
+    "crz",
+    "cp",
+    "xx_plus_yy",
+    "xx_minus_yy",
+]
 
 
 def extract_cuts(graph, labels):  # noqa: C901
@@ -99,14 +123,15 @@ def add_cuts_to_circuit(circuit, cut_data, cut_data_test):
                 )
             )
             target_index = i[2][0] + offset
-            qctest.data.pop(target_index)
+            original = qctest.data.pop(target_index)
 
             gate_name = j[1]
-            if gate_name not in QPD_GATE_REGISTRY:
-                raise NotImplementedError(
-                    f"No cut marker registered for gate '{gate_name}'."
-                )
-            cut_marker = QPD_GATE_REGISTRY[gate_name]
+            if gate_name in QPD_GATE_REGISTRY:
+                cut_marker = QPD_GATE_REGISTRY[gate_name]
+            else:
+                # No dedicated marker, so wrap the gate we just removed and let its QPD
+                # be generated from its matrix at expansion time.
+                cut_marker = CutTwoQubitGate(original.operation)
 
             # Insert the cut operation
             insert_or_append(

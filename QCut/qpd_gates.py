@@ -57,6 +57,49 @@ QPD_GATE_REGISTRY: dict[str, Instruction] = {
 }
 
 
+class CutTwoQubitGate(Instruction):
+    """Opaque cut marker for an arbitrary two-qubit gate, carrying the gate itself.
+
+    The markers above identify themselves by name alone, which is enough while every
+    cuttable gate has a hand-written QPD. A generated QPD needs the gate's matrix, so
+    this marker carries the gate to QPD-expansion time.
+
+    The name is ``Cut<GATE>`` so that ``_get_cut_locations`` and ``_insert_cut_nodes``
+    keep working unchanged. The wrapped gate's parameters are re-exposed as this
+    instruction's own ``params``, without which Qiskit could not bind them.
+    """
+
+    def __init__(self, gate: Gate):
+        """Wrap ``gate`` in a cut marker."""
+        if gate.num_qubits != 2:
+            raise ValueError(
+                f"CutTwoQubitGate needs a two-qubit gate, got {gate.name} on "
+                f"{gate.num_qubits} qubits."
+            )
+        super().__init__(
+            name=f"Cut{gate.name.upper()}",
+            num_qubits=2,
+            num_clbits=0,
+            params=list(gate.params),
+        )
+        self._base_gate = gate
+        self._opaque = True
+        self.definition = None
+
+    @property
+    def gate(self) -> Gate:
+        """The wrapped gate, carrying the marker's current parameter values."""
+        if not self.params:
+            return self._base_gate
+        bound = self._base_gate.copy()
+        bound.params = list(self.params)
+        return bound
+
+    def __repr__(self) -> str:
+        """Represent as string."""
+        return self.name
+
+
 class _ReplaceWithCutGates(TransformationPass):
     def __init__(self, registry: dict[str, Instruction]):
         self.registry = registry
@@ -85,6 +128,10 @@ def cutGate(
 
     control and target together define the ordered physical qubit mapping for
     gate inputs 0..n-1: gate input i maps to physical qubit (controls + targets)[i].
+
+    A two-qubit gate becomes a single :class:`CutTwoQubitGate` marker, so its QPD is
+    generated from its matrix at expansion time. Larger gates are still transpiled into
+    the ``{u, cz, swap, iswap}`` basis first, which turns them into several cuts.
     """
     controls = [control] if isinstance(control, int) else list(control)
     targets = [target] if isinstance(target, int) else list(target)
@@ -100,6 +147,9 @@ def cutGate(
         raise ValueError("Qubit arguments must be unique.")
     if any(q < 0 for q in all_qargs):
         raise ValueError("Qubit arguments must be non-negative.")
+
+    if gate.num_qubits == 2:
+        return {"instruction": CutTwoQubitGate(gate), "qargs": all_qargs}
 
     qc = QuantumCircuit(gate.num_qubits, name=f"cut{gate.name.upper()}")
     qc.append(gate, list(range(gate.num_qubits)))

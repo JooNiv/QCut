@@ -24,14 +24,13 @@ from QCut.basis_transform import (
 from QCut.circuit_preparation import get_locations_and_subcircuits
 from QCut.circuit_utils import _remove_obsm, _remove_obsm_2
 from QCut.cutcircuit import CutCircuit, CutExperiment
-from QCut.cutlocation import CutLocation
 from QCut.postprocess import ERROR, estimate_expectation_values
 from QCut.qcutresult import RawResult
 from QCut.qpd_operations import (
-    QPD_REGISTRY,
     _insert_2qubit_gate_cut_qpd,
     _insert_wire_cut_qpd,
     get_qpd_combinations,
+    qpd_for_location,
 )
 
 logger: logging.Logger = logging.getLogger(__name__)
@@ -194,13 +193,16 @@ def get_experiment_circuits(  # noqa: C901
 
     _remove_obsm_2(cut_circuit.subcircuits)
 
-    # initialize solution lists
+    # initialize solution lists. Must use the same resolver as get_qpd_combinations,
+    # or the coefficient array and the combinations disagree.
     num_circs = 1
     for cut_loc in cut_circuit.cut_locations:
-        if isinstance(cut_loc, CutLocation):
-            num_circs *= len(QPD_REGISTRY[cut_loc.gate_name])
-        else:
-            num_circs *= 8
+        num_circs *= len(qpd_for_location(cut_loc))
+    logger.debug(
+        "expanding %d cut(s) into %d experiment group(s)",
+        len(cut_circuit.cut_locations),
+        num_circs,
+    )
     experiment_circuits = []
     coefficients = np.empty(num_circs)
     placeholder_locations = _get_placeholder_locations(cut_circuit.subcircuits)
