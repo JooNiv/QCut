@@ -25,7 +25,10 @@ cut_circuit.append(cut(), [1])
 cut_circuit.cx(1, 2)
 cut_circuit.cx(2, 3)
 
-subcirc_lens = [3, 4, 6]
+# cutGate now emits a single CutCX marker instead of transpiling CX into the {u, cz}
+# basis, so the two `u` gates that sat on the target wire are now KAK locals inside the
+# QPD operations.
+subcirc_lens = [3, 2, 6]
 
 res_expvs = [0.727323, 0.727323, 0.727323, 1.000000]
 

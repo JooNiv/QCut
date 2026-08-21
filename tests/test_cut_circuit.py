@@ -45,7 +45,10 @@ cut_experiment = ck.get_experiment_circuits(cut_circuit, observables)
 
 exp_num_qubits = [1, 1, 3]
 exp_num_circuits = 144
-exp_group_size = 3
+# group_size is the instruction count of the first subcircuit. The CX cut now uses a
+# generated QPD, whose operations carry the KAK local unitaries as explicit `u` gates.
+# num_groups and num_circuits are unchanged.
+exp_group_size = 5
 exp_num_groups = 48
 exp_num_obs_groups = 1
 
