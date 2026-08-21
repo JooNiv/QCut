@@ -12,8 +12,10 @@ from qiskit import ClassicalRegister, QuantumCircuit, QuantumRegister
 from qiskit.circuit import CircuitInstruction, Instruction, Qubit
 from qiskit.converters import circuit_to_dag, dag_to_circuit
 
+from QCut.consolidate import consolidate_two_qubit_blocks, marker_gate
 from QCut.cutcircuit import CutCircuit
 from QCut.cutlocation import CutLocation, SingleQubitCutLocation
+from QCut.options import CutOptions, resolve
 from QCut.qcuterror import QCutError
 
 logger: logging.Logger = logging.getLogger(__name__)
@@ -235,9 +237,26 @@ def get_qubit_map(subcircuits: list[QuantumCircuit]):
     return map_qubit
 
 
+def _consolidate_marked_pairs(circuit: QuantumCircuit) -> QuantumCircuit:
+    """Merge runs of gates on qubit pairs that carry a cut marker.
+
+    Pairs with no marker are left alone. Merging them would not change any cutting cost
+    and would only replace named gates by generic unitaries.
+    """
+    marked = {
+        frozenset(circuit.find_bit(q).index for q in instruction.qubits)
+        for instruction in circuit.data
+        if marker_gate(instruction.operation) is not None
+    }
+    if not marked:
+        return circuit
+    return consolidate_two_qubit_blocks(circuit, restrict_to=marked)
+
+
 def get_locations_and_subcircuits(
     circuit: QuantumCircuit,
     max_qubits: list[int] | None = None,
+    options: CutOptions | None = None,
 ) -> CutCircuit:
     """Get cut locations and subcircuits with placeholder operations.
 
@@ -247,6 +266,8 @@ def get_locations_and_subcircuits(
             list of maximum qubits per subcircuit when using automatic cut
             finding. If None, no constraint is used. Defaults to None.
             In general it is not necesary to manually specify this parameter.
+        options (CutOptions, optional): configuration for the run. Defaults to
+            QCut.options.DEFAULT_OPTIONS.
 
     Returns:
         tuple: A tuple containing:
@@ -258,8 +279,13 @@ def get_locations_and_subcircuits(
     """
     from QCut.QCutFind import construct_final_subcircuits
 
+    options = resolve(options)
     circuit_copy = circuit.copy()  # copy to avoid modifying the original circuit
     circuit_copy = circuit_copy.decompose(["CutGate"])
+    if options.consolidate:
+        # Before the obs_i tags go on, since those touch every qubit and would end every
+        # run. Cut locations are recorded afterwards, so merged runs count as one cut.
+        circuit_copy = _consolidate_marked_pairs(circuit_copy)
     for i in range(circuit.num_qubits):
         obs_m = QuantumCircuit(1, name=f"obs_{i}")
         obs_m = obs_m.to_instruction()
@@ -308,4 +334,4 @@ def get_locations_and_subcircuits(
         f" and separated into {len(fixed_circs)} subcircuits."
     )
 
-    return CutCircuit(fixed_circs, cut_locations, map_qubits)
+    return CutCircuit(fixed_circs, cut_locations, map_qubits, options=options)
