@@ -15,6 +15,8 @@ from QCut.circuit_knitting import (
 from QCut.circuit_preparation import (
     get_locations_and_subcircuits,
 )
+from QCut.consolidate import consolidate_two_qubit_blocks
+from QCut.options import DEFAULT_OPTIONS, CutOptions
 from QCut.postprocess import (
     estimate_expectation_values,
 )
@@ -44,4 +46,7 @@ __all__ = [
     "cutISWAP",
     "cutGate",
     "find_cuts",
+    "CutOptions",
+    "DEFAULT_OPTIONS",
+    "consolidate_two_qubit_blocks",
 ]
