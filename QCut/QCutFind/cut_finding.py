@@ -7,6 +7,8 @@ from qiskit import transpile
 from qiskit.circuit import CircuitInstruction
 
 from QCut.circuit_preparation import get_locations_and_subcircuits
+from QCut.consolidate import consolidate_two_qubit_blocks
+from QCut.options import CutOptions, resolve
 from QCut.QCutFind.graph_circuit_utils import circ_to_graph
 from QCut.QCutFind.metis import k_way_metis_partition
 from QCut.QCutFind.refine import refine_cuts
@@ -164,6 +166,7 @@ def find_cuts(  # noqa: C901
     max_qubits=None,
     cuts="both",
     more_data=False,
+    options: CutOptions | None = None,
 ):
     """Partition a quantum circuit into subcircuits by inserting cut operations.
 
@@ -183,6 +186,8 @@ def find_cuts(  # noqa: C901
             Defaults to "both".
         more_data (bool, optional): If True, returns additional data for debugging and
             analysis. Defaults to False.
+        options (CutOptions, optional): configuration for the run. Defaults to
+            QCut.options.DEFAULT_OPTIONS.
 
     Returns:
         tuple: If more_data is False, returns:
@@ -219,7 +224,12 @@ def find_cuts(  # noqa: C901
 
     circuit.remove_final_measurements()
 
+    options = resolve(options)
     circuit = transpile(circuit, optimization_level=0, basis_gates=BASIS_GATES)
+    if options.consolidate:
+        # Before the graph is built, so a merged run shows up as one edge to cut rather
+        # than several. Nothing is marked yet, so every pair is a candidate.
+        circuit = consolidate_two_qubit_blocks(circuit)
 
     graph, nodes_on_qubit = circ_to_graph(circuit, mode=cuts)
 
@@ -250,10 +260,10 @@ def find_cuts(  # noqa: C901
 
     if max_qubits is not None:
         final_cut_circuit = get_locations_and_subcircuits(
-            cut_circuit, max_qubits=max_qubits
+            cut_circuit, max_qubits=max_qubits, options=options
         )
     else:
-        final_cut_circuit = get_locations_and_subcircuits(cut_circuit)
+        final_cut_circuit = get_locations_and_subcircuits(cut_circuit, options=options)
 
     if not more_data:
         return final_cut_circuit
