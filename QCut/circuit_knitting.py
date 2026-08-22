@@ -21,6 +21,7 @@ from QCut.basis_transform import (
     _combine_pauli_ops,
     _get_obs_subcircuits,
 )
+from QCut.bundle import locate_placeholders, parse_placeholder, plan_bundles
 from QCut.circuit_preparation import get_locations_and_subcircuits
 from QCut.circuit_utils import _remove_obsm, _remove_obsm_2
 from QCut.cutcircuit import CutCircuit, CutExperiment
@@ -29,9 +30,10 @@ from QCut.postprocess import ERROR, estimate_expectation_values
 from QCut.qcutresult import RawResult
 from QCut.qpd_operations import (
     _insert_2qubit_gate_cut_qpd,
+    _insert_bundle_qpd,
     _insert_wire_cut_qpd,
     get_qpd_combinations,
-    qpd_for_location,
+    qpd_for_bundle,
     sample_qpd_combinations,
 )
 
@@ -105,6 +107,22 @@ def _get_placeholder_locations(subcircuits: list[QuantumCircuit]) -> list:
         ops.append(subops)
 
     return ops
+
+
+def _transpiled(circuit: QuantumCircuit, basis, cache: dict) -> QuantumCircuit:
+    """Transpile a QPD operation once and reuse it across experiment groups.
+
+    A bundle's operations are shared between groups, so without a cache each group would
+    transpile them again. Caching also leaves the hand-written tables untouched, which
+    transpiling in place did not.
+    """
+    key = id(circuit)
+    hit = cache.get(key)
+    if hit is not None and hit[0] is circuit:
+        return hit[1]
+    transpiled = transpile(circuit, basis_gates=basis)
+    cache[key] = (circuit, transpiled)
+    return transpiled
 
 
 def get_experiment_circuits(  # noqa: C901
@@ -191,34 +209,39 @@ def get_experiment_circuits(  # noqa: C901
 
     _remove_obsm_2(cut_circuit.subcircuits)
 
-    # Enumerating every combination costs the product of the per-cut term counts, so
+    # Enumerating every combination costs the product of the per-bundle term counts, so
     # past a threshold the decomposition is sampled instead. Both paths must agree with
-    # qpd_for_location on the term counts, or the coefficients and the combinations
-    # would not line up.
+    # qpd_for_bundle on the term counts, or the coefficients and the combinations would
+    # not line up.
     options = cut_circuit.options
+    bundles = plan_bundles(cut_circuit.cut_locations, cut_circuit.subcircuits, options)
+    bundle_of_cut = {cut: bundle for bundle in bundles for cut in bundle.cuts}
+    placeholders = locate_placeholders(cut_circuit.subcircuits)
     exact_groups = 1
-    for cut_loc in cut_circuit.cut_locations:
-        exact_groups *= len(qpd_for_location(cut_loc))
+    for bundle in bundles:
+        exact_groups *= len(qpd_for_bundle(bundle, cut_circuit.cut_locations))
 
     if options.should_sample(exact_groups):
         qpd_combinations, coefficients, num_draws = sample_qpd_combinations(
-            cut_circuit.cut_locations, options.sample_count, options.seed
+            cut_circuit.cut_locations, options.sample_count, options.seed, bundles
         )
         logger.info(
             f"Sampling {num_draws} draws over {exact_groups} possible groups, "
             f"giving {len(qpd_combinations)} distinct circuit groups."
         )
     else:
-        qpd_combinations = get_qpd_combinations(cut_circuit.cut_locations)
+        qpd_combinations = get_qpd_combinations(cut_circuit.cut_locations, bundles)
         coefficients = np.empty(exact_groups)
         num_draws = None
         logger.debug(
-            "expanding %d cut(s) into %d experiment group(s)",
+            "expanding %d bundle(s) over %d cut(s) into %d experiment group(s)",
+            len(bundles),
             len(cut_circuit.cut_locations),
             exact_groups,
         )
 
     experiment_circuits = []
+    transpile_cache: dict[int, tuple[QuantumCircuit, QuantumCircuit]] = {}
     placeholder_locations = _get_placeholder_locations(cut_circuit.subcircuits)
     for id_meas_experiment_index, qpd in enumerate(
         qpd_combinations
@@ -228,9 +251,16 @@ def get_experiment_circuits(  # noqa: C901
             coefficients[id_meas_experiment_index] = np.prod([op["c"] for op in qpd])
 
         if check_circuit_type:
-            for sub in qpd:
-                sub["op_0"] = transpile(sub["op_0"], basis_gates=basis)
-                sub["op_1"] = transpile(sub["op_1"], basis_gates=basis)
+            qpd = tuple(
+                sub
+                if sub["op_0"] is None
+                else {
+                    **sub,
+                    "op_0": _transpiled(sub["op_0"], basis, transpile_cache),
+                    "op_1": _transpiled(sub["op_1"], basis, transpile_cache),
+                }
+                for sub in qpd
+            )
 
         # circuits
         inserted_operations = 0
@@ -267,7 +297,28 @@ def get_experiment_circuits(  # noqa: C901
                                 ind = cur_ind_plus - offset
                                 break
 
-                    if "cut" in op.operation.name:
+                    parsed = parse_placeholder(op.operation.name)
+                    bundle = (
+                        bundle_of_cut.get(parsed[0]) if parsed is not None else None
+                    )
+                    if bundle is not None and bundle.size > 1:
+                        (
+                            offset,
+                            classical_bit_index,
+                            inserted_operations,
+                        ) = _insert_bundle_qpd(
+                            ind,
+                            op,
+                            subcircuit,
+                            offset,
+                            qpd,
+                            bundle,
+                            placeholders,
+                            classical_bit_index,
+                            inserted_operations,
+                        )
+
+                    elif "cut" in op.operation.name:
                         (
                             offset,
                             classical_bit_index,
