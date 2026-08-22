@@ -219,20 +219,42 @@ def test_automatic_cut_finding_uses_a_generated_qpd():
         assert abs(float(np.real(state.expectation_value(pauli))) - actual) < TOLERANCE
 
 
-def test_gate_weight_scales_gamma_and_handles_unknown_gates():
+def test_gate_weight_is_log_gamma_and_handles_unknown_gates():
     """Weights must distinguish gammas that used to truncate to the same int."""
+    import math
+
     from QCut.QCutFind.graph_circuit_utils import (
         WEIGHT_SCALE,
+        cut_weight,
         get_gate_weight,
         get_wire_weight,
     )
 
-    assert get_gate_weight("cz") == 3 * WEIGHT_SCALE
-    assert get_gate_weight("swap") == 7 * WEIGHT_SCALE
-    assert get_wire_weight("both") == 4 * WEIGHT_SCALE
+    assert get_gate_weight("cz") == round(math.log(3) * WEIGHT_SCALE)
+    assert get_gate_weight("swap") == round(math.log(7) * WEIGHT_SCALE)
+    assert get_wire_weight("both") == round(math.log(4) * WEIGHT_SCALE)
     # Both of these gammas used to truncate to 1.
     small = get_gate_weight("rzz", "gate", RZZGate(0.05))
     larger = get_gate_weight("rzz", "gate", RZZGate(0.3))
-    assert small < larger < 3 * WEIGHT_SCALE
+    assert small < larger < get_gate_weight("cz")
+    # An rzz(pi/2) is CZ-equivalent, so it must weigh the same.
+    assert get_gate_weight("rzz", "gate", RZZGate(np.pi / 2)) == get_gate_weight("cz")
+    # A free cut costs no shots but still adds circuits, so it does not weigh nothing.
+    assert cut_weight(1.0) == 1
     with pytest.raises(ValueError, match="no gate was supplied"):
         get_gate_weight("rzz")
+
+
+def test_log_weights_rank_cut_sets_by_their_real_cost():
+    """The overhead of a cut set is a product, so the weights have to add up like one.
+
+    Two CZ cuts cost gamma 9 and one SWAP cut costs 7, so the SWAP is cheaper. Adding
+    gamma directly says the opposite, since 3 + 3 is less than 7. That is the bug the
+    logarithm fixes.
+    """
+    from QCut.QCutFind.graph_circuit_utils import get_gate_weight
+
+    two_cz = 2 * get_gate_weight("cz")
+    one_swap = get_gate_weight("swap")
+    assert 3 + 3 < 7  # what the old additive gamma weights compared
+    assert two_cz > one_swap  # what the real cost, 9 against 7, demands
