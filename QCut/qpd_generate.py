@@ -117,19 +117,34 @@ def gamma_optimal(u: np.ndarray) -> float:
     return float(2 * np.sum(np.abs(np.asarray(u))) ** 2 - 1)
 
 
+def gamma_from_u(u: np.ndarray) -> float:
+    """Return the one-norm of the Eq. (19) coefficients without building the table.
+
+    Equal to ``gamma(qpd_from_u(u))`` but closed form, which is what makes it cheap
+    enough to cost a whole cutting plan before committing to it.
+    """
+    u = np.asarray(u)
+    total = float(np.sum(np.abs(u) ** 2))
+    for alpha in range(4):
+        for beta in range(alpha + 1, 4):
+            z = u[alpha] * np.conj(u[beta])
+            total += 4 * (abs(z.real) + abs(z.imag))
+    return total
+
+
+def gamma_for_gate(gate: Gate) -> float:
+    """Return the gamma :func:`qpd_from_gate` would give, without building the table."""
+    decomposition = TwoQubitWeylDecomposition(gate.to_matrix())
+    return gamma_from_u(u_from_kak(decomposition.a, decomposition.b, decomposition.c))
+
+
 def optimality_gap(u: np.ndarray) -> float:
     r"""Return ``gamma(qpd_from_u(u)) - gamma_optimal(u)`` without building the table.
 
     A non-zero value means some pair product has both a real and an imaginary part, and
     a Schmitt-Piveteau-Sutter decomposition would be cheaper for this gate.
     """
-    u = np.asarray(u)
-    g = float(np.sum(np.abs(u) ** 2))
-    for alpha in range(4):
-        for beta in range(alpha + 1, 4):
-            z = u[alpha] * np.conj(u[beta])
-            g += 4 * (abs(z.real) + abs(z.imag))
-    return g - gamma_optimal(u)
+    return gamma_from_u(u) - gamma_optimal(u)
 
 
 Row = tuple[float, QuantumCircuit, QuantumCircuit]
