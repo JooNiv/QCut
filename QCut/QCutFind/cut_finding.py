@@ -2,6 +2,8 @@
 The main cut finding workflow for QCut.
 """
 
+import logging
+
 import rustworkx as rx
 from qiskit import transpile
 from qiskit.circuit import CircuitInstruction
@@ -40,6 +42,8 @@ BASIS_GATES = [
     "xx_plus_yy",
     "xx_minus_yy",
 ]
+
+logger: logging.Logger = logging.getLogger(__name__)
 
 
 def extract_cuts(graph, labels):  # noqa: C901
@@ -160,6 +164,49 @@ def add_cuts_to_circuit(circuit, cut_data, cut_data_test):
     return qctest
 
 
+def _cheaper_find_cuts(circuit, num_partitions, max_qubits, cuts, options):
+    """Find cuts both with and without consolidation and keep the cheaper plan.
+
+    Merging runs of gates on a pair lowers each pair's cost but can raise the total,
+    since a merged run of gates about different axes can no longer join a joint
+    decomposition. Here it also changes what the partitioner sees, so the two plans may
+    cut different gates and cannot be compared any other way.
+    """
+    from QCut.qpd_operations import plan_cost
+
+    candidates = []
+    first_error = None
+    for label in ("always", "never"):
+        forced = options.replace(consolidate=label)
+        try:
+            found = find_cuts(
+                circuit.copy(), num_partitions, max_qubits, cuts, options=forced
+            )
+        except Exception as error:  # noqa: BLE001, PERF203
+            logger.debug("the %s plan could not be cut: %s", label, error)
+            first_error = first_error or error
+            continue
+        candidates.append((plan_cost(found, forced), label, found))
+
+    if not candidates:
+        # Neither plan works, so report why rather than inventing a new message.
+        raise first_error
+
+    # Stable sort, so a tie keeps "always" and therefore the plan with fewer cuts.
+    candidates.sort(key=lambda candidate: candidate[0])
+    cost, label, chosen = candidates[0]
+    if len(candidates) > 1:
+        logger.info(
+            f"Consolidation is {'on' if label == 'always' else 'off'} for this run, "
+            f"since it costs gamma {cost:.4f} against {candidates[1][0]:.4f} the other "
+            "way."
+        )
+    # Hand back the options the caller passed, not the forced ones the search used, so
+    # both consolidation paths behave the same. Which way it went is in the log.
+    chosen.options = options
+    return chosen
+
+
 def find_cuts(  # noqa: C901
     circuit,
     num_partitions: int | None = None,
@@ -226,7 +273,18 @@ def find_cuts(  # noqa: C901
 
     options = resolve(options)
     circuit = transpile(circuit, optimization_level=0, basis_gates=BASIS_GATES)
-    if options.consolidate:
+
+    mode = options.consolidate_mode
+    if mode == "auto" and consolidate_two_qubit_blocks(circuit) is circuit:
+        mode = "never"  # nothing was worth merging, so there is nothing to compare
+    if mode == "auto" and not more_data:
+        # Consolidating changes which edges the partitioner sees, so the two plans can
+        # end up cutting different gates entirely. There is no way to compare them
+        # short of running both, which is what this does. The more_data path returns
+        # the intermediate graph and cut data, which belong to one run, so it merges
+        # without comparing.
+        return _cheaper_find_cuts(circuit, num_partitions, max_qubits, cuts, options)
+    if mode == "always" or mode == "auto":
         # Before the graph is built, so a merged run shows up as one edge to cut rather
         # than several. Nothing is marked yet, so every pair is a candidate.
         circuit = consolidate_two_qubit_blocks(circuit)
