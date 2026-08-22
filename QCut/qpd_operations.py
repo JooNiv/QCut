@@ -16,9 +16,23 @@ from qiskit.circuit import (
     Qubit,
 )
 
+from QCut.bundle import (
+    Bundle,
+    flatten_term,
+    joint_gate,
+    parse_placeholder,
+    plan_bundles,
+)
+from QCut.circuit_utils import _remove_obsm_2
 from QCut.cutlocation import CutLocation, SingleQubitCutLocation
+from QCut.qcuterror import QCutError
 from QCut.qpd import cz_qpd, identity_qpd, iswap_qpd, swap_qpd
-from QCut.qpd_generate import qpd_from_gate
+from QCut.qpd_generate import gamma, gamma_for_gate, qpd_from_gate
+from QCut.qpd_joint import (
+    gamma_joint,
+    joint_rotation_qpd_from_gates,
+    single_axis_frame,
+)
 
 logger: logging.Logger = logging.getLogger(__name__)
 
@@ -64,6 +78,87 @@ def qpd_for_location(cut: CutLocation | SingleQubitCutLocation) -> list[dict]:
         )
     cut._qpd = qpd
     return qpd
+
+
+def qpd_for_bundle(bundle: Bundle, cut_locations: list) -> list[dict]:
+    """Return the QPD shared by a bundle of cut locations.
+
+    A bundle of one falls through to :func:`qpd_for_location`. Larger bundles get the
+    joint decomposition, whose operations act on one qubit per cut.
+
+    Raises:
+        QCutError: a bundle was planned that has no joint decomposition.
+    """
+    if bundle.size == 1:
+        return qpd_for_location(cut_locations[bundle.anchor])
+
+    gates = [joint_gate(cut_locations[cut]) for cut in bundle.cuts]
+    qpd = joint_rotation_qpd_from_gates(gates, bundle.flipped)
+    if qpd is None:  # pragma: no cover - plan_bundles checks this first
+        raise QCutError(
+            f"bundle {bundle.cuts} has no joint decomposition, which means one of its "
+            "gates is not equivalent to a single-axis rotation"
+        )
+    return qpd
+
+
+def default_bundles(cut_locations: list) -> list[Bundle]:
+    """Return one single-cut bundle per location, the no-bundling arrangement."""
+    return [Bundle((index,), "single") for index in range(len(cut_locations))]
+
+
+def _spread(bundles: list[Bundle], choice: tuple, num_cuts: int) -> tuple[dict, ...]:
+    """Turn one term per bundle into one entry per cut location.
+
+    The anchor of each bundle keeps the operations and the whole coefficient, so
+    multiplying the per-cut coefficients together still gives the term's coefficient.
+    """
+    per_cut: dict[int, dict] = {}
+    for bundle, term in zip(bundles, choice):
+        per_cut.update(flatten_term(bundle, term))
+    return tuple(per_cut[index] for index in range(num_cuts))
+
+
+def bundle_gamma(bundle: Bundle, cut_locations: list) -> float:
+    """Return a bundle's sampling overhead without building its QPD.
+
+    Every case has a closed form, which is what makes it cheap enough to cost a whole
+    cutting plan before committing to one.
+    """
+    if bundle.size > 1:
+        thetas = [
+            single_axis_frame(joint_gate(cut_locations[cut]))[0] for cut in bundle.cuts
+        ]
+        return gamma_joint(thetas)
+
+    cut = cut_locations[bundle.anchor]
+    if isinstance(cut, SingleQubitCutLocation):
+        return gamma(identity_qpd)
+    if cut.gate_name in QPD_REGISTRY:
+        return gamma(QPD_REGISTRY[cut.gate_name])
+    if cut.gate is not None:
+        return gamma_for_gate(cut.gate)
+    raise NotImplementedError(
+        f"No QPD available for gate '{cut.gate_name}', so its cost is unknown."
+    )
+
+
+def plan_cost(cut_circuit, options) -> float:
+    """Return the total sampling overhead a split would cost.
+
+    Includes whatever joint decompositions the split allows, which is the point: two
+    splits of the same circuit can permit different bundles, so their costs cannot be
+    compared without planning the bundles for each.
+    """
+    subcircuits = [subcircuit.copy() for subcircuit in cut_circuit.subcircuits]
+    _remove_obsm_2(subcircuits)
+    bundles = plan_bundles(
+        cut_circuit.cut_locations, subcircuits, options, announce=False
+    )
+    total = 1.0
+    for bundle in bundles:
+        total *= bundle_gamma(bundle, cut_circuit.cut_locations)
+    return total
 
 
 def _insert_wire_cut_qpd(
@@ -253,31 +348,93 @@ def _insert_2qubit_gate_cut_qpd(  # noqa: C901
     return offset, classical_bit_index, inserted_operations
 
 
+def _insert_bundle_qpd(  # noqa: PLR0913
+    ind,
+    op,
+    subcircuit,
+    offset,
+    qpd,
+    bundle,
+    placeholders,
+    classical_bit_index,
+    inserted_operations,
+):
+    """Replace a bundle's placeholders in one subcircuit by a single block.
+
+    A joint decomposition acts on one qubit per cut, so all of a bundle's placeholders
+    on one side become one multi-qubit operation. It goes in where the first or the last
+    of them sat, whichever :func:`QCut.bundle._placement` found workable, and the others
+    are simply removed.
+
+    The operations always come from the bundle's anchor entry, which is also the one
+    carrying the whole coefficient. Where the block lands is a separate question from
+    which cut owns it, because the workable position differs per subcircuit.
+    """
+    cut, side = parse_placeholder(op.operation.name)
+    bundle_side = bundle.bundle_side(cut, side)
+    members = bundle.layout[bundle_side]
+    indices = [placeholders[member].index for member in members]
+    target = min(indices) if bundle.place[bundle_side] == "first" else max(indices)
+
+    subcircuit.data.pop(ind + offset)
+    if placeholders[(cut, side)].index != target:
+        return offset - 1, classical_bit_index, inserted_operations + 1
+
+    entry = qpd[bundle.anchor]
+    block = entry["op_0"] if bundle_side == 0 else entry["op_1"]
+    qubits = [
+        Qubit(subcircuit.qregs[0], placeholders[member].qubit) for member in members
+    ]
+    measured = False
+    for subop in reversed(block.data):
+        clbits = []
+        if subop.clbits:
+            clbits = [subcircuit.cregs[0][classical_bit_index]]
+            measured = True
+        subcircuit.data.insert(
+            ind + offset,
+            CircuitInstruction(
+                operation=subop.operation,
+                qubits=[qubits[block.find_bit(q).index] for q in subop.qubits],
+                clbits=clbits,
+            ),
+        )
+    if measured:
+        classical_bit_index += 1
+    return offset + len(block.data) - 1, classical_bit_index, inserted_operations + 1
+
+
 def get_qpd_combinations(
     cut_locations: list[CutLocation | SingleQubitCutLocation],
+    bundles: list[Bundle] | None = None,
 ) -> Iterable[tuple[dict, ...]]:
     """Get all possible combinations of the QPD operations so that each combination
     has len(cut_locations) elements.
 
     Args:
         cut_locations (list[CutLocation | SingleQubitCutLocation]): cut locations
+        bundles (list[Bundle], optional): cuts sharing a decomposition. Defaults to one
+            bundle per cut.
 
     Returns:
         Iterable[tuple[dict, ...]]:
             Iterable of the possible QPD operations
 
     """
-    qpd_lists = [qpd_for_location(cut) for cut in cut_locations]
+    bundles = default_bundles(cut_locations) if bundles is None else bundles
+    qpd_lists = [qpd_for_bundle(bundle, cut_locations) for bundle in bundles]
 
-    # Cartesian product across all qpd options per cut
-    all_combinations = product(*qpd_lists)
-    return all_combinations
+    # Cartesian product across all qpd options per bundle
+    return (
+        _spread(bundles, choice, len(cut_locations)) for choice in product(*qpd_lists)
+    )
 
 
 def sample_qpd_combinations(
     cut_locations: list[CutLocation | SingleQubitCutLocation],
     num_samples: int,
     seed: int | None = None,
+    bundles: list[Bundle] | None = None,
 ) -> tuple[list[tuple[dict, ...]], np.ndarray, int]:
     """Draw QPD combinations from the quasiprobability distribution.
 
@@ -295,17 +452,19 @@ def sample_qpd_combinations(
         cut_locations: the cuts to expand.
         num_samples: how many draws to take.
         seed: seed for the sampler.
+        bundles: cuts sharing a decomposition. Defaults to one bundle per cut.
 
     Returns:
         ``(combinations, coefficients, num_samples)``, where ``num_samples`` is the draw
         count the estimator must normalise by rather than ``len(combinations)``.
     """
-    qpd_lists = [qpd_for_location(cut) for cut in cut_locations]
+    bundles = default_bundles(cut_locations) if bundles is None else bundles
+    qpd_lists = [qpd_for_bundle(bundle, cut_locations) for bundle in bundles]
     gammas = [sum(abs(term["c"]) for term in qpd) for qpd in qpd_lists]
     gamma_total = float(np.prod(gammas))
 
     rng = np.random.default_rng(seed)
-    per_cut_draws = [
+    per_bundle_draws = [
         rng.choice(
             len(qpd),
             size=num_samples,
@@ -314,19 +473,19 @@ def sample_qpd_combinations(
         for qpd, gamma in zip(qpd_lists, gammas)
     ]
 
-    counts = Counter(zip(*per_cut_draws))
+    counts = Counter(zip(*per_bundle_draws))
     combinations: list[tuple[dict, ...]] = []
     coefficients: list[float] = []
     for key, count in counts.items():
-        terms = tuple(qpd_lists[cut][term] for cut, term in enumerate(key))
-        sign = float(np.prod([np.sign(term["c"]) for term in terms]))
-        combinations.append(terms)
+        choice = tuple(qpd_lists[bundle][term] for bundle, term in enumerate(key))
+        sign = float(np.prod([np.sign(term["c"]) for term in choice]))
+        combinations.append(_spread(bundles, choice, len(cut_locations)))
         coefficients.append(sign * gamma_total * count / num_samples)
 
     logger.debug(
-        "sampled %d draw(s) over %d cut(s) into %d distinct group(s), gamma=%.6f",
+        "sampled %d draw(s) over %d bundle(s) into %d distinct group(s), gamma=%.6f",
         num_samples,
-        len(cut_locations),
+        len(bundles),
         len(combinations),
         gamma_total,
     )
