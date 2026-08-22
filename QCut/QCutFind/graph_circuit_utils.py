@@ -3,21 +3,40 @@ Utility functions for converting quantum circuits to graph representations and
 vice versa, as well as functions for updating node and edge information in the graph.
 """
 
+import math
+
 import rustworkx as rx
 
 from QCut.qpd_generate import gamma as qpd_gamma
 from QCut.qpd_generate import qpd_from_gate
 from QCut.qpd_operations import QPD_REGISTRY
 
-#: METIS takes integer edge weights, so gamma is scaled before rounding.
-WEIGHT_SCALE: int = 100
+#: METIS takes integer edge weights, so a weight is scaled before rounding. The scale
+#: has to resolve the gap between cheap cuts, since log(1.05) is only 0.049.
+WEIGHT_SCALE: int = 10000
 
-#: Stands in for "this cut is not allowed in the current mode". Must stay far above any
-#: scaled gamma so METIS never prefers it.
+#: Stands in for "this cut is not allowed in the current mode". Must stay far above the
+#: total weight of any real cut set so METIS never prefers it.
 DISALLOWED_WEIGHT: int = 100000000000
 
 #: gamma of the identity-channel decomposition used for a wire cut.
 WIRE_GAMMA: int = 4
+
+
+def cut_weight(gamma: float) -> int:
+    """Turn a sampling overhead into an edge weight METIS can minimise correctly.
+
+    The overhead of a cut set is the *product* of its gammas, but METIS minimises the
+    *sum* of the cut edge weights. Taking the logarithm turns one into the other, so
+    ``log(gamma)`` is the weight that makes the partitioner optimise the real cost.
+    Using gamma directly, as this used to, systematically undervalues cheap cuts. An
+    ``rzz(0.3)`` at gamma 1.59 against a ``cz`` at gamma 3.00 reads as 1.9 times cheaper
+    added up but is 2.4 times cheaper multiplied.
+
+    A free cut at ``gamma = 1`` would weigh nothing, which is true of its shot cost but
+    not of the circuits it still adds, so the weight floor is one.
+    """
+    return max(1, round(math.log(gamma) * WEIGHT_SCALE))
 
 
 def weight_fn(edge_data):
@@ -101,8 +120,7 @@ def get_gate_weight(gate_name, mode="gate", gate=None):
     Get the weight of a gate based on its name and the specified mode
     (gate or wire or both).
 
-    The weight is the gate's sampling-overhead factor gamma, scaled by ``WEIGHT_SCALE``
-    so that a non-integer gamma is not truncated away.
+    The weight is ``log(gamma)`` scaled by ``WEIGHT_SCALE``, see :func:`cut_weight`.
 
     Args:
         gate_name: The name of the gate.
@@ -122,7 +140,7 @@ def get_gate_weight(gate_name, mode="gate", gate=None):
             f"Gate {gate_name} has no QPD in QPD_REGISTRY and no gate was supplied to "
             "generate one from."
         )
-    return round(gamma * WEIGHT_SCALE)
+    return cut_weight(gamma)
 
 
 def get_wire_weight(mode="wire"):
@@ -135,7 +153,7 @@ def get_wire_weight(mode="wire"):
     """
     if mode == "gate":
         return DISALLOWED_WEIGHT
-    return WIRE_GAMMA * WEIGHT_SCALE
+    return cut_weight(WIRE_GAMMA)
 
 
 def circ_to_graph(circuit, mode="both"):  # noqa: C901
