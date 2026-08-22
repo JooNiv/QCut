@@ -21,14 +21,27 @@ from QCut.qcuterror import QCutError
 #: enumerates while the exact count stays within ``max_exact_groups``.
 ExpansionStrategy = Literal["auto", "exact", "sample"]
 
+#: When to merge runs of gates on the same qubit pair. ``"always"`` merges wherever it
+#: lowers the cost of that pair on its own, ``"never"`` leaves every gate alone, and
+#: ``"auto"`` costs both whole plans and keeps the cheaper. ``True`` and ``False`` are
+#: accepted as ``"always"`` and ``"never"``.
+ConsolidateStrategy = Literal["auto", "always", "never"]
+
 
 @dataclass(frozen=True)
 class CutOptions:
     """Configuration for a cutting run.
 
     ``consolidate`` merges runs of gates acting on the same qubit pair into one gate
-    before cutting, so the pair costs one cut instead of several. It is only applied
-    where it lowers the sampling overhead.
+    before cutting, so the pair costs one cut instead of several. See
+    :data:`ConsolidateStrategy`. Merging can cost more than it saves once joint cutting
+    is in play, because a merged run of gates about different axes is no longer a
+    single-axis rotation and cannot be bundled, so ``"auto"`` compares the two plans
+    outright rather than guessing.
+
+    ``joint_rotation_cuts`` cuts parallel two-qubit rotation gates with one joint
+    decomposition instead of one each, which costs strictly less in both sampling
+    overhead and circuit count.
 
     ``expansion`` decides how the decomposition becomes experiment circuits, see
     :data:`ExpansionStrategy`. Under ``"auto"``, ``max_exact_groups`` is the largest
@@ -37,7 +50,8 @@ class CutOptions:
     fixes the sampler for a reproducible experiment set.
     """
 
-    consolidate: bool = True
+    consolidate: ConsolidateStrategy | bool = "auto"
+    joint_rotation_cuts: bool = True
     expansion: ExpansionStrategy = "auto"
     max_exact_groups: int = 1000
     num_samples: int | None = None
@@ -45,6 +59,11 @@ class CutOptions:
 
     def __post_init__(self) -> None:
         """Validate the combination."""
+        if self.consolidate not in ("auto", "always", "never", True, False):
+            raise QCutError(
+                f"unknown consolidate strategy '{self.consolidate}', expected one of "
+                "'auto', 'always', 'never', True, False"
+            )
         if self.expansion not in ("auto", "exact", "sample"):
             raise QCutError(
                 f"unknown expansion strategy '{self.expansion}', expected one of "
@@ -54,6 +73,15 @@ class CutOptions:
             raise QCutError("max_exact_groups must be at least 1")
         if self.num_samples is not None and self.num_samples < 1:
             raise QCutError("num_samples must be at least 1")
+
+    @property
+    def consolidate_mode(self) -> str:
+        """The consolidation strategy, with ``True`` and ``False`` normalised."""
+        if self.consolidate is True:
+            return "always"
+        if self.consolidate is False:
+            return "never"
+        return self.consolidate
 
     @property
     def sample_count(self) -> int:
