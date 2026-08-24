@@ -22,7 +22,7 @@ from dataclasses import dataclass
 from qiskit import QuantumCircuit
 from qiskit.circuit.library import CZGate
 
-from QCut.cutlocation import CutLocation
+from QCut.cutlocation import CutLocation, SingleQubitCutLocation
 from QCut.options import CutOptions
 from QCut.qpd_joint import gamma_joint, gamma_separate, single_axis_frame
 
@@ -125,13 +125,13 @@ def _placement(
     """Where one multi-qubit operation replacing ``placeholders`` can go, if anywhere.
 
     The block needs a single point in the subcircuit, so every placeholder has to be
-    able to slide there without crossing anything on *its own* qubit. Operations on the
-    group's other qubits are irrelevant, which is the point: the cut gates are parallel,
-    so each slot slides independently.
+    able to slide there without crossing anything on its own qubit. Operations on the
+    group's other qubits are irrelevant, which is the point: the cuts are parallel, so
+    each slot slides independently.
 
     Sliding the whole group to the earliest placeholder and to the latest are different
     questions and either can be the one that works, so both are tried. Returns
-    ``"first"``, ``"last"``, or None if the cuts are not parallel after all.
+    ``"first"``, ``"last"``, or None if neither does.
     """
     if len(placeholders) < 2:
         return "first"
@@ -211,6 +211,49 @@ def joint_gate(location: CutLocation):
     return None
 
 
+def _wire_candidate_groups(
+    cut_locations: list, placeholders: dict[tuple[int, int], Placeholder]
+) -> dict[tuple[int, int], list[int]]:
+    """Group wire cuts by the ordered pair of subcircuits they run between.
+
+    Ordered, unlike the gate cut version, because a communicating wire cut sends its
+    measured outcome one way only. Cuts pointing the other way between the same two
+    subcircuits form their own bundle.
+    """
+    groups: dict[tuple[int, int], list[int]] = {}
+    for index, location in enumerate(cut_locations):
+        if not isinstance(location, SingleQubitCutLocation):
+            continue
+        measure = placeholders.get((index, SIDE_0))
+        prepare = placeholders.get((index, SIDE_1))
+        if measure is None or prepare is None:
+            continue
+        if measure.subcircuit == prepare.subcircuit:
+            continue
+        groups.setdefault((measure.subcircuit, prepare.subcircuit), []).append(index)
+    return groups
+
+
+def _would_cycle(edges: set[tuple[int, int]], new: tuple[int, int]) -> bool:
+    """Whether adding ``new`` makes the subcircuit dependency graph cyclic.
+
+    A communicating wire cut forces its measure side to run before its prepare side. A
+    cycle of such constraints has no valid execution order, so one of the bundles
+    involved has to fall back to the non-communicating decomposition.
+    """
+    source, target = new
+    if source == target:
+        return True
+    reachable, frontier = {target}, [target]
+    while frontier:
+        node = frontier.pop()
+        for a, b in edges:
+            if a == node and b not in reachable:
+                reachable.add(b)
+                frontier.append(b)
+    return source in reachable
+
+
 def _group_placeholders(
     placeholders: dict[tuple[int, int], Placeholder],
     cuts: list[int],
@@ -225,17 +268,27 @@ def _group_placeholders(
     ]
 
 
-def _grow_groups(
+#: Largest block the group search will attempt. Past this the term count makes the
+#: decomposition impractical anyway, and it keeps the search from growing cubically on a
+#: circuit with very many cuts.
+MAX_GROUP: int = 8
+
+
+def _form_groups(
     eligible: list[int],
     placeholders: dict[tuple[int, int], Placeholder],
     subcircuits: list[QuantumCircuit],
     pair: tuple[int, int],
+    min_size: int = 2,
 ) -> list[tuple[list[int], tuple[str, str]]]:
     """Split ``eligible`` into groups that one operation per side can replace.
 
-    Grown one cut at a time rather than solved exactly. A cut that cannot join the
-    current group starts a new one, which keeps the result deterministic and is enough
-    for the layered circuits joint cutting is aimed at.
+    Runs are tried longest first rather than grown one cut at a time. Growing misses
+    real blocks, because an operation coupling two of the block's qubits is in the way
+    of a small group and harmlessly inside a larger one covering both of them.
+
+    ``min_size`` is 2 for joint gate cutting, where a group of one is just the ordinary
+    single-cut table, and 1 for communicating wire cuts when they are forced on.
     """
 
     def placements(group: list[int]) -> tuple[str, str] | None:
@@ -250,20 +303,22 @@ def _grow_groups(
         return (found[0], found[1])
 
     groups: list[tuple[list[int], tuple[str, str]]] = []
-    current: list[int] = []
-    current_place: tuple[str, str] | None = None
-    for cut in eligible:
-        candidate = placements(current + [cut])
-        if candidate is not None:
-            current = current + [cut]
-            current_place = candidate
-            continue
-        if len(current) > 1 and current_place is not None:
-            groups.append((current, current_place))
-        current = [cut]
-        current_place = placements(current)
-    if len(current) > 1 and current_place is not None:
-        groups.append((current, current_place))
+    remaining = list(eligible)
+    while len(remaining) >= min_size:
+        best = None
+        for size in range(min(len(remaining), MAX_GROUP), min_size - 1, -1):
+            for offset in range(len(remaining) - size + 1):
+                candidate = remaining[offset : offset + size]
+                place = placements(candidate)
+                if place is not None:
+                    best = (candidate, place)
+                    break
+            if best is not None:
+                break
+        if best is None:
+            break
+        groups.append(best)
+        remaining = [cut for cut in remaining if cut not in best[0]]
     return groups
 
 
@@ -300,31 +355,30 @@ def plan_bundles(
         cut_locations: the cuts to group.
         subcircuits: the split circuit, needed to tell which cuts are parallel and which
             subcircuits each cut joins.
-        options: configuration. ``joint_rotation_cuts`` turns joint cutting off.
+        options: configuration. ``joint_rotation_cuts`` and ``wire_cut_communication``
+            turn the two kinds of bundle off.
         announce: whether to log what was bundled. Off while costing a candidate plan,
             which would otherwise report a grouping that may not be the one used.
 
     Returns:
-        One :class:`Bundle` per group, of kind ``"joint_rotation"`` where a joint
-        decomposition applies and ``"single"`` everywhere else.
+        One :class:`Bundle` per group, of kind ``"joint_rotation"`` for parallel
+        rotation gates, ``"cc_wire"`` for wire cuts that exchange their measured
+        outcome, and ``"single"`` for everything else.
     """
+    placeholders = locate_placeholders(subcircuits)
     bundled: dict[int, Bundle] = {}
+
     if options.joint_rotation_cuts:
-        placeholders = locate_placeholders(subcircuits)
-        candidates = _candidate_groups(cut_locations, placeholders)
-        for pair, members in candidates.items():
+        for pair, members in _candidate_groups(cut_locations, placeholders).items():
             eligible = [
                 index for index in members if is_joint_eligible(cut_locations[index])
             ]
-            for group, place in _grow_groups(eligible, placeholders, subcircuits, pair):
-                bundle = Bundle(
-                    tuple(group),
-                    "joint_rotation",
-                    _layout(group, placeholders, pair),
-                    place,
-                )
-                for index in group:
-                    bundled[index] = bundle
+            for group, place in _form_groups(eligible, placeholders, subcircuits, pair):
+                _claim(bundled, group, "joint_rotation", placeholders, pair, place)
+
+    minimum = options.min_communicating_block
+    if minimum:
+        _plan_wire_bundles(cut_locations, subcircuits, placeholders, bundled, minimum)
 
     bundles: list[Bundle] = []
     seen: set[Bundle] = set()
@@ -340,27 +394,145 @@ def plan_bundles(
     return bundles
 
 
+def _claim(
+    bundled: dict[int, Bundle],
+    group: list[int],
+    kind: str,
+    placeholders: dict[tuple[int, int], Placeholder],
+    pair: tuple[int, int],
+    place: tuple[str, str],
+) -> None:
+    """Record one bundle against every cut it covers."""
+    bundle = Bundle(tuple(group), kind, _layout(group, placeholders, pair), place)
+    for index in group:
+        bundled[index] = bundle
+
+
+def _plan_wire_bundles(
+    cut_locations: list,
+    subcircuits: list[QuantumCircuit],
+    placeholders: dict[tuple[int, int], Placeholder],
+    bundled: dict[int, Bundle],
+    minimum: int,
+) -> None:
+    """Group wire cuts that can exchange their measured outcome.
+
+    Only blocks of at least ``minimum`` wires are formed. Communicating does not
+    realise the whole of the gamma it advertises, because the protocol's per-shot
+    feed-forward is emulated by post-selecting batched runs, so a narrow block can end
+    up dearer than leaving it alone even though its gamma looks better.
+
+    Bundles are considered in a fixed order and one is skipped when its direction would
+    close a cycle in the execution order, since then no sequence of runs could satisfy
+    it.
+    """
+    edges: set[tuple[int, int]] = set()
+    candidates = _wire_candidate_groups(cut_locations, placeholders)
+    for pair in sorted(candidates):
+        if _would_cycle(edges, pair):
+            logger.info(
+                f"Wire cuts from subcircuit {pair[0]} to {pair[1]} keep the "
+                "non-communicating decomposition, since running them in order would "
+                "need a cycle."
+            )
+            continue
+        groups = [
+            entry
+            for entry in _form_groups(
+                candidates[pair],
+                placeholders,
+                subcircuits,
+                pair,
+                min_size=minimum,
+            )
+            if len(entry[0]) >= minimum
+        ]
+        if not groups:
+            continue
+        edges.add(pair)
+        for group, place in groups:
+            _claim(bundled, group, "cc_wire", placeholders, pair, place)
+
+
 def _log_savings(bundles: list[Bundle], cut_locations: list) -> None:
     """Report what bundling bought, since it changes both gamma and the group count."""
-    joint = [bundle for bundle in bundles if bundle.size > 1]
-    if not joint:
-        return
-    together, apart = 1.0, 1.0
-    for bundle in joint:
-        thetas = [
-            single_axis_frame(joint_gate(cut_locations[index]))[0]
-            for index in bundle.cuts
-        ]
-        together *= gamma_joint(thetas)
-        apart *= gamma_separate(thetas)
-    logger.info(
-        "Bundled %d cut(s) into %d joint decomposition(s), gamma %.4f against %.4f "
-        "cut separately.",
-        sum(bundle.size for bundle in joint),
-        len(joint),
-        together,
-        apart,
-    )
+    from QCut.qpd_locc import gamma_local, gamma_locc
+
+    joint = [bundle for bundle in bundles if bundle.kind == "joint_rotation"]
+    if joint:
+        together, apart = 1.0, 1.0
+        for bundle in joint:
+            thetas = [
+                single_axis_frame(joint_gate(cut_locations[index]))[0]
+                for index in bundle.cuts
+            ]
+            together *= gamma_joint(thetas)
+            apart *= gamma_separate(thetas)
+        logger.info(
+            "Bundled %d cut(s) into %d joint decomposition(s), gamma %.4f against %.4f "
+            "cut separately.",
+            sum(bundle.size for bundle in joint),
+            len(joint),
+            together,
+            apart,
+        )
+
+    wire = [bundle for bundle in bundles if bundle.kind == "cc_wire"]
+    if wire:
+        together, apart = 1.0, 1.0
+        for bundle in wire:
+            together *= gamma_locc(bundle.size)
+            apart *= gamma_local(bundle.size)
+        logger.info(
+            "Bundled %d wire cut(s) into %d communicating decomposition(s), gamma %.4f "
+            "against %.4f without communication. These run in waves.",
+            sum(bundle.size for bundle in wire),
+            len(wire),
+            together,
+            apart,
+        )
+
+
+def communication_waves(
+    bundles: list[Bundle],
+    placeholders: dict[tuple[int, int], Placeholder],
+    num_subcircuits: int,
+) -> tuple[dict[int, int], dict[Bundle, int]]:
+    """Order the subcircuits by the communicating cuts' dependencies.
+
+    A communicating cut forces its measuring side to run before its preparing side, and
+    those constraints chain. Cutting a circuit into A, B and C so that A feeds B and B
+    feeds C takes three waves, because B's own measured outcome is what decides what C
+    prepares. The wave of a subcircuit is the longest chain reaching it.
+
+    Returns the wave per subcircuit and, per bundle, the wave in which its measured
+    outcome becomes available, which is the wave of its preparing side.
+    """
+    edges = []
+    for bundle in bundles:
+        if bundle.kind != "cc_wire":
+            continue
+        cut = bundle.cuts[0]
+        edges.append(
+            (
+                bundle,
+                placeholders[(cut, SIDE_0)].subcircuit,
+                placeholders[(cut, SIDE_1)].subcircuit,
+            )
+        )
+
+    waves = dict.fromkeys(range(num_subcircuits), 0)
+    # plan_bundles refuses any edge that would close a cycle, so this settles.
+    for _ in range(num_subcircuits):
+        changed = False
+        for _bundle, measure, prepare in edges:
+            if waves[prepare] < waves[measure] + 1:
+                waves[prepare] = waves[measure] + 1
+                changed = True
+        if not changed:
+            break
+
+    return waves, {bundle: waves[prepare] for bundle, _m, prepare in edges}
 
 
 def flatten_term(bundle: Bundle, term: dict) -> dict[int, dict]:
