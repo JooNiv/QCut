@@ -276,17 +276,105 @@ After installation just import the backend you want to use:
 
 .. code:: python
 
-   from iqm.qiskit_iqm import IQMFakeAdonis()
+   from iqm.qiskit_iqm import IQMFakeAdonis
    backend = IQMFakeAdonis()
 
-To tranpile experiment circuits to the backend one can either manually call qiskit
-transpile in a loop or use QCut's ``transpile_experiments()`` function:
+Let QCut do the transpiling
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Transpile the subcircuits, before the experiment circuits are built. This is both
+cheaper, since each subcircuit is translated once rather than once per group, and the
+path that knows about the placeholders standing in for the cuts:
 
 .. code:: python
 
-   transpiled_experiments = ck.transpile_experiments(experiment_circuits, backend)
+   cut_circuit = ck.transpile_subcircuits(cut_circuit, backend, optimization_level=3)
+   experiment = ck.get_experiment_circuits(cut_circuit, observables)
 
-Now one can proceed like before.
+``transpile_experiments`` does the same job after the fact, if the experiment circuits
+already exist. Either takes a ``transpile_options`` dict, passed through to Qiskit's
+transpiler.
+
+This works on star-topology devices such as Adonis, on Apollo, and on resonator devices
+such as Deneb. Three things it has to take care of, which are easy to get wrong by hand:
+
+- **The layout.** Transpiling lays a subcircuit out on physical qubits and pads it to
+  the device width, so the qubit at index ``i`` afterwards is not the one that was there
+  before. Expectation values are read by position, so the qubits are put back in their
+  original order afterwards.
+- **Borrowed wires.** If the layout puts two of a subcircuit's qubits somewhere the
+  device does not connect, routing borrows a third wire to bridge them. That wire is
+  kept, since the circuit needs it, but it holds nothing to measure.
+- **Non-standard device gates.** A resonator machine lists a ``move`` operation, which
+  Qiskit will not accept as a basis gate. It is not needed for translating a basis
+  change, so it is left out.
+
+IQM's own transpiler
+~~~~~~~~~~~~~~~~~~~~
+
+``transpile_subcircuits`` uses ``transpile_to_IQM`` by itself whenever the backend is an
+IQM one and the adapter is installed, which is where the shallower circuits above come
+from. Pass ``use_iqm_transpiler=False`` to force the ordinary Qiskit path instead.
+
+Two of that function's defaults are inverted for QCut, and it is worth knowing why:
+
+``remove_final_rzs=False``
+    A Z rotation is a virtual frame on IQM hardware, and dropping a trailing one is
+    harmless only if the qubit is then measured in the Z basis. QCut adds the basis
+    rotations for X and Y observables *later*, so a frame removed now is one that should
+    have been rotated then, and those expectation values come out wrong with nothing to
+    indicate it.
+
+``perform_move_routing=False``
+    This is the step that turns a simplified-architecture circuit into a real Star
+    architecture one, introducing the resonator and its MOVE gates. It rebuilds the
+    classical registers on the way and loses ``qpd_meas`` wherever a term does not write
+    to it, which invalidates the reconstruction. It also has to: IQM's own documentation
+    describes going the other way, with ``transpile_remove_moves``, precisely so a
+    circuit can be handled by tools that do not support the MOVE gate. QCut is one of
+    those, so it works on the simplified architecture and the MOVEs are inserted
+    afterwards, at submission, by ``iqm-client``. A move-routed circuit also cannot be
+    checked against a local simulator at all, since Aer does not implement the gate.
+
+Both can still be overridden through ``transpile_options``, which is passed on to
+``transpile_to_IQM`` along with anything else it takes. Overriding these two will give
+wrong answers.
+
+The placeholders standing in for the cuts survive this because they are swapped for
+barriers carrying their name as a label first, and swapped back afterwards. A transpiler
+that builds its own target has no way of being told about a custom instruction and
+refuses to synthesise it, while a barrier is a directive it passes through untouched.
+This is also the more honest instruction to give it: a placeholder stands for an
+operation that has not been chosen yet, so merging the gates on either side across the
+gap would not be a valid simplification.
+
+Transpiling before the cuts are marked
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The other way round works too, if you would rather IQM's transpiler saw the whole circuit
+at once rather than each subcircuit:
+
+.. code:: python
+
+   from iqm.qiskit_iqm import transpile_to_IQM
+
+   native = transpile_to_IQM(
+       circuit,
+       backend,
+       remove_final_rzs=False,      # for the reason above
+       perform_move_routing=False,
+       optimization_level=3,
+   )
+   # insert the cut markers into `native`, then cut and run as usual
+
+Two things to keep in mind on that path. The native circuit is padded to the device
+width, so QCut sees the padding as ordinary qubits and splits accordingly, and results
+have to be read back through ``native.layout.final_index_layout()`` to line up with the
+qubits of the circuit you started from.
+
+The same warning applies to any pre-transpiled input, whatever produced it: if a circuit
+reached you already translated and stripped of its trailing Z frames, asking QCut for X
+or Y observables will give wrong answers.
 
 Running on FiQCI
 ----------------
