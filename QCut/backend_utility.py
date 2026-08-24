@@ -8,7 +8,7 @@ from qiskit import transpile
 from qiskit.circuit import Gate
 from qiskit.transpiler import Target
 
-from QCut.circuit_utils import _remove_idle_wires
+from QCut.circuit_utils import _drop_barriers, _fence_markers, _to_logical_order
 from QCut.cutcircuit import CutCircuit, CutExperiment
 from QCut.cutlocation import CutLocation, SingleQubitCutLocation
 
@@ -84,14 +84,23 @@ def transpile_subcircuits(
         custom_name_mapping=custom_gates,
     )
 
+    # Fenced first: a placeholder is a single-qubit gate as far as the transpiler is
+    # concerned, so without barriers it gets commuted past the others and the experiment
+    # builder, which reads them in order, misreads the result.
+    marker_names = set(custom_gates)
     transpiled = transpile(
-        cut_circuit.subcircuits,
+        [_fence_markers(circuit, marker_names) for circuit in cut_circuit.subcircuits],
         target=target,
         optimization_level=optimization_level,
         **(transpile_options or {}),
     )
 
-    transpiled = [_remove_idle_wires(circ) for circ in transpiled]
+    # Undo the layout: transpiling lays the subcircuits out on physical qubits and pads
+    # them to the device width, and post-processing reads measurement bits by position.
+    transpiled = [
+        _drop_barriers(_to_logical_order(circuit, original.num_qubits))
+        for circuit, original in zip(transpiled, cut_circuit.subcircuits)
+    ]
 
     return CutCircuit(
         subcircuits=transpiled,
