@@ -252,19 +252,25 @@ QCut comes with functionality for automatically finding good cut locations that 
 Running on IQM fake backends
 ----------------------------
 
-To use QCut with IQM’s fake backends it is required to install `Qiskit
-IQM <https://github.com/iqm-finland/qiskit-on-iqm>`__ for Qiskit <= 1.2
-or `IQM client <https://docs.meetiqm.com/iqm-client>`__ for Qiskit > 1.2.
+QCut ships an extra for this, so the adapter comes with it:
 
-Installation can be done via uv:
+.. code:: bash
+
+   uv pip install "QCut[iqm]"
+
+That installs `IQM client <https://docs.meetiqm.com/iqm-client>`__ with its Qiskit
+adapter, which covers Qiskit 1.0 up to but not including 2.2. Installing the extra will
+therefore hold Qiskit below 2.2; put it in an environment whose Qiskit is already in
+range if you would rather the resolver left it alone.
+
+The adapter used to be a separate `Qiskit
+IQM <https://github.com/iqm-finland/qiskit-on-iqm>`__ package, capped at Qiskit 1.2.
+Everything it supported is supported by the extra above, so it is only worth installing
+directly if you need that older adapter's API:
 
 .. code:: bash
 
    uv pip install qiskit-iqm==17.8
-
-.. code:: bash
-
-   uv pip install iqm-client[qiskit]
 
 After installation just import the backend you want to use:
 

@@ -41,6 +41,18 @@ uv add QCut
 
 If using other than the default Qiskit version (newest) it is recommended to install Qiskit first before installing QCut.
 
+**IQM hardware and fake backends:**
+
+```bash
+uv pip install "QCut[iqm]"
+#or
+uv add "QCut[iqm]"
+```
+
+This pulls in IQM's Qiskit adapter, which supports Qiskit 1.0 up to but not including
+2.2, so installing it will hold Qiskit below 2.2. Install it into an environment whose
+Qiskit is already in that range if you would rather the resolver did not move it.
+
 Uv can be installed with
 
 ```bash
