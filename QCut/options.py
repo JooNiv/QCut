@@ -27,6 +27,20 @@ ExpansionStrategy = Literal["auto", "exact", "sample"]
 #: accepted as ``"always"`` and ``"never"``.
 ConsolidateStrategy = Literal["auto", "always", "never"]
 
+#: When to let the two sides of a wire cut exchange the measured outcome. ``"always"``
+#: uses it for any block, ``"never"`` for none, and ``"auto"`` only for blocks of at
+#: least :data:`MIN_COMMUNICATING_BLOCK` wires, which is where it starts to pay for
+#: itself. ``True`` and ``False`` are accepted as ``"always"`` and ``"never"``.
+CommunicationStrategy = Literal["auto", "always", "never"]
+
+#: Smallest block ``"auto"`` will use classical communication for. Gamma overstates
+#: what communication buys, because the protocol assumes the prepared state can follow
+#: the measured outcome shot by shot and batched runs have to emulate that by
+#: post-selection. Measured against the local tables a single wire comes out worse in
+#: shots while paying only a quarter off its circuit count, and blocks of two and more
+#: come out ahead on both. See :doc:`the derivation <theory/LOCC_wire_derivation>`.
+MIN_COMMUNICATING_BLOCK: int = 2
+
 
 @dataclass(frozen=True)
 class CutOptions:
@@ -43,19 +57,34 @@ class CutOptions:
     decomposition instead of one each, which costs strictly less in both sampling
     overhead and circuit count.
 
+    ``wire_cut_communication`` lets the two sides of a wire cut exchange the measured
+    outcome, which lowers the overhead of a block of ``n`` parallel wires from ``4**n``
+    to ``2**(n+1) - 1``. It makes those experiments run in two phases, since the state
+    one side prepares depends on what the other measured. See
+    :data:`CommunicationStrategy`.
+
     ``expansion`` decides how the decomposition becomes experiment circuits, see
     :data:`ExpansionStrategy`. Under ``"auto"``, ``max_exact_groups`` is the largest
     exact group count still enumerated rather than sampled. When sampling,
+    ``finder_candidates`` is how many candidate partitions the cut finder generates and
+    costs before keeping the cheapest. METIS returns only the partitioning that
+    minimises its own objective, the weighted edge cut, which stops being the true cost
+    once cuts share a decomposition, so the candidates are generated one per seed and
+    compared on what they actually cost. The seeds are fixed, which makes the finder
+    reproducible; ``seed`` shifts them as a set.
+
     ``num_samples`` draws are taken, defaulting to ``max_exact_groups``, and ``seed``
     fixes the sampler for a reproducible experiment set.
     """
 
     consolidate: ConsolidateStrategy | bool = "auto"
     joint_rotation_cuts: bool = True
+    wire_cut_communication: CommunicationStrategy | bool = "auto"
     expansion: ExpansionStrategy = "auto"
     max_exact_groups: int = 1000
     num_samples: int | None = None
     seed: int | None = None
+    finder_candidates: int = 5
 
     def __post_init__(self) -> None:
         """Validate the combination."""
@@ -63,6 +92,12 @@ class CutOptions:
             raise QCutError(
                 f"unknown consolidate strategy '{self.consolidate}', expected one of "
                 "'auto', 'always', 'never', True, False"
+            )
+        if self.wire_cut_communication not in ("auto", "always", "never", True, False):
+            raise QCutError(
+                f"unknown wire_cut_communication strategy "
+                f"'{self.wire_cut_communication}', expected one of 'auto', 'always', "
+                "'never', True, False"
             )
         if self.expansion not in ("auto", "exact", "sample"):
             raise QCutError(
@@ -73,6 +108,8 @@ class CutOptions:
             raise QCutError("max_exact_groups must be at least 1")
         if self.num_samples is not None and self.num_samples < 1:
             raise QCutError("num_samples must be at least 1")
+        if self.finder_candidates < 1:
+            raise QCutError("finder_candidates must be at least 1")
 
     @property
     def consolidate_mode(self) -> str:
@@ -82,6 +119,15 @@ class CutOptions:
         if self.consolidate is False:
             return "never"
         return self.consolidate
+
+    @property
+    def min_communicating_block(self) -> int:
+        """Smallest wire cut block that will use classical communication."""
+        if self.wire_cut_communication in ("never", False):
+            return 0
+        if self.wire_cut_communication in ("always", True):
+            return 1
+        return MIN_COMMUNICATING_BLOCK
 
     @property
     def sample_count(self) -> int:
