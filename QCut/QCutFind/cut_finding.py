@@ -12,7 +12,12 @@ from QCut.circuit_preparation import get_locations_and_subcircuits
 from QCut.consolidate import consolidate_two_qubit_blocks
 from QCut.options import CutOptions, resolve
 from QCut.QCutFind.graph_circuit_utils import circ_to_graph
-from QCut.QCutFind.metis import k_way_metis_partition
+from QCut.QCutFind.metis import (
+    BUDGET_UFACTOR,
+    FREE_UFACTOR,
+    k_way_metis_partition,
+    qubit_node_weights,
+)
 from QCut.QCutFind.refine import refine_cuts
 from QCut.qpd_gates import QPD_GATE_REGISTRY, CutTwoQubitGate
 from QCut.qpd_gates import cut_op as cut
@@ -264,7 +269,7 @@ def find_cuts(  # noqa: C901
         )
 
     if (max_qubits is not None and len(max_qubits) < 2) or num_partitions < 2:
-        raise ValueError("Number of partitions has to be atleast 2")
+        raise ValueError("Number of partitions has to be at least 2")
 
     if num_partitions == 1:
         return circuit, [], []
@@ -297,31 +302,85 @@ def find_cuts(  # noqa: C901
         for comp_ind, comp in enumerate(components):
             for node in comp:
                 labels[node] = comp_ind
-        cut_data, cut_data_test = [], []
+        candidates = [(labels, [], [])]
     else:
-        labels = k_way_metis_partition(graph, num_partitions)
-        cut_data, cut_data_test = extract_cuts(graph, labels)
+        # METIS minimises the weighted edge cut, which is the true cost only while no
+        # cuts share a decomposition, and it returns just the best partitioning it saw
+        # by that measure. Asking for one partitioning per seed and costing each whole
+        # plan afterwards compares them by what they actually cost. The seeds are fixed,
+        # so the answer is reproducible; ``options.seed`` shifts them as a set.
+        base = 0 if options.seed is None else int(options.seed)
+        # A qubit budget has to be asked for, not repaired for. The graph's nodes are
+        # wire segments, so METIS balancing node counts says nothing about how many
+        # qubits a partition ends up holding, and the repair afterwards moves whole
+        # qubits across and pays in cuts for each. Weighting the nodes so a partition's
+        # weight is its qubit count, and naming the share each may hold, gets the
+        # constraint met by the partitioner instead.
+        if max_qubits is None:
+            weights, targets, ufactor = None, None, FREE_UFACTOR
+        else:
+            weights = qubit_node_weights(graph, nodes_on_qubit)
+            total = sum(max_qubits)
+            targets = [allowance / total for allowance in max_qubits]
+            ufactor = BUDGET_UFACTOR
+        candidates = []
+        for offset in range(max(1, options.finder_candidates)):
+            labels = k_way_metis_partition(
+                graph,
+                num_partitions,
+                seed=base + offset,
+                ncuts=1,
+                node_weights=weights,
+                targets=targets,
+                ufactor=ufactor,
+            )
+            candidates.append((labels, *extract_cuts(graph, labels)))
 
-    if max_qubits is not None:
-        cut_data, cut_data_test, labels = refine_cuts(
-            cut_data,
-            cut_data_test,
-            labels,
-            graph,
-            max_qubits,
-            nodes_on_qubit,
-            circuit,
-            cuts,
+    from QCut.qpd_operations import plan_cost  # local: avoids an import cycle
+
+    best = None
+    for labels, cut_data, cut_data_test in candidates:
+        if max_qubits is not None:
+            cut_data, cut_data_test, labels = refine_cuts(
+                cut_data,
+                cut_data_test,
+                labels,
+                graph,
+                max_qubits,
+                nodes_on_qubit,
+                circuit,
+                cuts,
+            )
+
+        cut_circuit = add_cuts_to_circuit(circuit, cut_data, cut_data_test)
+
+        if max_qubits is not None:
+            final_cut_circuit = get_locations_and_subcircuits(
+                cut_circuit, max_qubits=max_qubits, options=options
+            )
+        else:
+            final_cut_circuit = get_locations_and_subcircuits(
+                cut_circuit, options=options
+            )
+
+        # Costed after refinement, because refinement can add cuts of its own.
+        cost = plan_cost(final_cut_circuit, options)
+        if best is None or cost < best[0]:
+            best = (
+                cost,
+                final_cut_circuit,
+                cut_circuit,
+                cut_data,
+                cut_data_test,
+                labels,
+            )
+
+    if len(candidates) > 1:
+        logger.info(
+            f"Costed {len(candidates)} candidate partition(s), keeping one at "
+            f"gamma={best[0]:.6g}."
         )
-
-    cut_circuit = add_cuts_to_circuit(circuit, cut_data, cut_data_test)
-
-    if max_qubits is not None:
-        final_cut_circuit = get_locations_and_subcircuits(
-            cut_circuit, max_qubits=max_qubits, options=options
-        )
-    else:
-        final_cut_circuit = get_locations_and_subcircuits(cut_circuit, options=options)
+    _, final_cut_circuit, cut_circuit, cut_data, cut_data_test, labels = best
 
     if not more_data:
         return final_cut_circuit
