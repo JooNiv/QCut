@@ -25,21 +25,95 @@ def _count_gates(circuit: QuantumCircuit) -> dict[Qubit, int]:
     return gate_count
 
 
-def _remove_idle_wires(circuit: QuantumCircuit) -> QuantumCircuit:
-    """Remove idle wires from a QuantumCircuit.
+def _fence_markers(circuit: QuantumCircuit, names: set[str]) -> QuantumCircuit:
+    """Put a barrier either side of every placeholder, so transpiling cannot move it.
+
+    The experiment builder walks a subcircuit's instructions in order and expects the
+    placeholders where it left them. Transpiling is free to commute single-qubit gates
+    past each other, and a placeholder looks like one, so without a fence the markers
+    come back permuted and the walk misreads the circuit.
+
+    Fencing is also the more honest instruction to give the transpiler. A placeholder
+    stands for an operation that has not been chosen yet, so merging the gates on either
+    side of it across the gap is not a valid simplification in the first place.
+    """
+    out = circuit.copy_empty_like()
+    for instruction in circuit.data:
+        fenced = instruction.operation.name in names
+        if fenced:
+            out.barrier(instruction.qubits)
+        out.append(instruction.operation, instruction.qubits, instruction.clbits)
+        if fenced:
+            out.barrier(instruction.qubits)
+    return out
+
+
+def _drop_barriers(circuit: QuantumCircuit) -> QuantumCircuit:
+    """Remove the fences again, once transpilation can no longer reorder anything."""
+    out = circuit.copy_empty_like()
+    for instruction in circuit.data:
+        if instruction.operation.name != "barrier":
+            out.append(instruction.operation, instruction.qubits, instruction.clbits)
+    return out
+
+
+def _to_logical_order(circuit: QuantumCircuit, num_logical: int) -> QuantumCircuit:
+    """Undo a transpiler layout, so qubit ``i`` is the subcircuit's own qubit ``i``.
+
+    Transpiling against a backend lays the circuit out on physical qubits and pads it to
+    the device width, so the qubit at index ``i`` afterwards is generally not the one
+    that was there before. Everything downstream reads measurement bits by position --
+    ``_get_sub_expectation_values`` picks observable bits out by index -- so a layout
+    that permutes the qubits silently attributes results to the wrong ones.
+
+    Relabelling the wires is exact and free: the operations and their order do not
+    change, only which index each sits on. The logical qubits are put where the layout
+    says they end up, since that is where the observables are read, and any wire routing
+    borrowed on the way is kept after them. Placeholders are unaffected either way,
+    because a placeholder is inserted on whichever wire it is already sitting on, which
+    is where its qubit is at that point in the circuit.
+
+    Wires that end up carrying nothing at all -- the device padding -- are dropped.
 
     Args:
-        circuit (QuantumCircuit): The input quantum circuit.
+        circuit (QuantumCircuit): a transpiled circuit carrying a layout.
+        num_logical (int): how many qubits it had before transpilation.
 
     Returns:
-        QuantumCircuit: A new quantum circuit with idle wires removed.
+        QuantumCircuit: the same circuit, its own qubits first and in order.
     """
-    gate_count = _count_gates(circuit)
-    for qubit, count in gate_count.items():
-        if count == 0:
-            circuit.qubits.remove(qubit)
+    layout = circuit.layout
+    if layout is None:
+        return circuit
 
-    return circuit
+    physical_for_logical = list(layout.final_index_layout())[:num_logical]
+    busy = {
+        circuit.find_bit(qubit).index
+        for instruction in circuit.data
+        for qubit in instruction.qubits
+    }
+    # The subcircuit's own qubits first, then anything routing borrowed, then nothing:
+    # idle padding is left out entirely.
+    borrowed = sorted(busy - set(physical_for_logical))
+    order = physical_for_logical + borrowed
+    new_for_old = {old: new for new, old in enumerate(order)}
+
+    out = QuantumCircuit(len(order), name=circuit.name)
+    for register in circuit.cregs:
+        out.add_register(register)
+    # Wires past this are ones routing borrowed. They carry no part of the subcircuit's
+    # state at the end, so nothing downstream should measure them.
+    out.metadata = dict(circuit.metadata or {})
+    out.metadata["qcut_logical_qubits"] = num_logical
+
+    for instruction in circuit.data:
+        physical = [circuit.find_bit(qubit).index for qubit in instruction.qubits]
+        out.append(
+            instruction.operation,
+            [out.qubits[new_for_old[index]] for index in physical],
+            instruction.clbits,
+        )
+    return out
 
 
 def _remove_obsm(subcircuits: list[dict[int, QuantumCircuit]]):
