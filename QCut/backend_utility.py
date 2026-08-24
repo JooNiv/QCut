@@ -185,6 +185,7 @@ def transpile_experiments(
     backend,
     optimization_level: int = 0,
     transpile_options: dict | None = None,
+    use_iqm_transpiler: bool = True,
 ) -> CutExperiment:
     """
     Transpile experiment circuits. Transpiles all generated experiment circuits for
@@ -193,11 +194,18 @@ def transpile_experiments(
     efficient. This function is mainly provided for special cases where one needs/wants
     extra control over the transpilation of experiment circuits.
 
+    As with :func:`transpile_subcircuits`, an IQM backend is handed to IQM's own
+    transpiler when the adapter is installed, with the same two defaults inverted and
+    for the same reasons. No placeholders are left at this point, so nothing has to be
+    hidden from it as barriers, but the layout still has to be undone afterwards.
+
     Args:
         cut_experiment: (CutExperiment): Experiment circuits to be transpiled.
         backend (str): Backend to transpile to.
         optimization_level (int): Optimization level for transpilation (0-3).
-        transpile_options (dict): Arguments passed to qiskit transpile function.
+        transpile_options (dict): Arguments passed to the transpiler.
+        use_iqm_transpiler (bool): Whether an IQM backend may use IQM's transpiler.
+            Pass False for the ordinary qiskit path.
 
     Returns:
         CutExperiment: Transpiled experiment circuits wrapped in CutExperiment class.
@@ -206,19 +214,46 @@ def transpile_experiments(
     if not isinstance(cut_experiment, CutExperiment):
         raise ValueError("cut_experiment must be of type CutExperiment.")
 
-    subexperiments = [
-        [
-            {
-                ind: transpile(
-                    circ,
-                    backend=backend,
+    iqm_transpile = _iqm_transpiler_for(backend) if use_iqm_transpiler else None
+
+    if iqm_transpile is not None:
+        options = {
+            "remove_final_rzs": False,
+            "perform_move_routing": False,
+            "optimization_level": optimization_level,
+        }
+        options.update(transpile_options or {})
+
+        def translate(circuit):
+            return _to_logical_order(
+                iqm_transpile(circuit, backend, **options), circuit.num_qubits
+            )
+    else:
+        # Not ``backend=backend``: a resonator machine's target carries a ``move``
+        # operation, and transpiling against it emits MOVE gates that no local
+        # simulator can run and whose register rewriting QCut cannot reconstruct
+        # from. Building the target from the backend's instruction names leaves that
+        # operation out, and the resonator stage happens at submission instead.
+        basis = sorted({item[0].name for item in backend._target.instructions})
+        fallback_target = Target().from_configuration(
+            num_qubits=backend.num_qubits,
+            coupling_map=backend._coupling_map,
+            basis_gates=basis,
+        )
+
+        def translate(circuit):
+            return _to_logical_order(
+                transpile(
+                    circuit,
+                    target=fallback_target,
                     optimization_level=optimization_level,
                     **(transpile_options or {}),
-                )
-                for ind, circ in exp.items()
-            }
-            for exp in exps
-        ]
+                ),
+                circuit.num_qubits,
+            )
+
+    subexperiments = [
+        [{ind: translate(circ) for ind, circ in exp.items()} for exp in exps]
         for exps in cut_experiment.experiments
     ]
 
@@ -230,4 +265,11 @@ def transpile_experiments(
         observables=cut_experiment.observables,
         options=cut_experiment.options,
         backend=backend,
+        # Translating gates does not change any of these, and dropping them would.
+        # Without the plan a communicating experiment forgets that it runs in waves and
+        # is executed as though nothing depended on a measured outcome; without the bit
+        # layout the estimator cannot find the qpd bits.
+        num_draws=cut_experiment._num_draws,
+        plan=cut_experiment.plan,
+        qpd_bits=cut_experiment.qpd_bits,
     )
