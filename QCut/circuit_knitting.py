@@ -21,13 +21,20 @@ from QCut.basis_transform import (
     _combine_pauli_ops,
     _get_obs_subcircuits,
 )
-from QCut.bundle import locate_placeholders, parse_placeholder, plan_bundles
+from QCut.bundle import (
+    SIDE_1,
+    communication_waves,
+    locate_placeholders,
+    parse_placeholder,
+    plan_bundles,
+)
 from QCut.circuit_preparation import get_locations_and_subcircuits
 from QCut.circuit_utils import _remove_obsm, _remove_obsm_2
 from QCut.cutcircuit import CutCircuit, CutExperiment
 from QCut.options import CutOptions
-from QCut.postprocess import ERROR, estimate_expectation_values
+from QCut.postprocess import estimate_expectation_values
 from QCut.qcutresult import RawResult
+from QCut.qpd_locc import CommunicationPlan
 from QCut.qpd_operations import (
     _insert_2qubit_gate_cut_qpd,
     _insert_bundle_qpd,
@@ -242,6 +249,12 @@ def get_experiment_circuits(  # noqa: C901
 
     experiment_circuits = []
     transpile_cache: dict[int, tuple[QuantumCircuit, QuantumCircuit]] = {}
+    # Which classical bits carry a communicating wire cut's measured outcome, keyed by
+    # (group, observable setting, subcircuit). Execution reads the label back from it.
+    label_clbits: dict[tuple[int, int, int], list] = {}
+    communicating = [bundle for bundle in bundles if bundle.kind == "cc_wire"]
+    group_labels: list[dict] = []
+    group_keys: list[tuple] = []
     placeholder_locations = _get_placeholder_locations(cut_circuit.subcircuits)
     for id_meas_experiment_index, qpd in enumerate(
         qpd_combinations
@@ -249,6 +262,26 @@ def get_experiment_circuits(  # noqa: C901
         # QPD combinations
         if num_draws is None:
             coefficients[id_meas_experiment_index] = np.prod([op["c"] for op in qpd])
+
+        if communicating:
+            group_labels.append(
+                {bundle: qpd[bundle.anchor]["label"] for bundle in communicating}
+            )
+            # A communicating bundle contributes only its channel, so groups differing
+            # only in the label they answer share a key. Every other bundle contributes
+            # its whole choice, or a group would be handed operations meant for another.
+            group_keys.append(
+                tuple(
+                    (id(bundle), qpd[bundle.anchor]["channel"])
+                    if bundle.kind == "cc_wire"
+                    else (
+                        id(bundle),
+                        id(qpd[bundle.anchor]["op_0"]),
+                        id(qpd[bundle.anchor]["op_1"]),
+                    )
+                    for bundle in bundles
+                )
+            )
 
         if check_circuit_type:
             qpd = tuple(
@@ -274,6 +307,7 @@ def get_experiment_circuits(  # noqa: C901
                 classical_bit_index = 0
                 qpd_qubits = []  # store the qubit indices of qubits used for qpd
                 # measurements
+                labels_here: list = []  # (bundle, clbits) per communicating wire cut
                 for op_ind in placeholder_locations[id_meas_subcircuit_index]:
                     ind, op = op_ind
 
@@ -301,7 +335,7 @@ def get_experiment_circuits(  # noqa: C901
                     bundle = (
                         bundle_of_cut.get(parsed[0]) if parsed is not None else None
                     )
-                    if bundle is not None and bundle.size > 1:
+                    if bundle is not None and bundle.kind != "single":
                         (
                             offset,
                             classical_bit_index,
@@ -311,11 +345,13 @@ def get_experiment_circuits(  # noqa: C901
                             op,
                             subcircuit,
                             offset,
+                            qpd_qubits,
                             qpd,
                             bundle,
                             placeholders,
                             classical_bit_index,
                             inserted_operations,
+                            labels_here,
                         )
 
                     elif "cut" in op.operation.name:
@@ -357,9 +393,34 @@ def get_experiment_circuits(  # noqa: C901
 
                 subcircuit = _finalize_subcircuit(subcircuit, qpd_qubits)
                 cur_set_circuits[id_meas_subcircuit_index] = subcircuit
+                if labels_here:
+                    label_clbits[
+                        (
+                            id_meas_experiment_index,
+                            len(obs_set_circuits),
+                            id_meas_subcircuit_index,
+                        )
+                    ] = labels_here
             obs_set_circuits.append(cur_set_circuits)
         experiment_circuits.append(obs_set_circuits)
 
+    plan = None
+    if communicating:
+        waves, bundle_waves = communication_waves(
+            bundles, placeholders, len(cut_circuit.subcircuits)
+        )
+        plan = CommunicationPlan(
+            label_clbits,
+            group_labels,
+            group_keys,
+            frozenset(
+                placeholders[(cut, SIDE_1)].subcircuit
+                for bundle in communicating
+                for cut in bundle.cuts
+            ),
+            waves,
+            bundle_waves,
+        )
     cut_experiment = CutExperiment(
         experiment_circuits,
         cut_circuit.cut_locations,
@@ -369,6 +430,7 @@ def get_experiment_circuits(  # noqa: C901
         backend=backend,
         options=options,
         num_draws=num_draws,
+        plan=plan,
     )
 
     logger.info(f"Generated {cut_experiment.num_circuits} circuits for the experiment.")
@@ -376,9 +438,332 @@ def get_experiment_circuits(  # noqa: C901
     return cut_experiment
 
 
+def _select_label(counts: dict, clbits, label, scale: float) -> dict:
+    """Keep the shots whose measured label matches, rescaled to the nominal total.
+
+    A communicating wire cut's measured bits say which state the other side prepared,
+    so only the shots that came out with this group's label belong to it. Scaling the
+    survivors by the number of labels turns the surviving fraction into the estimate of
+    that outcome's probability that the decomposition asks for.
+
+    The qpd register is added before the end-of-circuit one, so it is the last field of
+    a counts key, and within a field the highest classical bit comes first.
+    """
+    kept = {}
+    for key, value in counts.items():
+        bits = key.split(" ")[-1]
+        if all(
+            bits[len(bits) - 1 - clbit] == str(wanted)
+            for clbit, wanted in zip(clbits, label)
+        ):
+            kept[key] = value * scale
+    return kept
+
+
+def _apply_communication(cut_experiment, results) -> None:
+    """Restrict every measuring run to the outcome its group answers."""
+    plan = cut_experiment.plan
+    for (group, obs, sub), entries in plan.label_clbits.items():
+        counts = results[group][obs][sub]
+        for bundle, clbits in entries:
+            counts = _select_label(
+                counts, clbits, plan.labels[group][bundle], 2**bundle.size
+            )
+        results[group][obs][sub] = counts
+
+
+def _backend_shot_cap(backend) -> int | None:
+    """Return the most shots a backend takes in one job, if it says."""
+    for probe in (
+        lambda: backend.max_shots,
+        lambda: backend.configuration().max_shots,
+    ):
+        try:
+            cap = probe()
+        except Exception:
+            continue
+        if isinstance(cap, int) and cap > 0:
+            return cap
+    return None
+
+
+#: Widest ratio of requested shot counts allowed to share one job. Circuits in a batch
+#: all run at the same number of shots, so a batch spanning a wide range starves the
+#: circuits at its top end. Holding the ratio to two keeps the variance cost of that
+#: within a few percent while still leaving only a handful of batches.
+SHOT_SPREAD: float = 2.0
+
+
+#: Shots per circuit when the caller does not say. Used by :func:`run_experiments` and
+#: the one-call wrappers around it, so they cannot drift apart.
+DEFAULT_SHOTS: int = 2**12
+
+
+#: Share of the shot budget spent on the measuring wave. A measuring circuit is shared
+#: between every group that differs only in which label it answers, so a shot spent
+#: there buys precision for all of them at once, while a preparing shot buys it for one
+#: group alone. Splitting the budget evenly over the subcircuits therefore over-funds
+#: the measuring side. Scans at one, two and three wires, over cuts into two and three
+#: pieces, all put the best share near a sixth, independent of the block width and of
+#: how many pieces the circuit was cut into.
+MEASURE_SHARE: float = 1 / 6
+
+
+def _batches(runnable, max_batch_size):
+    """Group jobs, already sorted by requested shots, into runs that can share a job.
+
+    A batch closes when it is full or when the next circuit wants more than
+    :data:`SHOT_SPREAD` times what the batch's smallest asked for. Both limits matter.
+    Without the size limit a batch could exceed what the backend takes in one job, and
+    without the spread limit a generous ``max_batch_size`` would put everything in one
+    batch at one shot count, which is uniform allocation and throws away the whole point
+    of splitting the shots in proportion to the labels.
+    """
+    batch = []
+    for job in runnable:
+        if batch and (
+            len(batch) >= max_batch_size or job[2] > batch[0][2] * SHOT_SPREAD
+        ):
+            yield batch
+            batch = []
+        batch.append(job)
+    if batch:
+        yield batch
+
+
+def _dispatch(jobs, backend, max_batch_size, nominal_shots, cap, results) -> None:
+    """Run one wave and scatter its counts, rescaled to a common shot count.
+
+    Circuits in a wave no longer want the same number of shots, and only circuits asking
+    for the same number can share a job. They are sorted and grouped by
+    :func:`_batches`, and each batch runs at the mean of what its own circuits asked
+    for. Sorting first is what keeps that mean close to every request in the batch.
+
+    The counts are then rescaled to ``nominal_shots`` so that everything downstream can
+    keep dividing by the one number it was given.
+    """
+    runnable = []
+    for targets, circuit, wanted in jobs:
+        if not _has_measurements(circuit):
+            synthetic = {" " + "0" * circuit.num_clbits: nominal_shots}
+            for group, obs, sub in targets:
+                results[group][obs][sub] = dict(synthetic)
+            continue
+        runnable.append((targets, circuit, wanted))
+
+    runnable.sort(key=lambda job: job[2])
+    for batch in _batches(runnable, max_batch_size):
+        shots = max(1, round(sum(job[2] for job in batch) / len(batch)))
+        if cap is not None:
+            shots = min(shots, cap)
+        scale = nominal_shots / shots
+        logger.info(f"Running {len(batch)} circuits with {shots} shots each")
+        counts = (
+            backend.run([circuit for _t, circuit, _w in batch], shots=shots)
+            .result()
+            .get_counts()
+        )
+        if isinstance(counts, dict):
+            counts = [counts]
+        for (targets, _circuit, _wanted), circuit_counts in zip(batch, counts):
+            scaled = {key: value * scale for key, value in circuit_counts.items()}
+            for group, obs, sub in targets:
+                results[group][obs][sub] = dict(scaled)
+
+
+def _label_fraction(counts: dict, clbits, label) -> float:
+    """Return how often a measuring run came out with this label."""
+    total = sum(counts.values())
+    if total <= 0:
+        return 0.0
+    kept = sum(
+        value
+        for key, value in counts.items()
+        if all(
+            key.split(" ")[-1][len(key.split(" ")[-1]) - 1 - clbit] == str(wanted)
+            for clbit, wanted in zip(clbits, label)
+        )
+    )
+    return kept / total
+
+
+def _label_weights(cut_experiment, results, wave: int) -> list[float]:
+    """Return how likely each group's path was, using the waves already run.
+
+    A bundle's outcome is only known once its preparing side has been reached, so at
+    wave ``w`` the weight is the product over the bundles settled by then. That is just
+    the information the protocol itself has at that point.
+    """
+    plan = cut_experiment.plan
+    settled = {bundle for bundle, at in plan.bundle_waves.items() if at <= wave}
+    seen: dict[tuple[int, object], float] = {}
+    for (group, obs, sub), entries in plan.label_clbits.items():
+        for bundle, clbits in entries:
+            if bundle not in settled or (group, bundle) in seen:
+                continue
+            seen[(group, bundle)] = _label_fraction(
+                results[group][obs][sub], clbits, plan.labels[group][bundle]
+            )
+    weights = []
+    for group in range(len(cut_experiment.experiments)):
+        weight = 1.0
+        for bundle in plan.labels[group]:
+            if bundle in settled:
+                weight *= seen.get((group, bundle), 0.0)
+        weights.append(weight)
+    return weights
+
+
+def _allocate(weights: list[float], total: int) -> list[int]:
+    """Split ``total`` shots between groups in proportion to ``weights``.
+
+    Proportional allocation is what minimises the variance of the sum, and it is the
+    whole point of communicating: a label that rarely comes up needs correspondingly few
+    shots spent on the state it asks for. A group whose label did come up must still get
+    at least one shot, or its contribution goes missing and the estimate is biased, so
+    the split uses largest remainders on top of a floor of one.
+    """
+    live = [index for index, weight in enumerate(weights) if weight > 0]
+    allocation = [0] * len(weights)
+    if not live:
+        return allocation
+    spare = max(total - len(live), 0)
+    scale = sum(weights[index] for index in live)
+    exact = [spare * weights[index] / scale for index in live]
+    for position, index in enumerate(live):
+        allocation[index] = 1 + int(exact[position])
+    remainder = spare - sum(int(value) for value in exact)
+    order = sorted(range(len(live)), key=lambda p: -(exact[p] % 1))
+    for position in order[: max(remainder, 0)]:
+        allocation[live[position]] += 1
+    return allocation
+
+
+def _first_wave_jobs(cut_experiment, shots, sharing, scale=1.0):
+    """Return the jobs for wave zero, one per distinct label-independent circuit.
+
+    ``scale`` is :data:`MEASURE_SHARE` rewritten as a per-subcircuit factor, so that
+    the measuring wave takes that share of the run rather than an even one.
+    """
+    plan = cut_experiment.plan
+    experiments = cut_experiment.experiments
+    jobs = []
+    for members in sharing.values():
+        budget = max(1, round(shots * len(members) * scale))
+        for obs, obs_group in enumerate(experiments[members[0]]):
+            for sub, circuit in obs_group.items():
+                if plan.waves.get(sub, 0) != 0:
+                    continue
+                jobs.append(([(group, obs, sub) for group in members], circuit, budget))
+    return jobs
+
+
+def _later_wave_jobs(cut_experiment, wave, allocation, results):
+    """Return one wave's jobs, blanking groups whose path never came up."""
+    plan = cut_experiment.plan
+    jobs = []
+    for group, obs_groups in enumerate(cut_experiment.experiments):
+        for obs, obs_group in enumerate(obs_groups):
+            for sub, circuit in obs_group.items():
+                if plan.waves.get(sub, 0) != wave:
+                    continue
+                if allocation[group] <= 0:
+                    results[group][obs][sub] = {}
+                else:
+                    jobs.append(([(group, obs, sub)], circuit, allocation[group]))
+    return jobs
+
+
+def _run_communicating(cut_experiment, shots, backend, max_batch_size):
+    """Run an experiment whose wire cuts exchange their measured outcome.
+
+    The state one side prepares depends on what the other measured, so the circuits run
+    in waves. Wave zero holds everything no label can affect, and its circuits are
+    shared between the groups differing only in which label they answer, so they run
+    once for the whole set. Each later wave has its shots split in proportion to how
+    often the labels it depends on actually came up.
+
+    The budget is not divided evenly between the waves. Sharing makes a measuring shot
+    worth more than a preparing one, so wave zero takes :data:`MEASURE_SHARE` of the run
+    and the later waves divide the rest. The total is unchanged either way.
+    """
+    plan = cut_experiment.plan
+    results: list[list[dict[int, dict[str, float]]]] = [
+        # Seeded in subcircuit order, because the estimator reads the observable bits
+        # back in the order these were filled, and the waves fill them out of order.
+        [{sub: {} for sub in sorted(obs_group)} for obs_group in group]
+        for group in cut_experiment.experiments
+    ]
+    cap = _backend_shot_cap(backend)
+
+    # Budget-neutral reweighting of the waves. Every subcircuit would otherwise get
+    # shots * groups whatever wave it fell in, which hands the measuring wave a share
+    # of one over the number of pieces the circuit was cut into. Rewriting
+    # MEASURE_SHARE as a per-subcircuit factor leaves the run's total untouched, so
+    # ``shots`` keeps meaning what it always did.
+    subcircuits = list(cut_experiment.experiments[0][0])
+    measuring = sum(1 for sub in subcircuits if plan.waves.get(sub, 0) == 0)
+    preparing = len(subcircuits) - measuring
+    first_scale = MEASURE_SHARE * len(subcircuits) / measuring
+    later_scale = (
+        (1 - MEASURE_SHARE) * len(subcircuits) / preparing if preparing else 0.0
+    )
+
+    sharing: dict[tuple, list[int]] = {}
+    for group in range(len(cut_experiment.experiments)):
+        sharing.setdefault(plan.keys[group], []).append(group)
+
+    logger.info(
+        f"Wave 1 of {plan.last_wave + 1}: {len(sharing)} distinct measuring run(s) "
+        f"shared across {len(cut_experiment.experiments)} group(s)."
+    )
+    _dispatch(
+        _first_wave_jobs(cut_experiment, shots, sharing, first_scale),
+        backend,
+        max_batch_size,
+        shots,
+        cap,
+        results,
+    )
+
+    for wave in range(1, plan.last_wave + 1):
+        weights = _label_weights(cut_experiment, results, wave)
+        allocation = _allocate(
+            weights, round(shots * len(cut_experiment.experiments) * later_scale)
+        )
+        logger.info(
+            f"Wave {wave + 1} of {plan.last_wave + 1}: preparing circuits for "
+            f"{sum(1 for value in allocation if value > 0)} of "
+            f"{len(cut_experiment.experiments)} group(s), shots split in proportion to "
+            "how often each label came up."
+        )
+        _dispatch(
+            _later_wave_jobs(cut_experiment, wave, allocation, results),
+            backend,
+            max_batch_size,
+            shots,
+            cap,
+            results,
+        )
+
+    _apply_communication(cut_experiment, results)
+    return results
+
+
+def _align_missing(results) -> None:
+    """Fill in any subcircuit that produced no counts at all."""
+    all_keys = results[0][0].keys()
+    for sub_result in results:
+        for experiment_run in sub_result:
+            if experiment_run.keys() != all_keys:
+                for key, val in results[0][0].items():
+                    if key not in experiment_run:
+                        experiment_run[key] = val
+
+
 def run_experiments(  # noqa: C901
     cut_experiment: CutExperiment,
-    shots: int = 2**12,
+    shots: int = DEFAULT_SHOTS,
     backend=None,
     max_batch_size: int = 100,
 ) -> RawResult:
@@ -393,7 +778,11 @@ def run_experiments(  # noqa: C901
     Args:
         experiment_circuits (CutCircuit): experiment circuits
         cut_locations (np.ndarray[CutLocation]): list of cut locations
-        shots (int): number of shots per circuit run (optional)
+        shots (int): number of shots per circuit run (optional). Communicating wire
+            cuts spend it differently: the waves split a total of ``shots`` times the
+            number of groups per subcircuit between them, in proportion to how often
+            each label came up, so individual circuits run at very different counts and
+            only that total is fixed. See :func:`_run_communicating`.
         backend: backend used for running the circuits (optional)
         max_batch_size (int): maximum number of circuits submitted per backend.run
             call. Larger batches reduce per-job overhead on real hardware.
@@ -403,11 +792,13 @@ def run_experiments(  # noqa: C901
             list of transformed results
 
     """
-    gamma = sum(abs(c) for c in cut_experiment.coefficients)
-    samples = int(np.power(gamma, 2) / np.power(ERROR, 2))
-    samples = int(samples / cut_experiment.num_groups)
     if backend is None:
         backend = AerSimulator()
+
+    if cut_experiment.plan is not None:
+        results = _run_communicating(cut_experiment, shots, backend, max_batch_size)
+        _align_missing(results)
+        return RawResult(results, shots, cut_experiment.expv_data())
 
     results: list[list[dict[int, dict[str, int]]]] = [
         [{} for _ in group] for group in cut_experiment.experiments
@@ -451,16 +842,9 @@ def run_experiments(  # noqa: C901
     for (group_idx, obs_idx, sub_idx), num_clbits in empty_locations:
         results[group_idx][obs_idx][sub_idx] = {" " + "0" * num_clbits: shots}
 
-    all_keys = results[0][0].keys()
+    _align_missing(results)
 
-    for ind, sub_result in enumerate(results):
-        for exp_ind, experiment_run in enumerate(sub_result):
-            if experiment_run.keys() != all_keys:
-                for key, val in results[0][0].items():
-                    if key not in experiment_run:
-                        experiment_run[key] = val
-
-    return RawResult(results, samples, shots)
+    return RawResult(results, shots, cut_experiment.expv_data())
 
 
 def run_cut_circuit(
@@ -469,6 +853,7 @@ def run_cut_circuit(
     backend=AerSimulator(),
     max_batch_size: int = 100,
     options: CutOptions | None = None,
+    shots: int = DEFAULT_SHOTS,
 ) -> list[float]:
     """After splitting the circuit run the rest of the circuit knitting sequence.
 
@@ -482,6 +867,8 @@ def run_cut_circuit(
         max_batch_size (int): maximum number of circuits submitted per backend.run
             call (optional)
         options (CutOptions): configuration, overriding what the CutCircuit carries
+            (optional)
+        shots (int): number of shots per circuit run, as in :func:`run_experiments`
             (optional)
 
     Returns:
@@ -502,11 +889,12 @@ def run_cut_circuit(
 
     results = run_experiments(
         cut_experiment,
+        shots=shots,
         backend=backend,
         max_batch_size=max_batch_size,
     )
 
-    return estimate_expectation_values(results, cut_experiment.expv_data())
+    return estimate_expectation_values(results)
 
 
 def run(
@@ -515,17 +903,20 @@ def run(
     backend=AerSimulator(),
     max_batch_size: int = 100,
     options: CutOptions | None = None,
+    shots: int = DEFAULT_SHOTS,
 ) -> list[float]:
     """Run the whole circuit knitting sequence with one function call.
 
     Args:
         circuit (QuantumCircuit): circuit with cut experiments
         observables (list[int | list[int]]):
-            list of observbles in the form of qubit indices (Z-obsevable).
+            list of observbles in the form of qubit indices (Z-observable).
         backend: backend to use for running experiment circuits (optional)
         max_batch_size (int): maximum number of circuits submitted per backend.run
             call (optional)
         options (CutOptions): configuration for the run (optional)
+        shots (int): number of shots per circuit run, as in :func:`run_experiments`
+            (optional)
 
     Returns:
         list: a list of expectation values
@@ -534,4 +925,6 @@ def run(
     # circuit = circuit.copy()
     cut_circuit = get_locations_and_subcircuits(circuit, options=options)
 
-    return run_cut_circuit(cut_circuit, observables, backend, max_batch_size)
+    return run_cut_circuit(
+        cut_circuit, observables, backend, max_batch_size, shots=shots
+    )
