@@ -15,25 +15,24 @@ from QCut.basis_transform import _combine_pauli_ops, _get_observable_circuit_ind
 from QCut.cutlocation import SingleQubitCutLocation
 from QCut.qcutresult import RawResult, SubResult, TotalResult
 
-ERROR = 0.0000001
-
 
 def _process_results(
     results: list,
     shots: int,
-    samples: int,
 ) -> list[list[TotalResult]]:
     """Transform results with post processing function {0,1} -> [-1, 1].
 
-    Tranform results so that we map 0 -> -1 and 1 -> 1. Gives processed results in form
+    Transform results so that we map 0 -> -1 and 1 -> 1. Gives processed results in form
     [TotalResult0, TotalResult1, ...], where TotalResult is
     [SubResult0, SubResult1, ...] and SubResult are [[[x0,x0,x0], [y0,y0], counts0],
     [[x1,x1,x1], [y1,y1], counts1], ...].
 
+    Each outcome is weighted by how often it came up, so the weight carried through to
+    the estimator is that outcome's probability.
+
     Args:
         results (list): results from experiment circuits
-        shots (int): number of shots per circuit run
-        samples (int): number of needed samples
+        shots (int): number of shots the counts were taken at
 
     Returns:
     -------
@@ -41,49 +40,49 @@ def _process_results(
             list of transformed results
 
     """
-    preocessed_results = []
+    processed_results = []
 
     for group_ind, circ_group in enumerate(results):
         for exp_ind, experiment_run in enumerate(circ_group):
             experiment_run_results = []
             for sub_ind, sub_result in experiment_run.items():
                 circuit_results = []
-                for meassurements, count in sub_result.items():
+                for measurements, count in sub_result.items():
                     # separate end measurements from mid-circuit measurements
-                    if meassurements == " ":
-                        separate_measurements = [meassurements.split(" ")[0]]
+                    if measurements == " ":
+                        separate_measurements = [measurements.split(" ")[0]]
                     else:
-                        separate_measurements = meassurements.split(" ")
+                        separate_measurements = measurements.split(" ")
 
                     # map to eigenvalues
                     result_eigenvalues = [
                         np.array([-1 if x == "0" else 1 for x in i])
                         for i in separate_measurements
                     ]
-                    circuit_results.append(
-                        SubResult(result_eigenvalues, count / shots * samples)
-                    )
+                    circuit_results.append(SubResult(result_eigenvalues, count / shots))
                 experiment_run_results.append(circuit_results)
-            if group_ind >= len(preocessed_results):
-                preocessed_results.append([])
-            preocessed_results[group_ind].append(TotalResult(experiment_run_results))
+            if group_ind >= len(processed_results):
+                processed_results.append([])
+            processed_results[group_ind].append(TotalResult(experiment_run_results))
 
-    return preocessed_results
+    return processed_results
 
 
 def _get_sub_expectation_values(
     experiment_run: TotalResult,
     observables: list,
-    shots: int,
     map_qubits: Optional[dict[int, int]] = None,
 ) -> np.ndarray:
     """Calculate sub expectation value for the result.
+
+    One subcircuit group's contribution: over every combination of the subcircuits'
+    end-of-circuit outcomes, the product of their probabilities times the observable's
+    eigenvalue times the sign the mid-circuit measurements carry.
 
     Args:
         experiment_run (TotalResult): results of a subcircuit pair
         observables (list[int | list[int]]):
             list of observables as qubit indices (Z-observables)
-        shots (int): number of shots
 
     Returns:
         list:
@@ -99,7 +98,7 @@ def _get_sub_expectation_values(
 
     for ind, circuit_result in enumerate(sub_circuit_result_combinations):
         # loop through results
-        # concat results to one array and reverse to account for qiskit quibit ordering
+        # concat results to one array and reverse to account for qiskit qubit ordering
         full_result = np.concatenate(
             [i.measurements[0] for i in reversed(circuit_result)]
         )
@@ -121,13 +120,12 @@ def _get_sub_expectation_values(
         sorted_full_result = list(reversed(sorted_full_result))
 
         qpd_measurement_coefficient = 1  # initial value for qpd
-        weight = shots  # initial weight
-        for res in circuit_result:  # calculate weight and qpd coefficient
-            weight *= res.count / shots
-            # if len(res.measurements) > 1:
+        probability = 1.0  # joint probability of this combination of outcomes
+        for res in circuit_result:
+            probability *= res.count  # already a probability, see _process_results
             qpd_measurement_coefficient *= np.prod(res.measurements[1])
         observable_results = np.empty(len(observables))  # initialize empty array
-        # for obsrvables
+        # for observables
         for count, obs in enumerate(observables):  # populate observable array
             if isinstance(obs, int):
                 observable_results[count] = sorted_full_result[obs]  # if single qubit
@@ -135,7 +133,7 @@ def _get_sub_expectation_values(
             # to array
             else:  # if multi qubit observable
                 multi_qubit_observable_eigenvalue = 1  # initial eigenvalue
-                for sub_observables in obs:  # multio qubit observable
+                for sub_observables in obs:  # multi qubit observable
                     multi_qubit_observable_eigenvalue *= sorted_full_result[
                         sub_observables
                     ]
@@ -144,69 +142,61 @@ def _get_sub_expectation_values(
                     )
 
         observable_expectation_value = (
-            qpd_measurement_coefficient * observable_results * weight
+            qpd_measurement_coefficient * observable_results * probability
         )
         sub_expectation_value += observable_expectation_value
 
     return sub_expectation_value
 
 
-def _get_weights(coefficients: list[float], num_exp_groups: int):
-    """
-    Get weights for each subcircuit group based on the coefficients.
-    The sum of the weights is equal to the number of experiment groups.
-
-    Args:
-        coefficients (list[float]): list of coefficients for each subcircuit group
-        num_exp_groups (int): number of experiment groups
-    Returns:
-        Generator:
-            generator of weights for each subcircuit group
-    """
-
-    total_coefficient = sum(abs(coef) for coef in coefficients)
-    if total_coefficient == 0:
-        raise ValueError("Total coefficient cannot be zero.")
-    for coef in coefficients:
-        yield num_exp_groups * abs(coef) / total_coefficient
-
-
-def estimate_expectation_values(results: RawResult, expv_data: dict) -> list[float]:
-    """Calculate the estimated expectation values.
+def estimate_expectation_values(
+    results: RawResult, expv_data: dict | None = None
+) -> np.ndarray:
+    r"""Calculate the estimated expectation values.
 
     Loop through processed results. For each result group generate all products of
     different measurements from different subcircuits of the group. For each result
     from qpd measurements calculate qpd coefficient and from counts calculate weight.
-    Get results for qubits corresponding to the observables. If multiqubit observable
-    multiply individual qubit eigenvalues and multiply by (-1)^(m+1) where m is number
-    of qubits in the observable. Multiply by weight and add to sub expectation value.
-    Once all results iterated over move to next circuit group. Lastly multiply
-    by total cut cost and divide by number of samples.
+    The estimate is the quasiprobability sum itself,
+
+    .. math::
+
+        \langle O \rangle = (-1)^{w+1} \sum_g c_g E_g
+
+    over the subcircuit groups, where :math:`c_g` is the group's coefficient,
+    :math:`E_g` is what :func:`_get_sub_expectation_values` returns for it, and
+    :math:`w` counts the wire cuts. That parity is the qpd register's sign convention:
+    every one of its bits maps 0 to -1, so an unwritten bit contributes -1 and only the
+    number allocated per subcircuit survives.
+
+    Multi-qubit observables pick up a further :math:`(-1)^{m+1}` for their :math:`m`
+    qubits, applied while their eigenvalues are multiplied together.
 
     Args:
-        results (RawResult): raw results from experiment circuits
-        coefficients (list[int]): list of coefficients for each subcircuit group
-        cut_locations (np.ndarray[CutLocation]): cut locations
-        observables (list[int | list[int]]):
-            observables to calculate expectation values for
+        results (RawResult): raw results from experiment circuits. Carries the data
+            needed to interpret itself, so ``expv_data`` does not have to be passed.
+        expv_data (dict, optional): experiment data, if it is not the data the results
+            were produced with. Defaults to what ``results`` recorded.
 
     Returns:
-        list[float]:
-            expectation values as a list of floats
+        np.ndarray:
+            one expectation value per observable, in the order they were given
 
     """
     raw_results = results
-    results_processed = _process_results(
-        raw_results.results, raw_results._shots, raw_results._samples
-    )
+    if expv_data is None:
+        expv_data = raw_results.expv_data
+        if expv_data is None:
+            raise ValueError(
+                "These results carry no experiment data, so expv_data has to be given. "
+                "Results from QCut.run_experiments carry it already."
+            )
+    results_processed = _process_results(raw_results.results, raw_results._shots)
 
     wire_cuts = len(
         [i for i in expv_data["cut_locations"] if isinstance(i, SingleQubitCutLocation)]
     )
-
-    gamma = sum(abs(c) for c in expv_data["coefficients"])
-    samples = int(np.power(gamma, 2) / np.power(ERROR, 2))
-    shots = int(samples / len(results_processed))
+    parity = np.power(-1, wire_cuts + 1)
 
     measurement_settings = _combine_pauli_ops(expv_data["observables"])
 
@@ -216,42 +206,29 @@ def estimate_expectation_values(results: RawResult, expv_data: dict) -> list[flo
         obs_circuit_info = _get_observable_circuit_index(obs, measurement_settings)
         result_for_obs.append(obs_circuit_info)
 
-    sum_shots = 0
-    # ininialize approx expectation values of an array of ones
-    expectation_values = np.ones(len(expv_data["observables"]))
+    expectation_values = np.zeros(len(expv_data["observables"]))
 
     for ind, obs_data in enumerate(result_for_obs):
         if obs_data["circuit_index"] is None:
             raise ValueError("""Observable cannot be measured 
                              with given measurement settings.""")
 
-        weights = _get_weights(expv_data["coefficients"], expv_data["num_exp_groups"])
-
         for experiment_run, coefficient in zip(
             results_processed, expv_data["coefficients"]
         ):
-            # add sub results to the total approx expectation value
             cur_obs = (
                 obs_data["obs_indices"]
                 if len(obs_data["obs_indices"]) == 1
                 else [obs_data["obs_indices"]]
             )
-
-            weight = next(weights)
-
-            mid = (
-                np.power(-1, wire_cuts + 1)  # * (np.power(-1, cz_cuts)
-                * np.sign(coefficient)
-                * weight
+            expectation_values[ind] += (
+                parity
+                * coefficient
                 * _get_sub_expectation_values(
                     experiment_run[obs_data["circuit_index"]],
                     cur_obs,
-                    shots,
                     expv_data["map_qubit"],
                 )
             )[0]
-            sum_shots += shots
-            expectation_values[ind] += mid
 
-    gamma = sum(abs(c) for c in expv_data["coefficients"])
-    return gamma * expectation_values / samples
+    return expectation_values
