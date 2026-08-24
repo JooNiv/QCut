@@ -1,6 +1,6 @@
 """Class for nicely representing a cut circuit/experiment. Also implements
 some of the same functionality as the qiskit QuantumCircuit class for
-a group of circuts."""
+a group of circuits."""
 
 from __future__ import annotations
 
@@ -93,12 +93,17 @@ class CutExperiment:
         backend=None,
         options: CutOptions | None = None,
         num_draws: int | None = None,
+        plan=None,
     ) -> None:
         """Init.
 
         ``num_draws`` records how many samples were drawn when the decomposition was
         sampled rather than enumerated. It is informational. The estimator does not need
         it, because the sampled coefficients already carry their multiplicity.
+
+        ``plan`` is a :class:`QCut.qpd_locc.CommunicationPlan` when any wire cut
+        exchanges its measured outcome, and None otherwise. Those experiments run in two
+        phases, so execution needs to know which bits carry the outcome.
         """
 
         self.experiments = experiment_circuits
@@ -109,6 +114,7 @@ class CutExperiment:
         self.observables = observables
         self.options = resolve(options)
         self._num_draws = num_draws
+        self.plan = plan
 
     def expv_data(self):
         """Get data for expv calculation."""
@@ -158,6 +164,7 @@ class CutExperiment:
                 self.backend,
                 self.options,
                 self._num_draws,
+                self.plan,
             )
 
     @property
@@ -188,6 +195,11 @@ class CutExperiment:
         if self._num_draws is None:
             return self.num_groups
         return self._num_draws
+
+    @property
+    def communicates(self):
+        """Whether any wire cut exchanges its outcome between the partitions."""
+        return self.plan is not None
 
     @property
     def sampled(self):
