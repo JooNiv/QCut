@@ -15,6 +15,12 @@ made.
 A cut marker is opaque, so it is unwrapped to the gate it carries before its run is
 merged, and the result is marked again. Wire cut markers end a run rather than being
 absorbed into it, since the cut has to stay where it was placed.
+
+A run does not have to be contiguous. An instruction on disjoint qubits commutes with
+the whole run and is simply skipped, and one that overlaps the pair is slid past
+whenever it commutes with the members that would move across it. That second case is
+the common one in an Ising or QAOA layer, where neighbouring ``rzz`` and ``cz`` gates
+all commute, and without it a pair's gates are rarely adjacent enough to merge at all.
 """
 
 from __future__ import annotations
@@ -30,6 +36,24 @@ from qiskit.quantum_info import Operator
 from QCut.qpd_gates import CutTwoQubitGate
 
 logger: logging.Logger = logging.getLogger(__name__)
+
+try:  # pragma: no cover - depends on the qiskit version
+    from qiskit.circuit.commutation_library import SessionCommutationChecker as _CHECKER
+except ImportError:  # pragma: no cover
+    _CHECKER = None
+    logger.debug("no commutation library available; runs must be contiguous")
+
+#: Never slid past, whatever the checker says. Cut markers pin a location the caller
+#: chose, and the rest either carry classical data or are not unitary, so reordering
+#: around them is not a question of commutation.
+_UNSLIDEABLE: tuple[str, ...] = (
+    "barrier",
+    "measure",
+    "Cut",
+    "reset",
+    "delay",
+    "initialize",
+)
 
 # The per-gate markers carry no gate of their own, so the gate each one stands for has
 # to be recovered before its run can be merged.
@@ -47,6 +71,61 @@ def marker_gate(operation) -> Gate | None:
     if isinstance(operation, CutTwoQubitGate):
         return operation.gate
     return _MARKER_GATES.get(operation.name)
+
+
+def _gate_of(operation) -> Gate:
+    """The gate an instruction stands for, unwrapping a cut marker."""
+    return marker_gate(operation) or operation
+
+
+def _commutes(circuit: QuantumCircuit, member: int, operation, qubits) -> bool:
+    """Whether ``operation`` on ``qubits`` commutes with the instruction at ``member``.
+
+    Both sides are unwrapped first. The checker answers False for anything it cannot
+    look inside, and a cut marker is an opaque custom instruction, so without unwrapping
+    every marked pair would look non-commuting and no run would ever be extended.
+    """
+    if _CHECKER is None:
+        return False
+    other = circuit.data[member]
+    try:
+        return bool(
+            _CHECKER.commute(
+                _gate_of(operation),
+                list(qubits),
+                [],
+                _gate_of(other.operation),
+                [circuit.find_bit(q).index for q in other.qubits],
+                [],
+            )
+        )
+    except Exception:  # noqa: BLE001 - an unknown operation is simply not commuting
+        return False
+
+
+def _commuting_suffix(
+    circuit: QuantumCircuit, instruction, qubits, current: list[int]
+) -> list[int] | None:
+    """The longest tail of ``current`` that ``instruction`` may be slid past, or None.
+
+    Only members before the blocker move, and they move as a group, so the blocker has
+    to commute with all of them. Trimming from the front rather than giving up matters:
+    a run that absorbed a single-qubit gate early would otherwise be killed by a check
+    that gate need not have been part of.
+    """
+    if _CHECKER is None or not current or instruction.clbits:
+        return None
+    if instruction.operation.name in _UNSLIDEABLE:
+        return None
+    suffix = list(current)
+    while suffix:
+        if all(
+            _commutes(circuit, member, instruction.operation, qubits)
+            for member in suffix
+        ):
+            return suffix
+        suffix = suffix[1:]
+    return None
 
 
 def _cost(gate: Gate) -> tuple[float, int]:
@@ -75,25 +154,33 @@ def _worth_merging(gates: list[Gate], merged: Gate) -> bool:
 
 def _blocks_on_pair(
     circuit: QuantumCircuit, pair: tuple[int, int], claimed: set[int]
-) -> list[list[int]]:
+) -> list[tuple[list[int], bool]]:
     """Return the maximal runs of instruction indices acting only within ``pair``.
+
+    Each run comes with a flag saying whether anything was slid past it, which decides
+    where the merged gate goes.
 
     An instruction touching neither qubit of the pair is skipped, since it acts on
     disjoint qubits and so commutes with the whole run. An instruction touching one of
-    the pair's qubits but reaching outside it ends the run, as do measurements,
+    the pair's qubits but reaching outside it is slid past if it commutes with the
+    members that would cross it, and otherwise ends the run — as do measurements,
     barriers, wire cut markers, and anything another pair's run already claimed. That
     last case matters for a single-qubit gate on a qubit shared by two pairs, which
     would otherwise be absorbed into both runs and applied twice.
     """
     pair_set = set(pair)
-    blocks: list[list[int]] = []
+    blocks: list[tuple[list[int], bool]] = []
     current: list[int] = []
+    moved = False
     for index, instruction in enumerate(circuit.data):
-        qubits = {circuit.find_bit(q).index for q in instruction.qubits}
-        if not qubits & pair_set:
+        # Ordered, because the commutation check needs the gate's argument order: cx on
+        # (1, 2) commutes with a Z-diagonal gate on qubit 1 and cx on (2, 1) does not.
+        qubits = [circuit.find_bit(q).index for q in instruction.qubits]
+        touched = set(qubits)
+        if not touched & pair_set:
             continue
         absorbable = (
-            qubits <= pair_set
+            touched <= pair_set
             and not instruction.clbits
             and index not in claimed
             and instruction.operation.name not in ("barrier", "measure", "Cut")
@@ -101,11 +188,18 @@ def _blocks_on_pair(
         if absorbable:
             current.append(index)
             continue
+        suffix = _commuting_suffix(circuit, instruction, qubits, current)
+        if suffix is not None:
+            prefix = current[: len(current) - len(suffix)]
+            if prefix:
+                blocks.append((prefix, moved))
+            current, moved = suffix, True
+            continue
         if current:
-            blocks.append(current)
-            current = []
+            blocks.append((current, moved))
+            current, moved = [], False
     if current:
-        blocks.append(current)
+        blocks.append((current, moved))
     return blocks
 
 
@@ -137,7 +231,7 @@ def _plan_merges(
     replacements: dict[int, tuple[Gate, tuple[int, int]] | None] = {}
     claimed: set[int] = set()
     for key, pair in pairs.items():
-        for block in _blocks_on_pair(circuit, pair, claimed):
+        for block, moved in _blocks_on_pair(circuit, pair, claimed):
             gates = [
                 marker_gate(circuit.data[i].operation) or circuit.data[i].operation
                 for i in block
@@ -152,13 +246,17 @@ def _plan_merges(
             if not _worth_merging(two_qubit, merged):
                 continue
             # The block may start with a single-qubit gate, so the merged gate goes
-            # on the pair rather than on the first instruction's qubits.
-            replacements[block[0]] = (
+            # on the pair rather than on the first instruction's qubits. If anything was
+            # slid past, the members before it have moved forward across it, so the
+            # merged gate belongs at the end of the run rather than the start.
+            anchor = block[-1] if moved else block[0]
+            replacements[anchor] = (
                 CutTwoQubitGate(merged) if key in marked else merged,
                 pair,
             )
-            for index in block[1:]:
-                replacements[index] = None
+            for index in block:
+                if index != anchor:
+                    replacements[index] = None
             claimed.update(block)
     return replacements
 
