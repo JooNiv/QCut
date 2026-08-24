@@ -31,7 +31,6 @@ finally:
     del version, PackageNotFoundError
 
 __all__ = [
-    "run_on_backend",
     "transpile_experiments",
     "transpile_subcircuits",
     "estimate_expectation_values",
