@@ -183,7 +183,7 @@ results = ck.run_experiments(cut_experiment, backend=fake)
 **8: Define observables and calculate expectation values**
 
 ```python
-expectation_values = ck.estimate_expectation_values(results, cut_experiment.expv_data())
+expectation_values = ck.estimate_expectation_values(results)
 ```
 
 **9: Finally calculate the exact and noisy expectation values of the original circuit and compare them to the results calculated with QCut**
@@ -275,7 +275,7 @@ print(f"Exact expectation values with ideal simulator :{np.array(exact_expvals)}
 To use QCut with IQM's fake backends it is required to install [Qiskit IQM](https://github.com/iqm-finland/qiskit-on-iqm) for Qiskit <= 1.2 
 or [IQM client](https://docs.meetiqm.com/iqm-client) for Qiskit > 1.2.
 
-Installation can be doen via uv:
+Installation can be done via uv:
 
 ```bash
 uv pip install qiskit-iqm==17.8

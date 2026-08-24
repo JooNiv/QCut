@@ -25,6 +25,15 @@ into one gate before cutting. If nothing else touches those qubits in between, t
 run is itself one two-qubit unitary, and cutting it once is usually cheaper than cutting
 each gate, because the overhead of separate cuts multiplies.
 
+A run does not have to be contiguous. Gates on other qubits commute with it and are
+skipped, and a gate that overlaps the pair is moved out of the way whenever it commutes
+with the members that would cross it. That last case carries most of the benefit: a
+layer of an Ising or QAOA circuit puts a neighbouring ``rzz`` or ``cz`` between every
+pair of gates on the same qubits, and treating those as blockers leaves almost nothing
+adjacent enough to merge. Which gate is involved matters more than which qubits — a
+``cx`` whose *control* lands on the pair commutes with a Z-diagonal run and is moved
+past, while the same gate reversed does not and ends the run.
+
 Two ``rzz(0.4)`` gates on a pair cost :math:`\gamma = 3.16` over 36 subexperiments cut
 separately, against :math:`\gamma = 2.43` over 6 as the single ``rzz(0.8)`` they compose
 to. Two ``cz`` gates compose to the identity, so the merged cut costs
@@ -96,6 +105,84 @@ grouped and what that saved at INFO level.
 Note that this changes the number of experiment groups, so a test pinning
 ``CutExperiment.num_groups`` will see 30 where it saw 36. The derivation is on the
 :doc:`joint rotation gate cutting <theory/Joint_rotation_derivation>` page.
+
+Wire cuts that exchange the measured outcome
+--------------------------------------------
+
+``wire_cut_communication`` (default ``"auto"``) lets the two sides of a wire cut exchange
+the measured outcome. Cutting :math:`n` wires locally costs :math:`4^n` and that is
+provably the best possible, so a block of wires gains nothing on its own. Communicating
+brings it down to :math:`2^{n+1} - 1`, and the number of circuits from :math:`8^n` to
+:math:`2^n(2^{n+1}-1)`.
+
+.. list-table::
+   :header-rows: 1
+
+   * - wires
+     - communicating
+     - local only
+   * - 1
+     - 6 circuits, :math:`\gamma = 3`
+     - 8 circuits, :math:`\gamma = 4`
+   * - 2
+     - 28 circuits, :math:`\gamma = 7`
+     - 64 circuits, :math:`\gamma = 16`
+   * - 3
+     - 120 circuits, :math:`\gamma = 15`
+     - 512 circuits, :math:`\gamma = 64`
+
+The circuit count is the reliable win. The shot cost is more subtle, because
+:math:`\gamma` assumes the prepared state can follow the measured outcome shot by shot.
+Batched runs emulate that by post-selection, which reads a group's measuring side from
+only the shots whose label matched and rescales by :math:`2^n`. Sharing that circuit
+between the channel's groups pays for the rescaling exactly, so the measuring side comes
+out at parity rather than ahead, and the realised gain falls short of the ratio of the
+:math:`\gamma`\ s. How far short depends on the circuit. Measurements put a single wire
+behind the local tables on shots and blocks of two and more ahead on shots, circuits and
+jobs together.
+
+So the three strategies are
+
+``"auto"``
+    Communicate only for blocks of at least
+    :data:`~QCut.options.MIN_COMMUNICATING_BLOCK` wires, two by default, which is where
+    it starts to pay for itself. A single wire would trade a quarter off its circuit
+    count for roughly twice the shots.
+
+``"always"`` (or ``True``)
+    Communicate wherever the cuts allow it, single wires included.
+
+``"never"`` (or ``False``)
+    Keep the local decomposition everywhere.
+
+Communicating makes those experiments run in **waves**. Wave one holds everything no
+measured label can affect, shared between the groups that differ only in which label they
+answer, and each later wave has its shots split in proportion to how often the labels it
+depends on came up. There are as many waves as the dependencies are deep, so a circuit
+split into A, B and C where A feeds B and B feeds C takes three, because B's own measured
+outcome is what decides what C prepares.
+
+The waves do not get equal shares of the budget. A measuring shot buys precision for
+every group answering its shared circuit at once, while a preparing shot buys it for one
+group, so an even split over the subcircuits over-funds the measuring wave. It takes
+:data:`~QCut.circuit_knitting.MEASURE_SHARE` of the run instead, a sixth, and the later
+waves divide the rest evenly. The total is the same either way, so ``shots`` means what
+it always did.
+
+Nothing runs one shot at a time, and batching is preserved. Within a wave the circuits are
+sorted by how many shots they want and grouped into batches, each running at the mean of
+what its own circuits asked for. A batch closes when it reaches ``max_batch_size`` or when
+its requests span more than a factor of two, whichever comes first. The first limit keeps
+a job within what the backend takes, and the second stops a generous ``max_batch_size``
+from putting a whole wave in one job at one shot count, which would be uniform allocation
+and would throw the proportional split away. So a wave costs a handful of jobs whatever
+the batch size is. ``CutExperiment.communicates`` says whether an experiment took that
+path.
+
+A communicating cut forces its measuring side to run before its preparing side. If wire
+cuts point both ways between the same two subcircuits there is no valid order, so one
+direction keeps the local decomposition and says so at INFO level. The derivation is on
+the :doc:`classical communication <theory/LOCC_wire_derivation>` page.
 
 Sampling instead of enumerating
 -------------------------------

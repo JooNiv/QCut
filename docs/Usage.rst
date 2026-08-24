@@ -8,7 +8,7 @@ NISQ devices they pose significant errors, if they are even available.
 QCut has been designed to work with IQM’s qpus, and therefore on the
 Finnish Quantum Computing Infrastructure
 (`FiQCI <https://fiqci.fi/>`__), and tested with an IQM Adonis 5-qubit
-qpu. Additionally, QCut is built to be combatible with IQM’s Qiskit fork iqm_qiskit.
+qpu. Additionally, QCut is built to be compatible with IQM’s Qiskit fork iqm_qiskit.
 
 QCut was built as a part of a summer internship at CSC - IT Center for
 Science (Finnish IT Center for Science).
@@ -156,7 +156,7 @@ circuit to perform the basis transform.
 .. code:: python
 
    observables = [0,1,2, [0,1]]
-   expectation_values = ck.estimate_expectation_values(results, cut_experiment.expv_data())
+   expectation_values = ck.estimate_expectation_values(results)
 
 **9: Finally calculate the exact expectation values and compare them to
 the results calculated with QCut**

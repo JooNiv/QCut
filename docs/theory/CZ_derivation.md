@@ -1,6 +1,6 @@
 # Deriving optimal QPD for the CZ gate
 
-**Here we will briefly go over where the decomposition for the CZ gate used comes from and how that is transfromed to operations implementable on a quantum computer. The derivation is based on [[1]](#references).**
+**Here we will briefly go over where the decomposition for the CZ gate used comes from and how that is transformed to operations implementable on a quantum computer. The derivation is based on [[1]](#references).**
 
 ## Background
 
@@ -154,5 +154,5 @@ Nos this gets multiplied by the extra factors from the terms in Appendix A (sinc
 
 $\frac{1}{16}*2^2*|1 + i|^2 = \frac{1}{16}*4*2=\frac{1}{2}$
 
-And finally this is multiplied by the $\alpha_1 \alpha_2$ factor from the sum yielding $\pm \frac{1}{2}$ as the coeffcient for term 3 depending on the $\alpha's$.
+And finally this is multiplied by the $\alpha_1 \alpha_2$ factor from the sum yielding $\pm \frac{1}{2}$ as the coefficient for term 3 depending on the $\alpha's$.
 
