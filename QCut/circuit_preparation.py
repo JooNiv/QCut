@@ -157,7 +157,12 @@ def _move_to_new_wire(orig: QuantumCircuit) -> QuantumCircuit:
     new.add_bits(new_qubits)
 
     # 3) Replay every instruction, splitting on Measure
-    for inst, qargs, cargs in orig.data:
+    for instruction in orig.data:
+        inst, qargs, cargs = (
+            instruction.operation,
+            instruction.qubits,
+            instruction.clbits,
+        )
         # map every qarg via our current mapping
         mapped_qs = [qubit_map[q] for q in qargs]
 
@@ -208,10 +213,14 @@ def _add_cbits(subcircuits):
                 clbits += 1
                 clbits_qpd += 1
 
-        circ.add_register(ClassicalRegister(clbits_qpd, "qpd_meas"))
-        circ.add_register(
-            ClassicalRegister(circ.num_qubits - clbits_qpd + clbits, "meas")
-        )
+        # A register of no bits still counts as a register, and a backend that refuses
+        # jobs carrying one it cannot see written to -- IQM's does -- rejects the whole
+        # experiment over it. Since it holds no bits, leaving it out moves nothing.
+        meas_size = circ.num_qubits - clbits_qpd + clbits
+        if clbits_qpd:
+            circ.add_register(ClassicalRegister(clbits_qpd, "qpd_meas"))
+        if meas_size:
+            circ.add_register(ClassicalRegister(meas_size, "meas"))
 
     return subcircuits
 
@@ -274,8 +283,10 @@ def _split(
     fixed_circs = []
     for subcircuit in subcircuits:
         rebuilt = QuantumCircuit(subcircuit.num_qubits)
-        rebuilt.add_register(subcircuit.cregs[0])
-        rebuilt.add_register(subcircuit.cregs[1])
+        # By name, not by position: a register of no bits is not created at all, so
+        # which index holds which is not fixed.
+        for register in subcircuit.cregs:
+            rebuilt.add_register(register)
         for instruction in subcircuit.data:
             qubits = [
                 rebuilt.qubits[subcircuit.qubits.index(q)] for q in instruction.qubits
