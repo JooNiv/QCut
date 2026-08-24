@@ -12,6 +12,7 @@ from qiskit import QuantumCircuit, transpile
 from qiskit.circuit import (
     Qubit,
 )
+from qiskit.circuit.library import get_standard_gate_name_mapping
 from qiskit.converters import circuit_to_dag
 from qiskit.quantum_info import SparsePauliOp
 from qiskit_aer import AerSimulator
@@ -29,7 +30,7 @@ from QCut.bundle import (
     plan_bundles,
 )
 from QCut.circuit_preparation import get_locations_and_subcircuits
-from QCut.circuit_utils import _remove_obsm, _remove_obsm_2
+from QCut.circuit_utils import _remove_obsm, _remove_obsm_2, compact_qpd_register
 from QCut.cutcircuit import CutCircuit, CutExperiment
 from QCut.options import CutOptions
 from QCut.postprocess import estimate_expectation_values
@@ -65,9 +66,14 @@ def _finalize_subcircuit(
     dag = circuit_to_dag(subcircuit)
     idle = list(dag.idle_wires())
 
-    creg_to_use = (
-        subcircuit.cregs[1] if len(subcircuit.cregs) >= 2 else subcircuit.cregs[0]
+    # The observable register by name. Positions are not fixed, because a register of
+    # no bits is not created, so "the second one" is not reliably the right one.
+    creg_to_use = next(
+        (register for register in subcircuit.cregs if register.name == "meas"),
+        subcircuit.cregs[0] if subcircuit.cregs else None,
     )
+    if creg_to_use is None:
+        return subcircuit
 
     for wire in idle:
         if (
@@ -193,6 +199,21 @@ def get_experiment_circuits(  # noqa: C901
         except Exception:
             basis = list(backend.architecture.gates.keys())  # type: ignore[possibly-missing-attribute]
         basis = ["r" if gate == "prx" else gate for gate in basis]
+        # A device's own gate list can name operations qiskit does not know, and it
+        # refuses those through ``basis_gates`` rather than ignoring them. IQM's
+        # resonator machines list ``move``, which shifts a state between a qubit and a
+        # resonator, so a Deneb-class backend used to fail here. The operations being
+        # translated below are single-qubit basis changes, so anything qiskit cannot
+        # name is of no use to them and is dropped.
+        known = set(get_standard_gate_name_mapping())
+        known.update(("measure", "reset", "delay", "barrier", "id"))
+        dropped = [gate for gate in basis if gate not in known]
+        if dropped:
+            logger.debug(
+                f"ignoring backend gate(s) {dropped}, which qiskit cannot take as a "
+                "basis gate, while translating the observable basis changes"
+            )
+        basis = [gate for gate in basis if gate in known]
 
     obs_subcircuits = None
 
@@ -260,6 +281,8 @@ def get_experiment_circuits(  # noqa: C901
     # Which classical bits carry a communicating wire cut's measured outcome, keyed by
     # (group, observable setting, subcircuit). Execution reads the label back from it.
     label_clbits: dict[tuple[int, int, int], list] = {}
+    # (group, observable set, subcircuit) -> (qpd bits written, qpd bits dropped)
+    qpd_bits: dict[tuple[int, int, int], tuple[int, int]] = {}
     communicating = [bundle for bundle in bundles if bundle.kind == "cc_wire"]
     group_labels: list[dict] = []
     group_keys: list[tuple] = []
@@ -402,6 +425,20 @@ def get_experiment_circuits(  # noqa: C901
                         )
 
                 subcircuit = _finalize_subcircuit(subcircuit, qpd_qubits)
+                # Drop the qpd bits this term never writes to, so no circuit carries an
+                # unused classical register, and remember how many went so the sign they
+                # stood for can be put back during post-processing.
+                subcircuit, dropped = compact_qpd_register(subcircuit)
+                remaining = next(
+                    (r.size for r in subcircuit.cregs if r.name == "qpd_meas"), 0
+                )
+                qpd_bits[
+                    (
+                        id_meas_experiment_index,
+                        len(obs_set_circuits),
+                        id_meas_subcircuit_index,
+                    )
+                ] = (remaining, dropped)
                 cur_set_circuits[id_meas_subcircuit_index] = subcircuit
                 if labels_here:
                     label_clbits[
@@ -441,6 +478,7 @@ def get_experiment_circuits(  # noqa: C901
         options=options,
         num_draws=num_draws,
         plan=plan,
+        qpd_bits=qpd_bits,
     )
 
     logger.info(f"Generated {cut_experiment.num_circuits} circuits for the experiment.")
