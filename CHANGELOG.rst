@@ -2,6 +2,86 @@
 Changelog
 =========
 
+**Version 2.0.0**
+=================
+
+Breaking changes
+----------------
+
+- :code:`RawResult` no longer takes a :code:`samples` argument. It is now
+  :code:`RawResult(results, shots, expv_data=None)`.
+- :code:`find_cuts()` is now deterministic and costs several candidate partitions before
+  choosing, so it returns different, cheaper plans than 1.3.2 did for the same circuit.
+- Cut edge weights are :code:`log gamma` rather than :code:`gamma`, which also changes
+  which cuts are chosen. See `Automatic cuts <https://jooniv.github.io/QCut/AutomaticCuts.html>`__.
+- Subcircuits are no longer given empty classical registers, and an unused
+  :code:`qpd_meas` register is dropped. Code reading registers by position rather than by
+  name has to be updated.
+- Passing :code:`expv_data` to :code:`estimate_expectation_values()` is now optional and
+  the documented form is :code:`estimate_expectation_values(results)`. The old two
+  argument call still works. See `Usage <https://jooniv.github.io/QCut/Usage.html>`__.
+
+Cutting arbitrary two-qubit gates
+---------------------------------
+
+- Any two-qubit gate can be cut, with the decomposition derived from its KAK
+  coordinates. See `Gate cuts <https://jooniv.github.io/QCut/GateCuts.html>`__ and
+  `Theory <https://jooniv.github.io/QCut/Theory.html>`__.
+
+Joint cutting of parallel rotation gates
+----------------------------------------
+
+- Single-axis rotation gates running in parallel between the same two partitions share
+  one decomposition: two parallel :code:`rzz` cost 30 subexperiments instead of 36, three
+  cost 132 instead of 216. On by default.
+  See `the derivation <https://jooniv.github.io/QCut/theory/Joint_rotation_derivation.html>`__.
+
+Wire cuts with classical communication
+--------------------------------------
+
+- A block of parallel wire cuts can exchange the measured outcome, taking the overhead
+  from :code:`4**n` to :code:`2**(n+1) - 1` and two wires from 64 subexperiments to 28.
+  These run in waves. Used by default for blocks of two or more.
+  See `the derivation <https://jooniv.github.io/QCut/theory/LOCC_wire_derivation.html>`__.
+
+Gate consolidation
+------------------
+
+- Runs of gates on the same qubit pair are merged before cutting, so the pair costs one
+  cut. Runs need not be contiguous, gates that commute with the run are moved out of the
+  way. On by default, and compared against not merging.
+  See `Options <https://jooniv.github.io/QCut/Options.html>`__.
+
+Sampling instead of enumerating
+-------------------------------
+
+- The experiment can be sampled from the quasiprobability distribution rather than
+  enumerated, which bounds the number of circuits when the exact count is out of reach.
+  Automatic above 1000 groups. See `Options <https://jooniv.github.io/QCut/Options.html>`__.
+
+Configuration
+-------------
+
+- Added :code:`CutOptions`, collected once and carried through the run. Covers
+  consolidation, joint cuts, wire cut communication, expansion strategy, sampling and the
+  cut finder. See `Options <https://jooniv.github.io/QCut/Options.html>`__.
+
+Running on real hardware
+------------------------
+
+- Improved and fixed bugs in transpilation for real backends.
+- Better IQM support: :code:`pip install "QCut[iqm]"`, and both transpile helpers use IQM's own
+  transpiler for IQM backends, resonator machines included. Pass
+  :code:`use_iqm_transpiler=False` to opt out.
+  See `Usage <https://jooniv.github.io/QCut/Usage.html>`__.
+- :code:`run()` and :code:`run_cut_circuit()` now take :code:`shots`.
+
+Other
+-----
+
+- :code:`from QCut import *` no longer raises.
+- Test suite split into tiers. See :code:`CONTRIBUTING.md`.
+
 **Version 1.3.2**
 =================
 - Fix bug in how weights for different gates were being handled by `QCutFind`.
