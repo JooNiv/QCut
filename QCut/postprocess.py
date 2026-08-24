@@ -19,6 +19,7 @@ from QCut.qcutresult import RawResult, SubResult, TotalResult
 def _process_results(
     results: list,
     shots: int,
+    qpd_bits: dict[tuple[int, int, int], tuple[int, int]] | None = None,
 ) -> list[list[TotalResult]]:
     """Transform results with post processing function {0,1} -> [-1, 1].
 
@@ -30,9 +31,21 @@ def _process_results(
     Each outcome is weighted by how often it came up, so the weight carried through to
     the estimator is that outcome's probability.
 
+    The qpd measurement bits are picked out by how many there are rather than by looking
+    for their register in the reported counts. A backend is free to rename or merge
+    classical registers -- IQM's transpiler does, when it routes through a resonator --
+    and a key split on whitespace quietly returns the wrong field when it does. The
+    widths come from the experiment, which knows them because it built the circuits.
+
+    Bits that were dropped for going unwritten are put back as -1, which is what an
+    unwritten bit reads as, so the sign is the one the full register would have given.
+
     Args:
         results (list): results from experiment circuits
         shots (int): number of shots the counts were taken at
+        qpd_bits (dict): per circuit, how many qpd bits it wrote and how many were
+            dropped. Without it the qpd register is taken to be the last whitespace
+            separated field, as it was before the widths were recorded.
 
     Returns:
     -------
@@ -47,18 +60,30 @@ def _process_results(
             experiment_run_results = []
             for sub_ind, sub_result in experiment_run.items():
                 circuit_results = []
+                layout = (qpd_bits or {}).get((group_ind, exp_ind, sub_ind))
                 for measurements, count in sub_result.items():
-                    # separate end measurements from mid-circuit measurements
-                    if measurements == " ":
-                        separate_measurements = [measurements.split(" ")[0]]
+                    if layout is None:
+                        # No widths recorded: fall back to splitting the key.
+                        fields = (
+                            [measurements.split(" ")[0]]
+                            if measurements == " "
+                            else measurements.split(" ")
+                        )
+                        result_eigenvalues = [
+                            np.array([-1 if x == "0" else 1 for x in field])
+                            for field in fields
+                        ]
                     else:
-                        separate_measurements = measurements.split(" ")
-
-                    # map to eigenvalues
-                    result_eigenvalues = [
-                        np.array([-1 if x == "0" else 1 for x in i])
-                        for i in separate_measurements
-                    ]
+                        written, dropped = layout
+                        bits = measurements.replace(" ", "")
+                        split = len(bits) - written
+                        qpd = [-1] * dropped + [
+                            -1 if x == "0" else 1 for x in bits[split:]
+                        ]
+                        result_eigenvalues = [
+                            np.array([-1 if x == "0" else 1 for x in bits[:split]]),
+                            np.array(qpd),
+                        ]
                     circuit_results.append(SubResult(result_eigenvalues, count / shots))
                 experiment_run_results.append(circuit_results)
             if group_ind >= len(processed_results):
@@ -191,7 +216,9 @@ def estimate_expectation_values(
                 "These results carry no experiment data, so expv_data has to be given. "
                 "Results from QCut.run_experiments carry it already."
             )
-    results_processed = _process_results(raw_results.results, raw_results._shots)
+    results_processed = _process_results(
+        raw_results.results, raw_results._shots, expv_data.get("qpd_bits")
+    )
 
     wire_cuts = len(
         [i for i in expv_data["cut_locations"] if isinstance(i, SingleQubitCutLocation)]
