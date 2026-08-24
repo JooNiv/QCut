@@ -97,6 +97,7 @@ def transpile_subcircuits(
         subcircuits=transpiled,
         cut_locations=cut_circuit.cut_locations,
         map_qubit=cut_circuit.map_qubit,
+        options=cut_circuit.options,
         backend=backend,
     )
 
@@ -149,5 +150,6 @@ def transpile_experiments(
         map_qubit=cut_experiment.map_qubit,
         coefficients=cut_experiment.coefficients,
         observables=cut_experiment.observables,
+        options=cut_experiment.options,
         backend=backend,
     )

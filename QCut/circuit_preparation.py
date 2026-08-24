@@ -30,7 +30,7 @@ def _get_cut_locations(circuit):
     # if operation is a Cut() instruction remove it and add registers and
     # offset index to cut_locations
 
-    # rename varibales to be more descriptive (namely qs)
+    # rename variables to be more descriptive (namely qs)
     while index < len(circuit):
         op = circuit_data[index]
         if "Cut" in op.operation.name:
@@ -349,7 +349,7 @@ def get_locations_and_subcircuits(
         max_qubits (list[int], optional):
             list of maximum qubits per subcircuit when using automatic cut
             finding. If None, no constraint is used. Defaults to None.
-            In general it is not necesary to manually specify this parameter.
+            In general it is not necessary to manually specify this parameter.
         options (CutOptions, optional): configuration for the run. Defaults to
             QCut.options.DEFAULT_OPTIONS.
 
