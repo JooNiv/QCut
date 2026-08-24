@@ -33,6 +33,7 @@ from QCut.qpd_joint import (
     joint_rotation_qpd_from_gates,
     single_axis_frame,
 )
+from QCut.qpd_locc import gamma_locc, locc_wire_qpd
 
 logger: logging.Logger = logging.getLogger(__name__)
 
@@ -89,6 +90,8 @@ def qpd_for_bundle(bundle: Bundle, cut_locations: list) -> list[dict]:
     Raises:
         QCutError: a bundle was planned that has no joint decomposition.
     """
+    if bundle.kind == "cc_wire":
+        return locc_wire_qpd(bundle.size)
     if bundle.size == 1:
         return qpd_for_location(cut_locations[bundle.anchor])
 
@@ -125,6 +128,8 @@ def bundle_gamma(bundle: Bundle, cut_locations: list) -> float:
     Every case has a closed form, which is what makes it cheap enough to cost a whole
     cutting plan before committing to one.
     """
+    if bundle.kind == "cc_wire":
+        return gamma_locc(bundle.size)
     if bundle.size > 1:
         thetas = [
             single_axis_frame(joint_gate(cut_locations[cut]))[0] for cut in bundle.cuts
@@ -353,22 +358,29 @@ def _insert_bundle_qpd(  # noqa: PLR0913
     op,
     subcircuit,
     offset,
+    qpd_qubits,
     qpd,
     bundle,
     placeholders,
     classical_bit_index,
     inserted_operations,
+    label_clbits,
 ):
     """Replace a bundle's placeholders in one subcircuit by a single block.
 
-    A joint decomposition acts on one qubit per cut, so all of a bundle's placeholders
-    on one side become one multi-qubit operation. It goes in where the first or the last
-    of them sat, whichever :func:`QCut.bundle._placement` found workable, and the others
+    A bundle's decomposition acts on one qubit per cut, so all of its placeholders on
+    one side become one multi-qubit operation. It goes in where the first or the last of
+    them sat, whichever :func:`QCut.bundle._placement` found workable, and the others
     are simply removed.
 
     The operations always come from the bundle's anchor entry, which is also the one
     carrying the whole coefficient. Where the block lands is a separate question from
     which cut owns it, because the workable position differs per subcircuit.
+
+    A block may measure more than once, so each measurement takes its own classical bit.
+    For a communicating wire cut those bits are the measured outcome that decides what
+    the other side prepares, so which bit belongs to which cut is recorded in
+    ``label_clbits``.
     """
     cut, side = parse_placeholder(op.operation.name)
     bundle_side = bundle.bundle_side(cut, side)
@@ -385,12 +397,24 @@ def _insert_bundle_qpd(  # noqa: PLR0913
     qubits = [
         Qubit(subcircuit.qregs[0], placeholders[member].qubit) for member in members
     ]
-    measured = False
-    for subop in reversed(block.data):
-        clbits = []
-        if subop.clbits:
-            clbits = [subcircuit.cregs[0][classical_bit_index]]
-            measured = True
+
+    # Assign classical bits walking the block forwards, so the bit order follows the
+    # block's qubit order rather than the order the instructions get inserted in.
+    assigned: dict[int, int] = {}
+    per_qubit: dict[int, int] = {}
+    next_bit = classical_bit_index
+    for position, subop in enumerate(block.data):
+        if not subop.clbits:
+            continue
+        assigned[position] = next_bit
+        per_qubit[block.find_bit(subop.qubits[0]).index] = next_bit
+        next_bit += 1
+
+    for position in range(len(block.data) - 1, -1, -1):
+        subop = block.data[position]
+        clbits = (
+            [subcircuit.cregs[0][assigned[position]]] if position in assigned else []
+        )
         subcircuit.data.insert(
             ind + offset,
             CircuitInstruction(
@@ -399,9 +423,16 @@ def _insert_bundle_qpd(  # noqa: PLR0913
                 clbits=clbits,
             ),
         )
-    if measured:
-        classical_bit_index += 1
-    return offset + len(block.data) - 1, classical_bit_index, inserted_operations + 1
+
+    if bundle.kind == "cc_wire" and bundle_side == 0:
+        # The measured qubits are spent, so they must not be measured again into the
+        # end-of-circuit register, exactly as a plain wire cut's measure side is not.
+        qpd_qubits.extend(qubit._index for qubit in qubits)
+        label_clbits.append(
+            (bundle, tuple(per_qubit[index] for index in range(len(members))))
+        )
+
+    return offset + len(block.data) - 1, next_bit, inserted_operations + 1
 
 
 def get_qpd_combinations(
