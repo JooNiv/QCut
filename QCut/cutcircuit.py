@@ -94,6 +94,7 @@ class CutExperiment:
         options: CutOptions | None = None,
         num_draws: int | None = None,
         plan=None,
+        qpd_bits: dict[tuple[int, int, int], tuple[int, int]] | None = None,
     ) -> None:
         """Init.
 
@@ -104,6 +105,11 @@ class CutExperiment:
         ``plan`` is a :class:`QCut.qpd_locc.CommunicationPlan` when any wire cut
         exchanges its measured outcome, and None otherwise. Those experiments run in two
         phases, so execution needs to know which bits carry the outcome.
+
+        ``qpd_bits`` says, per circuit, how many qpd measurement bits it writes and how
+        many were dropped for going unwritten. Post-processing needs both: the first to
+        find those bits without relying on how a backend reports its registers, and the
+        second to restore the sign the dropped ones carried.
         """
 
         self.experiments = experiment_circuits
@@ -115,6 +121,7 @@ class CutExperiment:
         self.options = resolve(options)
         self._num_draws = num_draws
         self.plan = plan
+        self.qpd_bits = qpd_bits or {}
 
     def expv_data(self):
         """Get data for expv calculation."""
@@ -124,6 +131,7 @@ class CutExperiment:
             "coefficients": self.coefficients,
             "observables": self.observables,
             "num_exp_groups": self.num_groups,
+            "qpd_bits": self.qpd_bits,
         }
 
     def assign_parameters(
