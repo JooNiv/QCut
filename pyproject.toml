@@ -106,3 +106,18 @@ docstring-code-line-length = "dynamic"
 
 [tool.pytest.ini_options]
 python_files = ["tests.py", "test_*.py"]
+markers = [
+    # Simulation-heavy end-to-end tests. Qiskit already parallelises a single
+    # simulation across every core, so these cost real wall clock and cannot be
+    # parallelised away. The version matrix skips them with -m "not slow": what it
+    # exists to catch is API drift, which shows up in the algebraic and construction
+    # tests, and the pipeline is still exercised end to end there by the automatic-cut
+    # tests, which stay unmarked on purpose.
+    "slow: end-to-end simulation, skipped by the qiskit version matrix",
+    # Anything that puts a circuit on a simulator. Wall clock in this suite is
+    # groups x subcircuits x shots simulated shots and nothing else, so this is the
+    # line that separates a few seconds from a few minutes. Marking the simulator
+    # tests rather than tagging the fast ones means a new algebraic test joins the
+    # quick tier by default instead of being silently left out of it.
+    "sim: runs circuits on a simulator; deselect with -m \"not sim\" for a fast loop",
+]
