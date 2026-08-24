@@ -3,8 +3,8 @@ Utility functions for working with quantum circuits in the context of circuit
 cutting and knitting.
 """
 
-from qiskit import QuantumCircuit
-from qiskit.circuit import Qubit
+from qiskit import ClassicalRegister, QuantumCircuit
+from qiskit.circuit import Barrier, Qubit
 
 
 def _count_gates(circuit: QuantumCircuit) -> dict[Qubit, int]:
@@ -55,6 +55,88 @@ def _drop_barriers(circuit: QuantumCircuit) -> QuantumCircuit:
         if instruction.operation.name != "barrier":
             out.append(instruction.operation, instruction.qubits, instruction.clbits)
     return out
+
+
+def markers_to_barriers(circuit: QuantumCircuit, names: set[str]) -> QuantumCircuit:
+    """Swap placeholder instructions for barriers carrying their name as a label.
+
+    A placeholder is an opaque one-qubit instruction, so a transpiler that builds its
+    own target has no way to be told about it and refuses to synthesise it. IQM's does
+    exactly that. A barrier is a directive every transpiler passes through untouched,
+    and it can carry a label, so the placeholder survives and comes back afterwards.
+
+    Barriers also stop the surrounding gates being merged across the gap, which is the
+    right instruction anyway: the placeholder stands for an operation not yet chosen.
+    """
+    out = circuit.copy_empty_like()
+    for instruction in circuit.data:
+        if instruction.operation.name in names:
+            out.append(Barrier(1, label=instruction.operation.name), instruction.qubits)
+        else:
+            out.append(instruction.operation, instruction.qubits, instruction.clbits)
+    return out
+
+
+def barriers_to_markers(circuit: QuantumCircuit, names: set[str]) -> QuantumCircuit:
+    """Turn the labelled barriers back into placeholders, once transpiling is done."""
+    from QCut.circuit_preparation import NonCommutingGate
+
+    out = circuit.copy_empty_like()
+    for instruction in circuit.data:
+        label = instruction.operation.label
+        if instruction.operation.name == "barrier" and label in names:
+            out.append(NonCommutingGate(label), instruction.qubits)
+        else:
+            out.append(instruction.operation, instruction.qubits, instruction.clbits)
+    return out
+
+
+def compact_qpd_register(circuit: QuantumCircuit) -> tuple[QuantumCircuit, int]:
+    """Drop ``qpd_meas`` when this circuit writes nothing to it.
+
+    The register is sized when the subcircuits are built, for the most measurements any
+    QPD term on that subcircuit could need. A term often needs none -- the identity term
+    measures nothing -- and a classical register that nothing writes to is not something
+    every backend accepts: IQM's refuses the job outright.
+
+    Only the all-or-nothing case is handled, because that is the one that occurs: a
+    term either measures on this subcircuit or it does not. Renumbering a partly used
+    register would also move the bits a communicating wire cut recorded as its label.
+
+    What is lost is the sign those bits carried. An unwritten bit reads as zero and the
+    estimator maps zero to -1, so the number dropped is returned and put back later.
+
+    Returns:
+        The circuit and how many bits were dropped.
+    """
+    register = next((reg for reg in circuit.cregs if reg.name == "qpd_meas"), None)
+    if register is None or register.size == 0:
+        return circuit, 0
+
+    offset = circuit.find_bit(register[0]).index
+    used = any(
+        offset <= circuit.find_bit(clbit).index < offset + register.size
+        for instruction in circuit.data
+        for clbit in instruction.clbits
+    )
+    if used:
+        return circuit, 0
+
+    out = QuantumCircuit(*circuit.qregs, name=circuit.name)
+    out.metadata = dict(circuit.metadata or {})
+    for other in circuit.cregs:
+        if other is not register:
+            out.add_register(ClassicalRegister(other.size, other.name))
+    for instruction in circuit.data:
+        out.append(
+            instruction.operation,
+            instruction.qubits,
+            [
+                out.clbits[circuit.find_bit(clbit).index - register.size]
+                for clbit in instruction.clbits
+            ],
+        )
+    return out, register.size
 
 
 def _to_logical_order(circuit: QuantumCircuit, num_logical: int) -> QuantumCircuit:
