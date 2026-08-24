@@ -74,3 +74,51 @@ def test_cut_experiment_assign_parameters():
                                 assert "mult" not in elem.name
                         else:
                             assert True
+
+
+def test_results_carry_their_own_experiment_data():
+    """``expv_data`` should not have to be threaded through by the caller.
+
+    ``run_experiments`` records it on the result, so the estimator can be called on the
+    result alone. Passing it explicitly still works, and must agree exactly.
+    """
+    import numpy as np
+    from qiskit_aer import AerSimulator
+
+    circuit = QuantumCircuit(2)
+    circuit.h(0)
+    circuit.append(**cutGate(CXGate(), 0, 1))
+    observables = SparsePauliOp(["IZ", "ZI"])
+
+    cut_circuit = ck.get_locations_and_subcircuits(circuit)
+    experiment = ck.get_experiment_circuits(cut_circuit, observables)
+    results = ck.run_experiments(
+        experiment, backend=AerSimulator(seed_simulator=17), shots=2048
+    )
+
+    assert results.expv_data is not None
+    implicit = ck.estimate_expectation_values(results)
+    explicit = ck.estimate_expectation_values(results, experiment.expv_data())
+    assert np.array_equal(implicit, explicit)
+
+
+def test_results_without_experiment_data_say_so():
+    """A hand-built result carries nothing, so the estimator has to be told."""
+    import pytest
+
+    from QCut.qcutresult import RawResult
+
+    bare = RawResult([], 1024)
+    assert bare.expv_data is None
+    with pytest.raises(ValueError, match="expv_data"):
+        ck.estimate_expectation_values(bare)
+
+
+def test_every_exported_name_exists():
+    """``from QCut import *`` must not raise.
+
+    ``__all__`` listed a name that had been removed, so the star import failed with an
+    AttributeError. Nothing else in the suite exercised it.
+    """
+    missing = [name for name in ck.__all__ if not hasattr(ck, name)]
+    assert missing == []

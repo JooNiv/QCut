@@ -61,6 +61,7 @@ GENERATED = [
 @pytest.mark.parametrize(
     ("name", "gate", "expected_groups"), GENERATED, ids=[g[0] for g in GENERATED]
 )
+@pytest.mark.sim
 def test_generated_cut_reproduces_the_uncut_circuit(name, gate, expected_groups):
     values, num_groups = _cut_and_run(gate)
     assert num_groups == expected_groups
@@ -68,6 +69,7 @@ def test_generated_cut_reproduces_the_uncut_circuit(name, gate, expected_groups)
         assert abs(expected - actual) < TOLERANCE, f"{name}: {values}"
 
 
+@pytest.mark.sim
 def test_generic_unitary_can_be_cut():
     """An arbitrary SU(4) needs the full 58-row table."""
     gate = UnitaryGate(random_unitary(4, seed=7).data)
@@ -162,6 +164,7 @@ class TestParametrisedCutGate:
 
     @pytest.mark.parametrize("key", ["object", "name"])
     @pytest.mark.parametrize("theta", [0.3, 1.9])
+    @pytest.mark.sim
     def test_binding_after_the_split_gives_correct_values(self, key, theta):
         cut_circuit = ck.get_locations_and_subcircuits(self._circuit())
         parameters = {self.THETA: theta} if key == "object" else {"theta": theta}
@@ -186,6 +189,7 @@ class TestParametrisedCutGate:
             ck.get_experiment_circuits(cut_circuit, OBSERVABLES)
 
 
+@pytest.mark.sim
 def test_automatic_cut_finding_uses_a_generated_qpd():
     """find_cuts must keep a gate whole rather than break it into cz cuts.
 

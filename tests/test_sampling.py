@@ -42,6 +42,7 @@ def _run(gate, options, shots=2**12):
     return np.array(values), experiment
 
 
+@pytest.mark.sim
 def test_auto_enumerates_a_small_decomposition():
     """The default must not sample where enumeration is affordable and exact."""
     _, experiment = _run(RZZGate(0.9), CutOptions())
@@ -72,6 +73,7 @@ def test_auto_samples_once_the_product_is_large():
     assert experiment.num_groups <= 120
 
 
+@pytest.mark.sim
 def test_sampled_gamma_matches_the_exact_gamma():
     """The coefficients are scaled so their one-norm is the true gamma.
 
@@ -88,6 +90,7 @@ def test_sampled_gamma_matches_the_exact_gamma():
 
 
 @pytest.mark.parametrize("num_samples", [500, 2000])
+@pytest.mark.sim
 def test_sampling_converges_on_the_exact_answer(num_samples):
     gate = RZZGate(0.9)
     values, experiment = _run(
@@ -101,6 +104,7 @@ def test_sampling_converges_on_the_exact_answer(num_samples):
     assert np.abs(_reference(gate) - values).max() < tolerance
 
 
+@pytest.mark.sim
 def test_a_seed_makes_the_experiment_reproducible():
     first = _run(RZZGate(0.9), CutOptions(expansion="sample", num_samples=50, seed=11))[
         1
@@ -116,6 +120,7 @@ def test_a_seed_makes_the_experiment_reproducible():
     assert len(other.coefficients) == len(first.coefficients)
 
 
+@pytest.mark.sim
 def test_repeated_draws_are_collapsed():
     """Drawing 500 times from a 6 term decomposition must not build 500 circuits."""
     _, experiment = _run(

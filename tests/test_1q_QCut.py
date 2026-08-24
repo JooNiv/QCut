@@ -1,6 +1,7 @@
 """Tests for CircuitKnitting package."""  # noqa: N999
 
 import numpy as np
+import pytest
 from qiskit import QuantumCircuit
 from qiskit.quantum_info import SparsePauliOp
 from qiskit_aer import AerSimulator
@@ -62,6 +63,7 @@ def test_separate_subcircuits() -> None:
             assert len(subcirc.data) == sq.subcircuit_len[solution_index][circ_index]
 
 
+@pytest.mark.sim
 def test_results_exist() -> None:
     circ = QuantumCircuit(2)
     circ.h(0)
@@ -75,7 +77,7 @@ def test_results_exist() -> None:
 
     res = ck.run_experiments(cut_experiment, backend=AerSimulator())
 
-    result = _process_results(res.result(), res._shots, res._samples)
+    result = _process_results(res.result(), res._shots)
 
     assert isinstance(result[0][0], TotalResult)
 
@@ -86,6 +88,7 @@ def test_results_exist() -> None:
     assert str(result[0][0].subcircuits[0][0][0])
 
 
+@pytest.mark.sim
 def test_expectation_values() -> None:
     """Test the expectation values of the test circuits.
 

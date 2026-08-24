@@ -48,6 +48,7 @@ def test_cut_gate_subcircuits():
         assert len(circ.data) == subcirc_lens[ind]
 
 
+@pytest.mark.sim
 def test_cut_gate_expectation_values():
     cut_qc = ck.get_locations_and_subcircuits(cut_circuit.copy())
 

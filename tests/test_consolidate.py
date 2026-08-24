@@ -15,6 +15,12 @@ from QCut.qpd_operations import qpd_for_location
 
 TOLERANCE = 0.1
 
+#: Shot budget for the end-to-end tests. These assert that a plan reconstructs the
+#: right answer, and a plan that pairs the wrong operations is out by order one, so
+#: they do not need shot-noise precision. Measured over six runs the worst error on
+#: the heaviest fixture is 0.041, leaving the tolerance a factor of 2.5 clear.
+SHOTS = 2**11
+
 
 def _unwrap(circuit: QuantumCircuit) -> QuantumCircuit:
     """Replace cut markers by the gates they carry, so the unitary can be compared."""
@@ -83,11 +89,127 @@ def test_a_wire_cut_ends_a_run():
 
 
 def test_a_gate_reaching_outside_the_pair_ends_a_run():
+    """A blocker that does not commute cannot be moved, so the run really does end.
+
+    Which leg of the blocker lands on the pair is what decides it. ``cx(2, 1)`` puts its
+    target on qubit 1 and does not commute with a Z-diagonal gate there, while
+    ``cx(1, 2)`` puts its control there and does, so that one gets slid past instead.
+    """
     circuit = QuantumCircuit(3)
     circuit.rzz(0.4, 0, 1)
-    circuit.rzz(0.4, 1, 2)
+    circuit.cx(2, 1)
     circuit.rzz(0.4, 0, 1)
     assert consolidate_two_qubit_blocks(circuit) is circuit
+
+
+def test_a_control_leg_on_the_pair_commutes_and_is_slid_past():
+    """The companion to the above: a control leg is Z-diagonal, so the run survives."""
+    circuit = QuantumCircuit(3)
+    circuit.rzz(0.4, 0, 1)
+    circuit.cx(1, 2)
+    circuit.rzz(0.5, 0, 1)
+    merged = consolidate_two_qubit_blocks(circuit)
+    assert merged.count_ops() == {"unitary": 1, "cx": 1}
+    assert _equivalent(circuit, merged)
+
+
+def test_a_commuting_gate_reaching_outside_the_pair_is_slid_past():
+    """The Ising case: neighbouring rzz gates all commute, so the run survives.
+
+    Without this the gates on a pair are rarely adjacent enough to merge, since a layer
+    of an Ising or QAOA circuit puts a neighbouring gate between every pair of them.
+    """
+    circuit = QuantumCircuit(3)
+    circuit.rzz(0.4, 0, 1)
+    circuit.rzz(0.3, 1, 2)
+    circuit.rzz(0.5, 0, 1)
+    merged = consolidate_two_qubit_blocks(circuit)
+    assert merged.count_ops() == {"unitary": 1, "rzz": 1}
+    assert _equivalent(circuit, merged)
+
+
+def test_a_slid_run_puts_the_merged_gate_after_the_blocker():
+    """Members before the blocker move across it, so the merge lands at the run's end.
+
+    Anchoring at the start instead would reorder the blocker against gates that have
+    not moved, which is why the position depends on whether anything was slid.
+    """
+    circuit = QuantumCircuit(3)
+    circuit.rzz(0.4, 0, 1)
+    circuit.rzz(0.3, 1, 2)
+    circuit.rzz(0.5, 0, 1)
+    merged = consolidate_two_qubit_blocks(circuit)
+    names = [instruction.operation.name for instruction in merged.data]
+    assert names == ["rzz", "unitary"]
+
+
+def test_an_absorbed_single_qubit_gate_does_not_block_a_slide():
+    """Only the members crossing the blocker have to commute with it.
+
+    A run that greedily absorbed ``ry`` would otherwise be killed by a check that gate
+    need not be part of: the ``ry`` stays where it is and only the ``rzz`` moves.
+    """
+    circuit = QuantumCircuit(3)
+    circuit.ry(0.7, 1)
+    circuit.rzz(0.4, 0, 1)
+    circuit.rzz(0.3, 1, 2)
+    circuit.rzz(0.5, 0, 1)
+    merged = consolidate_two_qubit_blocks(circuit)
+    assert merged.count_ops() == {"unitary": 1, "rzz": 1, "ry": 1}
+    assert _equivalent(circuit, merged)
+
+
+def test_a_cut_marker_is_unwrapped_before_the_commutation_check():
+    """A marker is opaque, and the checker refuses anything it cannot look inside.
+
+    Without unwrapping, every marked pair looks non-commuting and the whole exercise
+    silently does nothing -- which is the case that matters, since consolidation only
+    ever runs on marked pairs.
+    """
+    circuit = QuantumCircuit(4)
+    circuit.append(**cutGate(RZZGate(0.5), 1, 2))
+    circuit.rzz(0.3, 2, 3)
+    circuit.append(**cutGate(RZZGate(0.6), 1, 2))
+    merged = consolidate_two_qubit_blocks(circuit, restrict_to={frozenset({1, 2})})
+    assert merged.count_ops() == {"CutUNITARY": 1, "rzz": 1}
+
+
+def test_a_wire_cut_marker_is_never_slid_past():
+    """A wire cut pins a location the caller chose, so it ends the run regardless."""
+    circuit = QuantumCircuit(3)
+    circuit.rzz(0.4, 0, 1)
+    circuit.append(cut(), [1])
+    circuit.rzz(0.5, 0, 1)
+    assert consolidate_two_qubit_blocks(circuit) is circuit
+
+
+@pytest.mark.parametrize("seed", range(24))
+def test_sliding_keeps_the_circuit_equivalent(seed):
+    """Randomised check that reordering around commuting gates preserves the unitary.
+
+    Both orientations of ``cx`` appear on purpose. Only one of them commutes with a
+    Z-diagonal neighbour, so a check that dropped the gate's argument order would pass
+    on symmetric gates and quietly corrupt these.
+    """
+    rng = np.random.default_rng(1000 + seed)
+    width = int(rng.integers(3, 6))
+    circuit = QuantumCircuit(width)
+    for qubit in range(width):
+        circuit.ry(float(rng.uniform(0, np.pi)), qubit)
+    for _ in range(int(rng.integers(3, 7))):
+        first = int(rng.integers(width - 1))
+        draw = rng.random()
+        if draw < 0.5:
+            circuit.rzz(float(rng.uniform(0.2, 1.2)), first, first + 1)
+        elif draw < 0.7:
+            circuit.cx(first, first + 1)
+        elif draw < 0.9:
+            circuit.cx(first + 1, first)
+        else:
+            circuit.cz(first, first + 1)
+        if rng.random() < 0.4:
+            circuit.rz(float(rng.uniform(0, np.pi)), int(rng.integers(width)))
+    assert _equivalent(circuit, consolidate_two_qubit_blocks(circuit))
 
 
 def test_a_disjoint_gate_does_not_end_a_run():
@@ -131,11 +253,13 @@ def test_two_cz_cuts_collapse_to_a_free_cut():
 def _run(circuit, observables, options):
     cut_circuit = ck.get_locations_and_subcircuits(circuit, options=options)
     experiment = ck.get_experiment_circuits(cut_circuit, observables)
-    results = ck.run_experiments(experiment, backend=AerSimulator())
+    results = ck.run_experiments(experiment, backend=AerSimulator(), shots=SHOTS)
     values = ck.estimate_expectation_values(results, experiment.expv_data())
     return values, len(cut_circuit.cut_locations), experiment.num_groups
 
 
+@pytest.mark.slow
+@pytest.mark.sim
 def test_merging_lowers_the_cost_and_keeps_the_answer():
     """Two marked rzz cost gamma 3.16 over 36 groups apart, 2.43 over 6 merged."""
     observables = SparsePauliOp(["IZ", "ZI", "ZZ"])
@@ -167,6 +291,8 @@ def test_merging_lowers_the_cost_and_keeps_the_answer():
         assert abs(expected - with_) < TOLERANCE
 
 
+@pytest.mark.slow
+@pytest.mark.sim
 def test_find_cuts_consolidates_before_partitioning():
     """A merged run is one graph edge to cut rather than several."""
     circuit = QuantumCircuit(4)
@@ -187,7 +313,7 @@ def test_find_cuts_consolidates_before_partitioning():
 
     for cut_circuit in (with_merge, without):
         experiment = ck.get_experiment_circuits(cut_circuit, observables)
-        results = ck.run_experiments(experiment, backend=AerSimulator())
+        results = ck.run_experiments(experiment, backend=AerSimulator(), shots=SHOTS)
         values = ck.estimate_expectation_values(results, experiment.expv_data())
         for expected, actual in zip(exact, values):
             assert abs(expected - actual) < TOLERANCE
@@ -263,6 +389,8 @@ def test_auto_takes_the_merge_when_it_helps():
     assert (always_cuts, never_cuts, auto_cuts) == (1, 2, 1)
 
 
+@pytest.mark.slow
+@pytest.mark.sim
 def test_auto_keeps_the_answer_on_the_plan_it_picks():
     """The cheaper plan still has to reconstruct the right expectation values."""
     circuit = _blocked_bundle_circuit()
@@ -307,6 +435,8 @@ def test_never_really_means_never():
     assert len(cut_circuit.cut_locations) == 2
 
 
+@pytest.mark.slow
+@pytest.mark.sim
 def test_find_cuts_auto_is_never_worse_than_either_mode():
     """find_cuts runs the whole search both ways under auto.
 
@@ -339,7 +469,7 @@ def test_find_cuts_auto_is_never_worse_than_either_mode():
     options = CutOptions(consolidate="auto")
     found = ck.find_cuts(circuit.copy(), num_partitions=2, options=options)
     experiment = ck.get_experiment_circuits(found, observables)
-    results = ck.run_experiments(experiment, backend=AerSimulator(), shots=2**13)
+    results = ck.run_experiments(experiment, backend=AerSimulator(), shots=SHOTS)
     values = ck.estimate_expectation_values(results, experiment.expv_data())
     for expected, actual in zip(exact, values):
         assert abs(expected - actual) < TOLERANCE
