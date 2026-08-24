@@ -33,6 +33,7 @@ from QCut.circuit_utils import _remove_obsm, _remove_obsm_2
 from QCut.cutcircuit import CutCircuit, CutExperiment
 from QCut.options import CutOptions
 from QCut.postprocess import estimate_expectation_values
+from QCut.qcuterror import QCutError
 from QCut.qcutresult import RawResult
 from QCut.qpd_locc import CommunicationPlan
 from QCut.qpd_operations import (
@@ -52,7 +53,14 @@ def _finalize_subcircuit(
 ) -> QuantumCircuit:
     """Finalize the subcircuit by measuring remaining qubits and decomposing."""
 
-    meas_qubits = [i for i in range(subcircuit.num_qubits) if i not in qpd_qubits]
+    # Transpiling can leave a subcircuit wider than it started, when routing borrows a
+    # wire to bridge two qubits the device does not connect directly. _to_logical_order
+    # puts the subcircuit's own qubits first and records how many there are; the rest
+    # hold nothing to measure.
+    own_qubits = (subcircuit.metadata or {}).get(
+        "qcut_logical_qubits", subcircuit.num_qubits
+    )
+    meas_qubits = [i for i in range(own_qubits) if i not in qpd_qubits]
 
     dag = circuit_to_dag(subcircuit)
     idle = list(dag.idle_wires())
@@ -308,28 +316,30 @@ def get_experiment_circuits(  # noqa: C901
                 qpd_qubits = []  # store the qubit indices of qubits used for qpd
                 # measurements
                 labels_here: list = []  # (bundle, clbits) per communicating wire cut
-                for op_ind in placeholder_locations[id_meas_subcircuit_index]:
+                # Placeholders are found by name in the subcircuit as it stands, not by
+                # the index they had when it was built. Transpiling against a backend
+                # commutes them past each other, since each looks like an ordinary
+                # single-qubit gate, and the walk below both reads them and accumulates
+                # ``offset`` on the assumption that it meets them front to back. Every
+                # placeholder name is unique within its subcircuit, so the lookup is
+                # exact, and sorting by it restores the order the walk needs.
+                position = {
+                    instruction.operation.name: index
+                    for index, instruction in enumerate(subcircuit.data)
+                }
+                placeholders_here = []
+                for recorded_ind, op in placeholder_locations[id_meas_subcircuit_index]:
+                    if op.operation.name not in position:
+                        raise QCutError(
+                            f"Placeholder '{op.operation.name}' is missing from its "
+                            "subcircuit. Transpilation is not allowed to remove or "
+                            "rename it, so the experiment cannot be built."
+                        )
+                    placeholders_here.append((position[op.operation.name], op))
+                placeholders_here.sort(key=lambda pair: pair[0])
+
+                for op_ind in placeholders_here:
                     ind, op = op_ind
-
-                    actual_op = subcircuit.data[ind + offset]
-
-                    if actual_op.operation.name != op.operation.name:
-                        cur_ind = ind + offset
-                        for i in range(len(subcircuit.data)):
-                            cur_ind_minus = cur_ind - i
-                            cur_ind_plus = cur_ind + i
-                            if (
-                                op.operation.name
-                                == subcircuit.data[cur_ind_minus].operation.name
-                            ):
-                                ind = cur_ind_minus - offset
-                                break
-                            if (
-                                op.operation.name
-                                == subcircuit.data[cur_ind_plus].operation.name
-                            ):
-                                ind = cur_ind_plus - offset
-                                break
 
                     parsed = parse_placeholder(op.operation.name)
                     bundle = (
