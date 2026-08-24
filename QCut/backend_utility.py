@@ -8,9 +8,31 @@ from qiskit import transpile
 from qiskit.circuit import Gate
 from qiskit.transpiler import Target
 
-from QCut.circuit_utils import _drop_barriers, _fence_markers, _to_logical_order
+from QCut.circuit_utils import (
+    _drop_barriers,
+    _fence_markers,
+    _to_logical_order,
+    barriers_to_markers,
+    markers_to_barriers,
+)
 from QCut.cutcircuit import CutCircuit, CutExperiment
 from QCut.cutlocation import CutLocation, SingleQubitCutLocation
+
+
+def _iqm_transpiler_for(backend):
+    """Return IQM's transpiler if it is installed and ``backend`` is one of its own.
+
+    The adapter comes with ``pip install "QCut[iqm]"``. Without it, or for any other
+    backend, this returns None and the ordinary qiskit path is used. The backend check
+    is what ``IQMBackendBase`` is imported for: a fake IQM device and a real one both
+    derive from it, and nothing else does.
+    """
+    try:
+        from iqm.qiskit_iqm import transpile_to_IQM
+        from iqm.qiskit_iqm.iqm_backend import IQMBackendBase
+    except ImportError:
+        return None
+    return transpile_to_IQM if isinstance(backend, IQMBackendBase) else None
 
 
 def transpile_subcircuits(
@@ -18,6 +40,7 @@ def transpile_subcircuits(
     backend,
     optimization_level: int = 0,
     transpile_options: dict | None = None,
+    use_iqm_transpiler: bool = True,
 ) -> CutCircuit:
     """
     Transpile subcircuits for a given backend. More efficient than transpiling
@@ -88,6 +111,52 @@ def transpile_subcircuits(
     # concerned, so without barriers it gets commuted past the others and the experiment
     # builder, which reads them in order, misreads the result.
     marker_names = set(custom_gates)
+
+    iqm_transpile = _iqm_transpiler_for(backend) if use_iqm_transpiler else None
+    if iqm_transpile is not None:
+        # IQM's own transpiler produces markedly shallower circuits than the generic
+        # path, and it will accept the placeholders once they are barriers carrying
+        # their name. Two of its defaults have to go the other way for QCut:
+        #
+        #   remove_final_rzs   a Z rotation before a Z measurement is unobservable, so
+        #                      it drops trailing ones. QCut adds the rotations for X and
+        #                      Y observables later, and those frames are needed then.
+        #   perform_move_routing
+        #                      rebuilds the classical registers on the way to the Star
+        #                      architecture and loses ``qpd_meas`` wherever a term does
+        #                      not write to it. Inserting the MOVEs belongs at
+        #                      submission, which is where iqm-client does it.
+        #
+        # Both are still overridable through ``transpile_options``, deliberately, but
+        # the answers will be wrong.
+        options = {
+            "remove_final_rzs": False,
+            "perform_move_routing": False,
+            "optimization_level": optimization_level,
+        }
+        options.update(transpile_options or {})
+        transpiled = [
+            barriers_to_markers(
+                _to_logical_order(
+                    iqm_transpile(
+                        markers_to_barriers(subcircuit, marker_names),
+                        backend,
+                        **options,
+                    ),
+                    subcircuit.num_qubits,
+                ),
+                marker_names,
+            )
+            for subcircuit in cut_circuit.subcircuits
+        ]
+        return CutCircuit(
+            subcircuits=transpiled,
+            cut_locations=cut_circuit.cut_locations,
+            map_qubit=cut_circuit.map_qubit,
+            options=cut_circuit.options,
+            backend=backend,
+        )
+
     transpiled = transpile(
         [_fence_markers(circuit, marker_names) for circuit in cut_circuit.subcircuits],
         target=target,
