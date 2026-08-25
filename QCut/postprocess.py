@@ -63,12 +63,14 @@ def _process_results(
                 layout = (qpd_bits or {}).get((group_ind, exp_ind, sub_ind))
                 for measurements, count in sub_result.items():
                     if layout is None:
-                        # No widths recorded: fall back to splitting the key.
-                        fields = (
-                            [measurements.split(" ")[0]]
-                            if measurements == " "
-                            else measurements.split(" ")
-                        )
+                        # No widths recorded: fall back to splitting the key. A circuit
+                        # with nothing to write to its qpd register does not carry one,
+                        # so there may be a single field; pad to two either way, since
+                        # everything downstream reads the observable bits as the first
+                        # and the qpd bits as the second.
+                        fields = [f for f in measurements.split(" ") if f]
+                        while len(fields) < 2:
+                            fields.append("")
                         result_eigenvalues = [
                             np.array([-1 if x == "0" else 1 for x in field])
                             for field in fields
