@@ -24,6 +24,7 @@ from QCut.circuit_utils import (
 )
 from QCut.cutcircuit import CutCircuit, CutExperiment
 from QCut.cutlocation import CutLocation, SingleQubitCutLocation
+from QCut.qcuterror import QCutError
 
 logger: logging.Logger = logging.getLogger(__name__)
 
@@ -139,6 +140,48 @@ def _translate_subcircuit(subcircuit, spans, translate, marker_names):
     return translate(subcircuit, [])
 
 
+#: What each of IQM's own options does to a circuit that still carries placeholders,
+#: and therefore the value :func:`transpile_subcircuits` has to hold it at.
+_IQM_ENFORCED: dict[str, tuple[bool, str]] = {
+    "remove_final_rzs": (
+        False,
+        "drops the trailing Z rotations, which are unobservable before a Z measurement "
+        "but not before the X and Y basis changes QCut adds afterwards",
+    ),
+    "perform_move_routing": (
+        False,
+        "rewrites the circuit for the Star architecture, which removes the "
+        "placeholders and the classical registers along with them, leaving nothing "
+        "to put a quasiprobability operation into",
+    ),
+    "optimize_single_qubits": (
+        False,
+        "commutes Z rotations along each wire, and a barrier does not stop it, so a "
+        "rotation written before a cut ends up applied after the wire has been "
+        "measured and re-prepared",
+    ),
+}
+
+
+def _check_iqm_options(transpile_options: dict | None) -> None:
+    """Raise if an option would break a circuit that still carries placeholders.
+
+    Raises:
+        QCutError: one of :data:`_IQM_ENFORCED` was overridden.
+    """
+    for name, (required, why) in _IQM_ENFORCED.items():
+        asked = (transpile_options or {}).get(name, required)
+        if asked == required:
+            continue
+        raise QCutError(
+            f"transpile_subcircuits cannot honour {name}={asked!r} on an IQM "
+            f"backend: it {why}. Subcircuits still carry the cut and observable "
+            "placeholders, so the transpiler is working on a circuit it cannot see "
+            "all of. Transpile the finished experiment circuits with "
+            f"transpile_experiments instead, which keeps {name}={asked!r}."
+        )
+
+
 def _placeholder_gates(cut_circuit) -> dict[str, Gate]:
     """One opaque one-qubit gate per placeholder the subcircuits carry.
 
@@ -195,6 +238,14 @@ def transpile_subcircuits(
     to pass additional options to the transpiler. For more control over transpilation
     of experiment circuits, use `transpile_experiments` or manually transpile them.
 
+    On an IQM backend this gives up IQM's single-qubit optimisation, which would
+    otherwise commute Z rotations across the cut placeholders and put them on the wrong
+    side of a cut. Nothing can be told to leave the placeholders alone -- a barrier is a
+    scheduling directive there, not an algebraic wall -- so circuits come out perhaps a
+    fifth deeper than they need to be. :func:`transpile_experiments` has no placeholders
+    left to protect and keeps the optimisation, so it is the one to use when the depth
+    matters more than the transpilation time.
+
     Args:
         subcircuits (list[QuantumCircuit]): List of subcircuits to be transpiled.
         backend: Backend to transpile to.
@@ -238,24 +289,12 @@ def transpile_subcircuits(
     if iqm_transpile is not None:
         # IQM's own transpiler produces markedly shallower circuits than the generic
         # path, and it will accept the placeholders once they are barriers carrying
-        # their name. Two of its defaults have to go the other way for QCut:
-        #
-        #   remove_final_rzs   a Z rotation before a Z measurement is unobservable, so
-        #                      it drops trailing ones. QCut adds the rotations for X and
-        #                      Y observables later, and those frames are needed then.
-        #   perform_move_routing
-        #                      rebuilds the classical registers on the way to the Star
-        #                      architecture and loses ``qpd_meas`` wherever a term does
-        #                      not write to it. Inserting the MOVEs belongs at
-        #                      submission, which is where iqm-client does it.
-        #
-        # Both are still overridable through ``transpile_options``, deliberately, but
-        # the answers will be wrong.
-        options = {
-            "remove_final_rzs": False,
-            "perform_move_routing": False,
-            "optimization_level": optimization_level,
-        }
+        # their name. What it must not be allowed to do to a circuit that still has
+        # placeholders is listed in _IQM_ENFORCED, and asking for any of it is refused
+        # rather than quietly ignored.
+        _check_iqm_options(transpile_options)
+        options = {name: value for name, (value, _why) in _IQM_ENFORCED.items()}
+        options["optimization_level"] = optimization_level
         options.update(transpile_options or {})
 
         # A custom gate is refused here, so the block marker has to be a native one
@@ -340,9 +379,12 @@ def transpile_experiments(
     extra control over the transpilation of experiment circuits.
 
     As with :func:`transpile_subcircuits`, an IQM backend is handed to IQM's own
-    transpiler when the adapter is installed, with the same two defaults inverted and
-    for the same reasons. No placeholders are left at this point, so nothing has to be
-    hidden from it as barriers, but the layout still has to be undone afterwards.
+    transpiler when the adapter is installed, with the same defaults inverted and for
+    the same reasons. No placeholders are left at this point, so nothing has to be
+    hidden from it as barriers -- and nothing has to give up IQM's single-qubit
+    optimisation either, which is why this route produces the shallower circuits of the
+    two, at the cost of transpiling every experiment circuit rather than each subcircuit
+    once. The layout still has to be recorded afterwards.
 
     Args:
         cut_experiment: (CutExperiment): Experiment circuits to be transpiled.
