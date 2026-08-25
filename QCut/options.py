@@ -66,6 +66,7 @@ class CutOptions:
     ``expansion`` decides how the decomposition becomes experiment circuits, see
     :data:`ExpansionStrategy`. Under ``"auto"``, ``max_exact_groups`` is the largest
     exact group count still enumerated rather than sampled. When sampling,
+    
     ``finder_candidates`` is how many candidate partitions the cut finder generates and
     costs before keeping the cheapest. METIS returns only the partitioning that
     minimises its own objective, the weighted edge cut, which stops being the true cost
