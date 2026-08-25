@@ -64,11 +64,11 @@ class CutCircuit:
                 except Exception:
                     new_circuits.append(circuit)
             return CutCircuit(
-                new_circuits,
-                bound_locations,
-                self.map_qubit,
-                self.backend,
-                self.options,
+                subcircuits=new_circuits,
+                cut_locations=bound_locations,
+                map_qubit=self.map_qubit,
+                backend=self.backend,
+                options=self.options,
             )
 
     @property
@@ -164,15 +164,16 @@ class CutExperiment:
                     new_subcircuits.append(new_circuits)
                 new_experiments.append(new_subcircuits)
             return CutExperiment(
-                new_experiments,
-                self.cut_locations,
-                self.map_qubit,
-                self.coefficients,
-                self.observables,
-                self.backend,
-                self.options,
-                self._num_draws,
-                self.plan,
+                experiment_circuits=new_experiments,
+                cut_locations=self.cut_locations,
+                backend=self.backend,
+                map_qubit=self.map_qubit,
+                coefficients=self.coefficients,
+                observables=self.observables,
+                options=self.options,
+                num_draws=self._num_draws,
+                plan=self.plan,
+                qpd_bits=self.qpd_bits,
             )
 
     @property
