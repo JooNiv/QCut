@@ -20,6 +20,7 @@ from QCut.bundle import (
     Bundle,
     flatten_term,
     joint_gate,
+    locate_placeholders,
     parse_placeholder,
     plan_bundles,
 )
@@ -521,3 +522,92 @@ def sample_qpd_combinations(
         gamma_total,
     )
     return combinations, np.array(coefficients), num_samples
+
+
+def _coupled_pairs(backend) -> set[frozenset[int]] | None:
+    """Return the device's undirected two-qubit loci, or None if it has no topology.
+
+    A backend without a coupling map couples everything, so nothing needs restricting.
+    """
+    for get in (lambda: backend.coupling_map, lambda: backend._coupling_map):
+        try:
+            coupling_map = get()
+        except Exception:  # noqa: BLE001 - backends differ in what they expose
+            continue
+        if coupling_map is None:
+            continue
+        return {frozenset(edge) for edge in coupling_map.get_edges()}
+    return None
+
+
+def coupling_filter(cut_locations: list, subcircuits, backend):
+    """Return a veto on bundles the device could not run, or None if anything goes.
+
+    A bundle of one cut decomposes into one-qubit operations, which run anywhere. A
+    bundle spanning several cuts does not: its terms carry two-qubit gates, and those go
+    in after transpilation, at the wires the cuts' placeholders ended up on. Nothing
+    routes them -- the transpiler only ever saw one-qubit placeholders, so it had no
+    reason to put those particular wires next to each other, and on a star machine two
+    cut wires are adjacent only if one of them is the centre. A device that checks the
+    locus, as IQM's does, then refuses the job.
+
+    Vetoing during planning rather than afterwards is what keeps the fallback sensible:
+    the group search walks sizes downwards, so a block too wide to route is retried as
+    narrower blocks. Two wires that cannot communicate as one block still communicate as
+    two blocks of one, which is much cheaper than giving up on communicating entirely.
+
+    Only applies once a backend is attached, meaning the subcircuits have been
+    transpiled and their wires are physical. An experiment built from logical
+    subcircuits and transpiled afterwards has its blocks routed like everything else and
+    keeps the widest decomposition.
+    """
+    coupled = _coupled_pairs(backend) if backend is not None else None
+    if coupled is None:
+        return None
+
+    placeholders = locate_placeholders(subcircuits)
+
+    def fits(bundle: Bundle) -> bool:
+        if bundle.size < 2:
+            return True
+        offender = _uncoupled_pair(bundle, cut_locations, placeholders, coupled)
+        if offender is None:
+            return True
+        logger.info(
+            "not bundling cuts %s: the block needs a two-qubit gate on wires %s, which "
+            "the backend does not couple. Transpiling the experiment circuits instead "
+            "of the subcircuits keeps the wider decomposition, since the block is then "
+            "routed with everything else.",
+            bundle.cuts,
+            offender,
+        )
+        return False
+
+    return fits
+
+
+def _block_pairs(block, wires) -> Iterable[frozenset[int]]:
+    """Every pair of wires a block's multi-qubit gates put together."""
+    for instruction in block.data:
+        if instruction.operation.name == "barrier" or len(instruction.qubits) < 2:
+            continue
+        touched = [wires[block.find_bit(qubit).index] for qubit in instruction.qubits]
+        for first in range(len(touched)):
+            for second in range(first + 1, len(touched)):
+                yield frozenset((touched[first], touched[second]))
+
+
+def _uncoupled_pair(
+    bundle: Bundle, cut_locations: list, placeholders, coupled
+) -> tuple[int, ...] | None:
+    """The first pair a bundle's terms need that the device does not couple."""
+    for term in qpd_for_bundle(bundle, cut_locations):
+        for side, key in enumerate(("op_0", "op_1")):
+            block = term[key]
+            if block is None or block.num_qubits < 2:
+                continue
+            wires = [placeholders[member].qubit for member in bundle.layout[side]]
+            for pair in _block_pairs(block, wires):
+                if pair not in coupled:
+                    return tuple(sorted(pair))
+    return None
