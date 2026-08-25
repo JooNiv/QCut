@@ -22,7 +22,9 @@ from qiskit_aer import AerSimulator
 
 import QCut as ck
 from QCut import CutOptions, cut, cutGate
+from QCut.backend_utility import _IQM_ENFORCED
 from QCut.bundle import plan_bundles
+from QCut.qcuterror import QCutError
 from QCut.qpd_operations import coupling_filter
 
 iqm = pytest.importorskip(
@@ -117,11 +119,35 @@ def _locc_pair():
     return marked, plain, SparsePauliOp(["IIIZ", "IIZI", "IZII", "IIZZ"])
 
 
+def _rotations_across_a_wire_cut():
+    """A cut with single-qubit rotations either side of it, as a QAOA layer has.
+
+    The other cases put their cuts where almost nothing surrounds them, which hid a
+    defect: IQM's transpiler commutes Z rotations along a wire, and a barrier does not
+    stop it, so a rotation written before the cut was applied after it -- on the far
+    side of a wire that has been measured and re-prepared in between. Nothing catches
+    that unless there is a rotation there to move.
+    """
+    marked, plain = QuantumCircuit(4), QuantumCircuit(4)
+    for circuit in (marked, plain):
+        for qubit in range(4):
+            circuit.h(qubit)
+        circuit.rzz(0.7, 0, 1)
+        circuit.rzz(0.9, 1, 2)
+    marked.append(cut(), [2])
+    for circuit in (marked, plain):
+        circuit.rzz(1.1, 2, 3)
+        for qubit in range(4):
+            circuit.rx(0.5, qubit)
+    return marked, plain, SparsePauliOp(["IIZZ", "IZZI", "ZZII", "IIIZ"])
+
+
 CASES = {
     "gate_cut": _gate_cut,
     "wire_cut": _wire_cut,
     "locc_block": _locc_block,
     "locc_pair": _locc_pair,
+    "rotations_across_a_cut": _rotations_across_a_wire_cut,
 }
 
 
@@ -437,3 +463,49 @@ def test_a_wide_block_can_survive_subcircuit_transpilation(backend, level):
     )
     assert np.allclose(values, exact, atol=TOLERANCE)
     assert experiment.num_circuits <= build("never").num_circuits
+
+
+@pytest.mark.sim
+@pytest.mark.parametrize("option", sorted(_IQM_ENFORCED))
+def test_an_option_that_would_break_a_placeholder_is_refused(option):
+    """Asking for one of these used to be ignored, which is worse than being told no.
+
+    Each of them rewrites a circuit in a way that only makes sense once nothing is left
+    to be chosen, so the answer is to transpile the experiment circuits instead, and the
+    error says so.
+    """
+    marked, _plain, _observables = _gate_cut()
+    cut_circuit = ck.get_locations_and_subcircuits(marked)
+
+    required, _why = _IQM_ENFORCED[option]
+    with pytest.raises(QCutError, match="transpile_experiments"):
+        ck.transpile_subcircuits(
+            cut_circuit,
+            iqm.IQMFakeAdonis(),
+            transpile_options={option: not required},
+        )
+
+
+@pytest.mark.sim
+@pytest.mark.parametrize("option", sorted(_IQM_ENFORCED))
+def test_restating_an_enforced_option_is_allowed(option):
+    """Passing the value it is already held at asks for nothing, so it is allowed."""
+    required, _why = _IQM_ENFORCED[option]
+    transpiled = ck.transpile_subcircuits(
+        ck.get_locations_and_subcircuits(_gate_cut()[0]),
+        iqm.IQMFakeAdonis(),
+        transpile_options={option: required},
+    )
+    assert len(transpiled.subcircuits) == 2
+
+
+@pytest.mark.sim
+def test_the_qiskit_path_takes_its_own_options():
+    """The refusal is about IQM's transpiler, so it must not reach the generic path."""
+    transpiled = ck.transpile_subcircuits(
+        ck.get_locations_and_subcircuits(_gate_cut()[0]),
+        iqm.IQMFakeAdonis(),
+        use_iqm_transpiler=False,
+        transpile_options={"seed_transpiler": 3},
+    )
+    assert len(transpiled.subcircuits) == 2
