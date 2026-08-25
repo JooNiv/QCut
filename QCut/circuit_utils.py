@@ -3,6 +3,8 @@ Utility functions for working with quantum circuits in the context of circuit
 cutting and knitting.
 """
 
+from dataclasses import dataclass
+
 from qiskit import ClassicalRegister, QuantumCircuit
 from qiskit.circuit import Barrier, Qubit
 
@@ -139,63 +141,37 @@ def compact_qpd_register(circuit: QuantumCircuit) -> tuple[QuantumCircuit, int]:
     return out, register.size
 
 
-def _to_logical_order(circuit: QuantumCircuit, num_logical: int) -> QuantumCircuit:
-    """Undo a transpiler layout, so qubit ``i`` is the subcircuit's own qubit ``i``.
+def _record_layout(circuit: QuantumCircuit, num_logical: int) -> QuantumCircuit:
+    """Note where the transpiler put each of a subcircuit's qubits. Move nothing.
 
-    Transpiling against a backend lays the circuit out on physical qubits and pads it to
-    the device width, so the qubit at index ``i`` afterwards is generally not the one
-    that was there before. Everything downstream reads measurement bits by position --
-    ``_get_sub_expectation_values`` picks observable bits out by index -- so a layout
-    that permutes the qubits silently attributes results to the wrong ones.
+    Transpiling lays a subcircuit out on physical qubits, chosen so that its two-qubit
+    gates land on pairs the device actually couples. Renaming the wires afterwards, to
+    put the subcircuit's own qubits back at 0, 1, 2 ... restores the order the estimator
+    reads bits in, but throws that placement away: the gates end up on index pairs
+    that mean nothing to the device, and a backend that checks -- IQM's does -- rejects
+    the job for a gate on a locus it does not have.
 
-    Relabelling the wires is exact and free: the operations and their order do not
-    change, only which index each sits on. The logical qubits are put where the layout
-    says they end up, since that is where the observables are read, and any wire routing
-    borrowed on the way is kept after them. Placeholders are unaffected either way,
-    because a placeholder is inserted on whichever wire it is already sitting on, which
-    is where its qubit is at that point in the circuit.
+    So the placement is left exactly as the transpiler made it, and the map from the
+    subcircuit's own qubits to the wires holding them is recorded instead.
+    :func:`QCut.circuit_knitting._finalize_subcircuit` measures through the map, which
+    puts the bits in the order everything downstream expects without moving a gate.
 
-    Wires that end up carrying nothing at all -- the device padding -- are dropped.
+    Wires the layout did not use, and wires routing borrowed, are simply not in the map,
+    so nothing measures them.
 
     Args:
         circuit (QuantumCircuit): a transpiled circuit carrying a layout.
         num_logical (int): how many qubits it had before transpilation.
 
     Returns:
-        QuantumCircuit: the same circuit, its own qubits first and in order.
+        QuantumCircuit: the same circuit, with ``qcut_layout`` in its metadata.
     """
     layout = circuit.layout
     if layout is None:
         return circuit
-
-    physical_for_logical = list(layout.final_index_layout())[:num_logical]
-    busy = {
-        circuit.find_bit(qubit).index
-        for instruction in circuit.data
-        for qubit in instruction.qubits
-    }
-    # The subcircuit's own qubits first, then anything routing borrowed, then nothing:
-    # idle padding is left out entirely.
-    borrowed = sorted(busy - set(physical_for_logical))
-    order = physical_for_logical + borrowed
-    new_for_old = {old: new for new, old in enumerate(order)}
-
-    out = QuantumCircuit(len(order), name=circuit.name)
-    for register in circuit.cregs:
-        out.add_register(register)
-    # Wires past this are ones routing borrowed. They carry no part of the subcircuit's
-    # state at the end, so nothing downstream should measure them.
-    out.metadata = dict(circuit.metadata or {})
-    out.metadata["qcut_logical_qubits"] = num_logical
-
-    for instruction in circuit.data:
-        physical = [circuit.find_bit(qubit).index for qubit in instruction.qubits]
-        out.append(
-            instruction.operation,
-            [out.qubits[new_for_old[index]] for index in physical],
-            instruction.clbits,
-        )
-    return out
+    circuit.metadata = dict(circuit.metadata or {})
+    circuit.metadata["qcut_layout"] = list(layout.final_index_layout())[:num_logical]
+    return circuit
 
 
 def _remove_obsm(subcircuits: list[dict[int, QuantumCircuit]]):
@@ -219,3 +195,68 @@ def _remove_obsm_2(subcircuits: list[QuantumCircuit]):
                 circ.data.remove(circ[j])
             else:
                 j += 1
+
+
+@dataclass(frozen=True)
+class MarkerSpan:
+    """One bundle side's placeholders, and the single wider marker standing in for them.
+
+    ``wires`` and the member names recorded alongside are both in bundle-qubit order, so
+    expanding the marker again puts each cut's placeholder back on the wire whose
+    operation it stands for.
+    """
+
+    name: str
+    wires: tuple[int, ...]
+    indices: tuple[int, ...]
+    at: int
+
+
+def fuse_markers(circuit: QuantumCircuit, spans, gate_for) -> QuantumCircuit:
+    """Replace each span's one-qubit placeholders by one marker as wide as its block.
+
+    A bundle's operations act on one qubit per cut at once, but its placeholders are one
+    qubit each, so the transpiler sees unrelated single-qubit gates and has no reason to
+    lay them out on wires the device couples. The block then goes in after transpilation
+    on whatever wires they landed on, with nothing to route it.
+
+    One marker of the block's real width says what is actually coming. Routing has to
+    put it on a locus the device has, and because it is a single instruction nothing can
+    be scheduled inside it: the cuts it covers stay simultaneous, which is what a block
+    needs. :func:`split_markers` takes it apart again once transpiling is done.
+    """
+    covered: dict[int, MarkerSpan] = {}
+    for span in spans:
+        for index in span.indices:
+            covered[index] = span
+
+    out = circuit.copy_empty_like()
+    for index, instruction in enumerate(circuit.data):
+        span = covered.get(index)
+        if span is None:
+            out.append(instruction.operation, instruction.qubits, instruction.clbits)
+        elif index == span.at:
+            out.append(gate_for(span), [out.qubits[wire] for wire in span.wires])
+    return out
+
+
+def split_markers(
+    circuit: QuantumCircuit, members: dict[str, list[str]]
+) -> QuantumCircuit:
+    """Expand each block marker back into the placeholders it stood in for.
+
+    They come back consecutive, on the wires the transpiler chose, in bundle-qubit
+    order. Everything downstream reads placeholders one at a time, so this is what keeps
+    the widening confined to transpilation.
+    """
+    from QCut.circuit_preparation import NonCommutingGate
+
+    out = circuit.copy_empty_like()
+    for instruction in circuit.data:
+        operation = instruction.operation
+        if operation.name not in members:
+            out.append(operation, instruction.qubits, instruction.clbits)
+            continue
+        for position, marker in enumerate(members[operation.name]):
+            out.append(NonCommutingGate(marker), [instruction.qubits[position]])
+    return out
