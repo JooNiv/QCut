@@ -13,7 +13,7 @@ from qiskit.circuit import (
     Qubit,
 )
 from qiskit.circuit.library import get_standard_gate_name_mapping
-from qiskit.converters import circuit_to_dag
+from qiskit.converters import circuit_to_dag, dag_to_circuit
 from qiskit.quantum_info import SparsePauliOp
 from qiskit_aer import AerSimulator
 
@@ -41,6 +41,7 @@ from QCut.qpd_operations import (
     _insert_2qubit_gate_cut_qpd,
     _insert_bundle_qpd,
     _insert_wire_cut_qpd,
+    coupling_filter,
     get_qpd_combinations,
     qpd_for_bundle,
     sample_qpd_combinations,
@@ -54,14 +55,18 @@ def _finalize_subcircuit(
 ) -> QuantumCircuit:
     """Finalize the subcircuit by measuring remaining qubits and decomposing."""
 
-    # Transpiling can leave a subcircuit wider than it started, when routing borrows a
-    # wire to bridge two qubits the device does not connect directly. _to_logical_order
-    # puts the subcircuit's own qubits first and records how many there are; the rest
-    # hold nothing to measure.
-    own_qubits = (subcircuit.metadata or {}).get(
-        "qcut_logical_qubits", subcircuit.num_qubits
-    )
-    meas_qubits = [i for i in range(own_qubits) if i not in qpd_qubits]
+    # Transpiling puts a subcircuit's qubits on physical wires of the backend's
+    # choosing, and _record_layout notes which wire holds which. Measuring through that
+    # map, in the subcircuit's own qubit order, puts the bits where everything
+    # downstream expects them without moving a single gate -- which matters, because the
+    # placement is what makes the two-qubit gates land on pairs the device couples.
+    #
+    # Wires the layout never used, and wires routing borrowed, are absent from the map,
+    # so nothing measures them.
+    layout = (subcircuit.metadata or {}).get("qcut_layout")
+    if layout is None:
+        layout = list(range(subcircuit.num_qubits))
+    meas_qubits = [wire for wire in layout if wire not in qpd_qubits]
 
     dag = circuit_to_dag(subcircuit)
     idle = list(dag.idle_wires())
@@ -183,6 +188,19 @@ def get_experiment_circuits(  # noqa: C901
 
     check_circuit_type = cut_circuit.backend is not None
 
+    # Planning a bundle and building the experiment circuits both read where the
+    # placeholders sit, and they have to read the same positions. Building the
+    # observable subcircuits goes through a DAG, which re-serialises the instructions in
+    # topological order, so a placeholder with nothing left on its own qubit can move
+    # ahead of a gate that was written before it. Planning against the order as written
+    # would then put a block where the builder cannot: it would sit before a gate that
+    # one of the block's other wires still has to go through, and that wire would be
+    # measured too early. Normalising first makes the two orders the same.
+    cut_circuit.subcircuits[:] = [
+        dag_to_circuit(circuit_to_dag(subcircuit))
+        for subcircuit in cut_circuit.subcircuits
+    ]
+
     measurement_settings = _combine_pauli_ops(observables)
 
     if len(measurement_settings) > 1:
@@ -250,7 +268,18 @@ def get_experiment_circuits(  # noqa: C901
     # qpd_for_bundle on the term counts, or the coefficients and the combinations would
     # not line up.
     options = cut_circuit.options
-    bundles = plan_bundles(cut_circuit.cut_locations, cut_circuit.subcircuits, options)
+    # A bundle wider than one cut has two-qubit gates in its terms, and those go in
+    # after transpilation, so they are only runnable where the device couples the wires
+    # the cuts landed on. Vetoing during planning lets a block too wide to route fall
+    # back to narrower blocks instead of to no bundling at all.
+    bundles = plan_bundles(
+        cut_circuit.cut_locations,
+        cut_circuit.subcircuits,
+        options,
+        fits=coupling_filter(
+            cut_circuit.cut_locations, cut_circuit.subcircuits, cut_circuit.backend
+        ),
+    )
     bundle_of_cut = {cut: bundle for bundle in bundles for cut in bundle.cuts}
     placeholders = locate_placeholders(cut_circuit.subcircuits)
     exact_groups = 1
