@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
+from typing import Callable
 
 from qiskit import QuantumCircuit
 from qiskit.circuit.library import CZGate
@@ -274,12 +275,34 @@ def _group_placeholders(
 MAX_GROUP: int = 8
 
 
-def _form_groups(
+def _widest_group(
+    remaining: list[int],
+    min_size: int,
+    viable: Callable[[list[int]], tuple[str, str] | None],
+) -> tuple[list[int], tuple[str, str]] | None:
+    """The longest run of ``remaining`` that can be one bundle, or None if none can.
+
+    Longest first, because growing a group one cut at a time misses real blocks: a gate
+    coupling two of the block's qubits is in the way of a small group and harmlessly
+    inside a larger one covering both.
+    """
+    for size in range(min(len(remaining), MAX_GROUP), min_size - 1, -1):
+        for offset in range(len(remaining) - size + 1):
+            candidate = remaining[offset : offset + size]
+            place = viable(candidate)
+            if place is not None:
+                return candidate, place
+    return None
+
+
+def _form_groups(  # noqa: PLR0913
     eligible: list[int],
     placeholders: dict[tuple[int, int], Placeholder],
     subcircuits: list[QuantumCircuit],
     pair: tuple[int, int],
     min_size: int = 2,
+    kind: str = "joint_rotation",
+    fits: Callable[[Bundle], bool] | None = None,
 ) -> list[tuple[list[int], tuple[str, str]]]:
     """Split ``eligible`` into groups that one operation per side can replace.
 
@@ -289,6 +312,11 @@ def _form_groups(
 
     ``min_size`` is 2 for joint gate cutting, where a group of one is just the ordinary
     single-cut table, and 1 for communicating wire cuts when they are forced on.
+
+    ``fits`` rejects a group the caller cannot use, and because the search already walks
+    sizes downwards, rejecting a group is all it takes to fall back to smaller ones
+    covering the same cuts. That is how a block too wide for a device's topology ends up
+    as several narrow blocks rather than as no block at all.
     """
 
     def placements(group: list[int]) -> tuple[str, str] | None:
@@ -302,19 +330,21 @@ def _form_groups(
             found.append(where)
         return (found[0], found[1])
 
+    def viable(candidate: list[int]) -> tuple[str, str] | None:
+        """Where this group's operations go, or None if it cannot be one bundle."""
+        place = placements(candidate)
+        if place is None:
+            return None
+        if fits is None:
+            return place
+        layout = _layout(candidate, placeholders, pair)
+        bundle = Bundle(tuple(candidate), kind, layout, place)
+        return place if fits(bundle) else None
+
     groups: list[tuple[list[int], tuple[str, str]]] = []
     remaining = list(eligible)
     while len(remaining) >= min_size:
-        best = None
-        for size in range(min(len(remaining), MAX_GROUP), min_size - 1, -1):
-            for offset in range(len(remaining) - size + 1):
-                candidate = remaining[offset : offset + size]
-                place = placements(candidate)
-                if place is not None:
-                    best = (candidate, place)
-                    break
-            if best is not None:
-                break
+        best = _widest_group(remaining, min_size, viable)
         if best is None:
             break
         groups.append(best)
@@ -345,6 +375,7 @@ def plan_bundles(
     subcircuits: list[QuantumCircuit],
     options: CutOptions,
     announce: bool = True,
+    fits: Callable[[Bundle], bool] | None = None,
 ) -> list[Bundle]:
     """Decide which cut locations share a decomposition.
 
@@ -359,6 +390,9 @@ def plan_bundles(
             turn the two kinds of bundle off.
         announce: whether to log what was bundled. Off while costing a candidate plan,
             which would otherwise report a grouping that may not be the one used.
+        fits: optional veto on a candidate bundle, used to keep planning inside what a
+            backend can actually run. A vetoed group is retried in smaller pieces, so a
+            block that is too wide becomes narrower blocks rather than none.
 
     Returns:
         One :class:`Bundle` per group, of kind ``"joint_rotation"`` for parallel
@@ -373,12 +407,21 @@ def plan_bundles(
             eligible = [
                 index for index in members if is_joint_eligible(cut_locations[index])
             ]
-            for group, place in _form_groups(eligible, placeholders, subcircuits, pair):
+            for group, place in _form_groups(
+                eligible,
+                placeholders,
+                subcircuits,
+                pair,
+                kind="joint_rotation",
+                fits=fits,
+            ):
                 _claim(bundled, group, "joint_rotation", placeholders, pair, place)
 
     minimum = options.min_communicating_block
     if minimum:
-        _plan_wire_bundles(cut_locations, subcircuits, placeholders, bundled, minimum)
+        _plan_wire_bundles(
+            cut_locations, subcircuits, placeholders, bundled, minimum, fits
+        )
 
     bundles: list[Bundle] = []
     seen: set[Bundle] = set()
@@ -414,6 +457,7 @@ def _plan_wire_bundles(
     placeholders: dict[tuple[int, int], Placeholder],
     bundled: dict[int, Bundle],
     minimum: int,
+    fits: Callable[[Bundle], bool] | None = None,
 ) -> None:
     """Group wire cuts that can exchange their measured outcome.
 
@@ -444,6 +488,8 @@ def _plan_wire_bundles(
                 subcircuits,
                 pair,
                 min_size=minimum,
+                kind="cc_wire",
+                fits=fits,
             )
             if len(entry[0]) >= minimum
         ]
