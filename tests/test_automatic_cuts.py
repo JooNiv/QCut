@@ -9,8 +9,8 @@ import QCut as ck
 # import QCut as ck
 import tests.solutions_automatic_cuts as sq
 from QCut import CutOptions, find_cuts
-from QCut.execution.circuit_knitting import run_cut_circuit
 from QCut.errors.qcuterror import QCutError
+from QCut.execution.circuit_knitting import run_cut_circuit
 from QCut.QCutFind.combine_subcircuits import construct_final_subcircuits
 
 #: Bound on each expectation value. The failure this guards against, a cut circuit that
