@@ -167,7 +167,9 @@ class CutOptions:
     @property
     def num_partitions(self) -> int | None:
         """Number of partitions to cut the circuit into."""
-        if self.finder_num_partitions is None and self.finder_max_qubits is None:
+        if (self.finder_num_partitions is None 
+            and (self.finder_max_qubits is None 
+                 or isinstance(self.finder_max_qubits, int))):
             return 2
 
         if self.finder_num_partitions is not None:
@@ -180,7 +182,7 @@ class CutOptions:
         if isinstance(self.finder_max_qubits, list):
             return self.finder_max_qubits
         if self.finder_max_qubits is not None:
-            return [self.finder_max_qubits] * self.finder_num_partitions
+            return [self.finder_max_qubits] * self.num_partitions
 
     def should_sample(self, exact_groups: int) -> bool:
         """Whether an experiment of ``exact_groups`` combinations should be sampled."""
