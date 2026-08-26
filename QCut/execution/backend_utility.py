@@ -459,4 +459,6 @@ def transpile_experiments(
         num_draws=cut_experiment._num_draws,
         plan=cut_experiment.plan,
         qpd_bits=cut_experiment.qpd_bits,
+        gamma=cut_experiment.gamma,
+        optimal_gamma=cut_experiment.optimal_gamma,
     )
