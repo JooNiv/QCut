@@ -106,7 +106,7 @@ def test_results_without_experiment_data_say_so():
     """A hand-built result carries nothing, so the estimator has to be told."""
     import pytest
 
-    from QCut.qcutresult import RawResult
+    from QCut.execution.qcutresult import RawResult
 
     bare = RawResult([], 1024)
     assert bare.expv_data is None

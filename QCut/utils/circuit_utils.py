@@ -81,7 +81,7 @@ def markers_to_barriers(circuit: QuantumCircuit, names: set[str]) -> QuantumCirc
 
 def barriers_to_markers(circuit: QuantumCircuit, names: set[str]) -> QuantumCircuit:
     """Turn the labelled barriers back into placeholders, once transpiling is done."""
-    from QCut.circuit_preparation import NonCommutingGate
+    from QCut.cutting.circuit_preparation import NonCommutingGate
 
     out = circuit.copy_empty_like()
     for instruction in circuit.data:
@@ -249,7 +249,7 @@ def split_markers(
     order. Everything downstream reads placeholders one at a time, so this is what keeps
     the widening confined to transpilation.
     """
-    from QCut.circuit_preparation import NonCommutingGate
+    from QCut.cutting.circuit_preparation import NonCommutingGate
 
     out = circuit.copy_empty_like()
     for instruction in circuit.data:

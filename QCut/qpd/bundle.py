@@ -25,7 +25,7 @@ from qiskit.circuit.library import CZGate
 
 from QCut.cutlocation import CutLocation, SingleQubitCutLocation
 from QCut.options import CutOptions
-from QCut.qpd_joint import gamma_joint, gamma_separate, single_axis_frame
+from QCut.qpd.qpd_joint import gamma_joint, gamma_separate, single_axis_frame
 
 logger: logging.Logger = logging.getLogger(__name__)
 
@@ -502,7 +502,7 @@ def _plan_wire_bundles(
 
 def _log_savings(bundles: list[Bundle], cut_locations: list) -> None:
     """Report what bundling bought, since it changes both gamma and the group count."""
-    from QCut.qpd_locc import gamma_local, gamma_locc
+    from QCut.qpd.qpd_locc import gamma_local, gamma_locc
 
     joint = [bundle for bundle in bundles if bundle.kind == "joint_rotation"]
     if joint:

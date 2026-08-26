@@ -14,7 +14,7 @@ from __future__ import annotations
 from dataclasses import dataclass, replace
 from typing import Literal
 
-from QCut.qcuterror import QCutError
+from QCut.errors.qcuterror import QCutError
 
 #: How the experiment tensor is built. ``"exact"`` enumerates every combination of QPD
 #: terms, ``"sample"`` draws from the quasiprobability distribution, and ``"auto"``

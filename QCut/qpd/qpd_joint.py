@@ -32,8 +32,8 @@ import numpy as np
 from qiskit.circuit import Gate, QuantumCircuit
 from qiskit.synthesis import TwoQubitWeylDecomposition
 
-from QCut.qcuterror import QCutError
-from QCut.qpd_generate import DEFAULT_TOL, _local_gate
+from QCut.errors.qcuterror import QCutError
+from QCut.qpd.qpd_generate import DEFAULT_TOL, _local_gate
 
 logger: logging.Logger = logging.getLogger(__name__)
 

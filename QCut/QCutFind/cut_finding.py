@@ -8,8 +8,8 @@ import rustworkx as rx
 from qiskit import transpile
 from qiskit.circuit import CircuitInstruction
 
-from QCut.circuit_preparation import get_locations_and_subcircuits
-from QCut.consolidate import consolidate_two_qubit_blocks
+from QCut.cutting.circuit_preparation import get_locations_and_subcircuits
+from QCut.cutting.consolidate import consolidate_two_qubit_blocks
 from QCut.options import CutOptions, resolve
 from QCut.QCutFind.graph_circuit_utils import circ_to_graph
 from QCut.QCutFind.metis import (
@@ -19,8 +19,8 @@ from QCut.QCutFind.metis import (
     qubit_node_weights,
 )
 from QCut.QCutFind.refine import refine_cuts
-from QCut.qpd_gates import QPD_GATE_REGISTRY, CutTwoQubitGate
-from QCut.qpd_gates import cut_op as cut
+from QCut.qpd.qpd_gates import QPD_GATE_REGISTRY, CutTwoQubitGate
+from QCut.qpd.qpd_gates import cut_op as cut
 
 #: Basis the circuit is transpiled into before the interaction graph is built. The
 #: two-qubit entries stop transpilation from breaking apart gates that could be cut
@@ -177,7 +177,7 @@ def _cheaper_find_cuts(circuit, options):
     decomposition. Here it also changes what the partitioner sees, so the two plans may
     cut different gates and cannot be compared any other way.
     """
-    from QCut.qpd_operations import plan_cost
+    from QCut.qpd.qpd_operations import plan_cost
 
     candidates = []
     first_error = None
@@ -309,7 +309,7 @@ def find_cuts(  # noqa: C901
             )
             candidates.append((labels, *extract_cuts(graph, labels)))
 
-    from QCut.qpd_operations import plan_cost  # local: avoids an import cycle
+    from QCut.qpd.qpd_operations import plan_cost  # local: avoids an import cycle
 
     best = None
     for labels, cut_data, cut_data_test in candidates:

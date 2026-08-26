@@ -7,9 +7,9 @@ import math
 
 import rustworkx as rx
 
-from QCut.qpd_generate import gamma as qpd_gamma
-from QCut.qpd_generate import qpd_from_gate
-from QCut.qpd_operations import QPD_REGISTRY
+from QCut.qpd.qpd_generate import gamma as qpd_gamma
+from QCut.qpd.qpd_generate import qpd_from_gate
+from QCut.qpd.qpd_operations import QPD_REGISTRY
 
 #: METIS takes integer edge weights, so a weight is scaled before rounding. The scale
 #: has to resolve the gap between cheap cuts, since log(1.05) is only 0.049.

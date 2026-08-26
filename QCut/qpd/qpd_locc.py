@@ -45,7 +45,7 @@ import numpy as np
 from qiskit import QuantumCircuit
 from qiskit.circuit.library import UnitaryGate
 
-from QCut.qcuterror import QCutError
+from QCut.errors.qcuterror import QCutError
 
 logger: logging.Logger = logging.getLogger(__name__)
 

@@ -16,9 +16,9 @@ from qiskit_aer import AerSimulator
 
 import QCut as ck
 from QCut import CutOptions, cutGate
-from QCut.qcuterror import QCutError
-from QCut.qpd_gates import CutTwoQubitGate
-from QCut.qpd_operations import qpd_for_location
+from QCut.errors.qcuterror import QCutError
+from QCut.qpd.qpd_gates import CutTwoQubitGate
+from QCut.qpd.qpd_operations import qpd_for_location
 
 OBSERVABLES = SparsePauliOp(["IZ", "ZI", "ZZ"])
 # Shot noise on the reconstructed values, in line with the rest of the suite.
@@ -106,7 +106,7 @@ def _location(gate_name, gate):
 
 def test_registry_gates_still_use_their_hand_written_table():
     """cz must keep using cz_qpd, which needs no local u gates, not generation."""
-    from QCut.qpd import cz_qpd, swap_qpd
+    from QCut.qpd.qpd import cz_qpd, swap_qpd
 
     assert qpd_for_location(_location("cz", CXGate())) is cz_qpd
     assert qpd_for_location(_location("swap", None)) is swap_qpd

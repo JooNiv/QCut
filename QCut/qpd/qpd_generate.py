@@ -25,8 +25,8 @@ import numpy as np
 from qiskit.circuit import Gate, QuantumCircuit
 from qiskit.synthesis import OneQubitEulerDecomposer, TwoQubitWeylDecomposition
 
-from QCut.qcuterror import QCutError
-from QCut.qpd_gates import (
+from QCut.errors.qcuterror import QCutError
+from QCut.qpd.qpd_gates import (
     axym,
     axyp,
     ayzm,

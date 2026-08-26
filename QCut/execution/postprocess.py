@@ -11,9 +11,9 @@ from typing import Optional
 
 import numpy as np
 
-from QCut.basis_transform import _combine_pauli_ops, _get_observable_circuit_index
+from QCut.execution.basis_transform import _combine_pauli_ops, _get_observable_circuit_index
 from QCut.cutlocation import SingleQubitCutLocation
-from QCut.qcutresult import RawResult, SubResult, TotalResult
+from QCut.execution.qcutresult import RawResult, SubResult, TotalResult
 
 
 def _process_results(

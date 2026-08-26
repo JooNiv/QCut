@@ -16,7 +16,7 @@ from qiskit.circuit import (
     Qubit,
 )
 
-from QCut.bundle import (
+from QCut.qpd.bundle import (
     Bundle,
     flatten_term,
     joint_gate,
@@ -24,17 +24,17 @@ from QCut.bundle import (
     parse_placeholder,
     plan_bundles,
 )
-from QCut.circuit_utils import _remove_obsm_2
+from QCut.utils.circuit_utils import _remove_obsm_2
 from QCut.cutlocation import CutLocation, SingleQubitCutLocation
-from QCut.qcuterror import QCutError
-from QCut.qpd import cz_qpd, identity_qpd, iswap_qpd, swap_qpd
-from QCut.qpd_generate import gamma, gamma_for_gate, qpd_from_gate
-from QCut.qpd_joint import (
+from QCut.errors.qcuterror import QCutError
+from QCut.qpd.qpd import cz_qpd, identity_qpd, iswap_qpd, swap_qpd
+from QCut.qpd.qpd_generate import gamma, gamma_for_gate, qpd_from_gate
+from QCut.qpd.qpd_joint import (
     gamma_joint,
     joint_rotation_qpd_from_gates,
     single_axis_frame,
 )
-from QCut.qpd_locc import gamma_locc, locc_wire_qpd
+from QCut.qpd.qpd_locc import gamma_locc, locc_wire_qpd
 
 logger: logging.Logger = logging.getLogger(__name__)
 

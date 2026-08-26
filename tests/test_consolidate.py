@@ -9,9 +9,9 @@ from qiskit_aer import AerSimulator
 
 import QCut as ck
 from QCut import CutOptions, cut, cutCZ, cutGate
-from QCut.consolidate import consolidate_two_qubit_blocks, marker_gate
-from QCut.qpd_generate import gamma
-from QCut.qpd_operations import qpd_for_location
+from QCut.cutting.consolidate import consolidate_two_qubit_blocks, marker_gate
+from QCut.qpd.qpd_generate import gamma
+from QCut.qpd.qpd_operations import qpd_for_location
 
 TOLERANCE = 0.1
 
@@ -304,7 +304,7 @@ def test_find_cuts_consolidates_before_partitioning():
     circuit.rzz(0.5, 2, 3)
 
     with_merge = ck.find_cuts(
-        circuit.copy(), options=CutOptions(finder_num_partitions=2), consolidate=True
+        circuit.copy(), options=CutOptions(finder_num_partitions=2, consolidate=True)
     )
     without = ck.find_cuts(
         circuit.copy(), options=CutOptions(consolidate=False, finder_num_partitions=2)
@@ -355,7 +355,7 @@ def _blocked_bundle_circuit():
 
 
 def _planned(circuit, consolidate):
-    from QCut.qpd_operations import plan_cost
+    from QCut.qpd.qpd_operations import plan_cost
 
     options = CutOptions(consolidate=consolidate)
     cut_circuit = ck.get_locations_and_subcircuits(circuit.copy(), options=options)
@@ -416,7 +416,7 @@ def test_auto_keeps_the_answer_on_the_plan_it_picks():
 
 def test_consolidate_strategy_accepts_booleans_and_rejects_nonsense():
     """True and False stay valid, and 'never' must not read as truthy."""
-    from QCut.qcuterror import QCutError
+    from QCut.errors.qcuterror import QCutError
 
     assert CutOptions(consolidate=True).consolidate_mode == "always"
     assert CutOptions(consolidate=False).consolidate_mode == "never"
@@ -445,7 +445,7 @@ def test_find_cuts_auto_is_never_worse_than_either_mode():
     Consolidating changes which edges the partitioner sees, so the two plans can cut
     different gates and the comparison cannot be made any other way.
     """
-    from QCut.qpd_operations import plan_cost
+    from QCut.qpd.qpd_operations import plan_cost
 
     circuit = QuantumCircuit(6)
     for qubit in range(6):

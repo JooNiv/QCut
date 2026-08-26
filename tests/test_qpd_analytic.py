@@ -17,9 +17,9 @@ from qiskit.circuit.library import (
     XXPlusYYGate,
 )
 
-from QCut.qcuterror import QCutError
-from QCut.qpd_analytic import analytic_kak, reassemble
-from QCut.qpd_generate import gamma, qpd_from_gate, qpd_from_u, u_from_kak
+from QCut.errors.qcuterror import QCutError
+from QCut.qpd.qpd_analytic import analytic_kak, reassemble
+from QCut.qpd.qpd_generate import gamma, qpd_from_gate, qpd_from_u, u_from_kak
 
 THETA = Parameter("t")
 
@@ -69,7 +69,7 @@ def test_derivation_does_not_depend_on_the_probe_angle(name, gate, monkeypatch):
     If probing at a different angle gave a different decomposition, it could not be
     baked into circuits before binding.
     """
-    import QCut.qpd_analytic as module
+    import QCut.qpd.qpd_analytic as module
 
     reference = analytic_kak(gate)
     for probe in (0.1, 0.35, 0.8, 1.3):

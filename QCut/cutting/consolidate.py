@@ -33,7 +33,7 @@ from qiskit.circuit import Gate
 from qiskit.circuit.library import CZGate, SwapGate, UnitaryGate, iSwapGate
 from qiskit.quantum_info import Operator
 
-from QCut.qpd_gates import CutTwoQubitGate
+from QCut.qpd.qpd_gates import CutTwoQubitGate
 
 logger: logging.Logger = logging.getLogger(__name__)
 
@@ -130,7 +130,7 @@ def _commuting_suffix(
 
 def _cost(gate: Gate) -> tuple[float, int]:
     """Return ``(gamma, term count)`` for cutting ``gate``."""
-    from QCut.qpd_generate import gamma, qpd_from_gate
+    from QCut.qpd.qpd_generate import gamma, qpd_from_gate
 
     qpd = qpd_from_gate(gate)
     return gamma(qpd), len(qpd)

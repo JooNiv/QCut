@@ -28,9 +28,9 @@ from qiskit_aer import AerSimulator
 
 import QCut as ck
 from QCut import CutOptions, cutCZ, cutGate
-from QCut.bundle import plan_bundles
-from QCut.qpd_generate import qpd_from_gate
-from QCut.qpd_joint import (
+from QCut.qpd.bundle import plan_bundles
+from QCut.qpd.qpd_generate import qpd_from_gate
+from QCut.qpd.qpd_joint import (
     gamma_joint,
     gamma_separate,
     joint_rotation_qpd,
@@ -378,7 +378,7 @@ def _bundles(circuit, options=None):
     cut_circuit = ck.get_locations_and_subcircuits(
         circuit, options=options or CutOptions()
     )
-    from QCut.circuit_utils import _remove_obsm_2
+    from QCut.utils.circuit_utils import _remove_obsm_2
 
     _remove_obsm_2(cut_circuit.subcircuits)
     return plan_bundles(

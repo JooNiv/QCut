@@ -17,27 +17,27 @@ from qiskit.converters import circuit_to_dag, dag_to_circuit
 from qiskit.quantum_info import SparsePauliOp
 from qiskit_aer import AerSimulator
 
-from QCut.backend_utility import transpile_subcircuits
-from QCut.basis_transform import (
+from QCut.execution.backend_utility import transpile_subcircuits
+from QCut.execution.basis_transform import (
     _combine_pauli_ops,
     _get_obs_subcircuits,
 )
-from QCut.bundle import (
+from QCut.qpd.bundle import (
     SIDE_1,
     communication_waves,
     locate_placeholders,
     parse_placeholder,
     plan_bundles,
 )
-from QCut.circuit_preparation import get_locations_and_subcircuits
-from QCut.circuit_utils import _remove_obsm, _remove_obsm_2, compact_qpd_register
+from QCut.cutting.circuit_preparation import get_locations_and_subcircuits
+from QCut.utils.circuit_utils import _remove_obsm, _remove_obsm_2, compact_qpd_register
 from QCut.cutcircuit import CutCircuit, CutExperiment
 from QCut.options import CutOptions
-from QCut.postprocess import estimate_expectation_values
-from QCut.qcuterror import QCutError
-from QCut.qcutresult import RawResult
-from QCut.qpd_locc import CommunicationPlan
-from QCut.qpd_operations import (
+from QCut.execution.postprocess import estimate_expectation_values
+from QCut.errors.qcuterror import QCutError
+from QCut.execution.qcutresult import RawResult
+from QCut.qpd.qpd_locc import CommunicationPlan
+from QCut.qpd.qpd_operations import (
     _insert_2qubit_gate_cut_qpd,
     _insert_bundle_qpd,
     _insert_wire_cut_qpd,

@@ -9,8 +9,8 @@ from qiskit_aer import AerSimulator
 
 import QCut as ck
 from QCut import CutOptions, cutGate
-from QCut.qcuterror import QCutError
-from QCut.qpd_operations import qpd_for_location, sample_qpd_combinations
+from QCut.errors.qcuterror import QCutError
+from QCut.qpd.qpd_operations import qpd_for_location, sample_qpd_combinations
 
 OBSERVABLES = SparsePauliOp(["IZ", "ZI", "ZZ"])
 

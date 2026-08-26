@@ -11,9 +11,9 @@ from qiskit_aer import AerSimulator
 import QCut as ck
 from QCut.cutlocation import CutLocation, SingleQubitCutLocation
 from QCut.options import CutOptions
-from QCut.qcutresult import RawResult
-from QCut.qpd import cz_qpd, iswap_qpd, swap_qpd
-from QCut.qpd_operations import QPD_REGISTRY, get_qpd_combinations
+from QCut.execution.qcutresult import RawResult
+from QCut.qpd.qpd import cz_qpd, iswap_qpd, swap_qpd
+from QCut.qpd.qpd_operations import QPD_REGISTRY, get_qpd_combinations
 
 
 def test_cutSWAP_returns_instruction():
@@ -126,7 +126,7 @@ def test_get_qpd_combinations_iswap_count():
 
 
 def test_get_qpd_combinations_wire_cut_count():
-    from QCut.qpd import identity_qpd
+    from QCut.qpd.qpd import identity_qpd
 
     wire_loc = SingleQubitCutLocation(((QuantumRegister(1), 0), 0))
     combos = list(get_qpd_combinations([wire_loc]))
@@ -134,7 +134,7 @@ def test_get_qpd_combinations_wire_cut_count():
 
 
 def test_get_qpd_combinations_mixed_cuts():
-    from QCut.qpd import identity_qpd
+    from QCut.qpd.qpd import identity_qpd
 
     wire_loc = SingleQubitCutLocation(((QuantumRegister(1), 0), 0))
     gate_loc = _make_cut_location(gate_name="cz")

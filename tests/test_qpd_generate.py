@@ -19,9 +19,9 @@ from qiskit.circuit.library import (
 )
 from qiskit.quantum_info import Operator, random_unitary
 
-from QCut.qcuterror import QCutError
-from QCut.qpd import cz_qpd, iswap_qpd, swap_qpd
-from QCut.qpd_generate import (
+from QCut.errors.qcuterror import QCutError
+from QCut.qpd.qpd import cz_qpd, iswap_qpd, swap_qpd
+from QCut.qpd.qpd_generate import (
     gamma,
     gamma_optimal,
     optimality_gap,
@@ -215,7 +215,7 @@ def test_generic_gates_stay_within_the_proven_bound(seed):
 
 def test_qpd_rows_do_not_alias_the_shared_primitives():
     """Generated rows must be copies, since the primitives are module singletons."""
-    from QCut import qpd_gates
+    from QCut.qpd import qpd_gates
 
     before = len(qpd_gates.zmeas.data)
     qpd = qpd_from_gate(CRZGate(0.8))

@@ -11,12 +11,12 @@ from qiskit_aer import AerSimulator
 
 import QCut as ck
 from QCut import CutOptions, cut, cutGate
-from QCut import circuit_knitting as knit
-from QCut.bundle import plan_bundles
-from QCut.circuit_knitting import MEASURE_SHARE
-from QCut.circuit_utils import _remove_obsm_2
-from QCut.qcuterror import QCutError
-from QCut.qpd_locc import (
+from QCut.execution import circuit_knitting as knit
+from QCut.qpd.bundle import plan_bundles
+from QCut.execution.circuit_knitting import MEASURE_SHARE
+from QCut.utils.circuit_utils import _remove_obsm_2
+from QCut.errors.qcuterror import QCutError
+from QCut.qpd.qpd_locc import (
     MAX_BLOCK,
     _label_sign,
     _lagrangians,

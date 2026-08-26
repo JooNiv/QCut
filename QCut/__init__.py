@@ -2,26 +2,26 @@
 
 from importlib.metadata import PackageNotFoundError, version
 
-from QCut.backend_utility import (
+from QCut.execution.backend_utility import (
     transpile_experiments,
     transpile_subcircuits,
 )
-from QCut.circuit_knitting import (
+from QCut.execution.circuit_knitting import (
     get_experiment_circuits,
     run,
     run_cut_circuit,
     run_experiments,
 )
-from QCut.circuit_preparation import (
+from QCut.cutting.circuit_preparation import (
     get_locations_and_subcircuits,
 )
-from QCut.consolidate import consolidate_two_qubit_blocks
+from QCut.cutting.consolidate import consolidate_two_qubit_blocks
 from QCut.options import DEFAULT_OPTIONS, CutOptions
-from QCut.postprocess import (
+from QCut.execution.postprocess import (
     estimate_expectation_values,
 )
 from QCut.QCutFind import find_cuts
-from QCut.qpd_gates import cut, cutCZ, cutGate, cutISWAP, cutSWAP
+from QCut.qpd.qpd_gates import cut, cutCZ, cutGate, cutISWAP, cutSWAP
 
 try:
     __version__ = version("QCut")

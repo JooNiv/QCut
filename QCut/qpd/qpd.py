@@ -2,7 +2,7 @@
 
 """Define identity channel quasi probability decomposition."""
 
-from QCut.qpd_gates import *
+from QCut.qpd.qpd_gates import *
 
 identity_qpd = [
     {"op_0": idmeas, "op_1": zero_init, "c": 1 / 2},

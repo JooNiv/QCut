@@ -22,10 +22,10 @@ from qiskit_aer import AerSimulator
 
 import QCut as ck
 from QCut import CutOptions, cut, cutGate
-from QCut.backend_utility import _IQM_ENFORCED
-from QCut.bundle import plan_bundles
-from QCut.qcuterror import QCutError
-from QCut.qpd_operations import coupling_filter
+from QCut.execution.backend_utility import _IQM_ENFORCED
+from QCut.qpd.bundle import plan_bundles
+from QCut.errors.qcuterror import QCutError
+from QCut.qpd.qpd_operations import coupling_filter
 
 iqm = pytest.importorskip(
     "iqm.qiskit_iqm", reason='needs the IQM adapter: pip install "QCut[iqm]"'

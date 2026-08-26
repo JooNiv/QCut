@@ -12,11 +12,11 @@ from qiskit import ClassicalRegister, QuantumCircuit, QuantumRegister
 from qiskit.circuit import CircuitInstruction, Instruction, Qubit
 from qiskit.converters import circuit_to_dag, dag_to_circuit
 
-from QCut.consolidate import consolidate_two_qubit_blocks, marker_gate
+from QCut.cutting.consolidate import consolidate_two_qubit_blocks, marker_gate
 from QCut.cutcircuit import CutCircuit
 from QCut.cutlocation import CutLocation, SingleQubitCutLocation
 from QCut.options import CutOptions, resolve
-from QCut.qcuterror import QCutError
+from QCut.errors.qcuterror import QCutError
 
 logger: logging.Logger = logging.getLogger(__name__)
 
@@ -320,7 +320,7 @@ def _cheaper_split(
     rotation and so can no longer join a joint decomposition. Which way wins depends on
     the whole circuit, so both plans are costed outright.
     """
-    from QCut.qpd_operations import plan_cost
+    from QCut.qpd.qpd_operations import plan_cost
 
     candidates = []
     first_error = None

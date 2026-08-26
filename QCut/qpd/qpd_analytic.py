@@ -34,7 +34,7 @@ from dataclasses import dataclass
 import numpy as np
 from qiskit.circuit import Gate
 
-from QCut.qcuterror import QCutError
+from QCut.errors.qcuterror import QCutError
 
 logger: logging.Logger = logging.getLogger(__name__)
 

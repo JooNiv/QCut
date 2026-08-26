@@ -9,8 +9,8 @@ import QCut as ck
 # import QCut as ck
 import tests.solutions_automatic_cuts as sq
 from QCut import CutOptions, find_cuts
-from QCut.circuit_knitting import run_cut_circuit
-from QCut.qcuterror import QCutError
+from QCut.execution.circuit_knitting import run_cut_circuit
+from QCut.errors.qcuterror import QCutError
 from QCut.QCutFind.combine_subcircuits import construct_final_subcircuits
 
 #: Bound on each expectation value. The failure this guards against, a cut circuit that
@@ -192,7 +192,7 @@ def _finder_circuit():
 
 
 def _cost(options):
-    from QCut.qpd_operations import plan_cost
+    from QCut.qpd.qpd_operations import plan_cost
 
     options = options.replace(
         finder_max_qubits=[5, 5],
@@ -256,7 +256,7 @@ def test_a_qubit_budget_is_met_by_the_partitioner():
     afterwards, by moving whole qubits across and paying in cuts, used to cost up to
     three orders of magnitude in sampling overhead on exactly these circuits.
     """
-    from QCut.qpd_operations import plan_cost
+    from QCut.qpd.qpd_operations import plan_cost
 
     options = CutOptions(
         consolidate="never",
@@ -286,7 +286,7 @@ def test_no_budget_leaves_the_split_free_to_be_uneven():
     Balancing unconditionally would make the unconstrained path worse, which is why the
     node weights are only applied when there is a budget to meet.
     """
-    from QCut.qpd_operations import plan_cost
+    from QCut.qpd.qpd_operations import plan_cost
 
     options = CutOptions(
         finder_num_partitions=2,

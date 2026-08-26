@@ -11,8 +11,8 @@ from qiskit import transpile
 from qiskit.circuit import Gate
 from qiskit.transpiler import Target
 
-from QCut.bundle import locate_placeholders, plan_bundles
-from QCut.circuit_utils import (
+from QCut.qpd.bundle import locate_placeholders, plan_bundles
+from QCut.utils.circuit_utils import (
     MarkerSpan,
     _drop_barriers,
     _fence_markers,
@@ -24,7 +24,7 @@ from QCut.circuit_utils import (
 )
 from QCut.cutcircuit import CutCircuit, CutExperiment
 from QCut.cutlocation import CutLocation, SingleQubitCutLocation
-from QCut.qcuterror import QCutError
+from QCut.errors.qcuterror import QCutError
 
 logger: logging.Logger = logging.getLogger(__name__)
 
