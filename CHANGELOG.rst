@@ -9,7 +9,10 @@ Breaking changes
 ----------------
 
 - :code:`RawResult` no longer takes a :code:`samples` argument. It is now
-  :code:`RawResult(results, shots, expv_data=None)`.
+  :code:`RawResult(results, shots, experiment=None)` and carries the experiment itself.
+- Modules are grouped into subpackages: :code:`QCut.qpd`, :code:`QCut.cutting`,
+  :code:`QCut.execution`, :code:`QCut.errors` and :code:`QCut.utils`. The names exported
+  from :code:`QCut` are unchanged; code importing a module directly has to be updated.
 - :code:`find_cuts()` is now deterministic and costs several candidate partitions before
   choosing, so it returns different, cheaper plans than 1.3.2 did for the same circuit.
 - :code:`find_cuts()` now reads its configuration from a :code:`CutOptions` object rather than from keyword arguments. See
@@ -19,9 +22,17 @@ Breaking changes
 - Subcircuits are no longer given empty classical registers, and an unused
   :code:`qpd_meas` register is dropped. Code reading registers by position rather than by
   name has to be updated.
-- Passing :code:`expv_data` to :code:`estimate_expectation_values()` is now optional and
-  the documented form is :code:`estimate_expectation_values(results)`. The old two
-  argument call still works. See `Usage <https://jooniv.github.io/QCut/Usage.html>`__.
+- :code:`CutExperiment.expv_data()` is gone and :code:`estimate_expectation_values()`
+  takes only the results, which now carry the experiment they came from. Replace
+  :code:`estimate_expectation_values(results, experiment.expv_data())` with
+  :code:`estimate_expectation_values(results)`.
+  See `Usage <https://jooniv.github.io/QCut/Usage.html>`__.
+- :code:`get_experiment_circuits()` no longer modifies the :code:`CutCircuit` it is
+  given, so one can be reused for several observable sets.
+- :code:`transpile_subcircuits()` raises rather than quietly overriding when
+  :code:`remove_final_rzs`, :code:`perform_move_routing` or
+  :code:`optimize_single_qubits` is passed for an IQM backend. Those rewrite a circuit
+  that still carries cut placeholders; use :code:`transpile_experiments()` instead.
 
 Cutting arbitrary two-qubit gates
 ---------------------------------
@@ -68,6 +79,14 @@ Configuration
   consolidation, joint cuts, wire cut communication, expansion strategy, sampling and the
   cut finder. See `Options <https://jooniv.github.io/QCut/Options.html>`__.
 
+Knowing what a cut costs
+------------------------
+
+- :code:`CutCircuit.gamma` is the sampling overhead of a split and
+  :code:`CutCircuit.optimal_gamma` the least those same cuts could cost with every
+  decomposition available. Both are closed form, so the cost of a plan can be read
+  before any experiment circuits are built. :code:`CutExperiment` carries both forward.
+
 Running on real hardware
 ------------------------
 
@@ -83,6 +102,9 @@ Other
 
 - :code:`from QCut import *` no longer raises.
 - Test suite split into tiers. See :code:`CONTRIBUTING.md`.
+- Dropped pickle, experiment generation is much faster.
+- :code:`finder_max_qubits` no longer raises when given as a list.
+- Benchmarks against IBM's cutting addon, in :code:`benchmarks/`.
 
 **Version 1.3.2**
 =================
