@@ -158,16 +158,12 @@ def get_experiment_circuits(  # noqa: C901
     measure/initialize/cutCZ nodes.
 
     Args:
-        subcircuits (list[QuantumCircuit]): subcircuits with measure/initialize nodes.
-        cut_locations (np.ndarray[CutLocation]): cut locations.
+        cut_circuit (CutCircuit): The cut circuit to generate experiment circuits for.
+        observables (SparsePauliOp): The observables to measure.
 
     Returns:
-        tuple: A tuple containing:
-            - CutCircuit: A CutCircuit object containing the experiment circuits.
-            - list[int]: A list of coefficients for each circuit.
-            - list[tuple[int, int, int]]:
-                A list of index pointers to results that need additional post-processing
-                due to identity basis measurement.
+        CutExperiment: An object containing the generated experiment circuits and 
+        related information.
 
     """
 
@@ -195,7 +191,9 @@ def get_experiment_circuits(  # noqa: C901
     # would then put a block where the builder cannot: it would sit before a gate that
     # one of the block's other wires still has to go through, and that wire would be
     # measured too early. Normalising first makes the two orders the same.
-    cut_circuit.subcircuits[:] = [
+    # Everything below works on this copy, so the caller's cut circuit comes back
+    # exactly as it went in.
+    subcircuits = [
         dag_to_circuit(circuit_to_dag(subcircuit))
         for subcircuit in cut_circuit.subcircuits
     ]
@@ -250,17 +248,13 @@ def get_experiment_circuits(  # noqa: C901
 
         ops = {"X-meas": x_meas_ops, "Y-meas": y_meas_ops}
 
-        obs_subcircuits = _get_obs_subcircuits(
-            cut_circuit.subcircuits, measurement_settings, ops
-        )
+        obs_subcircuits = _get_obs_subcircuits(subcircuits, measurement_settings, ops)
     else:
-        obs_subcircuits = _get_obs_subcircuits(
-            cut_circuit.subcircuits, measurement_settings
-        )
+        obs_subcircuits = _get_obs_subcircuits(subcircuits, measurement_settings)
 
     _remove_obsm(obs_subcircuits)
 
-    _remove_obsm_2(cut_circuit.subcircuits)
+    _remove_obsm_2(subcircuits)
 
     # Enumerating every combination costs the product of the per-bundle term counts, so
     # past a threshold the decomposition is sampled instead. Both paths must agree with
@@ -273,14 +267,14 @@ def get_experiment_circuits(  # noqa: C901
     # back to narrower blocks instead of to no bundling at all.
     bundles = plan_bundles(
         cut_circuit.cut_locations,
-        cut_circuit.subcircuits,
+        subcircuits,
         options,
         fits=coupling_filter(
-            cut_circuit.cut_locations, cut_circuit.subcircuits, cut_circuit.backend
+            cut_circuit.cut_locations, subcircuits, cut_circuit.backend
         ),
     )
     bundle_of_cut = {cut: bundle for bundle in bundles for cut in bundle.cuts}
-    placeholders = locate_placeholders(cut_circuit.subcircuits)
+    placeholders = locate_placeholders(subcircuits)
     exact_groups = 1
     for bundle in bundles:
         exact_groups *= len(qpd_for_bundle(bundle, cut_circuit.cut_locations))
@@ -314,7 +308,7 @@ def get_experiment_circuits(  # noqa: C901
     communicating = [bundle for bundle in bundles if bundle.kind == "cc_wire"]
     group_labels: list[dict] = []
     group_keys: list[tuple] = []
-    placeholder_locations = _get_placeholder_locations(cut_circuit.subcircuits)
+    placeholder_locations = _get_placeholder_locations(subcircuits)
     for id_meas_experiment_index, qpd in enumerate(
         qpd_combinations
     ):  # loop through all
@@ -481,7 +475,7 @@ def get_experiment_circuits(  # noqa: C901
     plan = None
     if communicating:
         waves, bundle_waves = communication_waves(
-            bundles, placeholders, len(cut_circuit.subcircuits)
+            bundles, placeholders, len(subcircuits)
         )
         plan = CommunicationPlan(
             label_clbits,
@@ -506,6 +500,8 @@ def get_experiment_circuits(  # noqa: C901
         num_draws=num_draws,
         plan=plan,
         qpd_bits=qpd_bits,
+        gamma=cut_circuit.gamma,
+        optimal_gamma=cut_circuit.optimal_gamma,
     )
 
     logger.info(f"Generated {cut_experiment.num_circuits} circuits for the experiment.")
