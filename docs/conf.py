@@ -12,7 +12,7 @@ import sys
 
 # Find the path to the source files we want to document, relative to the location of this file,
 # convert it to an absolute path.
-py_path = os.path.join(os.getcwd(), os.path.dirname(__file__), '../')
+py_path = os.path.join(os.getcwd(), os.path.dirname(__file__), "../")
 sys.path.insert(0, os.path.abspath(py_path))
 
 project = "QCut"
@@ -20,9 +20,9 @@ copyright = "2024, Joonas Nivala"
 author = "Joonas Nivala"
 
 # The short X.Y version.
-version = ''
+version = ""
 # The full version, including alpha/beta/rc tags.
-release = ''
+release = ""
 try:
     from QCut import __version__ as version
 except ImportError:
@@ -45,12 +45,12 @@ extensions = [
 ]
 
 autodoc_default_options = {
-    'members': True,
-    'member-order': 'bysource',
-    'special-members': '__init__',
-    'undoc-members': False,
-    'show-inheritance': True,
-    'private-members': False,
+    "members": True,
+    "member-order": "bysource",
+    "special-members": "__init__",
+    "undoc-members": False,
+    "show-inheritance": True,
+    "private-members": False,
 }
 
 autosummary_generate = True
@@ -69,9 +69,9 @@ exclude_patterns = [
 ]
 
 source_suffix = {
-    '.rst': 'restructuredtext',
-    '.md': 'myst-nb',
-    '.ipynb': 'myst-nb',
+    ".rst": "restructuredtext",
+    ".md": "myst-nb",
+    ".ipynb": "myst-nb",
 }
 
 myst_enable_extensions = [
