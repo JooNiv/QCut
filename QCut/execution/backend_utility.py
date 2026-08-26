@@ -215,8 +215,8 @@ def _iqm_transpiler_for(backend):
     derive from it, and nothing else does.
     """
     try:
-        from iqm.qiskit_iqm import transpile_to_IQM # type: ignore
-        from iqm.qiskit_iqm.iqm_backend import IQMBackendBase # type: ignore
+        from iqm.qiskit_iqm import transpile_to_IQM  # type: ignore
+        from iqm.qiskit_iqm.iqm_backend import IQMBackendBase  # type: ignore
     except ImportError:
         return None
     return transpile_to_IQM if isinstance(backend, IQMBackendBase) else None
