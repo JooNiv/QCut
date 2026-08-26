@@ -87,7 +87,7 @@ class CutOptions:
     finder_candidates: int = 5
     finder_cut_mode: FinderCutMode = "both"
     finder_max_qubits: int | list[int] | None = None
-    finder_num_partitions: int | None = 2
+    finder_num_partitions: int | None = None
 
     def __post_init__(self) -> None:  # noqa: C901
         """Validate the combination."""
@@ -120,6 +120,10 @@ class CutOptions:
             raise QCutError("finder_candidates must be at least 1")
         if self.finder_num_partitions is not None and self.finder_num_partitions < 1:
             raise QCutError("finder_num_partitions must be at least 1")
+
+        if self.finder_max_qubits is None and self.finder_num_partitions is None:
+            self.finder_num_partitions = 2
+        
         if self.finder_max_qubits is not None and isinstance(
             self.finder_max_qubits, list
         ):
