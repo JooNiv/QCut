@@ -169,7 +169,7 @@ def add_cuts_to_circuit(circuit, cut_data, cut_data_test):
     return qctest
 
 
-def _cheaper_find_cuts(circuit, num_partitions, max_qubits, cuts, options):
+def _cheaper_find_cuts(circuit, options):
     """Find cuts both with and without consolidation and keep the cheaper plan.
 
     Merging runs of gates on a pair lowers each pair's cost but can raise the total,
@@ -185,7 +185,7 @@ def _cheaper_find_cuts(circuit, num_partitions, max_qubits, cuts, options):
         forced = options.replace(consolidate=label)
         try:
             found = find_cuts(
-                circuit.copy(), num_partitions, max_qubits, cuts, options=forced
+                circuit.copy(), options=forced
             )
         except Exception as error:  # noqa: BLE001, PERF203
             logger.debug("the %s plan could not be cut: %s", label, error)
@@ -214,10 +214,6 @@ def _cheaper_find_cuts(circuit, num_partitions, max_qubits, cuts, options):
 
 def find_cuts(  # noqa: C901
     circuit,
-    num_partitions: int | None = None,
-    max_qubits=None,
-    cuts="both",
-    more_data=False,
     options: CutOptions | None = None,
 ):
     """Partition a quantum circuit into subcircuits by inserting cut operations.
@@ -230,33 +226,18 @@ def find_cuts(  # noqa: C901
 
     Args:
         circuit (QuantumCircuit): The input quantum circuit to partition.
-        num_partitions (int, optional): Number of partitions to create. If None,
-            determined from max_qubits.
-        max_qubits (list[int], optional): Maximum number of qubits allowed in each
-            partition. If specified, must match num_partitions.
-        cuts (str, optional): Type of cuts to insert. Can be "both", "gate", or "wire".
-            Defaults to "both".
-        more_data (bool, optional): If True, returns additional data for debugging and
-            analysis. Defaults to False.
         options (CutOptions, optional): configuration for the run. Defaults to
             QCut.options.DEFAULT_OPTIONS.
 
     Returns:
-        tuple: If more_data is False, returns:
-            - list[list[int]]: Qubit locations for each subcircuit.
-            - list[QuantumCircuit]: List of subcircuits after cuts.
-            - list[dict]: Mapping of qubits for each subcircuit.
-        If more_data is True, returns:
-            - list[list[int]]: Qubit locations for each subcircuit.
-            - list[QuantumCircuit]: List of subcircuits after cuts.
-            - list[dict]: Mapping of qubits for each subcircuit.
-            - QuantumCircuit: The circuit with cuts inserted.
-            - list: Data describing the cuts.
-            - list: Additional cut data for testing.
-            - dict: Partition labels for each node.
-            - rustworkx.PyGraph: The graph representation of the circuit.
-            - dict: Mapping of nodes to qubits.
+        CutCircuit: A circuit with cut operations inserted, ready for decomposition into
+        subcircuits.
     """
+    options = resolve(options)
+
+    num_partitions = options.num_partitions
+    max_qubits = options.max_qubits
+    cuts = options.finder_cut_mode
 
     if num_partitions is None:
         if max_qubits is None:
@@ -276,19 +257,13 @@ def find_cuts(  # noqa: C901
 
     circuit.remove_final_measurements()
 
-    options = resolve(options)
     circuit = transpile(circuit, optimization_level=0, basis_gates=BASIS_GATES)
 
     mode = options.consolidate_mode
     if mode == "auto" and consolidate_two_qubit_blocks(circuit) is circuit:
         mode = "never"  # nothing was worth merging, so there is nothing to compare
-    if mode == "auto" and not more_data:
-        # Consolidating changes which edges the partitioner sees, so the two plans can
-        # end up cutting different gates entirely. There is no way to compare them
-        # short of running both, which is what this does. The more_data path returns
-        # the intermediate graph and cut data, which belong to one run, so it merges
-        # without comparing.
-        return _cheaper_find_cuts(circuit, num_partitions, max_qubits, cuts, options)
+    if mode == "auto":
+        return _cheaper_find_cuts(circuit, options)
     if mode == "always" or mode == "auto":
         # Before the graph is built, so a merged run shows up as one edge to cut rather
         # than several. Nothing is marked yet, so every pair is a candidate.
@@ -382,15 +357,5 @@ def find_cuts(  # noqa: C901
         )
     _, final_cut_circuit, cut_circuit, cut_data, cut_data_test, labels = best
 
-    if not more_data:
-        return final_cut_circuit
-    else:
-        return (
-            final_cut_circuit,
-            cut_circuit,
-            cut_data,
-            cut_data_test,
-            labels,
-            graph,
-            nodes_on_qubit,
-        )
+    return final_cut_circuit
+    

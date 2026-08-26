@@ -33,13 +33,13 @@ ConsolidateStrategy = Literal["auto", "always", "never"]
 #: itself. ``True`` and ``False`` are accepted as ``"always"`` and ``"never"``.
 CommunicationStrategy = Literal["auto", "always", "never"]
 
-#: Smallest block ``"auto"`` will use classical communication for. Gamma overstates
-#: what communication buys, because the protocol assumes the prepared state can follow
-#: the measured outcome shot by shot and batched runs have to emulate that by
-#: post-selection. Measured against the local tables a single wire comes out worse in
-#: shots while paying only a quarter off its circuit count, and blocks of two and more
-#: come out ahead on both. See :doc:`the derivation <theory/LOCC_wire_derivation>`.
+#: Smallest block ``"auto"`` will use classical communication for.
 MIN_COMMUNICATING_BLOCK: int = 2
+
+# What types of cuts the cut finder will consider. ``"both"`` considers wire and gate 
+# cuts, ``"wire"`` considers only wire cuts, and ``"gate"`` considers only gate cuts.
+FinderCutMode = Literal["both", "wire", "gate"]
+
 
 
 @dataclass(frozen=True)
@@ -66,7 +66,7 @@ class CutOptions:
     ``expansion`` decides how the decomposition becomes experiment circuits, see
     :data:`ExpansionStrategy`. Under ``"auto"``, ``max_exact_groups`` is the largest
     exact group count still enumerated rather than sampled. When sampling,
-    
+
     ``finder_candidates`` is how many candidate partitions the cut finder generates and
     costs before keeping the cheapest. METIS returns only the partitioning that
     minimises its own objective, the weighted edge cut, which stops being the true cost
@@ -86,8 +86,11 @@ class CutOptions:
     num_samples: int | None = None
     seed: int | None = None
     finder_candidates: int = 5
+    finder_cut_mode: FinderCutMode = "both"
+    finder_max_qubits: int | list[int] | None = None
+    finder_num_partitions: int | None = 2
 
-    def __post_init__(self) -> None:
+    def __post_init__(self) -> None:  # noqa: C901
         """Validate the combination."""
         if self.consolidate not in ("auto", "always", "never", True, False):
             raise QCutError(
@@ -105,12 +108,36 @@ class CutOptions:
                 f"unknown expansion strategy '{self.expansion}', expected one of "
                 "'auto', 'exact', 'sample'"
             )
+        if self.finder_cut_mode not in ("both", "wire", "gate"):
+            raise QCutError(
+                f"unknown finder_cut_mode '{self.finder_cut_mode}', expected one of "
+                "'both', 'wire', 'gate'"
+            )
         if self.max_exact_groups < 1:
             raise QCutError("max_exact_groups must be at least 1")
         if self.num_samples is not None and self.num_samples < 1:
             raise QCutError("num_samples must be at least 1")
         if self.finder_candidates < 1:
             raise QCutError("finder_candidates must be at least 1")
+        if self.finder_num_partitions is not None and self.finder_num_partitions < 1:
+            raise QCutError("finder_num_partitions must be at least 1")
+        if (self.finder_max_qubits is not None 
+                    and isinstance(self.finder_max_qubits, list)):
+                    if any(q < 1 for q in self.finder_max_qubits):
+                        raise QCutError("all finder_max_qubits must be at least 1")
+                    if len(self.finder_max_qubits) <= 1:
+                        raise QCutError("finder_max_qubits must have atleast 2 entries")
+        if self.num_partitions is not None and isinstance(self.finder_max_qubits, list):
+            if len(self.finder_max_qubits) != self.finder_num_partitions:
+                raise QCutError(
+                    "finder_max_qubits must have the same length as finder_num_partitions"
+                )
+        elif self.finder_max_qubits is not None and self.finder_max_qubits < 1:
+            raise QCutError("finder_max_qubits must be at least 1")
+        if self.finder_num_partitions is None and self.finder_max_qubits is None:
+            raise QCutError(
+                "one of finder_num_partitions or finder_max_qubits must be specified"
+            )
 
     @property
     def consolidate_mode(self) -> str:
@@ -136,6 +163,21 @@ class CutOptions:
         return (
             self.num_samples if self.num_samples is not None else self.max_exact_groups
         )
+
+    @property
+    def num_partitions(self) -> int | None:
+        """Number of partitions to cut the circuit into."""
+        if self.finder_num_partitions is not None:
+            return self.finder_num_partitions
+        if isinstance(self.finder_max_qubits, list):
+            return len(self.finder_max_qubits)
+
+    @property
+    def max_qubits(self) -> list[int] | None:
+        if isinstance(self.finder_max_qubits, list):
+            return self.finder_max_qubits
+        if self.finder_max_qubits is not None:
+            return [self.finder_max_qubits] * self.finder_num_partitions
 
     def should_sample(self, exact_groups: int) -> bool:
         """Whether an experiment of ``exact_groups`` combinations should be sampled."""
