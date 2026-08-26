@@ -31,7 +31,7 @@ from QCut.qpd.qpd_generate import gamma, gamma_for_gate, qpd_from_gate
 from QCut.qpd.qpd_joint import (
     gamma_joint,
     joint_rotation_qpd_from_gates,
-    single_axis_frame,
+    single_axis_theta,
 )
 from QCut.qpd.qpd_locc import gamma_locc, locc_wire_qpd
 from QCut.utils.circuit_utils import _remove_obsm_2
@@ -133,7 +133,7 @@ def bundle_gamma(bundle: Bundle, cut_locations: list) -> float:
         return gamma_locc(bundle.size)
     if bundle.size > 1:
         thetas = [
-            single_axis_frame(joint_gate(cut_locations[cut]))[0] for cut in bundle.cuts
+            single_axis_theta(joint_gate(cut_locations[cut])) for cut in bundle.cuts
         ]
         return gamma_joint(thetas)
 
@@ -392,7 +392,10 @@ def _insert_bundle_qpd(  # noqa: PLR0913
     the other side prepares, so which bit belongs to which cut is recorded in
     ``label_clbits``.
     """
-    cut, side = parse_placeholder(op.operation.name)
+    parsed = parse_placeholder(op.operation.name)
+    if parsed is None:  # pragma: no cover - only placeholders reach here
+        raise QCutError(f"'{op.operation.name}' is not a cut placeholder")
+    cut, side = parsed
     bundle_side = bundle.bundle_side(cut, side)
     members = bundle.layout[bundle_side]
     indices = [placeholders[member].index for member in members]

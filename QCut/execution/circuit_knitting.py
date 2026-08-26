@@ -925,7 +925,7 @@ def run_cut_circuit(
     max_batch_size: int = 100,
     options: CutOptions | None = None,
     shots: int = DEFAULT_SHOTS,
-) -> list[float]:
+) -> np.ndarray:
     """After splitting the circuit run the rest of the circuit knitting sequence.
 
     Args:
@@ -941,7 +941,7 @@ def run_cut_circuit(
             (optional)
 
     Returns:
-        list: a list of expectation values
+        np.ndarray: one expectation value per observable, in the order given
 
     """
     if options is not None:
@@ -973,7 +973,7 @@ def run(
     max_batch_size: int = 100,
     options: CutOptions | None = None,
     shots: int = DEFAULT_SHOTS,
-) -> list[float]:
+) -> np.ndarray:
     """Run the whole circuit knitting sequence with one function call.
 
     Args:
@@ -988,7 +988,7 @@ def run(
             (optional)
 
     Returns:
-        list: a list of expectation values
+        np.ndarray: one expectation value per observable, in the order given
 
     """
     # circuit = circuit.copy()

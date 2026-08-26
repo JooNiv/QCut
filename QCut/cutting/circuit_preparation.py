@@ -335,7 +335,7 @@ def _cheaper_split(
 
     if not candidates:
         # Neither plan works, so report why rather than inventing a new message.
-        raise first_error
+        raise first_error or QCutError("the circuit could not be split")
 
     candidates.sort(key=lambda candidate: candidate[0])
     cost, label, chosen = candidates[0]

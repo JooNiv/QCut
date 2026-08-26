@@ -296,7 +296,9 @@ def transpile_subcircuits(
         # placeholders is listed in _IQM_ENFORCED, and asking for any of it is refused
         # rather than quietly ignored.
         _check_iqm_options(transpile_options)
-        options = {name: value for name, (value, _why) in _IQM_ENFORCED.items()}
+        options: dict[str, object] = {
+            name: value for name, (value, _why) in _IQM_ENFORCED.items()
+        }
         options["optimization_level"] = optimization_level
         options.update(transpile_options or {})
 

@@ -10,6 +10,7 @@ from qiskit.circuit import CircuitInstruction
 
 from QCut.cutting.circuit_preparation import get_locations_and_subcircuits
 from QCut.cutting.consolidate import consolidate_two_qubit_blocks
+from QCut.errors.qcuterror import QCutError
 from QCut.options import CutOptions, resolve
 from QCut.QCutFind.graph_circuit_utils import circ_to_graph
 from QCut.QCutFind.metis import (
@@ -193,7 +194,7 @@ def _cheaper_find_cuts(circuit, options):
 
     if not candidates:
         # Neither plan works, so report why rather than inventing a new message.
-        raise first_error
+        raise first_error or QCutError("no cutting plan could be found")
 
     # Stable sort, so a tie keeps "always" and therefore the plan with fewer cuts.
     candidates.sort(key=lambda candidate: candidate[0])
@@ -348,6 +349,9 @@ def find_cuts(  # noqa: C901
                 cut_data_test,
                 labels,
             )
+
+    if best is None:  # pragma: no cover - there is always at least one candidate
+        raise QCutError("no candidate partition could be costed")
 
     if len(candidates) > 1:
         logger.info(

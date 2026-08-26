@@ -29,7 +29,7 @@ import logging
 
 import numpy as np
 from qiskit import QuantumCircuit
-from qiskit.circuit import Gate
+from qiskit.circuit import Gate, Instruction
 from qiskit.circuit.library import CZGate, SwapGate, UnitaryGate, iSwapGate
 from qiskit.quantum_info import Operator
 
@@ -222,13 +222,13 @@ def _plan_merges(
     circuit: QuantumCircuit,
     pairs: dict[frozenset, tuple[int, int]],
     marked: set[frozenset],
-) -> dict[int, tuple[Gate, tuple[int, int]] | None]:
+) -> dict[int, tuple[Instruction, tuple[int, int]] | None]:
     """Decide which instructions to merge.
 
     Maps an instruction index either to the gate replacing it and the qubits it goes on,
     or to None meaning the instruction is absorbed and dropped.
     """
-    replacements: dict[int, tuple[Gate, tuple[int, int]] | None] = {}
+    replacements: dict[int, tuple[Instruction, tuple[int, int]] | None] = {}
     claimed: set[int] = set()
     for key, pair in pairs.items():
         for block, moved in _blocks_on_pair(circuit, pair, claimed):

@@ -170,17 +170,15 @@ class CutOptions:
         )
 
     @property
-    def num_partitions(self) -> int | None:
+    def num_partitions(self) -> int:
         """Number of partitions to cut the circuit into."""
-        if self.finder_num_partitions is None and (
-            self.finder_max_qubits is None or isinstance(self.finder_max_qubits, int)
-        ):
-            return 2
-
         if self.finder_num_partitions is not None:
             return self.finder_num_partitions
         if isinstance(self.finder_max_qubits, list):
             return len(self.finder_max_qubits)
+        # One budget for every partition says nothing about how many there are, and
+        # neither does having no budget at all, so both split in two.
+        return 2
 
     @property
     def max_qubits(self) -> list[int] | None:

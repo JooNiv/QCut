@@ -217,7 +217,9 @@ def joint_rotation_qpd(thetas: list[float], tol: float = DEFAULT_TOL) -> list[di
     return terms
 
 
-def single_axis_frame(gate: Gate) -> tuple[float, list[tuple], ...] | None:
+def single_axis_frame(
+    gate: Gate,
+) -> tuple[float, list[tuple[Gate | None, Gate | None]]] | None:
     r"""Put a two-qubit gate in the frame the joint decomposition needs.
 
     A gate qualifies when its Cartan coordinates have a single non-zero entry, which
@@ -256,6 +258,21 @@ def single_axis_frame(gate: Gate) -> tuple[float, list[tuple], ...] | None:
         )
     ]
     return -2 * decomposition.a, locals_
+
+
+def single_axis_theta(gate: Gate) -> float:
+    """The folded rotation angle of a single-axis gate.
+
+    Only for gates a plan has already accepted as single-axis, so one that is not is a
+    bug rather than a case to handle.
+    """
+    frame = single_axis_frame(gate)
+    if frame is None:
+        raise QCutError(
+            f"gate '{gate.name}' is not equivalent to a single-axis rotation, "
+            "so it has no joint decomposition"
+        )
+    return frame[0]
 
 
 def _with_side_locals(
@@ -299,9 +316,12 @@ def joint_rotation_qpd_from_gates(
         ``len(gates)`` qubits.
     """
     flipped = [False] * len(gates) if flipped is None else list(flipped)
-    frames = [single_axis_frame(gate) for gate in gates]
-    if any(frame is None for frame in frames):
-        return None
+    frames = []
+    for gate in gates:
+        frame = single_axis_frame(gate)
+        if frame is None:
+            return None
+        frames.append(frame)
 
     thetas = [frame[0] for frame in frames]
     per_side: list[list[tuple]] = [[], []]

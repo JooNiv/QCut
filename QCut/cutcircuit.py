@@ -247,11 +247,15 @@ class CutExperiment:
         return len(self.experiments[0])
 
     @property
-    def gamma(self) -> float:
-        """Sampling overhead of the decomposition these circuits came from."""
+    def gamma(self) -> float | None:
+        """Sampling overhead of the decomposition these circuits came from.
+
+        None only for an experiment built by hand rather than by
+        :func:`QCut.get_experiment_circuits`, which has no split to read it off.
+        """
         return self._gamma
 
     @property
-    def optimal_gamma(self) -> float:
+    def optimal_gamma(self) -> float | None:
         """The least these cuts could have cost with every decomposition available."""
         return self._optimal_gamma

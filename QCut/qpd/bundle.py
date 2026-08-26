@@ -25,7 +25,12 @@ from qiskit.circuit.library import CZGate
 
 from QCut.cutlocation import CutLocation, SingleQubitCutLocation
 from QCut.options import CutOptions
-from QCut.qpd.qpd_joint import gamma_joint, gamma_separate, single_axis_frame
+from QCut.qpd.qpd_joint import (
+    gamma_joint,
+    gamma_separate,
+    single_axis_frame,
+    single_axis_theta,
+)
 
 logger: logging.Logger = logging.getLogger(__name__)
 
@@ -509,7 +514,7 @@ def _log_savings(bundles: list[Bundle], cut_locations: list) -> None:
         together, apart = 1.0, 1.0
         for bundle in joint:
             thetas = [
-                single_axis_frame(joint_gate(cut_locations[index]))[0]
+                single_axis_theta(joint_gate(cut_locations[index]))
                 for index in bundle.cuts
             ]
             together *= gamma_joint(thetas)
