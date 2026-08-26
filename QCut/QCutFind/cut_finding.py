@@ -13,7 +13,7 @@ from QCut.cutting.consolidate import consolidate_two_qubit_blocks
 from QCut.options import CutOptions, resolve
 from QCut.QCutFind.graph_circuit_utils import circ_to_graph
 from QCut.QCutFind.metis import (
-    BUDGET_UFACTOR,
+    BUDGET_UFACTORS,
     FREE_UFACTOR,
     k_way_metis_partition,
     qubit_node_weights,
@@ -290,22 +290,23 @@ def find_cuts(  # noqa: C901
         # weight is its qubit count, and naming the share each may hold, gets the
         # constraint met by the partitioner instead.
         if max_qubits is None:
-            weights, targets, ufactor = None, None, FREE_UFACTOR
+            weights, targets = None, None
+            ufactors = (FREE_UFACTOR,)
         else:
             weights = qubit_node_weights(graph, nodes_on_qubit)
             total = sum(max_qubits)
             targets = [allowance / total for allowance in max_qubits]
-            ufactor = BUDGET_UFACTOR
+            ufactors = BUDGET_UFACTORS
         candidates = []
         for offset in range(max(1, options.finder_candidates)):
             labels = k_way_metis_partition(
                 graph,
                 num_partitions,
-                seed=base + offset,
+                seed=base + offset // len(ufactors),
                 ncuts=1,
                 node_weights=weights,
                 targets=targets,
-                ufactor=ufactor,
+                ufactor=ufactors[offset % len(ufactors)],
             )
             candidates.append((labels, *extract_cuts(graph, labels)))
 

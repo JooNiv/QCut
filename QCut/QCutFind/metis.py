@@ -50,6 +50,11 @@ QUBIT_SCALE: int = 1000
 #: repaired afterwards by moving whole qubits, which costs cuts.
 BUDGET_UFACTOR: int = 1
 
+#: Imbalances tried across candidates when there is a budget, tightest first. A looser
+#: balance keeps a qubit's timeline whole, which can refine into far fewer cuts even
+#: though METIS scores it as the worse edge cut.
+BUDGET_UFACTORS: tuple[int, ...] = (BUDGET_UFACTOR, 30, 100, 300, 1000)
+
 #: Imbalance allowed when there is no budget. Wide on purpose: an unbalanced split is
 #: often much cheaper, and with nothing to satisfy there is no reason to refuse it.
 FREE_UFACTOR: int = 500
