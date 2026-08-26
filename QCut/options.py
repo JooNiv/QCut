@@ -120,7 +120,7 @@ class CutOptions:
             raise QCutError("finder_candidates must be at least 1")
         if self.finder_num_partitions is not None and self.finder_num_partitions < 1:
             raise QCutError("finder_num_partitions must be at least 1")
-        
+
         # Split on the shape first: a per-partition budget is a list, one shared budget
         # is a number, and the checks for the two have nothing in common.
         if isinstance(self.finder_max_qubits, list):
@@ -167,9 +167,9 @@ class CutOptions:
     @property
     def num_partitions(self) -> int | None:
         """Number of partitions to cut the circuit into."""
-        if (self.finder_num_partitions is None 
-            and (self.finder_max_qubits is None 
-                 or isinstance(self.finder_max_qubits, int))):
+        if self.finder_num_partitions is None and (
+            self.finder_max_qubits is None or isinstance(self.finder_max_qubits, int)
+        ):
             return 2
 
         if self.finder_num_partitions is not None:

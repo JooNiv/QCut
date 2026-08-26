@@ -16,6 +16,8 @@ from qiskit.circuit import (
     Qubit,
 )
 
+from QCut.cutlocation import CutLocation, SingleQubitCutLocation
+from QCut.errors.qcuterror import QCutError
 from QCut.qpd.bundle import (
     Bundle,
     flatten_term,
@@ -24,9 +26,6 @@ from QCut.qpd.bundle import (
     parse_placeholder,
     plan_bundles,
 )
-from QCut.utils.circuit_utils import _remove_obsm_2
-from QCut.cutlocation import CutLocation, SingleQubitCutLocation
-from QCut.errors.qcuterror import QCutError
 from QCut.qpd.qpd import cz_qpd, identity_qpd, iswap_qpd, swap_qpd
 from QCut.qpd.qpd_generate import gamma, gamma_for_gate, qpd_from_gate
 from QCut.qpd.qpd_joint import (
@@ -35,6 +34,7 @@ from QCut.qpd.qpd_joint import (
     single_axis_frame,
 )
 from QCut.qpd.qpd_locc import gamma_locc, locc_wire_qpd
+from QCut.utils.circuit_utils import _remove_obsm_2
 
 logger: logging.Logger = logging.getLogger(__name__)
 
@@ -158,8 +158,18 @@ def plan_cost(cut_circuit, options) -> float:
     """
     subcircuits = [subcircuit.copy() for subcircuit in cut_circuit.subcircuits]
     _remove_obsm_2(subcircuits)
+    # Same veto the experiment builder applies, or a transpiled split would be costed
+    # with bundles its backend cannot run.
     bundles = plan_bundles(
-        cut_circuit.cut_locations, subcircuits, options, announce=False
+        cut_circuit.cut_locations,
+        subcircuits,
+        options,
+        announce=False,
+        fits=coupling_filter(
+            cut_circuit.cut_locations,
+            subcircuits,
+            getattr(cut_circuit, "backend", None),
+        ),
     )
     total = 1.0
     for bundle in bundles:

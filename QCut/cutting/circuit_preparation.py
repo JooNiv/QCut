@@ -12,11 +12,11 @@ from qiskit import ClassicalRegister, QuantumCircuit, QuantumRegister
 from qiskit.circuit import CircuitInstruction, Instruction, Qubit
 from qiskit.converters import circuit_to_dag, dag_to_circuit
 
-from QCut.cutting.consolidate import consolidate_two_qubit_blocks, marker_gate
 from QCut.cutcircuit import CutCircuit
 from QCut.cutlocation import CutLocation, SingleQubitCutLocation
-from QCut.options import CutOptions, resolve
+from QCut.cutting.consolidate import consolidate_two_qubit_blocks, marker_gate
 from QCut.errors.qcuterror import QCutError
+from QCut.options import CutOptions, resolve
 
 logger: logging.Logger = logging.getLogger(__name__)
 
