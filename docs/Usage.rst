@@ -1,5 +1,5 @@
 Basic Usage
-=====
+===========
 
 QCut is a quantum circuit knitting package capable of efficiently partitioning
 quantum circuits with wire and gate cuts using advanced LOCC and joint rotation decompositions
@@ -197,7 +197,7 @@ Additionally we can execute QCut using the ideal Aer simulator and see that we g
 ``QCut expectation values:[0.699436 0.713172 0.713172 0.979377]``
 
 
-Click :download:`here <examples/QCutBasicUsage.ipynb>` to download example notebook.
+Click :download:`here <notebooks/QCutBasicUsage.ipynb>` to download example notebook.
 
 
 Basic usage shorthand

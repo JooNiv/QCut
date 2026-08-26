@@ -56,12 +56,10 @@ def test_find_cuts() -> None:
     pre-defined solutions.
     """
     for solution_index, circ in enumerate(sq.test_circuits):
-
         options = CutOptions(
             finder_num_partitions=sq.cut_sizes[solution_index],
             finder_cut_mode="both",
         )
-
 
         cut_circuit = find_cuts(circ.copy(), options=options)
 
@@ -104,9 +102,7 @@ def test_auto_refine_wire():
         finder_max_qubits=[2, 2],
         finder_cut_mode="wire",
     )
-    cut_circuit = find_cuts(
-        circuit2.copy(), options=options
-    )
+    cut_circuit = find_cuts(circuit2.copy(), options=options)
 
     assert len(cut_circuit.subcircuits) == 2
 
@@ -123,9 +119,7 @@ def test_auto_refine_gate():
         finder_max_qubits=[2, 2],
         finder_cut_mode="gate",
     )
-    cut_circuit = find_cuts(
-        circuit2.copy(), options=options
-    )
+    cut_circuit = find_cuts(circuit2.copy(), options=options)
 
     assert len(cut_circuit.subcircuits) == 2
 
@@ -147,9 +141,7 @@ def test_construct_final_subcircuits():
         finder_max_qubits=[2, 2],
         finder_cut_mode="gate",
     )
-    cut_circuit = find_cuts(
-        circuit2.copy(), options=options
-    )
+    cut_circuit = find_cuts(circuit2.copy(), options=options)
 
     final_circs = construct_final_subcircuits(
         cut_circuit.subcircuits, [circuit2.num_qubits]
@@ -173,9 +165,7 @@ def test_expectation_values(index: int) -> None:
         finder_num_partitions=sq.cut_sizes[index],
         finder_cut_mode="both",
     )
-    cut_circuit = find_cuts(
-        sq.test_circuits[index].copy(), options=options
-    )
+    cut_circuit = find_cuts(sq.test_circuits[index].copy(), options=options)
     values = run_cut_circuit(
         cut_circuit, sq.test_observables[index], SIMULATOR, shots=SHOTS
     )
@@ -209,9 +199,7 @@ def _cost(options):
         finder_cut_mode="both",
     )
 
-    found = ck.find_cuts(
-        _finder_circuit().copy(), options=options
-    )
+    found = ck.find_cuts(_finder_circuit().copy(), options=options)
     return plan_cost(found, options)
 
 
@@ -271,12 +259,13 @@ def test_a_qubit_budget_is_met_by_the_partitioner():
     from QCut.qpd_operations import plan_cost
 
     options = CutOptions(
-        consolidate="never", joint_rotation_cuts=False, wire_cut_communication="never",
-        finder_max_qubits=[5, 5], finder_cut_mode="both"
+        consolidate="never",
+        joint_rotation_cuts=False,
+        wire_cut_communication="never",
+        finder_max_qubits=[5, 5],
+        finder_cut_mode="both",
     )
-    found = ck.find_cuts(
-        _finder_circuit().copy(), options=options
-    )
+    found = ck.find_cuts(_finder_circuit().copy(), options=options)
     assert _widths(found) == [5, 5]
     # The optimum over balanced bipartitions of this circuit, found by exhaustion.
     assert plan_cost(found, options) < 30.0
@@ -286,7 +275,7 @@ def test_an_uneven_budget_is_respected():
     """Shares come from ``max_qubits``, so they do not have to be equal."""
     found = ck.find_cuts(
         _finder_circuit().copy(),
-        options=CutOptions(finder_cut_mode="both", finder_max_qubits=[7, 3])
+        options=CutOptions(finder_cut_mode="both", finder_max_qubits=[7, 3]),
     )
     assert max(_widths(found)) <= 7
 
@@ -302,15 +291,13 @@ def test_no_budget_leaves_the_split_free_to_be_uneven():
     options = CutOptions(
         finder_num_partitions=2,
         finder_cut_mode="both",
-        consolidate="never", joint_rotation_cuts=False, wire_cut_communication="never"
+        consolidate="never",
+        joint_rotation_cuts=False,
+        wire_cut_communication="never",
     )
-    free = ck.find_cuts(
-        _finder_circuit().copy(), options=options
-    )
+    free = ck.find_cuts(_finder_circuit().copy(), options=options)
 
     options = options.replace(finder_max_qubits=[5, 5])
 
-    budgeted = ck.find_cuts(
-        _finder_circuit().copy(), options=options
-    )
+    budgeted = ck.find_cuts(_finder_circuit().copy(), options=options)
     assert plan_cost(free, options) <= plan_cost(budgeted, options) + 1e-9

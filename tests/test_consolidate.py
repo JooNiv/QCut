@@ -303,13 +303,11 @@ def test_find_cuts_consolidates_before_partitioning():
     circuit.rzz(0.4, 1, 2)
     circuit.rzz(0.5, 2, 3)
 
-    with_merge = ck.find_cuts(circuit.copy(), 
-                              options=CutOptions(
-                                  finder_num_partitions=2),
-                                  consolidate=True)
+    with_merge = ck.find_cuts(
+        circuit.copy(), options=CutOptions(finder_num_partitions=2), consolidate=True
+    )
     without = ck.find_cuts(
-        circuit.copy(), options=CutOptions(consolidate=False,
-                                            finder_num_partitions=2)
+        circuit.copy(), options=CutOptions(consolidate=False, finder_num_partitions=2)
     )
     observables = SparsePauliOp(["IIIZ", "IIZI", "IZII", "ZIII"])
     state = Statevector(circuit)

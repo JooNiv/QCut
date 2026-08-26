@@ -36,10 +36,9 @@ CommunicationStrategy = Literal["auto", "always", "never"]
 #: Smallest block ``"auto"`` will use classical communication for.
 MIN_COMMUNICATING_BLOCK: int = 2
 
-# What types of cuts the cut finder will consider. ``"both"`` considers wire and gate 
+# What types of cuts the cut finder will consider. ``"both"`` considers wire and gate
 # cuts, ``"wire"`` considers only wire cuts, and ``"gate"`` considers only gate cuts.
 FinderCutMode = Literal["both", "wire", "gate"]
-
 
 
 @dataclass(frozen=True)
@@ -121,17 +120,19 @@ class CutOptions:
             raise QCutError("finder_candidates must be at least 1")
         if self.finder_num_partitions is not None and self.finder_num_partitions < 1:
             raise QCutError("finder_num_partitions must be at least 1")
-        if (self.finder_max_qubits is not None 
-                    and isinstance(self.finder_max_qubits, list)):
-                    if any(q < 1 for q in self.finder_max_qubits):
-                        raise QCutError("all finder_max_qubits must be at least 1")
-                    if len(self.finder_max_qubits) <= 1:
-                        raise QCutError("finder_max_qubits must have atleast 2 entries")
-        if self.finder_num_partitions is not None and isinstance(self.finder_max_qubits,
-                                                                 list):
+        if self.finder_max_qubits is not None and isinstance(
+            self.finder_max_qubits, list
+        ):
+            if any(q < 1 for q in self.finder_max_qubits):
+                raise QCutError("all finder_max_qubits must be at least 1")
+            if len(self.finder_max_qubits) <= 1:
+                raise QCutError("finder_max_qubits must have atleast 2 entries")
+        if self.finder_num_partitions is not None and isinstance(
+            self.finder_max_qubits, list
+        ):
             if len(self.finder_max_qubits) != self.finder_num_partitions:
                 raise QCutError(
-                    "finder_max_qubits must have the same length as" \
+                    "finder_max_qubits must have the same length as"
                     "finder_num_partitions"
                 )
         elif self.finder_max_qubits is not None and self.finder_max_qubits < 1:

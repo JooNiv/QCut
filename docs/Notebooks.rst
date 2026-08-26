@@ -5,6 +5,6 @@ Notebooks
    :maxdepth: 3
    :caption: Contents:
 
-   Basic Usage <examples/QCutBasicUsage.ipynb>
-   QAOA Example <examples/QCutQAOAExample.ipynb>
-   Cut Options Example <examples/QCutOptionsExample.ipynb>
+   Basic Usage <notebooks/QCutBasicUsage.ipynb>
+   QAOA Example <notebooks/QCutQAOAExample.ipynb>
+   Cut Options Example <notebooks/QCutOptionsExample.ipynb>

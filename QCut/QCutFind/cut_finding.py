@@ -184,9 +184,7 @@ def _cheaper_find_cuts(circuit, options):
     for label in ("always", "never"):
         forced = options.replace(consolidate=label)
         try:
-            found = find_cuts(
-                circuit.copy(), options=forced
-            )
+            found = find_cuts(circuit.copy(), options=forced)
         except Exception as error:  # noqa: BLE001, PERF203
             logger.debug("the %s plan could not be cut: %s", label, error)
             first_error = first_error or error
@@ -358,4 +356,3 @@ def find_cuts(  # noqa: C901
     _, final_cut_circuit, cut_circuit, cut_data, cut_data_test, labels = best
 
     return final_cut_circuit
-    

@@ -5,6 +5,6 @@ Examples on using QCut
    :maxdepth: 3
    :caption: Contents:
 
-   WireCuts
-   GateCuts
-   AutomaticCuts
+   examples/WireCuts
+   examples/GateCuts
+   examples/AutomaticCuts
