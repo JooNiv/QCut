@@ -8,16 +8,42 @@ Under the hood QCut uses `pymetis <https://github.com/inducer/pymetis>`__  to fi
 
 .. code:: python
 
+   from qiskit import QuantumCircuit
+   from qiskit.quantum_info import SparsePauliOp
+   import QCut as ck
    from QCut import find_cuts, CutOptions
 
+   circuit = QuantumCircuit(6)
+   for qubit in range(6):
+       circuit.h(qubit)
+   for control, target in [(0, 1), (1, 2), (2, 3), (3, 4), (4, 5)]:
+       circuit.rzz(0.8, control, target)
+   for qubit in range(6):
+       circuit.rx(0.6, qubit)
+
+   observables = SparsePauliOp(["IIIIZZ", "IIIZZI", "IZZIII", "ZZIIII"])
+
    options = CutOptions(
-      finder_num_partitions=3,
+      finder_num_partitions=2,
       finder_cut_mode="both",
    )
 
-   cut_circuit = find_cuts(circuit , options=options)
+   cut_circuit = find_cuts(circuit, options=options)
 
-   estimated_expectation_values = ck.run_cut_circuit(cut_circuit, observables, backend)
+   print(cut_circuit.cut_locations)
+   print([subcircuit.num_qubits for subcircuit in cut_circuit.subcircuits])
+
+   estimated_expectation_values = ck.run_cut_circuit(cut_circuit, observables)
+
+Nothing here says where to cut. The finder settles on the single ``rzz`` in the middle of
+the chain, splitting the six qubits into two halves of three for 12 experiment circuits.
+Cutting a wire there instead would cost :math:`\gamma = 4` against roughly 2.4 for that
+gate, which is the sort of choice ``finder_cut_mode="both"`` exists to make; restricting
+it to ``"wire"`` or ``"gate"`` forces one kind.
+
+``finder_num_partitions`` asks for a number of pieces, and ``finder_max_qubits`` asks
+instead for a size limit per piece, either as one number for all of them or as a list
+with one entry per partition. At least one of the two has to be given.
 
 How cuts are costed
 -------------------
@@ -27,11 +53,6 @@ overhead of a set of cuts is the **product** of their :math:`\gamma` values. Tak
 logarithm turns one into the other, so each edge is weighted by
 :math:`\log\gamma` rather than by :math:`\gamma`, and the partitioner then optimises
 the cost that actually matters.
-
-Weighting by :math:`\gamma` directly, as QCut used to, systematically undervalues cheap
-cuts. Two ``cz`` cuts cost :math:`\gamma = 9` and one ``swap`` cut costs
-:math:`\gamma = 7`, so the ``swap`` is cheaper, yet adding gammas says the opposite
-because :math:`3 + 3 < 7`.
 
 A wire cut weighs :math:`\log 4`, and a gate cut weighs the logarithm of its own
 :math:`\gamma`, so an ``rzz`` with a small angle is correctly treated as nearly free.
@@ -44,21 +65,16 @@ Choosing between candidate partitions
 --------------------------------------
 
 METIS minimises the weighted edge cut. With ``log gamma`` weights that is exactly the
-true cost of a plan, right up until two cuts share a decomposition: a joint rotation
+true cost of a plan, right up until two cuts share a decomposition. A joint rotation
 bundle or a communicating block of wires costs less than the product of its parts, and
 METIS cannot know that. It also returns only the partitioning that scored best by its
 own measure, discarding the rest.
 
 So the finder asks for one partitioning per seed, builds each one out in full, and costs
 the finished plans with :func:`~QCut.qpd_operations.plan_cost`, which does see the
-bundles. The cheapest wins. ``finder_candidates`` (default 5) sets how many to try, and
+bundles. The cheapest wins. ``CutOptions.finder_candidates`` (default 5) sets how many to try, and
 because the seeds are consecutive a larger set contains the smaller one, so raising it
 cannot give a worse answer.
-
-The seeds are fixed. Before that they were drawn at random, which made the finder
-non-deterministic: two runs on the same circuit could return plans whose overheads
-differed by three orders of magnitude, and there was no way to get the good one back.
-``seed`` shifts the whole candidate set if you want a different draw.
 
 Meeting a qubit budget
 -----------------------
@@ -70,15 +86,8 @@ qubit's nodes therefore carries an equal share of one qubit's worth, which makes
 partition's weight its qubit count, and ``max_qubits`` becomes the share each partition
 may hold. A straddling qubit counts in both, which is what a wire cut costs anyway.
 
-Without that, the partition was chosen with no regard for the budget and then repaired
-to fit by moving whole qubits across, paying in cuts for each one. On nearest-neighbour
-circuits at 16 to 24 qubits, where the best balanced split is simply the contiguous one,
-that repair cost between 17 and 600 times the sampling overhead of the optimum. Asking
-the partitioner for the right thing finds the optimum outright.
-
 The weighting only applies when there is a budget. With none, an unbalanced split is
-usually cheaper, so forcing balance would make that case worse. The repair still runs as
-a fallback for whatever the partitioner cannot satisfy.
+often cheaper, so forcing balance would make that case worse.
 
 ``find_cuts`` still applies joint cutting to whatever cuts it settles on, it just does
-not steer the partitioner towards cut sets that would bundle well.
+not actively steer the partitioner towards cut sets that would bundle well.

@@ -1,4 +1,4 @@
-Usage
+Basic Usage
 =====
 
 QCut is a quantum circuit knitting package capable of efficiently partitioning

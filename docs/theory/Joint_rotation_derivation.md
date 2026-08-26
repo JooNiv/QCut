@@ -14,7 +14,6 @@ $$
 
 the single-gate optimum is $\gamma = 1 + 2|\sin\theta|$, which the [general two-qubit derivation](General_2q_derivation.md) already attains. Cutting `n` of them jointly instead costs
 
-(joint-gamma)=
 $$
 \gamma_{\mathrm{joint}} = 2\prod_{s=1}^{n}\bigl(1 + |\sin\theta_s|\bigr) - 1
 \;<\;
@@ -50,7 +49,6 @@ $\mathcal{P}_{ij}$ is the parity measurement over $T_{ij}$, meaning $\mathcal{P}
 
 Equation (C16) of [[1]](#joint-ref) is then
 
-(eqc16)=
 $$
 \bigotimes_s R_{zz}(\theta_s)
 = \sum_{j} c_j^2\, \mathcal{Z}_j\otimes\mathcal{Z}_j
@@ -67,9 +65,7 @@ $$
 
 where the ordering $i > j$ reads each bit pattern as an integer with gate $1$ most significant. The ordering matters, because swapping $i$ and $j$ flips the sign of $\nu_{ij}$ and changes the $\mathcal{Z}_i$ prefactor.
 
-Summing the absolute coefficients gives [equation above](#joint-gamma). Both $\mathcal{R}_{ij}$ and $\mathcal{P}_{ij}$ cost $\gamma = 1$ of their own, the first because it is a difference of two unitary channels weighted $\pm 1/2$, the second because the measurement outcome supplies the sign in post-processing. That is the same trick the `Bxy`, `Byz` and `Bzx` primitives already use.
-
-The paper arranges the ancilla qubits so that the second partition carries the reversed bit string $\tilde{\jmath} = (j_n,\dots,j_1)$. That is bookkeeping for its figure. Gate $s$ contributes the same bit $j_s$ to both of its qubits, so once operations are indexed by gate rather than by qubit position the reversal disappears.
+Summing the absolute coefficients gives the equation above. Both $\mathcal{R}_{ij}$ and $\mathcal{P}_{ij}$ cost $\gamma = 1$ of their own, the first because it is a difference of two unitary channels weighted $\pm 1/2$, the second because the measurement outcome supplies the sign in post-processing.
 
 ## Term counts
 
@@ -82,7 +78,7 @@ The double sum runs over $\binom{2^n}{2}$ pairs. A pair with even $\nu_{ij}$ con
 | 3 | 132 | 216 | 15 against 27 |
 | 4 | 552 | 1296 | 31 against 81 |
 
-So joint cutting lowers the circuit count as well as the overhead. Nothing has to be traded off, which is why it is on by default.
+So joint cutting lowers the circuit count as well as the overhead.
 
 ## Getting a gate into the frame
 
@@ -113,8 +109,8 @@ They do conflict in one case. Merging a run of gates about *different* axes comp
 
 Which way wins depends on the whole circuit, so `consolidate="auto"` splits it both ways, costs each plan in full including the bundles it allows, and keeps the cheaper. The comparison is exact rather than a heuristic, because `QCut.qpd_operations.plan_cost` gets every $\gamma$ from a closed form and never has to build a QPD table to do it. In a randomised search over 550 layered circuits, merging was the wrong call 18 times and `"auto"` picked correctly every time.
 
+(joint-ref)=
 ## References
 
-(joint-ref)=
 1. C. Ufrecht, L. S. Herzog, D. D. Scherer, M. Periyasamy, S. Rietsch, A. Plinge and C. Mutschler, *Optimal joint cutting of two-qubit rotation gates*, Phys. Rev. A **109**, 052440 (2024), [arXiv:2312.09679](https://arxiv.org/abs/2312.09679).
 2. L. Schmitt, C. Piveteau and D. Sutter, *Cutting circuits with multiple two-qubit unitaries*, Quantum **9**, 1634 (2025), [arXiv:2312.11638](https://arxiv.org/abs/2312.11638), which independently observes that joint cutting beats the product of single-gate costs.

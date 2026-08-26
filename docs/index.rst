@@ -6,7 +6,13 @@
 QCut documentation
 ==================
 
-A package for performing circuit knitting with wire cuts on hardware with no reset-gates or mid-circuit measurements. Built on top of Qiskit.
+QCut is a quantum circuit knitting package capable of efficiently partitioning
+quantum circuits with wire and gate cuts using advanced LOCC and joint rotation decompositions
+along with the standard local decompositions. It is designed to be compatible with Qiskit and should
+be compatible with any Qiskit programmable backend but has been especially designed to be compatible
+with IQM’s qpus and the Finnish Quantum Computing Infrastructure (`FiQCI <https://fiqci.fi/>`__).
+
+QQCut has been built at CSC - IT Center for Science (Finnish IT Center for Science)
 
 .. toctree::
    :maxdepth: 1

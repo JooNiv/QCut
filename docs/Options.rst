@@ -21,7 +21,8 @@ resulting ``CutCircuit`` and ``CutExperiment``, so it only has to be given once.
 Options are fixed before the subcircuits are built, because they decide how the
 quasiprobability decomposition is formed and therefore what its coefficients mean. A
 ``CutOptions`` is frozen for that reason. Use ``options.replace(...)`` for a modified copy,
-or reassign ``QCut.DEFAULT_OPTIONS`` to change the defaults process-wide.
+or reassign ``QCut.DEFAULT_OPTIONS`` to change the defaults process-wide. For more examplpes
+on using options, see :doc:`QCutOptionsExample.ipynb <examples/QCutOptionsExample>`.
 
 Merging gates on the same qubit pair
 ------------------------------------
@@ -33,10 +34,10 @@ each gate, because the overhead of separate cuts multiplies.
 
 A run does not have to be contiguous. Gates on other qubits commute with it and are
 skipped, and a gate that overlaps the pair is moved out of the way whenever it commutes
-with the members that would cross it. That last case carries most of the benefit: a
+with the members that would cross it. That last case carries most of the benefit. A
 layer of an Ising or QAOA circuit puts a neighbouring ``rzz`` or ``cz`` between every
 pair of gates on the same qubits, and treating those as blockers leaves almost nothing
-adjacent enough to merge. Which gate is involved matters more than which qubits — a
+adjacent enough to merge. Which gate is involved matters more than which qubits. A
 ``cx`` whose *control* lands on the pair commutes with a Z-diagonal run and is moved
 past, while the same gate reversed does not and ends the run.
 
@@ -48,41 +49,37 @@ to. Two ``cz`` gates compose to the identity, so the merged cut costs
 Merging is not always the cheaper choice once joint cutting is in play. A run of gates
 about *different* axes composes to a generic two-qubit unitary, which is no longer a
 single-axis rotation and so can no longer join a joint decomposition. Cutting the gates
-separately and bundling each with its parallel partners can beat merging them. In a
-randomised search over 550 layered circuits this happened 18 times, costing up to 11% in
-:math:`\gamma` and so about 23% in shots.
+separately and bundling each with its parallel partners can beat merging them.
 
 There is no way to tell which wins from one pair alone, so the three strategies are
 
 ``"auto"``
     Split the circuit both ways, cost each plan in full including the bundles it allows,
-    and keep the cheaper. The comparison is exact rather than a heuristic, and it was
-    optimal in every trial of the search above. The extra work only happens when there
-    was something to merge in the first place.
+    and keep the cheaper. The comparison is exact rather than a heuristic, and it is
+    optimal in every case.
 
 ``"always"`` (or ``True``)
-    Merge wherever it lowers the cost of that pair considered on its own. This was the
-    old behaviour.
+    Merge wherever it lowers the cost of that pair considered on its own.
 
 ``"never"`` (or ``False``)
     Leave every gate alone.
 
-Under ``"auto"``, ``find_cuts`` runs the whole search twice, because consolidating
+Under ``"auto"``, ``find_cuts`` also runs the whole cut search twice, because consolidating
 changes which edges the partitioner sees and the two plans can end up cutting different
 gates entirely. Both paths log which way they went and what it saved at INFO level.
 
 A run holding only one two-qubit gate is left alone, since absorbing the surrounding
-single-qubit gates cannot change :math:`\gamma` and would only replace a named gate by a
+single-qubit gates cannot change :math:`\gamma` and would only replace a named gate to a
 generic unitary.
 
 Note that merging can turn two separately placed cut markers on one pair into a single
-cut, which changes ``len(cut_locations)``. That is intended. QCut already requires that
-if one gate on a pair is cut then every gate on that pair is cut, so the gates in a run
-all have to be cut anyway.
+cut, which changes ``len(cut_locations)``. That is intended. QCut already requires
+(since otherwise partitioning would not be possible) that if one gate on a pair is cut
+then every gate on that pair is cut, so the gates in a run all have to be cut anyway.
 
 The pass is also available on its own as
-:func:`~QCut.consolidate.consolidate_two_qubit_blocks`, for running on a circuit before
-placing cuts by hand.
+:func:`~QCut.consolidate.consolidate_two_qubit_blocks` with some extra control knobs,
+for running on a circuit before placing cuts by hand.
 
 Cutting parallel rotation gates together
 ----------------------------------------
@@ -107,18 +104,14 @@ the same pair of subcircuits, because each side of the decomposition acts on sev
 qubits of one subcircuit at once. Anything that does not qualify is cut on its own as
 before, so turning this on can only help. ``QCut.bundle.plan_bundles`` reports what it
 grouped and what that saved at INFO level.
-
-Note that this changes the number of experiment groups, so a test pinning
-``CutExperiment.num_groups`` will see 30 where it saw 36. The derivation is on the
-:doc:`joint rotation gate cutting <theory/Joint_rotation_derivation>` page.
-
-Wire cuts that exchange the measured outcome
---------------------------------------------
+<|end_of_file|>
+Wire cuts with one-way clasical communication
+---------------------------------------------
 
 ``wire_cut_communication`` (default ``"auto"``) lets the two sides of a wire cut exchange
 the measured outcome. Cutting :math:`n` wires locally costs :math:`4^n` and that is
 provably the best possible, so a block of wires gains nothing on its own. Communicating
-brings it down to :math:`2^{n+1} - 1`, and the number of circuits from :math:`8^n` to
+brings it down to :math:`2^{n+1} - 1`, and the number of circuit groups/pairs from :math:`8^n` to
 :math:`2^n(2^{n+1}-1)`.
 
 .. list-table::
@@ -152,8 +145,7 @@ So the three strategies are
 ``"auto"``
     Communicate only for blocks of at least
     :data:`~QCut.options.MIN_COMMUNICATING_BLOCK` wires, two by default, which is where
-    it starts to pay for itself. A single wire would trade a quarter off its circuit
-    count for roughly twice the shots.
+    it starts to pay for itself. A single wire trades less shots for more circuits.
 
 ``"always"`` (or ``True``)
     Communicate wherever the cuts allow it, single wires included.
@@ -194,8 +186,8 @@ Sampling instead of enumerating
 -------------------------------
 
 Building every combination of QPD terms costs the product of the per-cut term counts. That
-is fine for one or two cuts and hopeless beyond that, since a generic two-qubit gate needs
-58 terms. ``expansion`` controls what happens instead.
+is fine for a relatively small number of cuts and intractably expensive beyond that,
+since a generic two-qubit gate needs 58 terms. ``expansion`` controls what happens instead.
 
 ``"auto"`` (the default) enumerates while the exact count is within ``max_exact_groups``
 (default 1000) and samples above it. ``"exact"`` always enumerates, ``"sample"`` always
@@ -210,3 +202,17 @@ Sampling is not only a way to make large cases tractable. Enumerating gives ever
 same number of shots and corrects with a weight afterwards, which is higher variance than
 drawing proportional to :math:`|c|` in the first place. The estimator is unbiased either
 way, and ``CutExperiment.sampled`` says which path was taken.
+
+Configuring cut finding options
+-------------------------------
+
+``CutOptions`` also carries the options that ``find_cuts`` uses to steer the partitioner.
+These are documented on the :doc:`automatic cut finding <AutomaticCuts>` page, and the defaults are
+``CutOptions.finder_num_partitions = 2``, ``CutOptions.finder_cut_mode = "wire"``,
+``CutOptions.finder_candidates = 5``, ``CutOptions.finder_max_qubits = None``, and
+``CutOptions.finder_seed = 0``.
+
+``finder_num_partitions`` and ``finder_max_qubits`` control the amount and size of the partitions,
+``finder_cut_mode`` controls whether to place wire cuts, gate cuts or both, and
+``finder_candidates`` controls how many different partitionings to test before picking the cheapest.
+The seeds are fixed, so the finder is deterministic and reproducible.
