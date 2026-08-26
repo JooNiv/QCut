@@ -127,7 +127,7 @@ class CutOptions:
                         raise QCutError("all finder_max_qubits must be at least 1")
                     if len(self.finder_max_qubits) <= 1:
                         raise QCutError("finder_max_qubits must have atleast 2 entries")
-        if self.num_partitions is not None and isinstance(self.finder_max_qubits, list):
+        if self.finder_num_partitions is not None and isinstance(self.finder_max_qubits, list):
             if len(self.finder_max_qubits) != self.finder_num_partitions:
                 raise QCutError(
                     "finder_max_qubits must have the same length as finder_num_partitions"
