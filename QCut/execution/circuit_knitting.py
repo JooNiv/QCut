@@ -162,7 +162,7 @@ def get_experiment_circuits(  # noqa: C901
         observables (SparsePauliOp): The observables to measure.
 
     Returns:
-        CutExperiment: An object containing the generated experiment circuits and 
+        CutExperiment: An object containing the generated experiment circuits and
         related information.
 
     """
@@ -847,8 +847,7 @@ def run_experiments(  # noqa: C901
     results from the qpd_meas class register.
 
     Args:
-        experiment_circuits (CutCircuit): experiment circuits
-        cut_locations (np.ndarray[CutLocation]): list of cut locations
+        cut_experiment (CutExperiment): the experiment circuits to run
         shots (int): number of shots per circuit run (optional). Communicating wire
             cuts spend it differently: the waves split a total of ``shots`` times the
             number of groups per subcircuit between them, in proportion to how often
@@ -859,8 +858,9 @@ def run_experiments(  # noqa: C901
             call. Larger batches reduce per-job overhead on real hardware.
 
     Returns:
-        list[TotalResult]:
-            list of transformed results
+        RawResult:
+            the raw counts, carrying the experiment they came from so that
+            :func:`QCut.estimate_expectation_values` can be called on them alone
 
     """
     if backend is None:
@@ -869,7 +869,7 @@ def run_experiments(  # noqa: C901
     if cut_experiment.plan is not None:
         results = _run_communicating(cut_experiment, shots, backend, max_batch_size)
         _align_missing(results)
-        return RawResult(results, shots, cut_experiment.expv_data())
+        return RawResult(results, shots, cut_experiment)
 
     results: list[list[dict[int, dict[str, int]]]] = [
         [{} for _ in group] for group in cut_experiment.experiments
@@ -915,7 +915,7 @@ def run_experiments(  # noqa: C901
 
     _align_missing(results)
 
-    return RawResult(results, shots, cut_experiment.expv_data())
+    return RawResult(results, shots, cut_experiment)
 
 
 def run_cut_circuit(
@@ -929,11 +929,9 @@ def run_cut_circuit(
     """After splitting the circuit run the rest of the circuit knitting sequence.
 
     Args:
-        subcircuits (list[QuantumCircuit]):
-            subcircuits containing the placeholder operations
-        cut_locations (np.ndarray[CutLocation]): list of cut locations
-        observables (list[int | list[int]]):
-            list of observables as qubit indices (Z observable)
+        cut_circuit (CutCircuit): the split circuit, carrying its placeholder
+            operations and cut locations
+        observables (SparsePauliOp): the observables to estimate
         backend: backend to use for running experiment circuits (optional)
         max_batch_size (int): maximum number of circuits submitted per backend.run
             call (optional)

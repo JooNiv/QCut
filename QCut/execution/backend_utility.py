@@ -247,10 +247,13 @@ def transpile_subcircuits(
     matters more than the transpilation time.
 
     Args:
-        subcircuits (list[QuantumCircuit]): List of subcircuits to be transpiled.
+        cut_circuit (CutCircuit): The split circuit whose subcircuits are transpiled.
         backend: Backend to transpile to.
         optimization_level (int): Optimization level for transpilation (0-3).
-        transpile_options (dict): Arguments passed to qiskit transpile function.
+        transpile_options (dict): Arguments passed to the transpiler.
+        use_iqm_transpiler (bool): Whether an IQM backend may use IQM's transpiler.
+            Pass False for the ordinary qiskit path.
+
     Returns:
         CutCircuit: Transpiled subcircuits wrapped in CutCircuit class.
     """

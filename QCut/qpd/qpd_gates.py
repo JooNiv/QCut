@@ -132,6 +132,17 @@ def cutGate(
     A two-qubit gate becomes a single :class:`CutTwoQubitGate` marker, so its QPD is
     generated from its matrix at expansion time. Larger gates are still transpiled into
     the ``{u, cz, swap, iswap}`` basis first, which turns them into several cuts.
+
+    Args:
+        gate (Gate): the gate to cut.
+        control (int | list[int]): qubit, or qubits, the gate's first inputs map to.
+        target (int | list[int]): qubit, or qubits, its remaining inputs map to.
+        single_qubit_basis (list[str]): basis the single-qubit parts are translated
+            into, if the default is not wanted (optional).
+
+    Returns:
+        dict: keyword arguments for ``QuantumCircuit.append``, so the call site reads
+        ``circuit.append(**cutGate(...))``.
     """
     controls = [control] if isinstance(control, int) else list(control)
     targets = [target] if isinstance(target, int) else list(target)

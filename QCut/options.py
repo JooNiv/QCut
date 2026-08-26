@@ -65,16 +65,21 @@ class CutOptions:
     ``expansion`` decides how the decomposition becomes experiment circuits, see
     :data:`ExpansionStrategy`. Under ``"auto"``, ``max_exact_groups`` is the largest
     exact group count still enumerated rather than sampled. When sampling,
+    ``num_samples`` draws are taken, defaulting to ``max_exact_groups``, and ``seed``
+    fixes the sampler for a reproducible experiment set.
 
     ``finder_candidates`` is how many candidate partitions the cut finder generates and
     costs before keeping the cheapest. METIS returns only the partitioning that
     minimises its own objective, the weighted edge cut, which stops being the true cost
-    once cuts share a decomposition, so the candidates are generated one per seed and
-    compared on what they actually cost. The seeds are fixed, which makes the finder
-    reproducible; ``seed`` shifts them as a set.
+    once cuts share a decomposition, so several are generated and compared on what they
+    actually cost. Under a qubit budget they vary by how much imbalance METIS is allowed
+    before they vary by seed, since that changes the partition more. Both are fixed,
+    which makes the finder reproducible; ``seed`` shifts the seeds as a set.
 
-    ``num_samples`` draws are taken, defaulting to ``max_exact_groups``, and ``seed``
-    fixes the sampler for a reproducible experiment set.
+    ``finder_cut_mode`` limits the finder to wire cuts, to gate cuts, or lets it use
+    both. ``finder_num_partitions`` asks for a number of pieces and
+    ``finder_max_qubits`` for a size limit per piece, either one number for all of them
+    or a list with one entry per partition. With neither given the finder splits in two.
     """
 
     consolidate: ConsolidateStrategy | bool = "auto"
