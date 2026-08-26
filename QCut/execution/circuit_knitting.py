@@ -5,7 +5,6 @@ A module for the main circuit knitting workflow.
 from __future__ import annotations
 
 import logging
-import pickle
 
 import numpy as np
 from qiskit import QuantumCircuit, transpile
@@ -17,11 +16,17 @@ from qiskit.converters import circuit_to_dag, dag_to_circuit
 from qiskit.quantum_info import SparsePauliOp
 from qiskit_aer import AerSimulator
 
+from QCut.cutcircuit import CutCircuit, CutExperiment
+from QCut.cutting.circuit_preparation import get_locations_and_subcircuits
+from QCut.errors.qcuterror import QCutError
 from QCut.execution.backend_utility import transpile_subcircuits
 from QCut.execution.basis_transform import (
     _combine_pauli_ops,
     _get_obs_subcircuits,
 )
+from QCut.execution.postprocess import estimate_expectation_values
+from QCut.execution.qcutresult import RawResult
+from QCut.options import CutOptions
 from QCut.qpd.bundle import (
     SIDE_1,
     communication_waves,
@@ -29,13 +34,6 @@ from QCut.qpd.bundle import (
     parse_placeholder,
     plan_bundles,
 )
-from QCut.cutting.circuit_preparation import get_locations_and_subcircuits
-from QCut.utils.circuit_utils import _remove_obsm, _remove_obsm_2, compact_qpd_register
-from QCut.cutcircuit import CutCircuit, CutExperiment
-from QCut.options import CutOptions
-from QCut.execution.postprocess import estimate_expectation_values
-from QCut.errors.qcuterror import QCutError
-from QCut.execution.qcutresult import RawResult
 from QCut.qpd.qpd_locc import CommunicationPlan
 from QCut.qpd.qpd_operations import (
     _insert_2qubit_gate_cut_qpd,
@@ -46,6 +44,7 @@ from QCut.qpd.qpd_operations import (
     qpd_for_bundle,
     sample_qpd_combinations,
 )
+from QCut.utils.circuit_utils import _remove_obsm, _remove_obsm_2, compact_qpd_register
 
 logger: logging.Logger = logging.getLogger(__name__)
 
@@ -361,8 +360,7 @@ def get_experiment_circuits(  # noqa: C901
         for obs_set in obs_subcircuits:
             cur_set_circuits = {}
             for id_meas_subcircuit_index, circ in obs_set.items():
-                subcircuit = pickle.loads(pickle.dumps(circ))
-                # subcircuit = deepcopy(circ)
+                subcircuit = circ.copy()
                 offset = 0
                 classical_bit_index = 0
                 qpd_qubits = []  # store the qubit indices of qubits used for qpd
