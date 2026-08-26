@@ -104,7 +104,7 @@ the same pair of subcircuits, because each side of the decomposition acts on sev
 qubits of one subcircuit at once. Anything that does not qualify is cut on its own as
 before, so turning this on can only help. ``QCut.bundle.plan_bundles`` reports what it
 grouped and what that saved at INFO level.
-<|end_of_file|>
+
 Wire cuts with one-way clasical communication
 ---------------------------------------------
 
