@@ -12,6 +12,8 @@ Breaking changes
   :code:`RawResult(results, shots, expv_data=None)`.
 - :code:`find_cuts()` is now deterministic and costs several candidate partitions before
   choosing, so it returns different, cheaper plans than 1.3.2 did for the same circuit.
+- :code:`find_cuts()` now reads its configuration from a :code:`CutOptions` object rather than from keyword arguments. See
+  `Options <https://jooniv.github.io/QCut/Options.html>`__ and `Automatic cuts <https://jooniv.github.io/QCut/AutomaticCuts.html>`__ for details.
 - Cut edge weights are :code:`log gamma` rather than :code:`gamma`, which also changes
   which cuts are chosen. See `Automatic cuts <https://jooniv.github.io/QCut/AutomaticCuts.html>`__.
 - Subcircuits are no longer given empty classical registers, and an unused
