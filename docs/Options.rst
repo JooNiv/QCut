@@ -22,7 +22,7 @@ Options are fixed before the subcircuits are built, because they decide how the
 quasiprobability decomposition is formed and therefore what its coefficients mean. A
 ``CutOptions`` is frozen for that reason. Use ``options.replace(...)`` for a modified copy,
 or reassign ``QCut.DEFAULT_OPTIONS`` to change the defaults process-wide. For more examplpes
-on using options, see :doc:`QCutOptionsExample.ipynb <examples/QCutOptionsExample>`.
+on using options, see :doc:`QCutOptionsExample.ipynb <notebooks/QCutOptionsExample>`.
 
 Merging gates on the same qubit pair
 ------------------------------------
@@ -207,7 +207,7 @@ Configuring cut finding options
 -------------------------------
 
 ``CutOptions`` also carries the options that ``find_cuts`` uses to steer the partitioner.
-These are documented on the :doc:`automatic cut finding <AutomaticCuts>` page, and the defaults are
+These are documented on the :doc:`automatic cut finding <examples/AutomaticCuts>` page, and the defaults are
 ``CutOptions.finder_num_partitions = 2``, ``CutOptions.finder_cut_mode = "wire"``,
 ``CutOptions.finder_candidates = 5``, ``CutOptions.finder_max_qubits = None``, and
 ``CutOptions.finder_seed = 0``.
