@@ -149,27 +149,26 @@ def bundle_gamma(bundle: Bundle, cut_locations: list) -> float:
     )
 
 
-def plan_cost(cut_circuit, options) -> float:
+def plan_cost(cut_circuit, options, respect_backend: bool = True) -> float:
     """Return the total sampling overhead a split would cost.
 
     Includes whatever joint decompositions the split allows, which is the point: two
     splits of the same circuit can permit different bundles, so their costs cannot be
     compared without planning the bundles for each.
+
+    ``respect_backend`` applies the same veto the experiment builder does, without which
+    a transpiled split is costed with bundles its backend cannot run. Turn it off to ask
+    what the cuts would cost on a device that could run anything.
     """
     subcircuits = [subcircuit.copy() for subcircuit in cut_circuit.subcircuits]
     _remove_obsm_2(subcircuits)
-    # Same veto the experiment builder applies, or a transpiled split would be costed
-    # with bundles its backend cannot run.
+    backend = getattr(cut_circuit, "backend", None) if respect_backend else None
     bundles = plan_bundles(
         cut_circuit.cut_locations,
         subcircuits,
         options,
         announce=False,
-        fits=coupling_filter(
-            cut_circuit.cut_locations,
-            subcircuits,
-            getattr(cut_circuit, "backend", None),
-        ),
+        fits=coupling_filter(cut_circuit.cut_locations, subcircuits, backend),
     )
     total = 1.0
     for bundle in bundles:
