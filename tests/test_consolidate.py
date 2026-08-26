@@ -254,7 +254,7 @@ def _run(circuit, observables, options):
     cut_circuit = ck.get_locations_and_subcircuits(circuit, options=options)
     experiment = ck.get_experiment_circuits(cut_circuit, observables)
     results = ck.run_experiments(experiment, backend=AerSimulator(), shots=SHOTS)
-    values = ck.estimate_expectation_values(results, experiment.expv_data())
+    values = ck.estimate_expectation_values(results)
     return values, len(cut_circuit.cut_locations), experiment.num_groups
 
 
@@ -316,7 +316,7 @@ def test_find_cuts_consolidates_before_partitioning():
     for cut_circuit in (with_merge, without):
         experiment = ck.get_experiment_circuits(cut_circuit, observables)
         results = ck.run_experiments(experiment, backend=AerSimulator(), shots=SHOTS)
-        values = ck.estimate_expectation_values(results, experiment.expv_data())
+        values = ck.estimate_expectation_values(results)
         for expected, actual in zip(exact, values):
             assert abs(expected - actual) < TOLERANCE
 
@@ -472,6 +472,6 @@ def test_find_cuts_auto_is_never_worse_than_either_mode():
     found = ck.find_cuts(circuit.copy(), options=options)
     experiment = ck.get_experiment_circuits(found, observables)
     results = ck.run_experiments(experiment, backend=AerSimulator(), shots=SHOTS)
-    values = ck.estimate_expectation_values(results, experiment.expv_data())
+    values = ck.estimate_expectation_values(results)
     for expected, actual in zip(exact, values):
         assert abs(expected - actual) < TOLERANCE

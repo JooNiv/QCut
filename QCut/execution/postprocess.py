@@ -179,9 +179,7 @@ def _get_sub_expectation_values(
     return sub_expectation_value
 
 
-def estimate_expectation_values(
-    results: RawResult, expv_data: dict | None = None
-) -> np.ndarray:
+def estimate_expectation_values(results: RawResult) -> np.ndarray:
     r"""Calculate the estimated expectation values.
 
     Loop through processed results. For each result group generate all products of
@@ -203,10 +201,8 @@ def estimate_expectation_values(
     qubits, applied while their eigenvalues are multiplied together.
 
     Args:
-        results (RawResult): raw results from experiment circuits. Carries the data
-            needed to interpret itself, so ``expv_data`` does not have to be passed.
-        expv_data (dict, optional): experiment data, if it is not the data the results
-            were produced with. Defaults to what ``results`` recorded.
+        results (RawResult): raw results from experiment circuits, carrying the
+            experiment they came from.
 
     Returns:
         np.ndarray:
@@ -214,31 +210,31 @@ def estimate_expectation_values(
 
     """
     raw_results = results
-    if expv_data is None:
-        expv_data = raw_results.expv_data
-        if expv_data is None:
-            raise ValueError(
-                "These results carry no experiment data, so expv_data has to be given. "
-                "Results from QCut.run_experiments carry it already."
-            )
+    experiment = raw_results.experiment
+    if experiment is None:
+        raise ValueError(
+            "These results carry no experiment, so there is nothing to interpret them "
+            "with. Results from QCut.run_experiments carry it already; a hand-built "
+            "RawResult has to be given the experiment it came from."
+        )
     results_processed = _process_results(
-        raw_results.results, raw_results._shots, expv_data.get("qpd_bits")
+        raw_results.results, raw_results._shots, experiment.qpd_bits
     )
 
     wire_cuts = len(
-        [i for i in expv_data["cut_locations"] if isinstance(i, SingleQubitCutLocation)]
+        [i for i in experiment.cut_locations if isinstance(i, SingleQubitCutLocation)]
     )
     parity = np.power(-1, wire_cuts + 1)
 
-    measurement_settings = _combine_pauli_ops(expv_data["observables"])
+    measurement_settings = _combine_pauli_ops(experiment.observables)
 
     result_for_obs = []
 
-    for obs in expv_data["observables"].paulis:
+    for obs in experiment.observables.paulis:
         obs_circuit_info = _get_observable_circuit_index(obs, measurement_settings)
         result_for_obs.append(obs_circuit_info)
 
-    expectation_values = np.zeros(len(expv_data["observables"]))
+    expectation_values = np.zeros(len(experiment.observables))
 
     for ind, obs_data in enumerate(result_for_obs):
         if obs_data["circuit_index"] is None:
@@ -246,7 +242,7 @@ def estimate_expectation_values(
                              with given measurement settings.""")
 
         for experiment_run, coefficient in zip(
-            results_processed, expv_data["coefficients"]
+            results_processed, experiment.coefficients
         ):
             cur_obs = (
                 obs_data["obs_indices"]
@@ -259,7 +255,7 @@ def estimate_expectation_values(
                 * _get_sub_expectation_values(
                     experiment_run[obs_data["circuit_index"]],
                     cur_obs,
-                    expv_data["map_qubit"],
+                    experiment.map_qubit,
                 )
             )[0]
 

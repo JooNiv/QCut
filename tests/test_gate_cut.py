@@ -60,9 +60,7 @@ def test_cut_gate_expectation_values():
 
     results = ck.run_experiments(cut_experiment, backend=backend)
 
-    expectation_values = ck.estimate_expectation_values(
-        results, cut_experiment.expv_data()
-    )
+    expectation_values = ck.estimate_expectation_values(results)
 
     for ind, expv in enumerate(expectation_values):
         assert abs(expv - res_expvs[ind]) < 0.1

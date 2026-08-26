@@ -11,11 +11,10 @@ from qiskit_aer import AerSimulator
 
 import QCut as ck
 from QCut import CutOptions, cut, cutGate
-from QCut.execution import circuit_knitting as knit
-from QCut.qpd.bundle import plan_bundles
-from QCut.execution.circuit_knitting import MEASURE_SHARE
-from QCut.utils.circuit_utils import _remove_obsm_2
 from QCut.errors.qcuterror import QCutError
+from QCut.execution import circuit_knitting as knit
+from QCut.execution.circuit_knitting import MEASURE_SHARE
+from QCut.qpd.bundle import plan_bundles
 from QCut.qpd.qpd_locc import (
     MAX_BLOCK,
     _label_sign,
@@ -28,6 +27,7 @@ from QCut.qpd.qpd_locc import (
     locc_wire_qpd,
     mub_unitaries,
 )
+from QCut.utils.circuit_utils import _remove_obsm_2
 
 TOLERANCE = 0.1
 
@@ -165,7 +165,7 @@ def _run(circuit, observables, options, shots=2**12):
     cut_circuit = ck.get_locations_and_subcircuits(circuit, options=options)
     experiment = ck.get_experiment_circuits(cut_circuit, observables)
     results = ck.run_experiments(experiment, backend=AerSimulator(), shots=shots)
-    values = ck.estimate_expectation_values(results, experiment.expv_data())
+    values = ck.estimate_expectation_values(results)
     return values, experiment
 
 
@@ -450,7 +450,7 @@ def test_a_generous_batch_size_does_not_collapse_the_allocation():
     for max_batch_size in (100, 10**9):
         jobs, results = _count_jobs(experiment, max_batch_size, shots=2**12)
         counts[max_batch_size] = len(jobs)
-        values = ck.estimate_expectation_values(results, experiment.expv_data())
+        values = ck.estimate_expectation_values(results)
         for expected, actual in zip(exact, values):
             assert abs(expected - actual) < 0.2
 

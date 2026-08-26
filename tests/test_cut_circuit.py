@@ -76,13 +76,8 @@ def test_cut_experiment_assign_parameters():
                             assert True
 
 
-def test_results_carry_their_own_experiment_data():
-    """``expv_data`` should not have to be threaded through by the caller.
-
-    ``run_experiments`` records it on the result, so the estimator can be called on the
-    result alone. Passing it explicitly still works, and must agree exactly.
-    """
-    import numpy as np
+def test_results_carry_their_own_experiment():
+    """The estimator is called on the result alone, with nothing threaded through."""
     from qiskit_aer import AerSimulator
 
     circuit = QuantumCircuit(2)
@@ -96,21 +91,19 @@ def test_results_carry_their_own_experiment_data():
         experiment, backend=AerSimulator(seed_simulator=17), shots=2048
     )
 
-    assert results.expv_data is not None
-    implicit = ck.estimate_expectation_values(results)
-    explicit = ck.estimate_expectation_values(results, experiment.expv_data())
-    assert np.array_equal(implicit, explicit)
+    assert results.experiment is experiment
+    assert len(ck.estimate_expectation_values(results)) == len(observables)
 
 
-def test_results_without_experiment_data_say_so():
-    """A hand-built result carries nothing, so the estimator has to be told."""
+def test_results_without_an_experiment_say_so():
+    """A hand-built result carries nothing, so the estimator cannot interpret it."""
     import pytest
 
     from QCut.execution.qcutresult import RawResult
 
     bare = RawResult([], 1024)
-    assert bare.expv_data is None
-    with pytest.raises(ValueError, match="expv_data"):
+    assert bare.experiment is None
+    with pytest.raises(ValueError, match="no experiment"):
         ck.estimate_expectation_values(bare)
 
 

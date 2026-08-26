@@ -311,7 +311,7 @@ def _run(circuit, options):
     cut_circuit = ck.get_locations_and_subcircuits(circuit, options=options)
     experiment = ck.get_experiment_circuits(cut_circuit, OBSERVABLES)
     results = ck.run_experiments(experiment, backend=AerSimulator(), shots=SHOTS)
-    values = ck.estimate_expectation_values(results, experiment.expv_data())
+    values = ck.estimate_expectation_values(results)
     gamma = sum(abs(c) for c in experiment.coefficients)
     return values, experiment.num_groups, gamma
 
@@ -556,7 +556,7 @@ def test_three_parallel_gates_run_end_to_end():
     )
     experiment = ck.get_experiment_circuits(cut_circuit, SIX_QUBIT_OBSERVABLES)
     results = ck.run_experiments(experiment, backend=AerSimulator(), shots=SHOTS)
-    values = ck.estimate_expectation_values(results, experiment.expv_data())
+    values = ck.estimate_expectation_values(results)
 
     assert experiment.num_groups == 132
     gamma = sum(abs(c) for c in experiment.coefficients)
@@ -624,7 +624,7 @@ def test_find_cuts_bundles_the_cuts_it_chooses():
         cut_circuit = ck.find_cuts(circuit.copy(), options=options)
         experiment = ck.get_experiment_circuits(cut_circuit, SIX_QUBIT_OBSERVABLES)
         results = ck.run_experiments(experiment, backend=AerSimulator(), shots=SHOTS)
-        values = ck.estimate_expectation_values(results, experiment.expv_data())
+        values = ck.estimate_expectation_values(results)
         seen[label] = (
             experiment.num_groups,
             sum(abs(c) for c in experiment.coefficients),

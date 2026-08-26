@@ -159,17 +159,6 @@ class CutExperiment:
         self._gamma = gamma
         self._optimal_gamma = optimal_gamma
 
-    def expv_data(self):
-        """Get data for expv calculation."""
-        return {
-            "cut_locations": self.cut_locations,
-            "map_qubit": self.map_qubit,
-            "coefficients": self.coefficients,
-            "observables": self.observables,
-            "num_exp_groups": self.num_groups,
-            "qpd_bits": self.qpd_bits,
-        }
-
     def assign_parameters(
         self, parameters: dict, inplace=False
     ) -> CutExperiment | None:

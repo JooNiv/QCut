@@ -1,6 +1,8 @@
 """Tests for new gate cut functionality: cutSWAP, cutISWAP, CutLocation.gate_name,
 QPD_REGISTRY, result normalisation, and end-to-end SWAP/ISWAP cut pipelines."""
 
+import copy
+
 import numpy as np
 import pytest
 from qiskit import QuantumCircuit, QuantumRegister
@@ -163,7 +165,7 @@ def test_the_estimate_uses_probabilities_not_raw_counts():
     raw = ck.run_experiments(
         experiment, backend=AerSimulator(seed_simulator=4321), shots=1024
     )
-    first = ck.estimate_expectation_values(raw, experiment.expv_data())
+    first = ck.estimate_expectation_values(raw)
 
     scale = 7
     scaled = RawResult(
@@ -178,8 +180,9 @@ def test_the_estimate_uses_probabilities_not_raw_counts():
             for group in raw.results
         ],
         raw._shots * scale,
+        experiment,
     )
-    second = ck.estimate_expectation_values(scaled, experiment.expv_data())
+    second = ck.estimate_expectation_values(scaled)
 
     assert np.allclose(first, second, atol=1e-12)
 
@@ -206,20 +209,22 @@ def test_a_group_contributes_in_proportion_to_its_coefficient():
         experiment, backend=AerSimulator(seed_simulator=99), shots=1024
     )
 
-    data = experiment.expv_data()
-    baseline = np.array(ck.estimate_expectation_values(raw, data))
+    def with_coefficients(coefficients):
+        """The same results read against an experiment whose coefficients differ."""
+        altered = copy.copy(experiment)
+        altered.coefficients = coefficients
+        return np.array(
+            ck.estimate_expectation_values(RawResult(raw.results, raw._shots, altered))
+        )
 
-    scaled = dict(data)
-    scaled["coefficients"] = [
-        2 * c if index == 0 else c for index, c in enumerate(data["coefficients"])
-    ]
-    bumped = np.array(ck.estimate_expectation_values(raw, scaled))
-
-    only_first = dict(data)
-    only_first["coefficients"] = [
-        c if index == 0 else 0.0 for index, c in enumerate(data["coefficients"])
-    ]
-    first_group = np.array(ck.estimate_expectation_values(raw, only_first))
+    original = list(experiment.coefficients)
+    baseline = with_coefficients(original)
+    bumped = with_coefficients(
+        [2 * c if index == 0 else c for index, c in enumerate(original)]
+    )
+    first_group = with_coefficients(
+        [c if index == 0 else 0.0 for index, c in enumerate(original)]
+    )
 
     assert np.allclose(bumped - baseline, first_group, atol=1e-12)
 
@@ -243,7 +248,7 @@ def test_swap_cut_expectation_values():
     cut_qc = ck.get_locations_and_subcircuits(swap_circuit.copy())
     cut_exp = ck.get_experiment_circuits(cut_qc, _swap_observables)
     results = ck.run_experiments(cut_exp, backend=AerSimulator())
-    expvs = ck.estimate_expectation_values(results, cut_exp.expv_data())
+    expvs = ck.estimate_expectation_values(results)
     for computed, expected in zip(expvs, _swap_expected):
         assert abs(computed - expected) < 0.15
 
@@ -267,7 +272,7 @@ def test_iswap_cut_expectation_values():
     cut_qc = ck.get_locations_and_subcircuits(iswap_circuit.copy())
     cut_exp = ck.get_experiment_circuits(cut_qc, _iswap_observables)
     results = ck.run_experiments(cut_exp, backend=AerSimulator())
-    expvs = ck.estimate_expectation_values(results, cut_exp.expv_data())
+    expvs = ck.estimate_expectation_values(results)
     for computed, expected in zip(expvs, _iswap_expected):
         assert abs(computed - expected) < 0.15
 

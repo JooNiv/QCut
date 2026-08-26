@@ -38,7 +38,7 @@ def _run(gate, options, shots=2**12):
     cut_circuit = ck.get_locations_and_subcircuits(_circuit(gate), options=options)
     experiment = ck.get_experiment_circuits(cut_circuit, OBSERVABLES)
     results = ck.run_experiments(experiment, backend=AerSimulator(), shots=shots)
-    values = ck.estimate_expectation_values(results, experiment.expv_data())
+    values = ck.estimate_expectation_values(results)
     return np.array(values), experiment
 
 

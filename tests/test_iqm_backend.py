@@ -22,9 +22,9 @@ from qiskit_aer import AerSimulator
 
 import QCut as ck
 from QCut import CutOptions, cut, cutGate
+from QCut.errors.qcuterror import QCutError
 from QCut.execution.backend_utility import _IQM_ENFORCED
 from QCut.qpd.bundle import plan_bundles
-from QCut.errors.qcuterror import QCutError
 from QCut.qpd.qpd_operations import coupling_filter
 
 iqm = pytest.importorskip(

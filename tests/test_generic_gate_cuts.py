@@ -43,7 +43,7 @@ def _cut_and_run(gate):
     cut_circuit = ck.get_locations_and_subcircuits(circuit)
     experiment = ck.get_experiment_circuits(cut_circuit, OBSERVABLES)
     results = ck.run_experiments(experiment, backend=AerSimulator())
-    values = ck.estimate_expectation_values(results, experiment.expv_data())
+    values = ck.estimate_expectation_values(results)
     return values, experiment.num_groups
 
 
@@ -174,7 +174,7 @@ class TestParametrisedCutGate:
         experiment = ck.get_experiment_circuits(bound, OBSERVABLES)
         assert experiment.num_groups == 6
         results = ck.run_experiments(experiment, backend=AerSimulator())
-        values = ck.estimate_expectation_values(results, experiment.expv_data())
+        values = ck.estimate_expectation_values(results)
         for expected, actual in zip(_reference(RZZGate(theta)), values):
             assert abs(expected - actual) < TOLERANCE
 
@@ -221,7 +221,7 @@ def test_automatic_cut_finding_uses_a_generated_qpd():
     )
 
     results = ck.run_experiments(experiment, backend=AerSimulator())
-    values = ck.estimate_expectation_values(results, experiment.expv_data())
+    values = ck.estimate_expectation_values(results)
     state = Statevector(circuit)
     for pauli, actual in zip(observables.paulis, values):
         assert abs(float(np.real(state.expectation_value(pauli))) - actual) < TOLERANCE
