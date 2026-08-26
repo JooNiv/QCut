@@ -32,6 +32,34 @@ class CutCircuit:
         self.map_qubit = map_qubit
         self.backend = backend
         self.options = resolve(options)
+        self._gamma: tuple[float, float] | None = None
+
+    def _costs(self) -> tuple[float, float]:
+        """Both overheads, computed once. Closed form, so no circuits are built."""
+        if self._gamma is None:
+            from QCut.qpd.qpd_operations import plan_cost
+
+            # Everything the decompositions can do, so the gap to gamma shows what a
+            # backend's topology or a switched-off option costs. consolidate is not
+            # forced: it decides which gates exist, and by now that has happened.
+            best = self.options.replace(
+                joint_rotation_cuts=True, wire_cut_communication="always"
+            )
+            self._gamma = (
+                plan_cost(self, self.options),
+                plan_cost(self, best, respect_backend=False),
+            )
+        return self._gamma
+
+    @property
+    def gamma(self) -> float:
+        """Sampling overhead of this split, as it will actually be run."""
+        return self._costs()[0]
+
+    @property
+    def optimal_gamma(self) -> float:
+        """The least these same cuts could cost with every decomposition available."""
+        return self._costs()[1]
 
     def assign_parameters(self, parameters: dict, inplace=False) -> CutCircuit | None:
         """Assign parameters to the circuits. Same as qiskit
@@ -95,8 +123,14 @@ class CutExperiment:
         num_draws: int | None = None,
         plan=None,
         qpd_bits: dict[tuple[int, int, int], tuple[int, int]] | None = None,
+        gamma: float | None = None,
+        optimal_gamma: float | None = None,
     ) -> None:
         """Init.
+
+        ``gamma`` and ``optimal_gamma`` come from the :class:`CutCircuit` these circuits
+        were built from, which is the only thing that can work them out: they are read
+        off the subcircuits, and an experiment does not keep those.
 
         ``num_draws`` records how many samples were drawn when the decomposition was
         sampled rather than enumerated. It is informational. The estimator does not need
@@ -122,6 +156,8 @@ class CutExperiment:
         self._num_draws = num_draws
         self.plan = plan
         self.qpd_bits = qpd_bits or {}
+        self._gamma = gamma
+        self._optimal_gamma = optimal_gamma
 
     def expv_data(self):
         """Get data for expv calculation."""
@@ -174,6 +210,8 @@ class CutExperiment:
                 num_draws=self._num_draws,
                 plan=self.plan,
                 qpd_bits=self.qpd_bits,
+                gamma=self._gamma,
+                optimal_gamma=self._optimal_gamma,
             )
 
     @property
@@ -218,3 +256,13 @@ class CutExperiment:
     @property
     def num_obs_groups(self):
         return len(self.experiments[0])
+
+    @property
+    def gamma(self) -> float:
+        """Sampling overhead of the decomposition these circuits came from."""
+        return self._gamma
+
+    @property
+    def optimal_gamma(self) -> float:
+        """The least these cuts could have cost with every decomposition available."""
+        return self._optimal_gamma
