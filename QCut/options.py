@@ -121,19 +121,19 @@ class CutOptions:
         if self.finder_num_partitions is not None and self.finder_num_partitions < 1:
             raise QCutError("finder_num_partitions must be at least 1")
         
-        if self.finder_max_qubits is not None and isinstance(
-            self.finder_max_qubits, list
-        ):
+        # Split on the shape first: a per-partition budget is a list, one shared budget
+        # is a number, and the checks for the two have nothing in common.
+        if isinstance(self.finder_max_qubits, list):
             if any(q < 1 for q in self.finder_max_qubits):
                 raise QCutError("all finder_max_qubits must be at least 1")
             if len(self.finder_max_qubits) <= 1:
-                raise QCutError("finder_max_qubits must have atleast 2 entries")
-        if self.finder_num_partitions is not None and isinstance(
-            self.finder_max_qubits, list
-        ):
-            if len(self.finder_max_qubits) != self.finder_num_partitions:
+                raise QCutError("finder_max_qubits must have at least 2 entries")
+            if (
+                self.finder_num_partitions is not None
+                and len(self.finder_max_qubits) != self.finder_num_partitions
+            ):
                 raise QCutError(
-                    "finder_max_qubits must have the same length as"
+                    "finder_max_qubits must have the same length as "
                     "finder_num_partitions"
                 )
         elif self.finder_max_qubits is not None and self.finder_max_qubits < 1:
