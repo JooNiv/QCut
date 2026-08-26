@@ -8,4 +8,3 @@ Examples on using QCut
    WireCuts
    GateCuts
    AutomaticCuts
-   Multiple_cuts

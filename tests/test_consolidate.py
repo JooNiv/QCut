@@ -303,9 +303,13 @@ def test_find_cuts_consolidates_before_partitioning():
     circuit.rzz(0.4, 1, 2)
     circuit.rzz(0.5, 2, 3)
 
-    with_merge = ck.find_cuts(circuit.copy(), num_partitions=2)
+    with_merge = ck.find_cuts(circuit.copy(), 
+                              options=CutOptions(
+                                  finder_num_partitions=2),
+                                  consolidate=True)
     without = ck.find_cuts(
-        circuit.copy(), num_partitions=2, options=CutOptions(consolidate=False)
+        circuit.copy(), options=CutOptions(consolidate=False,
+                                            finder_num_partitions=2)
     )
     observables = SparsePauliOp(["IIIZ", "IIZI", "IZII", "ZIII"])
     state = Statevector(circuit)
@@ -457,8 +461,8 @@ def test_find_cuts_auto_is_never_worse_than_either_mode():
 
     costs = {}
     for mode in ("auto", "always", "never"):
-        options = CutOptions(consolidate=mode)
-        found = ck.find_cuts(circuit.copy(), num_partitions=2, options=options)
+        options = CutOptions(consolidate=mode, finder_num_partitions=2)
+        found = ck.find_cuts(circuit.copy(), options=options)
         costs[mode] = plan_cost(found, options)
 
     assert costs["auto"] <= min(costs["always"], costs["never"]) + 1e-9
@@ -466,8 +470,8 @@ def test_find_cuts_auto_is_never_worse_than_either_mode():
     observables = SparsePauliOp(["IIIIIZ", "IIIIZI", "IIIZII", "ZIIIII"])
     state = Statevector(circuit)
     exact = [float(np.real(state.expectation_value(p))) for p in observables.paulis]
-    options = CutOptions(consolidate="auto")
-    found = ck.find_cuts(circuit.copy(), num_partitions=2, options=options)
+    options = CutOptions(consolidate="auto", finder_num_partitions=2)
+    found = ck.find_cuts(circuit.copy(), options=options)
     experiment = ck.get_experiment_circuits(found, observables)
     results = ck.run_experiments(experiment, backend=AerSimulator(), shots=SHOTS)
     values = ck.estimate_expectation_values(results, experiment.expv_data())

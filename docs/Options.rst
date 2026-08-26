@@ -7,10 +7,16 @@ resulting ``CutCircuit`` and ``CutExperiment``, so it only has to be given once.
 
 .. code:: python
 
-   from QCut import CutOptions, find_cuts
+   from QCut import find_cuts, CutOptions
 
-   cut_circuit = find_cuts(circuit, num_partitions=2,
-                           options=CutOptions(consolidate=False))
+    options = CutOptions(
+        finder_num_partitions=3,
+        finder_cut_mode="both",
+        consolidate=False,
+    )
+
+    cut_circuit = find_cuts(circuit , options=options)
+
 
 Options are fixed before the subcircuits are built, because they decide how the
 quasiprobability decomposition is formed and therefore what its coefficients mean. A

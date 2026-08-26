@@ -8,7 +8,15 @@ Under the hood QCut uses `pymetis <https://github.com/inducer/pymetis>`__  to fi
 
 .. code:: python
 
-   cut_circuit = find_cuts(circuit , 3, cuts="both")
+   from QCut import find_cuts, CutOptions
+
+   options = CutOptions(
+      finder_num_partitions=3,
+      finder_cut_mode="both",
+   )
+
+   cut_circuit = find_cuts(circuit , options=options)
+
    estimated_expectation_values = ck.run_cut_circuit(cut_circuit, observables, backend)
 
 How cuts are costed

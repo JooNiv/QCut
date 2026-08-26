@@ -9,7 +9,7 @@ QCut documentation
 A package for performing circuit knitting with wire cuts on hardware with no reset-gates or mid-circuit measurements. Built on top of Qiskit.
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: Contents:
 
    Usage

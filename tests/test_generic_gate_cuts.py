@@ -15,7 +15,7 @@ from qiskit.quantum_info import SparsePauliOp, Statevector, random_unitary
 from qiskit_aer import AerSimulator
 
 import QCut as ck
-from QCut import cutGate
+from QCut import CutOptions, cutGate
 from QCut.qcuterror import QCutError
 from QCut.qpd_gates import CutTwoQubitGate
 from QCut.qpd_operations import qpd_for_location
@@ -203,7 +203,11 @@ def test_automatic_cut_finding_uses_a_generated_qpd():
     circuit.rzz(0.4, 1, 2)
     circuit.rzz(0.5, 2, 3)
 
-    cut_circuit = ck.find_cuts(circuit.copy(), num_partitions=2)
+    options = CutOptions(
+        finder_num_partitions=2,
+    )
+
+    cut_circuit = ck.find_cuts(circuit.copy(), options=options)
     assert len(cut_circuit.cut_locations) == 1
     location = cut_circuit.cut_locations[0]
     assert location.gate_name == "rzz"

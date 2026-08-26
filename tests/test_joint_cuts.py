@@ -618,10 +618,10 @@ def test_find_cuts_bundles_the_cuts_it_chooses():
 
     seen = {}
     for label, options in [
-        ("joint", CutOptions()),
-        ("separate", CutOptions(joint_rotation_cuts=False)),
+        ("joint", CutOptions(finder_num_partitions=2)),
+        ("separate", CutOptions(finder_num_partitions=2, joint_rotation_cuts=False)),
     ]:
-        cut_circuit = ck.find_cuts(circuit.copy(), num_partitions=2, options=options)
+        cut_circuit = ck.find_cuts(circuit.copy(), options=options)
         experiment = ck.get_experiment_circuits(cut_circuit, SIX_QUBIT_OBSERVABLES)
         results = ck.run_experiments(experiment, backend=AerSimulator(), shots=SHOTS)
         values = ck.estimate_expectation_values(results, experiment.expv_data())

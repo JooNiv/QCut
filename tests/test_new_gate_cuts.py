@@ -10,6 +10,7 @@ from qiskit_aer import AerSimulator
 
 import QCut as ck
 from QCut.cutlocation import CutLocation, SingleQubitCutLocation
+from QCut.options import CutOptions
 from QCut.qcutresult import RawResult
 from QCut.qpd import cz_qpd, iswap_qpd, swap_qpd
 from QCut.qpd_operations import QPD_REGISTRY, get_qpd_combinations
@@ -287,7 +288,14 @@ def test_find_cuts_swap_circuit():
     qc.swap(1, 2)
     qc.swap(1, 2)
     qc.cx(2, 3)
-    cut_qc = ck.find_cuts(qc, num_partitions=2, max_qubits=[2, 2], cuts="gate")
+
+    options = CutOptions(
+        finder_num_partitions=2,
+        finder_max_qubits=[2, 2],
+        finder_cut_mode="gate",
+    )
+
+    cut_qc = ck.find_cuts(qc, options=options)
     assert len(cut_qc.subcircuits) == 2
 
 
@@ -300,5 +308,12 @@ def test_find_cuts_iswap_circuit():
     qc.iswap(1, 2)
     qc.iswap(1, 2)
     qc.cx(2, 3)
-    cut_qc = ck.find_cuts(qc, num_partitions=2, max_qubits=[2, 2], cuts="gate")
+
+    options = CutOptions(
+        finder_num_partitions=2,
+        finder_max_qubits=[2, 2],
+        finder_cut_mode="gate",
+    )
+
+    cut_qc = ck.find_cuts(qc, options=options)
     assert len(cut_qc.subcircuits) == 2

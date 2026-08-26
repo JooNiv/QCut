@@ -265,9 +265,14 @@ estimated_expectation_values = ck.run(cut_circuit, observables, sim)
 QCut comes with functionality for automatically finding good cut locations that can place both wire and gate cuts.
 
 ```python
-from QCut import find_cuts
+from QCut import find_cuts, CutOptions
 
-cut_circuit = find_cuts(circuit , 3, cuts="both")
+options = CutOptions(
+    finder_num_partitions=3,
+    finder_cut_mode="both",
+)
+
+cut_circuit = find_cuts(circuit , options=options)
 
 estimated_expectation_values = ck.run_cut_circuit(cut_circuit, observables, sim)
 

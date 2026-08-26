@@ -56,7 +56,14 @@ def test_find_cuts() -> None:
     pre-defined solutions.
     """
     for solution_index, circ in enumerate(sq.test_circuits):
-        cut_circuit = find_cuts(circ.copy(), sq.cut_sizes[solution_index], cuts="both")
+
+        options = CutOptions(
+            finder_num_partitions=sq.cut_sizes[solution_index],
+            finder_cut_mode="both",
+        )
+
+
+        cut_circuit = find_cuts(circ.copy(), options=options)
 
         assert len(cut_circuit.subcircuits) == sq.cut_sizes[solution_index]
 
@@ -68,7 +75,11 @@ def test_find_gate_cuts():
     locations in a circuit containing a cut gate by comparing the result to the
     expected number of subcircuits.
     """
-    cut_circuit = find_cuts(circuit1.copy(), 2, cuts="both")
+    options = CutOptions(
+        finder_num_partitions=2,
+        finder_cut_mode="both",
+    )
+    cut_circuit = find_cuts(circuit1.copy(), options=options)
 
     assert len(cut_circuit.subcircuits) == 2
 
@@ -88,8 +99,13 @@ def test_auto_refine_wire():
     locations in a circuit containing a cut gate by comparing the result to the
     expected number of subcircuits.
     """
+    options = CutOptions(
+        finder_num_partitions=2,
+        finder_max_qubits=[2, 2],
+        finder_cut_mode="wire",
+    )
     cut_circuit = find_cuts(
-        circuit2.copy(), num_partitions=2, max_qubits=[2, 2], cuts="wire"
+        circuit2.copy(), options=options
     )
 
     assert len(cut_circuit.subcircuits) == 2
@@ -102,8 +118,13 @@ def test_auto_refine_gate():
     locations in a circuit containing a cut gate by comparing the result to the
     expected number of subcircuits.
     """
+    options = CutOptions(
+        finder_num_partitions=2,
+        finder_max_qubits=[2, 2],
+        finder_cut_mode="gate",
+    )
     cut_circuit = find_cuts(
-        circuit2.copy(), num_partitions=2, max_qubits=[2, 2], cuts="gate"
+        circuit2.copy(), options=options
     )
 
     assert len(cut_circuit.subcircuits) == 2
@@ -121,8 +142,13 @@ def test_construct_final_subcircuits():
     after identifying cut locations by comparing the operations in the generated
     subcircuits to the expected operations.
     """
+    options = CutOptions(
+        finder_num_partitions=2,
+        finder_max_qubits=[2, 2],
+        finder_cut_mode="gate",
+    )
     cut_circuit = find_cuts(
-        circuit2.copy(), num_partitions=2, max_qubits=[2, 2], cuts="gate"
+        circuit2.copy(), options=options
     )
 
     final_circs = construct_final_subcircuits(
@@ -143,8 +169,12 @@ def test_expectation_values(index: int) -> None:
     still runs, which is deliberate: it is the one that would notice a transpiler or
     primitive change breaking the pipeline while every unit test stayed green.
     """
+    options = CutOptions(
+        finder_num_partitions=sq.cut_sizes[index],
+        finder_cut_mode="both",
+    )
     cut_circuit = find_cuts(
-        sq.test_circuits[index].copy(), sq.cut_sizes[index], cuts="both"
+        sq.test_circuits[index].copy(), options=options
     )
     values = run_cut_circuit(
         cut_circuit, sq.test_observables[index], SIMULATOR, shots=SHOTS
@@ -174,8 +204,13 @@ def _finder_circuit():
 def _cost(options):
     from QCut.qpd_operations import plan_cost
 
+    options = options.replace(
+        finder_max_qubits=[5, 5],
+        finder_cut_mode="both",
+    )
+
     found = ck.find_cuts(
-        _finder_circuit().copy(), max_qubits=[5, 5], cuts="both", options=options
+        _finder_circuit().copy(), options=options
     )
     return plan_cost(found, options)
 
@@ -236,10 +271,11 @@ def test_a_qubit_budget_is_met_by_the_partitioner():
     from QCut.qpd_operations import plan_cost
 
     options = CutOptions(
-        consolidate="never", joint_rotation_cuts=False, wire_cut_communication="never"
+        consolidate="never", joint_rotation_cuts=False, wire_cut_communication="never",
+        finder_max_qubits=[5, 5], finder_cut_mode="both"
     )
     found = ck.find_cuts(
-        _finder_circuit().copy(), max_qubits=[5, 5], cuts="both", options=options
+        _finder_circuit().copy(), options=options
     )
     assert _widths(found) == [5, 5]
     # The optimum over balanced bipartitions of this circuit, found by exhaustion.
@@ -249,7 +285,8 @@ def test_a_qubit_budget_is_met_by_the_partitioner():
 def test_an_uneven_budget_is_respected():
     """Shares come from ``max_qubits``, so they do not have to be equal."""
     found = ck.find_cuts(
-        _finder_circuit().copy(), max_qubits=[7, 3], cuts="both", options=CutOptions()
+        _finder_circuit().copy(),
+        options=CutOptions(finder_cut_mode="both", finder_max_qubits=[7, 3])
     )
     assert max(_widths(found)) <= 7
 
@@ -263,12 +300,17 @@ def test_no_budget_leaves_the_split_free_to_be_uneven():
     from QCut.qpd_operations import plan_cost
 
     options = CutOptions(
+        finder_num_partitions=2,
+        finder_cut_mode="both",
         consolidate="never", joint_rotation_cuts=False, wire_cut_communication="never"
     )
     free = ck.find_cuts(
-        _finder_circuit().copy(), num_partitions=2, cuts="both", options=options
+        _finder_circuit().copy(), options=options
     )
+
+    options = options.replace(finder_max_qubits=[5, 5])
+
     budgeted = ck.find_cuts(
-        _finder_circuit().copy(), max_qubits=[5, 5], cuts="both", options=options
+        _finder_circuit().copy(), options=options
     )
     assert plan_cost(free, options) <= plan_cost(budgeted, options) + 1e-9
