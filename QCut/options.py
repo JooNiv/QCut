@@ -120,9 +120,6 @@ class CutOptions:
             raise QCutError("finder_candidates must be at least 1")
         if self.finder_num_partitions is not None and self.finder_num_partitions < 1:
             raise QCutError("finder_num_partitions must be at least 1")
-
-        if self.finder_max_qubits is None and self.finder_num_partitions is None:
-            self.finder_num_partitions = 2
         
         if self.finder_max_qubits is not None and isinstance(
             self.finder_max_qubits, list
@@ -174,6 +171,9 @@ class CutOptions:
     @property
     def num_partitions(self) -> int | None:
         """Number of partitions to cut the circuit into."""
+        if self.finder_num_partitions is None and self.finder_max_qubits is None:
+            return 2
+
         if self.finder_num_partitions is not None:
             return self.finder_num_partitions
         if isinstance(self.finder_max_qubits, list):
