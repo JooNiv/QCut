@@ -138,10 +138,6 @@ class CutOptions:
                 )
         elif self.finder_max_qubits is not None and self.finder_max_qubits < 1:
             raise QCutError("finder_max_qubits must be at least 1")
-        if self.finder_num_partitions is None and self.finder_max_qubits is None:
-            raise QCutError(
-                "one of finder_num_partitions or finder_max_qubits must be specified"
-            )
 
     @property
     def consolidate_mode(self) -> str:
