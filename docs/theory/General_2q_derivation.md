@@ -4,7 +4,7 @@
 
 ## The term SWAP lets us drop
 
-The SWAP page applies equation 19 of [[1]](#references) in the form
+The SWAP page applies equation 19 of [[1]](#gen-ref) in the form
 
 (eq19)=
 $$
