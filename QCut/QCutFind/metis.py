@@ -122,16 +122,16 @@ def k_way_metis_partition(
     )
 
     obj_val, parts = pymetis.part_graph(
-        nparts=k,  # nparts
-        adjacency=None,  # adjacency (pythonic)
-        xadj=xadj,  # xadj
-        adjncy=adjncy,  # adjncy
-        vweights=node_weights,  # vweights
+        nparts=k,
+        # The same CSR arrays build_csr already produces, just handed over as the
+        # object pymetis wants: passing xadj/adjncy directly is deprecated.
+        adjacency=pymetis.CSRAdjacency(adj_starts=xadj, adjacent=adjncy),
+        vweights=node_weights,
         eweights=eweights,  # adjwgt (edge weights)
         tpwgts=targets,  # target share per partition
-        recursive=True,  # recursive
-        contiguous=None,  # contiguous
-        options=options,  # options
+        recursive=True,
+        contiguous=None,
+        options=options,
     )
 
     return {i: parts[i] for i in range(n)}
