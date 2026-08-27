@@ -1,5 +1,74 @@
 """Helper classes for storing results."""
 
+from dataclasses import dataclass, field
+
+
+def _select_label(counts: dict, clbits, label, scale: float) -> dict:
+    """Keep the shots whose measured label matches, rescaled to the nominal total.
+
+    A communicating wire cut's measured bits say which state the other side prepared,
+    so only the shots that came out with this group's label belong to it. Scaling the
+    survivors by the number of labels turns the surviving fraction into the estimate of
+    that outcome's probability that the decomposition asks for.
+
+    The qpd register is added before the end-of-circuit one, so it is the last field of
+    a counts key, and within a field the highest classical bit comes first.
+    """
+    kept = {}
+    for key, value in counts.items():
+        bits = key.split(" ")[-1]
+        if all(
+            bits[len(bits) - 1 - clbit] == str(wanted)
+            for clbit, wanted in zip(clbits, label)
+        ):
+            kept[key] = value * scale
+    return kept
+
+
+def _counts_from(result, index: int) -> dict[str, float]:
+    """Counts for one circuit, whatever ran it."""
+    if isinstance(result, dict):
+        return dict(result)
+    get_counts = getattr(result, "get_counts", None)
+    if get_counts is not None:
+        return dict(get_counts(index))
+    return dict(result[index].join_data().get_counts())
+
+
+@dataclass(frozen=True)
+class CircuitResult:
+    """One subcircuit's result within one group, before it is turned into counts.
+
+    Holds what the backend or the sampler handed back rather than counts taken out of
+    it, so running an experiment does no arithmetic of its own and the estimate can be
+    recomputed from the same results.
+
+    ``scale`` brings the circuit back to the nominal shot count, since a batch runs at
+    whatever its own circuits asked for. ``label_filter`` is the communicating wire
+    cuts' selection: several groups share one measuring circuit and each keeps only the
+    shots carrying the label it answers, so the selection belongs to the group's own
+    result rather than to the circuit they all read.
+    """
+
+    result: object
+    index: int = 0
+    scale: float = 1.0
+    label_filter: tuple[tuple, ...] = field(default_factory=tuple)
+
+    def raw_counts(self) -> dict[str, float]:
+        """Counts as measured, brought to the nominal shot count."""
+        counts = _counts_from(self.result, self.index)
+        if self.scale == 1.0:
+            return counts
+        return {key: value * self.scale for key, value in counts.items()}
+
+    def counts(self) -> dict[str, float]:
+        """What this group takes from the circuit: rescaled, then label-selected."""
+        counts = self.raw_counts()
+        for clbits, label, scale in self.label_filter:
+            counts = _select_label(counts, clbits, label, scale)
+        return counts
+
 
 # Class for storing results from single sub-circuit run
 class SubResult:

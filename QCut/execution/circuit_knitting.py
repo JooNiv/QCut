@@ -5,6 +5,7 @@ A module for the main circuit knitting workflow.
 from __future__ import annotations
 
 import logging
+from dataclasses import replace
 
 import numpy as np
 from qiskit import QuantumCircuit, transpile
@@ -25,7 +26,7 @@ from QCut.execution.basis_transform import (
     _get_obs_subcircuits,
 )
 from QCut.execution.postprocess import estimate_expectation_values
-from QCut.execution.qcutresult import RawResult
+from QCut.execution.qcutresult import CircuitResult, RawResult
 from QCut.options import CutOptions
 from QCut.qpd.bundle import (
     SIDE_1,
@@ -510,38 +511,24 @@ def get_experiment_circuits(  # noqa: C901
     return cut_experiment
 
 
-def _select_label(counts: dict, clbits, label, scale: float) -> dict:
-    """Keep the shots whose measured label matches, rescaled to the nominal total.
-
-    A communicating wire cut's measured bits say which state the other side prepared,
-    so only the shots that came out with this group's label belong to it. Scaling the
-    survivors by the number of labels turns the surviving fraction into the estimate of
-    that outcome's probability that the decomposition asks for.
-
-    The qpd register is added before the end-of-circuit one, so it is the last field of
-    a counts key, and within a field the highest classical bit comes first.
-    """
-    kept = {}
-    for key, value in counts.items():
-        bits = key.split(" ")[-1]
-        if all(
-            bits[len(bits) - 1 - clbit] == str(wanted)
-            for clbit, wanted in zip(clbits, label)
-        ):
-            kept[key] = value * scale
-    return kept
-
-
 def _apply_communication(cut_experiment, results) -> None:
-    """Restrict every measuring run to the outcome its group answers."""
+    """Record which outcome each group takes from its measuring run.
+
+    The selection is attached to the group's own result rather than applied to it, since
+    groups sharing a measuring circuit each keep a different label out of the same
+    counts.
+    """
     plan = cut_experiment.plan
     for (group, obs, sub), entries in plan.label_clbits.items():
-        counts = results[group][obs][sub]
-        for bundle, clbits in entries:
-            counts = _select_label(
-                counts, clbits, plan.labels[group][bundle], 2**bundle.size
-            )
-        results[group][obs][sub] = counts
+        leaf = results[group][obs][sub]
+        results[group][obs][sub] = replace(
+            leaf,
+            label_filter=leaf.label_filter
+            + tuple(
+                (clbits, plan.labels[group][bundle], 2**bundle.size)
+                for bundle, clbits in entries
+            ),
+        )
 
 
 def _backend_shot_cap(backend) -> int | None:
@@ -619,7 +606,7 @@ def _dispatch(jobs, backend, max_batch_size, nominal_shots, cap, results) -> Non
         if not _has_measurements(circuit):
             synthetic = {" " + "0" * circuit.num_clbits: nominal_shots}
             for group, obs, sub in targets:
-                results[group][obs][sub] = dict(synthetic)
+                results[group][obs][sub] = CircuitResult(dict(synthetic))
             continue
         runnable.append((targets, circuit, wanted))
 
@@ -636,13 +623,10 @@ def _dispatch(jobs, backend, max_batch_size, nominal_shots, cap, results) -> Non
         submitted.append((job, batch, nominal_shots / shots))
 
     for job, batch, scale in submitted:
-        counts = job.result().get_counts()
-        if isinstance(counts, dict):
-            counts = [counts]
-        for (targets, _circuit, _wanted), circuit_counts in zip(batch, counts):
-            scaled = {key: value * scale for key, value in circuit_counts.items()}
+        result = job.result()
+        for index, (targets, _circuit, _wanted) in enumerate(batch):
             for group, obs, sub in targets:
-                results[group][obs][sub] = dict(scaled)
+                results[group][obs][sub] = CircuitResult(result, index, scale)
 
 
 def _label_fraction(counts: dict, clbits, label) -> float:
@@ -676,7 +660,9 @@ def _label_weights(cut_experiment, results, wave: int) -> list[float]:
             if bundle not in settled or (group, bundle) in seen:
                 continue
             seen[(group, bundle)] = _label_fraction(
-                results[group][obs][sub], clbits, plan.labels[group][bundle]
+                results[group][obs][sub].raw_counts(),
+                clbits,
+                plan.labels[group][bundle],
             )
     weights = []
     for group in range(len(cut_experiment.experiments)):
@@ -742,7 +728,7 @@ def _later_wave_jobs(cut_experiment, wave, allocation, results):
                 if plan.waves.get(sub, 0) != wave:
                     continue
                 if allocation[group] <= 0:
-                    results[group][obs][sub] = {}
+                    results[group][obs][sub] = CircuitResult({})
                 else:
                     jobs.append(([(group, obs, sub)], circuit, allocation[group]))
     return jobs
