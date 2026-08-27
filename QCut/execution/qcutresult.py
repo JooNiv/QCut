@@ -118,7 +118,7 @@ class RawResult:
 
     def __init__(
         self,
-        results: list[list[dict[int, dict[str, int]]]],
+        results: list[list[dict[int, CircuitResult]]],
         shots: int,
         experiment=None,
     ):
@@ -131,10 +131,12 @@ class RawResult:
         """The experiment these results came from, if it was recorded."""
         return self._experiment
 
-    def result(self) -> list[list[dict[int, dict[str, int]]]]:
+    def result(self) -> list[list[dict[int, CircuitResult]]]:
         """
-        Get raw results for all experiments.
+        Get raw results for all experiments, as ``[group][observable][subcircuit]``.
 
-        Currently the format is not great. Might change in the future.
+        Each subcircuit holds a :class:`CircuitResult`, which is what the backend or
+        sampler returned rather than counts taken out of it. Call
+        :meth:`CircuitResult.counts` on one for its counts.
         """
         return self.results
