@@ -146,3 +146,6 @@ markers = [
     # quick tier by default instead of being silently left out of it.
     "sim: runs circuits on a simulator; deselect with -m \"not sim\" for a fast loop",
 ]
+
+[tool.ty.rules]
+unused-type-ignore-comment = "ignore"
