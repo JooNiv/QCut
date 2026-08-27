@@ -30,9 +30,11 @@ Breaking changes
 - :code:`get_experiment_circuits()` no longer modifies the :code:`CutCircuit` it is
   given, so one can be reused for several observable sets.
 - :code:`transpile_subcircuits()` raises rather than quietly overriding when
-  :code:`remove_final_rzs`, :code:`perform_move_routing` or
-  :code:`optimize_single_qubits` is passed for an IQM backend. Those rewrite a circuit
-  that still carries cut placeholders; use :code:`transpile_experiments()` instead.
+  :code:`remove_final_rzs` or :code:`optimize_single_qubits` is passed for an IQM
+  backend. Those rewrite a circuit that still carries cut placeholders; use
+  :code:`transpile_experiments()` instead.
+- :code:`perform_move_routing` now defaults to whether the backend needs it, on for a
+  resonator device and off otherwise, and an explicit value is honoured either way.
 
 Cutting arbitrary two-qubit gates
 ---------------------------------
@@ -95,6 +97,14 @@ Running on real hardware
   transpiler for IQM backends, resonator machines included. Pass
   :code:`use_iqm_transpiler=False` to opt out.
   See `Usage <https://jooniv.github.io/QCut/Usage.html>`__.
+- Resonator devices are supported by both transpile helpers. Their MOVE gates are routed
+  while the subcircuits still carry cut placeholders, which the routing pass used to
+  drop along with the classical registers and the layout.
+  :code:`use_iqm_transpiler=False` raises for them, since standard qiskit has no MOVE gate.
+- :code:`transpile_experiments()` works on IQM backends.
+- A block of parallel wire cuts is never bundled for a resonator device, which reports
+  its qubits as fully coupled but has no two-qubit gate that avoids its resonator. Those
+  cuts fall back to one block per wire rather than to the local decomposition.
 - :code:`run()` and :code:`run_cut_circuit()` now take :code:`shots`.
 
 Other
