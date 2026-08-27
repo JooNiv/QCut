@@ -624,17 +624,19 @@ def _dispatch(jobs, backend, max_batch_size, nominal_shots, cap, results) -> Non
         runnable.append((targets, circuit, wanted))
 
     runnable.sort(key=lambda job: job[2])
+
+    # Submitted before any is collected, so the whole wave queues at once.
+    submitted = []
     for batch in _batches(runnable, max_batch_size):
         shots = max(1, round(sum(job[2] for job in batch) / len(batch)))
         if cap is not None:
             shots = min(shots, cap)
-        scale = nominal_shots / shots
-        logger.info(f"Running {len(batch)} circuits with {shots} shots each")
-        counts = (
-            backend.run([circuit for _t, circuit, _w in batch], shots=shots)
-            .result()
-            .get_counts()
-        )
+        logger.info(f"Submitting {len(batch)} circuits at {shots} shots each")
+        job = backend.run([circuit for _t, circuit, _w in batch], shots=shots)
+        submitted.append((job, batch, nominal_shots / shots))
+
+    for job, batch, scale in submitted:
+        counts = job.result().get_counts()
         if isinstance(counts, dict):
             counts = [counts]
         for (targets, _circuit, _wanted), circuit_counts in zip(batch, counts):
