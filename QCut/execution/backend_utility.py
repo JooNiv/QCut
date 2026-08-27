@@ -9,11 +9,12 @@ from collections import defaultdict
 
 from qiskit import transpile
 from qiskit.circuit import Gate
-from qiskit.transpiler import Target
+from qiskit.transpiler import PassManager, Target
 
 from QCut.cutcircuit import CutCircuit, CutExperiment
 from QCut.cutlocation import CutLocation, SingleQubitCutLocation
 from QCut.errors.qcuterror import QCutError
+from QCut.execution.move_routing import is_resonator_backend, move_route
 from QCut.qpd.bundle import locate_placeholders, plan_bundles
 from QCut.utils.circuit_utils import (
     MarkerSpan,
@@ -27,6 +28,14 @@ from QCut.utils.circuit_utils import (
 )
 
 logger: logging.Logger = logging.getLogger(__name__)
+
+try:
+    from qiskit.transpiler.passes import RemoveIdentityEquivalent
+
+    #: None on qiskit 1.2 and older, which do not have the pass.
+    _REMOVE_IDENTITIES: PassManager | None = PassManager([RemoveIdentityEquivalent()])
+except ImportError:  # pragma: no cover - depends on the installed qiskit
+    _REMOVE_IDENTITIES = None
 
 
 #: How wide a block one marker will stand in for. Two covers the case that pays: a pair
@@ -148,12 +157,6 @@ _IQM_ENFORCED: dict[str, tuple[bool, str]] = {
         "drops the trailing Z rotations, which are unobservable before a Z measurement "
         "but not before the X and Y basis changes QCut adds afterwards",
     ),
-    "perform_move_routing": (
-        False,
-        "rewrites the circuit for the Star architecture, which removes the "
-        "placeholders and the classical registers along with them, leaving nothing "
-        "to put a quasiprobability operation into",
-    ),
     "optimize_single_qubits": (
         False,
         "commutes Z rotations along each wire, and a barrier does not stop it, so a "
@@ -180,6 +183,32 @@ def _check_iqm_options(transpile_options: dict | None) -> None:
             "all of. Transpile the finished experiment circuits with "
             f"transpile_experiments instead, which keeps {name}={asked!r}."
         )
+
+
+def _drop_identities(circuit):
+    """Remove the identity gates a QPD table writes out.
+
+    IQM's single-qubit pass refuses to see one: it is not in the basis, and unlike the
+    other gates in an experiment circuit it has no translation into it. They stay in
+    until here because the insertion sites count a table entry's instructions when they
+    shift the placeholder indices behind it, and ``id-meas``, ``0-init`` and ``I`` are
+    nothing but the ``id``.
+    """
+    if "id" not in circuit.count_ops():
+        return circuit
+
+    if _REMOVE_IDENTITIES is not None:
+        out = _REMOVE_IDENTITIES.run(circuit)
+        # The pass goes through a DAG, which does not carry the layout, and a resonator
+        # backend reads it to tell a qubit wire from its resonator.
+        out._layout = circuit.layout
+        return out
+
+    out = circuit.copy_empty_like()
+    for instruction in circuit.data:
+        if instruction.operation.name != "id":
+            out.append(instruction.operation, instruction.qubits, instruction.clbits)
+    return out
 
 
 def _placeholder_gates(cut_circuit) -> dict[str, Gate]:
@@ -220,6 +249,21 @@ def _iqm_transpiler_for(backend):
     except ImportError:
         return None
     return transpile_to_IQM if isinstance(backend, IQMBackendBase) else None
+
+
+def _transpiler_for(backend, use_iqm_transpiler: bool):
+    """IQM's transpiler if it applies, or None for the ordinary qiskit path.
+
+    Raises:
+        QCutError: the device needs MOVE routing, which only IQM's transpiler does.
+    """
+    iqm_transpile = _iqm_transpiler_for(backend) if use_iqm_transpiler else None
+    if iqm_transpile is None and is_resonator_backend(backend):
+        raise QCutError(
+            "this backend needs MOVE gates around every two-qubit gate, which only "
+            "IQM's transpiler inserts. Leave use_iqm_transpiler at True for it."
+        )
+    return iqm_transpile
 
 
 def transpile_subcircuits(
@@ -271,9 +315,13 @@ def transpile_subcircuits(
     target = Target()
 
     try:
-        basis_gates = list({i[0].name 
-                            for i in backend._target.instructions 
-                            if isinstance(i[0].name, str)})
+        basis_gates = list(
+            {
+                i[0].name
+                for i in backend._target.instructions
+                if isinstance(i[0].name, str)
+            }
+        )
 
     except Exception as e:
         raise ValueError(f"Error accessing backend target instructions: {e}")
@@ -290,7 +338,7 @@ def transpile_subcircuits(
     # concerned, so without barriers it gets commuted past the others and the experiment
     # builder, which reads them in order, misreads the result.
 
-    iqm_transpile = _iqm_transpiler_for(backend) if use_iqm_transpiler else None
+    iqm_transpile = _transpiler_for(backend, use_iqm_transpiler)
     if iqm_transpile is not None:
         # IQM's own transpiler produces markedly shallower circuits than the generic
         # path, and it will accept the placeholders once they are barriers carrying
@@ -304,25 +352,24 @@ def transpile_subcircuits(
         options["optimization_level"] = optimization_level
         options.update(transpile_options or {})
 
-        # A custom gate is refused here, so the block marker has to be a native one
-        # carrying a label -- which this transpiler, unlike qiskit's, does preserve. It
-        # is fenced because a real gate would otherwise be a real licence to commute
-        # operations through it, and the block replacing it grants no such licence.
-        # Nothing is fused here: a custom gate is refused by this transpiler, so a block
-        # marker would have to become a barrier, and a barrier constrains no routing.
-        # The blocks fall back to narrower ones, which need only one-qubit operations.
-        transpiled = [
-            barriers_to_markers(
-                _record_layout(
-                    iqm_transpile(
-                        markers_to_barriers(subcircuit, marker_names),
-                        backend,
-                        **options,
-                    ),
-                    subcircuit.num_qubits,
-                ),
-                marker_names,
+        move_routing = bool(
+            options.pop("perform_move_routing", is_resonator_backend(backend))
+        )
+
+        def route(subcircuit):
+            marked = markers_to_barriers(subcircuit, marker_names)
+            if move_routing:
+                return move_route(marked, backend, iqm_transpile, **options)
+            # Explicitly off, not merely absent: this transpiler defaults it on, and
+            # then round-trips the circuit through IQM's own format, which is what
+            # loses the labels and the classical registers.
+            return _record_layout(
+                iqm_transpile(marked, backend, perform_move_routing=False, **options),
+                subcircuit.num_qubits,
             )
+
+        transpiled = [
+            barriers_to_markers(route(subcircuit), marker_names)
             for subcircuit in cut_circuit.subcircuits
         ]
         return CutCircuit(
@@ -347,9 +394,7 @@ def transpile_subcircuits(
             optimization_level=optimization_level,
             **(transpile_options or {}),
         )
-        # Undo the layout: transpiling lays the subcircuits out on physical qubits and
-        # pads them to the device width, and post-processing reads measurement bits by
-        # position.
+
         return split_markers(
             _drop_barriers(_record_layout(translated, subcircuit.num_qubits)),
             block_members,
@@ -408,30 +453,31 @@ def transpile_experiments(
     if not isinstance(cut_experiment, CutExperiment):
         raise ValueError("cut_experiment must be of type CutExperiment.")
 
-    iqm_transpile = _iqm_transpiler_for(backend) if use_iqm_transpiler else None
+    iqm_transpile = _transpiler_for(backend, use_iqm_transpiler)
 
     if iqm_transpile is not None:
+
         options = {
             "remove_final_rzs": False,
-            "perform_move_routing": False,
+            "perform_move_routing": is_resonator_backend(backend),
             "optimization_level": optimization_level,
         }
         options.update(transpile_options or {})
 
         def translate(circuit):
             return _record_layout(
-                iqm_transpile(circuit, backend, **options), circuit.num_qubits
+                iqm_transpile(_drop_identities(circuit), backend, **options),
+                circuit.num_qubits,
             )
     else:
-        # Not ``backend=backend``: a resonator machine's target carries a ``move``
-        # operation, and transpiling against it emits MOVE gates that no local
-        # simulator can run and whose register rewriting QCut cannot reconstruct
-        # from. Building the target from the backend's instruction names leaves that
-        # operation out, and the resonator stage happens at submission instead.
-        basis = sorted({item[0].name 
-                        for item in backend._target.instructions
-                        if isinstance(item[0].name, str)})
-        
+        basis = sorted(
+            {
+                item[0].name
+                for item in backend._target.instructions
+                if isinstance(item[0].name, str)
+            }
+        )
+
         fallback_target = Target().from_configuration(
             num_qubits=backend.num_qubits,
             coupling_map=backend._coupling_map,
@@ -462,10 +508,6 @@ def transpile_experiments(
         observables=cut_experiment.observables,
         options=cut_experiment.options,
         backend=backend,
-        # Translating gates does not change any of these, and dropping them would.
-        # Without the plan a communicating experiment forgets that it runs in waves and
-        # is executed as though nothing depended on a measured outcome; without the bit
-        # layout the estimator cannot find the qpd bits.
         num_draws=cut_experiment._num_draws,
         plan=cut_experiment.plan,
         qpd_bits=cut_experiment.qpd_bits,
