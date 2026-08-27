@@ -17,6 +17,7 @@
     - [Shorthand](#shorthand)
     - [Running on FiQCI](#running-on-fiqci)
     - [Running on other hardware](#running-on-other-hardware)
+- [Benchmarks](#benchmarks)
 - [Documentation](#documentation)
 - [Acknowledgements](#acknowledgements)
 - [License](#license)
@@ -392,6 +393,28 @@ For running on real hardware using the Lumi supercomputer follow the instruction
 ### Running on other hardware
 
 Running on other providers such as IBM is untested at the moment but as long as the hardware can be accessed with Qiskit QCut should be compatible.
+
+# Benchmarks
+
+[`benchmarks/QCutVsAddon.ipynb`](./benchmarks/QCutVsAddon.ipynb) briefly compares QCut against IBM's [qiskit-addon-cutting](https://github.com/Qiskit/qiskit-addon-cutting) given the same cuts: the gamma each achieves, how many subexperiments that comes to, how long they take to generate, and what the two cut finders settle on under the same qubit budget. The benchmarks so QCut consitently matching or beating the Qiskit Cutting Addon.
+
+```bash
+uv sync --group benchmark
+```
+
+Where one of QCut's joint decompositions applies, the same cuts cost less:
+
+| | QCut | addon |
+| --- | --- | --- |
+| three wires cut at the same point | γ 15, 240 subexperiments | γ 64, 1024 |
+| three rotations crossing one split | γ 7.16, 264 subexperiments | γ 10.5, 432 |
+| an `rzz` and an `rxx` on each of three crossing pairs | γ 115 | γ 203 |
+
+Where none applies, the QAOA layer at the sizes measured, the two agree exactly.
+Turning consolidation, joint rotation cutting and
+communicating wire cuts off reproduces the addon's gamma in every case the notebook
+measures, which is what says the difference is those three and not something else. The
+notebook also lists what each library has that the other does not.
 
 # Documentation
 
