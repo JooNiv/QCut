@@ -115,6 +115,10 @@ Running on real hardware
   mid-circuit measurements.
 - Every batch of a wave is submitted before any of it is collected, so a run queues all
   of its jobs at once rather than waiting out each batch in turn.
+- :code:`run_experiments()` takes :code:`run_options`, passed on to every :code:`run`
+  call. A target that batches on its own account, such as
+  `fiqci-ems <https://github.com/FiQCI/fiqci-ems>`__ does, is also given QCut's
+  :code:`max_batch_size`, so it does not split a batch QCut has already sized.
 - :code:`run()` and :code:`run_cut_circuit()` now take :code:`shots`.
 
 Other
