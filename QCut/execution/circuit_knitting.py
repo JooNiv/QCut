@@ -80,12 +80,11 @@ def _finalize_subcircuit(
         return subcircuit
 
     for wire in idle:
-        if (
-            isinstance(wire, Qubit)
-            and wire._index in meas_qubits
-            and len(meas_qubits) > len(creg_to_use)
-        ):
-            meas_qubits.remove(wire._index)
+        if not isinstance(wire, Qubit):
+            continue
+        index = subcircuit.find_bit(wire).index
+        if index in meas_qubits and len(meas_qubits) > len(creg_to_use):
+            meas_qubits.remove(index)
 
     if len(meas_qubits) == 0:
         return subcircuit
