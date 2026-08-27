@@ -824,17 +824,6 @@ def _run_communicating(cut_experiment, shots, backend, max_batch_size):
     return results
 
 
-def _align_missing(results) -> None:
-    """Fill in any subcircuit that produced no counts at all."""
-    all_keys = results[0][0].keys()
-    for sub_result in results:
-        for experiment_run in sub_result:
-            if experiment_run.keys() != all_keys:
-                for key, val in results[0][0].items():
-                    if key not in experiment_run:
-                        experiment_run[key] = val
-
-
 def run_experiments(  # noqa: C901
     cut_experiment: CutExperiment,
     shots: int = DEFAULT_SHOTS,
@@ -871,7 +860,6 @@ def run_experiments(  # noqa: C901
 
     if cut_experiment.plan is not None:
         results = _run_communicating(cut_experiment, shots, backend, max_batch_size)
-        _align_missing(results)
         return RawResult(results, shots, cut_experiment)
 
     results: list[list[dict[int, dict[str, int]]]] = [
