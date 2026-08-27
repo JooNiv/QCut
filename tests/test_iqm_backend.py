@@ -13,6 +13,8 @@ test asserted gate names.
 So these assert values, and that the circuits would be accepted.
 """
 
+from copy import deepcopy
+
 import numpy as np
 import pytest
 from qiskit import QuantumCircuit
@@ -23,7 +25,12 @@ from qiskit_aer import AerSimulator
 import QCut as ck
 from QCut import CutOptions, cut, cutGate
 from QCut.errors.qcuterror import QCutError
-from QCut.execution.backend_utility import _IQM_ENFORCED
+from QCut.execution.backend_utility import (
+    _IQM_ENFORCED,
+    _markers_in,
+    _placeholder_gates,
+)
+from QCut.execution.move_routing import is_resonator_backend
 from QCut.qpd.bundle import plan_bundles
 from QCut.qpd.qpd_operations import coupling_filter
 
@@ -49,14 +56,31 @@ def _direct_backends():
     """The backends that couple qubits to each other, so a plain two-qubit gate runs.
 
     A resonator machine is excluded on purpose: it couples qubits only through its
-    resonator, so it refuses any two-qubit gate until the MOVEs are inserted at
-    submission, whatever the layout.
-    :func:`test_a_resonator_device_needs_its_moves_inserted` covers that separately.
+    resonator, so a block inserted after transpilation has no locus to land on however
+    the MOVEs are routed. :func:`test_a_resonator_device_gets_its_moves_inserted` and
+    :func:`test_a_block_is_never_bundled_on_a_resonator_device` cover it separately.
     """
     return [
         pytest.param(iqm.IQMFakeAdonis(), id="adonis_star"),
         pytest.param(iqm.IQMFakeApollo(), id="apollo"),
     ]
+
+
+def _ideal(subcircuits, backend):
+    """An ideal simulator that can run whatever came out of transpilation.
+
+    Aer has no MOVE gate, so a move-routed circuit cannot go through it at all. The fake
+    device can, and clearing its noise model leaves it ideal -- and still checking every
+    locus, which Aer never did.
+    """
+    if not any(sub.count_ops().get("move") for sub in subcircuits):
+        return AerSimulator()
+
+    from qiskit_aer.noise import NoiseModel
+
+    ideal = deepcopy(backend)
+    ideal.noise_model = NoiseModel(basis_gates=list(ideal.noise_model.basis_gates))
+    return ideal
 
 
 def _gate_cut():
@@ -178,6 +202,8 @@ def _accepted_by(backend, experiment, shots=32):
 
 
 def _run(marked, observables, backend, level, use_iqm):
+    if not use_iqm and is_resonator_backend(backend):
+        pytest.skip("qiskit's transpiler cannot route a resonator device's MOVEs")
     cut_circuit = ck.get_locations_and_subcircuits(
         marked.copy(), options=CutOptions(wire_cut_communication="always")
     )
@@ -185,8 +211,43 @@ def _run(marked, observables, backend, level, use_iqm):
         cut_circuit, backend, optimization_level=level, use_iqm_transpiler=use_iqm
     )
     experiment = ck.get_experiment_circuits(transpiled, observables)
-    results = ck.run_experiments(experiment, backend=AerSimulator(), shots=SHOTS)
+    results = ck.run_experiments(
+        experiment, backend=_ideal(transpiled.subcircuits, backend), shots=SHOTS
+    )
     return experiment, np.array(ck.estimate_expectation_values(results))
+
+
+@pytest.mark.sim
+@pytest.mark.slow
+@pytest.mark.parametrize("backend", _backends())
+def test_transpiling_the_experiments_reaches_the_device(backend):
+    """Experiment circuits transpiled by IQM's own transpiler still give the answer."""
+    marked, plain, observables = _wire_cut()
+    state = Statevector(plain)
+    exact = np.array(
+        [float(np.real(state.expectation_value(p))) for p in observables.paulis]
+    )
+
+    experiment = ck.get_experiment_circuits(
+        ck.get_locations_and_subcircuits(marked.copy()), observables
+    )
+    transpiled = ck.transpile_experiments(experiment, backend, optimization_level=3)
+    circuits = [
+        circuit
+        for groups in transpiled.experiments
+        for obs_group in groups
+        for circuit in obs_group.values()
+    ]
+    assert circuits and all("id" not in circuit.count_ops() for circuit in circuits)
+
+    results = ck.run_experiments(
+        transpiled, backend=_ideal(circuits, backend), shots=SHOTS
+    )
+    values = np.array(ck.estimate_expectation_values(results))
+    for expected, actual in zip(exact, values):
+        assert abs(expected - actual) < TOLERANCE, (
+            f"on {backend.name}: expected {expected}, got {actual}"
+        )
 
 
 @pytest.mark.sim
@@ -234,20 +295,30 @@ def test_no_circuit_carries_an_unwritten_register(case):
 def test_the_subcircuits_end_up_in_the_backend_basis():
     """Whichever transpiler ran, the result has to be something the device can run."""
     marked, _plain, observables = _gate_cut()
-    for use_iqm in (True, False):
+    # The qiskit path is not offered for a resonator device, so it is checked on a
+    # backend that couples its qubits directly.
+    for backend, use_iqm in (
+        (iqm.IQMFakeDeneb(), True),
+        (iqm.IQMFakeApollo(), True),
+        (iqm.IQMFakeApollo(), False),
+    ):
         cut_circuit = ck.get_locations_and_subcircuits(marked.copy())
         transpiled = ck.transpile_subcircuits(
-            cut_circuit,
-            iqm.IQMFakeDeneb(),
-            optimization_level=3,
-            use_iqm_transpiler=use_iqm,
+            cut_circuit, backend, optimization_level=3, use_iqm_transpiler=use_iqm
         )
         for subcircuit in transpiled.subcircuits:
             for instruction in subcircuit.data:
                 name = instruction.operation.name
-                assert name in ("r", "cz", "barrier", "measure") or name.startswith(
-                    ("cut", "obs_", "Meas_", "Init_")
-                ), f"unexpected {name} with use_iqm_transpiler={use_iqm}"
+                assert name in (
+                    "r",
+                    "cz",
+                    "move",
+                    "barrier",
+                    "measure",
+                ) or name.startswith(("cut", "obs_", "Meas_", "Init_")), (
+                    f"unexpected {name} on {backend.name} "
+                    f"with use_iqm_transpiler={use_iqm}"
+                )
 
 
 @pytest.mark.sim
@@ -277,40 +348,76 @@ def test_the_device_accepts_the_circuits(backend, case):
 
 @pytest.mark.sim
 @pytest.mark.slow
-def test_a_resonator_device_needs_its_moves_inserted():
+def test_a_resonator_device_gets_its_moves_inserted():
     """A star machine couples qubits only through its resonator.
 
-    So a circuit carrying a plain two-qubit gate is not runnable there whatever the
-    layout, and QCut deliberately stops at the simplified architecture: inserting the
-    MOVEs belongs at submission, and a move-routed circuit cannot be simulated locally
-    at all. This pins both halves -- that the device refuses it before, and that
-    inserting the moves is enough, with the classical registers surviving.
+    So a plain two-qubit gate is not runnable there whatever the layout, and the MOVEs
+    have to go in while the subcircuits are transpiled. The pass that inserts them
+    round-trips the circuit through IQM's own format, which loses the placeholders'
+    labels, the classical registers and the layout, so what is pinned here is that all
+    three come back and that the device then accepts the experiment.
     """
     backend = iqm.IQMFakeDeneb()
     marked, _plain, observables = _gate_cut()
     cut_circuit = ck.get_locations_and_subcircuits(marked.copy())
+    names = set(_placeholder_gates(cut_circuit))
     transpiled = ck.transpile_subcircuits(cut_circuit, backend, optimization_level=3)
 
-    before = ck.get_experiment_circuits(transpiled, observables)
-    with pytest.raises(Exception, match="not allowed as locus"):
-        _accepted_by(backend, before)
+    assert any(sub.count_ops().get("move") for sub in transpiled.subcircuits)
+    for before, after in zip(cut_circuit.subcircuits, transpiled.subcircuits):
+        assert sorted(_markers_in(after, names)) == sorted(_markers_in(before, names))
+        assert [(reg.name, reg.size) for reg in after.cregs] == [
+            (reg.name, reg.size) for reg in before.cregs
+        ]
 
-    after = ck.get_experiment_circuits(transpiled, observables)
-    for groups in after.experiments:
-        for obs_group in groups:
-            for sub, circuit in list(obs_group.items()):
-                shapes = [(r.name, r.size) for r in circuit.cregs]
-                routed = iqm.transpile_to_IQM(
-                    circuit,
-                    backend,
-                    remove_final_rzs=False,
-                    perform_move_routing=True,
-                    optimization_level=0,
-                )
-                assert [(r.name, r.size) for r in routed.cregs] == shapes
-                obs_group[sub] = routed
+    _accepted_by(backend, ck.get_experiment_circuits(transpiled, observables))
 
-    _accepted_by(backend, after)
+
+@pytest.mark.parametrize(
+    "transpile", [ck.transpile_subcircuits, ck.transpile_experiments]
+)
+def test_the_qiskit_path_is_refused_for_a_resonator_device(transpile):
+    """It has no MOVE gate, and the coupling map claims the qubits couple directly."""
+    marked, _plain, observables = _wire_cut()
+    cut_circuit = ck.get_locations_and_subcircuits(marked.copy())
+    argument = (
+        cut_circuit
+        if transpile is ck.transpile_subcircuits
+        else ck.get_experiment_circuits(cut_circuit, observables)
+    )
+
+    with pytest.raises(QCutError, match="MOVE"):
+        transpile(argument, iqm.IQMFakeDeneb(), use_iqm_transpiler=False)
+
+
+@pytest.mark.sim
+@pytest.mark.slow
+def test_a_block_is_never_bundled_on_a_resonator_device():
+    """Routing the MOVEs does not make a block placeable.
+
+    A block's two-qubit gates go in after transpilation, so nothing routes them, and on
+    a resonator machine there is no pair of qubits they could sit on. The device reports
+    its qubits as fully coupled all the same, because the transpiler can reach any pair
+    through the resonator, so the coupling map is not what the veto can go on.
+    """
+    backend = iqm.IQMFakeDeneb()
+    marked, _plain, _observables = _locc_pair()
+    cut_circuit = ck.get_locations_and_subcircuits(
+        marked.copy(), options=CutOptions(wire_cut_communication="always")
+    )
+    transpiled = ck.transpile_subcircuits(cut_circuit, backend, optimization_level=3)
+
+    fits = coupling_filter(
+        transpiled.cut_locations, transpiled.subcircuits, transpiled.backend
+    )
+    assert fits is not None
+    bundles = plan_bundles(
+        transpiled.cut_locations,
+        transpiled.subcircuits,
+        transpiled.options,
+        fits=fits,
+    )
+    assert all(bundle.size == 1 for bundle in bundles)
 
 
 @pytest.mark.sim
