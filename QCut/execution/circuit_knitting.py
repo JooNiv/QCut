@@ -889,12 +889,15 @@ def run_experiments(  # noqa: C901
         f"{num_batches}"
         f" batches of size {max_batch_size} for execution."
     )
+    # Submitted before any is collected, so every batch queues at once.
+    submitted = []
     for start in range(0, len(runnable), max_batch_size):
         batch = runnable[start : start + max_batch_size]
-        batch_circuits = [circ for _, circ in batch]
-        logger.info(f"Running batch of {len(batch_circuits)} circuits...")
-        counts = backend.run(batch_circuits, shots=shots).result().get_counts()
-        logger.info(f"Finished running batch of {len(batch_circuits)} circuits.")
+        logger.info(f"Submitting batch of {len(batch)} circuits...")
+        submitted.append((backend.run([circ for _, circ in batch], shots=shots), batch))
+
+    for job, batch in submitted:
+        counts = job.result().get_counts()
         if isinstance(counts, dict):
             counts = [counts]
         for (key, _circ), circ_counts in zip(batch, counts):
@@ -903,8 +906,6 @@ def run_experiments(  # noqa: C901
 
     for (group_idx, obs_idx, sub_idx), num_clbits in empty_locations:
         results[group_idx][obs_idx][sub_idx] = {" " + "0" * num_clbits: shots}
-
-    _align_missing(results)
 
     return RawResult(results, shots, cut_experiment)
 
