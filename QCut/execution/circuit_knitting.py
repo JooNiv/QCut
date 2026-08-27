@@ -748,10 +748,10 @@ def _run_communicating(cut_experiment, shots, backend, max_batch_size):
     and the later waves divide the rest. The total is unchanged either way.
     """
     plan = cut_experiment.plan
-    results: list[list[dict[int, dict[str, float]]]] = [
+    results: list[list[dict[int, CircuitResult]]] = [
         # Seeded in subcircuit order, because the estimator reads the observable bits
         # back in the order these were filled, and the waves fill them out of order.
-        [{sub: {} for sub in sorted(obs_group)} for obs_group in group]
+        [{sub: CircuitResult({}) for sub in sorted(obs_group)} for obs_group in group]
         for group in cut_experiment.experiments
     ]
     cap = _backend_shot_cap(backend)
@@ -848,7 +848,7 @@ def run_experiments(  # noqa: C901
         results = _run_communicating(cut_experiment, shots, backend, max_batch_size)
         return RawResult(results, shots, cut_experiment)
 
-    results: list[list[dict[int, dict[str, int]]]] = [
+    results: list[list[dict[int, CircuitResult]]] = [
         [{} for _ in group] for group in cut_experiment.experiments
     ]
 
@@ -883,15 +883,15 @@ def run_experiments(  # noqa: C901
         submitted.append((backend.run([circ for _, circ in batch], shots=shots), batch))
 
     for job, batch in submitted:
-        counts = job.result().get_counts()
-        if isinstance(counts, dict):
-            counts = [counts]
-        for (key, _circ), circ_counts in zip(batch, counts):
+        result = job.result()
+        for index, (key, _circ) in enumerate(batch):
             group_idx, obs_idx, sub_idx = key
-            results[group_idx][obs_idx][sub_idx] = dict(circ_counts.items())
+            results[group_idx][obs_idx][sub_idx] = CircuitResult(result, index)
 
     for (group_idx, obs_idx, sub_idx), num_clbits in empty_locations:
-        results[group_idx][obs_idx][sub_idx] = {" " + "0" * num_clbits: shots}
+        results[group_idx][obs_idx][sub_idx] = CircuitResult(
+            {" " + "0" * num_clbits: shots}
+        )
 
     return RawResult(results, shots, cut_experiment)
 

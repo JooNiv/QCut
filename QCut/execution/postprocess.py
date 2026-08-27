@@ -64,7 +64,7 @@ def _process_results(
             for sub_ind, sub_result in experiment_run.items():
                 circuit_results = []
                 layout = (qpd_bits or {}).get((group_ind, exp_ind, sub_ind))
-                for measurements, count in sub_result.items():
+                for measurements, count in sub_result.counts().items():
                     if layout is None:
                         # No widths recorded: fall back to splitting the key. A circuit
                         # with nothing to write to its qpd register does not carry one,
