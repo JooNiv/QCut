@@ -1,29 +1,5 @@
-"""Move routing for a circuit that still carries cut placeholders.
-
-IQM's transpiler inserts the MOVE gates a Star machine needs, but it does so by
-round-tripping the circuit through IQM's own instruction format, and three things QCut
-depends on do not come back:
-
-* a barrier serialises with an empty ``args``, so its label -- the placeholder's name --
-  is dropped. The barrier itself, and the wire it sits on, survive.
-* classical registers are rebuilt only from the measurements found in the routed
-  circuit, and a subcircuit has its registers but not its measurements yet.
-* the layout reports the wires from before routing moved everything, and the layout
-  object itself is unusable: the pass adds a resonator register to the circuit but not
-  to the layout, so ``initial_index_layout`` raises.
-
-The first two are known beforehand and are put back. The layout cannot be derived --
-reading ``final_index_layout`` off the routed circuit gives a permutation of the right
-wires rather than the right answer -- so it is measured instead: a throwaway measurement
-per qubit, routed along with everything else, lands on the wire that qubit ended up on.
-Those measurements are then removed.
-
-That measurement is also what makes the labels safe to put back. The routed circuit
-serialises its barriers in wire order, not in the order they were written, so the nth
-barrier out is not the nth placeholder in. Barriers on one wire cannot reorder among
-themselves, though, so labels are restored per wire, through the wire the probe found.
-
-Only :func:`transpile_to_IQM` is used, never the pass behind it.
+"""
+Move routing for a circuit that still carries cut placeholders.
 """
 
 from __future__ import annotations
@@ -42,13 +18,8 @@ PROBE_REGISTER: str = "qcut_move_probe"
 
 
 def is_resonator_backend(backend) -> bool:
-    """Whether the device couples its qubits only through a resonator.
-
-    Such a device reports its qubits as fully coupled, because a two-qubit gate can be
-    put on any pair by moving a state through the resonator and back. That is a fact
-    about routing, not about loci: no pair of qubits hosts the gate itself. So a circuit
-    transpiled without move routing comes back with a locus the device refuses, and a
-    block inserted after transpilation has nowhere legal to land at all.
+    """
+    Whether the device couples its qubits only through a resonator.
     """
     has_resonators = getattr(backend, "has_resonators", None)
     return bool(has_resonators and has_resonators())
@@ -104,12 +75,8 @@ def _restore(
     wires: list[int],
     registers: list[tuple[str, int]],
 ) -> QuantumCircuit:
-    """Drop the probe measurements, put the labels and registers back.
-
-    A wire's barriers cannot reorder among themselves, so the nth barrier on the wire a
-    qubit ended up on is that qubit's nth placeholder. Anything else -- a barrier on an
-    unexpected wire, or more of them than went in -- means that stopped holding, and
-    mislabelling one would put a cut somewhere it does not belong.
+    """
+    Drop the probe measurements, put the labels and registers back.
     """
     pending = {wires[qubit]: list(marks) for qubit, marks in labels.items()}
 
