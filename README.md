@@ -10,7 +10,6 @@
   - [Manual Usage](#manual-usage)
   - [Usage shorthand](#usage-shorthand)
   - [Automatic cuts](#automatic-cuts)
-  - [Running on IQM fake backends](#running-on-iqm-fake-backends)
   - [Running on FiQCI](#running-on-fiqci)
   - [Running on other hardware](#running-on-other-hardware)
 - [Documentation](#documentation)
@@ -52,6 +51,13 @@ uv add "QCut[iqm]"
 This pulls in IQM's Qiskit adapter, which supports Qiskit 1.0 up to but not including
 2.2, so installing it will hold Qiskit below 2.2. Install it into an environment whose
 Qiskit is already in that range if you would rather the resolver did not move it.
+
+After installing you can simply import what you need:
+
+```python
+from iqm.qiskit_iqm import IQMFakeAdonis
+backend = IQMFakeAdonis()
+```
 
 Uv can be installed with
 
@@ -285,32 +291,6 @@ print(f"Exact expectation values with ideal simulator :{np.array(exact_expvals)}
 `QCut expectation values:[0.699436 0.713172 0.713172 0.979377]`
 
 `Exact expectation values with ideal simulator :[0.727323 0.727323 0.727323 1.000000]`
-
-
-## Running on IQM fake backends
-
-To use QCut with IQM's fake backends it is required to install [Qiskit IQM](https://github.com/iqm-finland/qiskit-on-iqm) for Qiskit <= 1.2 
-or [IQM client](https://docs.meetiqm.com/iqm-client) for Qiskit > 1.2.
-
-Installation can be done via uv:
-
-```bash
-uv pip install qiskit-iqm==17.8
-```
-
-or
-
-```bash
-uv pip install iqm-client[qiskit]
-```
-
-
-After installation just import the backend you want to use:
-
-```python
-from iqm.qiskit_iqm import IQMFakeAdonis
-backend = IQMFakeAdonis()
-```
 
 ## Running on FiQCI
 
