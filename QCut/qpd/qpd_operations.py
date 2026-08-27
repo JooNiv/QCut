@@ -17,6 +17,7 @@ from qiskit.circuit import (
 
 from QCut.cutlocation import CutLocation, SingleQubitCutLocation
 from QCut.errors.qcuterror import QCutError
+from QCut.execution.move_routing import is_resonator_backend
 from QCut.qpd.bundle import (
     Bundle,
     flatten_term,
@@ -437,7 +438,7 @@ def _insert_bundle_qpd(  # noqa: PLR0913
     if bundle.kind == "cc_wire" and bundle_side == 0:
         # The measured qubits are spent, so they must not be measured again into the
         # end-of-circuit register, exactly as a plain wire cut's measure side is not.
-        qpd_qubits.extend(qubit._index for qubit in qubits)
+        qpd_qubits.extend(subcircuit.find_bit(qubit).index for qubit in qubits)
         label_clbits.append(
             (bundle, tuple(per_qubit[index] for index in range(len(members))))
         )
@@ -537,7 +538,11 @@ def _coupled_pairs(backend) -> set[frozenset[int]] | None:
     """Return the device's undirected two-qubit loci, or None if it has no topology.
 
     A backend without a coupling map couples everything, so nothing needs restricting.
+    A resonator machine couples no two qubits directly, so everything is restricted.
     """
+    if is_resonator_backend(backend):
+        return set()
+
     for get in (lambda: backend.coupling_map, lambda: backend._coupling_map):
         try:
             coupling_map = get()
@@ -556,9 +561,9 @@ def coupling_filter(cut_locations: list, subcircuits, backend):
     bundle spanning several cuts does not: its terms carry two-qubit gates, and those go
     in after transpilation, at the wires the cuts' placeholders ended up on. Nothing
     routes them -- the transpiler only ever saw one-qubit placeholders, so it had no
-    reason to put those particular wires next to each other, and on a star machine two
-    cut wires are adjacent only if one of them is the centre. A device that checks the
-    locus, as IQM's does, then refuses the job.
+    reason to put those particular wires next to each other, and on a resonator machine
+    there is no pair it could have chosen. A device that checks the locus, as IQM's
+    does, then refuses the job.
 
     Vetoing during planning rather than afterwards is what keeps the fallback sensible:
     the group search walks sizes downwards, so a block too wide to route is retried as
@@ -584,9 +589,9 @@ def coupling_filter(cut_locations: list, subcircuits, backend):
             return True
         logger.info(
             "not bundling cuts %s: the block needs a two-qubit gate on wires %s, which "
-            "the backend does not couple. Transpiling the experiment circuits instead "
-            "of the subcircuits keeps the wider decomposition, since the block is then "
-            "routed with everything else.",
+            "the backend has no such gate for. Transpiling the experiment circuits "
+            "instead of the subcircuits keeps the wider decomposition, since the block "
+            "is then routed with everything else.",
             bundle.cuts,
             offender,
         )
