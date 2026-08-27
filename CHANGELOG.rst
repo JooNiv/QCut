@@ -16,9 +16,9 @@ Breaking changes
 - :code:`find_cuts()` is now deterministic and costs several candidate partitions before
   choosing, so it returns different, cheaper plans than 1.3.2 did for the same circuit.
 - :code:`find_cuts()` now reads its configuration from a :code:`CutOptions` object rather than from keyword arguments. See
-  `Options <https://jooniv.github.io/QCut/Options.html>`__ and `Automatic cuts <https://jooniv.github.io/QCut/AutomaticCuts.html>`__ for details.
+  `Options <https://jooniv.github.io/QCut/Options.html>`__ and `Automatic cuts <https://jooniv.github.io/QCut/examples/AutomaticCuts.html>`__ for details.
 - Cut edge weights are :code:`log gamma` rather than :code:`gamma`, which also changes
-  which cuts are chosen. See `Automatic cuts <https://jooniv.github.io/QCut/AutomaticCuts.html>`__.
+  which cuts are chosen. See `Automatic cuts <https://jooniv.github.io/QCut/examples/AutomaticCuts.html>`__.
 - Subcircuits are no longer given empty classical registers, and an unused
   :code:`qpd_meas` register is dropped. Code reading registers by position rather than by
   name has to be updated.
@@ -40,7 +40,7 @@ Cutting arbitrary two-qubit gates
 ---------------------------------
 
 - Any two-qubit gate can be cut, with the decomposition derived from its KAK
-  coordinates. See `Gate cuts <https://jooniv.github.io/QCut/GateCuts.html>`__ and
+  coordinates. See `Gate cuts <https://jooniv.github.io/QCut/examples/GateCuts.html>`__ and
   `Theory <https://jooniv.github.io/QCut/Theory.html>`__.
 
 Joint cutting of parallel rotation gates
