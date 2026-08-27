@@ -13,7 +13,6 @@ from typing import Iterable
 import numpy as np
 from qiskit.circuit import (
     CircuitInstruction,
-    Qubit,
 )
 
 from QCut.cutlocation import CutLocation, SingleQubitCutLocation
@@ -193,7 +192,7 @@ def _insert_wire_cut_qpd(
         subcircuit.data.pop(ind + offset)  # remove plaxceholder
         # measure channel
         qpd_qubits.append(qubit_index)  # store index
-        qubits_for_operation = [Qubit(subcircuit.qregs[0], qubit_index)]
+        qubits_for_operation = [subcircuit.qubits[qubit_index]]
         meas_op = qpd[int(op.operation.name.split("_")[-1])]["op_0"]
         if meas_op.name == "id-meas":  # if identity measure channel
             # store indices
@@ -236,7 +235,7 @@ def _insert_wire_cut_qpd(
         subcircuit.data.pop(ind + offset)
         init_op = qpd[int(op.operation.name.split("_")[-1])]["op_1"]
         qubits_for_operation = [
-            Qubit(subcircuit.qregs[0], subcircuit.find_bit(x).index) for x in op.qubits
+            subcircuit.qubits[subcircuit.find_bit(x).index] for x in op.qubits
         ]
         for subop in reversed(init_op.data):
             subcircuit.data.insert(
@@ -270,7 +269,7 @@ def _insert_2qubit_gate_cut_qpd(  # noqa: C901
         subcircuit.data.pop(ind + offset)  # remove plaxceholder
         # measure channel
         # qpd_qubits.append(qubit_index)  # store index
-        qubits_for_operation = [Qubit(subcircuit.qregs[0], qubit_index)]
+        qubits_for_operation = [subcircuit.qubits[qubit_index]]
         meas_op = qpd[int(op.operation.name.split("_")[-1])]["op_0"]
         if meas_op.name in ["id-meas", "s", "sdg", "z"]:
             # if identity measure channel
@@ -318,7 +317,7 @@ def _insert_2qubit_gate_cut_qpd(  # noqa: C901
         subcircuit.data.pop(ind + offset)  # remove plaxceholder
         # measure channel
         # qpd_qubits.append(qubit_index)  # store index
-        qubits_for_operation = [Qubit(subcircuit.qregs[0], qubit_index)]
+        qubits_for_operation = [subcircuit.qubits[qubit_index]]
         meas_op = qpd[int(op.operation.name.split("_")[-1])]["op_1"]
         if meas_op.name in ["id-meas", "s", "sdg", "z"]:
             # if identity measure channel
@@ -407,9 +406,7 @@ def _insert_bundle_qpd(  # noqa: PLR0913
 
     entry = qpd[bundle.anchor]
     block = entry["op_0"] if bundle_side == 0 else entry["op_1"]
-    qubits = [
-        Qubit(subcircuit.qregs[0], placeholders[member].qubit) for member in members
-    ]
+    qubits = [subcircuit.qubits[placeholders[member].qubit] for member in members]
 
     # Assign classical bits walking the block forwards, so the bit order follows the
     # block's qubit order rather than the order the instructions get inserted in.
