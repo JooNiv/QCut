@@ -843,7 +843,7 @@ def run_experiments(  # noqa: C901
             number of groups per subcircuit between them, in proportion to how often
             each label came up, so individual circuits run at very different counts and
             only that total is fixed. See :func:`_run_communicating`.
-        backend: backend or V2 sampler used for running the circuits (optional).
+        backend: backend or V2 sampler used for running the circuits.
             A sampler is run through its own interface and its results are read
             per register, so the circuits must already be in its target's basis.
         max_batch_size (int): maximum number of circuits submitted per backend.run
