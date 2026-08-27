@@ -14,6 +14,7 @@ from qiskit.circuit import (
 )
 from qiskit.circuit.library import get_standard_gate_name_mapping
 from qiskit.converters import circuit_to_dag, dag_to_circuit
+from qiskit.primitives import BaseSamplerV2
 from qiskit.quantum_info import SparsePauliOp
 from qiskit_aer import AerSimulator
 
@@ -531,6 +532,17 @@ def _apply_communication(cut_experiment, results) -> None:
         )
 
 
+def _submit(backend, circuits, shots):
+    """Run one batch, whether ``backend`` is a backend or a sampler.
+
+    Both hand back a job rather than a result, so either way the caller can submit
+    everything before collecting any of it.
+    """
+    if isinstance(backend, BaseSamplerV2):
+        return backend.run([(circuit,) for circuit in circuits], shots=shots)
+    return backend.run(circuits, shots=shots)
+
+
 def _backend_shot_cap(backend) -> int | None:
     """Return the most shots a backend takes in one job, if it says."""
     for probe in (
@@ -619,7 +631,7 @@ def _dispatch(jobs, backend, max_batch_size, nominal_shots, cap, results) -> Non
         if cap is not None:
             shots = min(shots, cap)
         logger.info(f"Submitting {len(batch)} circuits at {shots} shots each")
-        job = backend.run([circuit for _t, circuit, _w in batch], shots=shots)
+        job = _submit(backend, [circuit for _t, circuit, _w in batch], shots)
         submitted.append((job, batch, nominal_shots / shots))
 
     for job, batch, scale in submitted:
@@ -831,7 +843,9 @@ def run_experiments(  # noqa: C901
             number of groups per subcircuit between them, in proportion to how often
             each label came up, so individual circuits run at very different counts and
             only that total is fixed. See :func:`_run_communicating`.
-        backend: backend used for running the circuits (optional)
+        backend: backend or V2 sampler used for running the circuits (optional).
+            A sampler is run through its own interface and its results are read
+            per register, so the circuits must already be in its target's basis.
         max_batch_size (int): maximum number of circuits submitted per backend.run
             call. Larger batches reduce per-job overhead on real hardware.
 
@@ -880,7 +894,7 @@ def run_experiments(  # noqa: C901
     for start in range(0, len(runnable), max_batch_size):
         batch = runnable[start : start + max_batch_size]
         logger.info(f"Submitting batch of {len(batch)} circuits...")
-        submitted.append((backend.run([circ for _, circ in batch], shots=shots), batch))
+        submitted.append((_submit(backend, [circ for _, circ in batch], shots), batch))
 
     for job, batch in submitted:
         result = job.result()
