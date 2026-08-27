@@ -264,6 +264,27 @@ Execution
    results = ck.run_experiments(cut_experiment, backend=fake)
    expectation_values = ck.estimate_expectation_values(results)
 
+:code:`backend` takes a Qiskit backend, a V2 sampler, or anything else shaped like a
+backend, which is what lets e.g. `fiqci-ems <https://github.com/FiQCI/fiqci-ems>`__ run the experiment:
+
+.. code:: python
+
+   from fiqci.ems import FiQCISampler
+
+   results = ck.run_experiments(
+       cut_experiment, backend=FiQCISampler(backend, mitigation_level=1)
+   )
+
+Every batch is submitted before any of it is collected, so a run queues all its jobs at
+once. :code:`max_batch_size` bounds how many circuits go in one, and a target that
+batches on its own account is given that same size so it does not split a batch again.
+:code:`run_options` is passed on to every :code:`run` call for anything else the target
+takes.
+
+Note that :code:`qiskit.primitives.StatevectorSampler` cannot be used since circuits
+from QCut contain mid-circuit measurements and that sampler refuses those.
+:code:`qiskit_aer.primitives.SamplerV2` and :code:`BackendSamplerV2` are both fine.
+
 Comparing against the exact and noisy expectation values of the original circuit:
 
 .. code:: python
