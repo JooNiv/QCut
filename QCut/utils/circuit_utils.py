@@ -126,6 +126,7 @@ def compact_qpd_register(circuit: QuantumCircuit) -> tuple[QuantumCircuit, int]:
 
     out = QuantumCircuit(*circuit.qregs, name=circuit.name)
     out.metadata = dict(circuit.metadata or {})
+    out._layout = circuit.layout
     for other in circuit.cregs:
         if other is not register:
             out.add_register(ClassicalRegister(other.size, other.name))

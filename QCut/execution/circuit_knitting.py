@@ -193,10 +193,12 @@ def get_experiment_circuits(  # noqa: C901
     # measured too early. Normalising first makes the two orders the same.
     # Everything below works on this copy, so the caller's cut circuit comes back
     # exactly as it went in.
-    subcircuits = [
-        dag_to_circuit(circuit_to_dag(subcircuit))
-        for subcircuit in cut_circuit.subcircuits
-    ]
+    subcircuits = []
+    for subcircuit in cut_circuit.subcircuits:
+        normalised = dag_to_circuit(circuit_to_dag(subcircuit))
+
+        normalised._layout = subcircuit.layout
+        subcircuits.append(normalised)
 
     measurement_settings = _combine_pauli_ops(observables)
 
