@@ -2,6 +2,7 @@
 QPD_REGISTRY, result normalisation, and end-to-end SWAP/ISWAP cut pipelines."""
 
 import copy
+from dataclasses import replace
 
 import numpy as np
 import pytest
@@ -172,8 +173,8 @@ def test_the_estimate_uses_probabilities_not_raw_counts():
         [
             [
                 {
-                    sub: {key: value * scale for key, value in counts.items()}
-                    for sub, counts in obs_group.items()
+                    sub: replace(leaf, scale=leaf.scale * scale)
+                    for sub, leaf in obs_group.items()
                 }
                 for obs_group in group
             ]
