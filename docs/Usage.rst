@@ -131,6 +131,10 @@ those same cuts could cost with every decomposition available. Shot cost goes as
 :code:`gamma` squared. Both are closed form, so a plan can be costed before any
 experiment circuits are built, and :code:`CutExperiment` carries both forward.
 
+The gap here is the lone wire cut: on its own it does not communicate under the default
+:code:`wire_cut_communication="auto"`, so it costs 4 rather than 3. Passing
+:code:`"always"` closes it and this split reaches 9.
+
 Cheaper decompositions
 ~~~~~~~~~~~~~~~~~~~~~~
 
@@ -156,8 +160,8 @@ three of the below are on by default and can be turned off through :doc:`Options
      - gamma 7, 28 subexperiments
      - gamma 16, 64
 
-Two parallel wire cuts, for instance, cost :code:`2**(n+1) - 1` rather than
-:code:`4**n`:
+A separate circuit, to show the last of those on its own. Two parallel wire cuts cost
+:code:`2**(n+1) - 1` rather than :code:`4**n`:
 
 .. code:: python
 

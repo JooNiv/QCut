@@ -207,6 +207,10 @@ cuts could cost with every decomposition available. Shot cost goes as `gamma` sq
 Both are closed form, so a plan can be costed before any experiment circuits are built,
 and `CutExperiment` carries both forward.
 
+The gap here is the lone wire cut: on its own it does not communicate under the default
+`wire_cut_communication="auto"`, so it costs 4 rather than 3. Passing `"always"` closes
+it and this split reaches 9.
+
 ### Cheaper decompositions
 
 Cuts are not decomposed one at a time where a cheaper joint decomposition exists. All
@@ -219,7 +223,8 @@ three of the below are on by default and can be turned off through
 | Parallel single-axis rotations share one decomposition ([derivation](https://jooniv.github.io/QCut/theory/Joint_rotation_derivation.html)) | γ 5.50, 30 subexperiments | γ 6.77, 36 |
 | A block of parallel wire cuts exchanges its measured outcome ([derivation](https://jooniv.github.io/QCut/theory/LOCC_wire_derivation.html)) | γ 7, 28 subexperiments | γ 16, 64 |
 
-Two parallel wire cuts, for instance, cost `2**(n+1) - 1` rather than `4**n`:
+A separate circuit, to show the last of those on its own. Two parallel wire cuts cost
+`2**(n+1) - 1` rather than `4**n`:
 
 ```python
 pair = QuantumCircuit(4)
