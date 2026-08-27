@@ -4,6 +4,7 @@ A module for the main circuit knitting workflow.
 
 from __future__ import annotations
 
+import inspect
 import logging
 from dataclasses import replace
 
@@ -532,15 +533,31 @@ def _apply_communication(cut_experiment, results) -> None:
         )
 
 
-def _submit(backend, circuits, shots):
-    """Run one batch, whether ``backend`` is a backend or a sampler.
+def _takes_max_batch_size(run) -> bool:
+    """Whether this ``run`` batches on its own account, so it can be told the size."""
+    try:
+        return "max_batch_size" in inspect.signature(run).parameters
+    except (TypeError, ValueError):
+        return False
+
+
+def _submit(backend, circuits, shots, max_batch_size, run_options):
+    """Run one batch, whether ``backend`` is a backend, a sampler, or a wrapper.
 
     Both hand back a job rather than a result, so either way the caller can submit
     everything before collecting any of it.
+
+    A wrapper that batches on its own account is given the size QCut used, since this
+    batch is already sized both for the device and for the shots its circuits asked for,
+    and splitting it again would only add jobs. Anything else in ``run_options`` is
+    passed through untouched.
     """
+    options = dict(run_options or {})
     if isinstance(backend, BaseSamplerV2):
-        return backend.run([(circuit,) for circuit in circuits], shots=shots)
-    return backend.run(circuits, shots=shots)
+        return backend.run([(circuit,) for circuit in circuits], shots=shots, **options)
+    if "max_batch_size" not in options and _takes_max_batch_size(backend.run):
+        options["max_batch_size"] = max_batch_size
+    return backend.run(circuits, shots=shots, **options)
 
 
 def _backend_shot_cap(backend) -> int | None:
@@ -602,7 +619,9 @@ def _batches(runnable, max_batch_size):
         yield batch
 
 
-def _dispatch(jobs, backend, max_batch_size, nominal_shots, cap, results) -> None:
+def _dispatch(  # noqa: PLR0913
+    jobs, backend, max_batch_size, nominal_shots, cap, results, run_options=None
+) -> None:
     """Run one wave and scatter its counts, rescaled to a common shot count.
 
     Circuits in a wave no longer want the same number of shots, and only circuits asking
@@ -631,7 +650,13 @@ def _dispatch(jobs, backend, max_batch_size, nominal_shots, cap, results) -> Non
         if cap is not None:
             shots = min(shots, cap)
         logger.info(f"Submitting {len(batch)} circuits at {shots} shots each")
-        job = _submit(backend, [circuit for _t, circuit, _w in batch], shots)
+        job = _submit(
+            backend,
+            [circuit for _t, circuit, _w in batch],
+            shots,
+            max_batch_size,
+            run_options,
+        )
         submitted.append((job, batch, nominal_shots / shots))
 
     for job, batch, scale in submitted:
@@ -746,7 +771,7 @@ def _later_wave_jobs(cut_experiment, wave, allocation, results):
     return jobs
 
 
-def _run_communicating(cut_experiment, shots, backend, max_batch_size):
+def _run_communicating(cut_experiment, shots, backend, max_batch_size, run_options):
     """Run an experiment whose wire cuts exchange their measured outcome.
 
     The state one side prepares depends on what the other measured, so the circuits run
@@ -796,6 +821,7 @@ def _run_communicating(cut_experiment, shots, backend, max_batch_size):
         shots,
         cap,
         results,
+        run_options,
     )
 
     for wave in range(1, plan.last_wave + 1):
@@ -816,6 +842,7 @@ def _run_communicating(cut_experiment, shots, backend, max_batch_size):
             shots,
             cap,
             results,
+            run_options,
         )
 
     _apply_communication(cut_experiment, results)
@@ -827,6 +854,7 @@ def run_experiments(  # noqa: C901
     shots: int = DEFAULT_SHOTS,
     backend=None,
     max_batch_size: int = 100,
+    run_options: dict | None = None,
 ) -> RawResult:
     """Run experiment circuits.
 
@@ -847,7 +875,11 @@ def run_experiments(  # noqa: C901
             A sampler is run through its own interface and its results are read
             per register, so the circuits must already be in its target's basis.
         max_batch_size (int): maximum number of circuits submitted per backend.run
-            call. Larger batches reduce per-job overhead on real hardware.
+            call. Larger batches reduce per-job overhead on real hardware. A target that
+            batches on its own account, as e.g. fiqci-ems does, is given this size
+            too, so it does not split a batch QCut has already sized.
+        run_options (dict): passed on to every ``run`` call. Use it for whatever the
+            target takes per run, since QCut sets only ``shots`` itself.
 
     Returns:
         RawResult:
@@ -859,7 +891,9 @@ def run_experiments(  # noqa: C901
         backend = AerSimulator()
 
     if cut_experiment.plan is not None:
-        results = _run_communicating(cut_experiment, shots, backend, max_batch_size)
+        results = _run_communicating(
+            cut_experiment, shots, backend, max_batch_size, run_options
+        )
         return RawResult(results, shots, cut_experiment)
 
     results: list[list[dict[int, CircuitResult]]] = [
@@ -894,7 +928,18 @@ def run_experiments(  # noqa: C901
     for start in range(0, len(runnable), max_batch_size):
         batch = runnable[start : start + max_batch_size]
         logger.info(f"Submitting batch of {len(batch)} circuits...")
-        submitted.append((_submit(backend, [circ for _, circ in batch], shots), batch))
+        submitted.append(
+            (
+                _submit(
+                    backend,
+                    [circ for _, circ in batch],
+                    shots,
+                    max_batch_size,
+                    run_options,
+                ),
+                batch,
+            )
+        )
 
     for job, batch in submitted:
         result = job.result()
