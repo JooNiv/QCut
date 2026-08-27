@@ -271,7 +271,9 @@ def transpile_subcircuits(
     target = Target()
 
     try:
-        basis_gates = list({i[0].name for i in backend._target.instructions})
+        basis_gates = list({i[0].name 
+                            for i in backend._target.instructions 
+                            if isinstance(i[0].name, str)})
 
     except Exception as e:
         raise ValueError(f"Error accessing backend target instructions: {e}")
@@ -426,7 +428,10 @@ def transpile_experiments(
         # simulator can run and whose register rewriting QCut cannot reconstruct
         # from. Building the target from the backend's instruction names leaves that
         # operation out, and the resonator stage happens at submission instead.
-        basis = sorted({item[0].name for item in backend._target.instructions})
+        basis = sorted({item[0].name 
+                        for item in backend._target.instructions
+                        if isinstance(item[0].name, str)})
+        
         fallback_target = Target().from_configuration(
             num_qubits=backend.num_qubits,
             coupling_map=backend._coupling_map,
