@@ -10,6 +10,10 @@ Breaking changes
 
 - :code:`RawResult` no longer takes a :code:`samples` argument. It is now
   :code:`RawResult(results, shots, experiment=None)` and carries the experiment itself.
+- :code:`RawResult.result()` keeps its shape but each subcircuit now holds a
+  :code:`CircuitResult` containing what the backend or sampler returned, plus the shot scale and
+  the label selection that group takes from it rather than a counts dict. Call
+  :code:`.counts()` on one for the counts.
 - Modules are grouped into subpackages: :code:`QCut.qpd`, :code:`QCut.cutting`,
   :code:`QCut.execution`, :code:`QCut.errors` and :code:`QCut.utils`. The names exported
   from :code:`QCut` are unchanged; code importing a module directly has to be updated.
@@ -105,6 +109,12 @@ Running on real hardware
 - A block of parallel wire cuts is never bundled for a resonator device, which reports
   its qubits as fully coupled but has no two-qubit gate that avoids its resonator. Those
   cuts fall back to one block per wire rather than to the local decomposition.
+- :code:`run_experiments()` also takes a V2 sampler as its :code:`backend`, on both the
+  plain and the communicating execution path. Note that
+  :code:`qiskit.primitives.StatevectorSampler` cannot be used, since it refuses
+  mid-circuit measurements.
+- Every batch of a wave is submitted before any of it is collected, so a run queues all
+  of its jobs at once rather than waiting out each batch in turn.
 - :code:`run()` and :code:`run_cut_circuit()` now take :code:`shots`.
 
 Other
