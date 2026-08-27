@@ -456,7 +456,6 @@ def transpile_experiments(
     iqm_transpile = _transpiler_for(backend, use_iqm_transpiler)
 
     if iqm_transpile is not None:
-
         options = {
             "remove_final_rzs": False,
             "perform_move_routing": is_resonator_backend(backend),
