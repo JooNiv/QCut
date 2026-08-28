@@ -17,6 +17,7 @@
     - [Shorthand](#shorthand)
     - [Running on FiQCI](#running-on-fiqci)
     - [Running on other hardware](#running-on-other-hardware)
+  - [Logging](#logging)
 - [Benchmarks](#benchmarks)
 - [Documentation](#documentation)
 - [Acknowledgements](#acknowledgements)
@@ -429,6 +430,29 @@ For running on real hardware using the Lumi supercomputer follow the instruction
 ### Running on other hardware
 
 Running on other providers such as IBM is untested at the moment but as long as the hardware can be accessed with Qiskit QCut should be compatible.
+
+## Logging
+
+QCut reports what it decided at `INFO`, so nothing prints until logging is configured:
+
+```python
+import logging
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+)
+
+logging.getLogger("QCut").setLevel(logging.INFO)
+logging.getLogger("qiskit").setLevel(logging.WARNING)
+```
+
+That covers the whole run: which partitions the finder costed and which it kept, whether
+consolidation was worth it, which cuts were bundled and the gamma that bought, any bundle
+the device could not take and what it fell back to, how many circuits went into each job
+and that job's id, and how a communicating run split its shots between waves.
+
+The job ids are the most important part. A job that fails or stalls on the device can be looked up by its id from the log.
 
 # Benchmarks
 
