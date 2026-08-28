@@ -565,6 +565,16 @@ def _submit(backend, circuits, shots, max_batch_size, run_options):
 RESULT_RETRY_DELAY: float = 5.0
 
 
+def _job_id(job) -> str:
+    """A job's id, or a note that it has none to give."""
+    identifier = getattr(job, "job_id", None)
+    try:
+        identifier = identifier() if callable(identifier) else identifier
+    except Exception:  # noqa: BLE001 - an id is for the log, never worth failing over
+        return "unknown"
+    return str(identifier) if identifier is not None else "unknown"
+
+
 def _result(job):
     """A job's result, asked for twice if the results are not ready yet."""
     try:
@@ -666,13 +676,15 @@ def _dispatch(  # noqa: PLR0913
         shots = max(1, round(sum(job[2] for job in batch) / len(batch)))
         if cap is not None:
             shots = min(shots, cap)
-        logger.info(f"Submitting {len(batch)} circuits at {shots} shots each")
         job = _submit(
             backend,
             [circuit for _t, circuit, _w in batch],
             shots,
             max_batch_size,
             run_options,
+        )
+        logger.info(
+            f"Submitted {len(batch)} circuits at {shots} shots each, job {_job_id(job)}"
         )
         submitted.append((job, batch, nominal_shots / shots))
 
@@ -944,19 +956,15 @@ def run_experiments(  # noqa: C901
     submitted = []
     for start in range(0, len(runnable), max_batch_size):
         batch = runnable[start : start + max_batch_size]
-        logger.info(f"Submitting batch of {len(batch)} circuits...")
-        submitted.append(
-            (
-                _submit(
-                    backend,
-                    [circ for _, circ in batch],
-                    shots,
-                    max_batch_size,
-                    run_options,
-                ),
-                batch,
-            )
+        job = _submit(
+            backend,
+            [circ for _, circ in batch],
+            shots,
+            max_batch_size,
+            run_options,
         )
+        logger.info(f"Submitted batch of {len(batch)} circuits, job {_job_id(job)}")
+        submitted.append((job, batch))
 
     for job, batch in submitted:
         result = _result(job)
