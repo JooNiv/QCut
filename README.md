@@ -30,7 +30,7 @@ QCut is a quantum circuit knitting package built on top of qiskit for performing
 
 QCut has been built at CSC - IT Center for Science (Finnish IT Center for Science).
 
-Check out [jooniv.github.io/QCut/](https://jooniv.github.io/QCut/) for documentation and more examples.
+Check out [docs](https://jooniv.github.io/QCut/) for instructions and more examples.
 
 # Installation
 
