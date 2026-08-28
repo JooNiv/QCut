@@ -2337,6 +2337,7 @@ benchmark = [
 dev = [
     { name = "matplotlib" },
     { name = "notebook" },
+    { name = "pydantic" },
     { name = "pylatexenc" },
     { name = "pytest" },
     { name = "pytest-cov" },
@@ -2376,6 +2377,7 @@ benchmark = [
 dev = [
     { name = "matplotlib", specifier = ">=3.10.5" },
     { name = "notebook", specifier = ">=7.4.5" },
+    { name = "pydantic", specifier = ">=2.12.5" },
     { name = "pylatexenc", specifier = ">=2.10" },
     { name = "pytest", specifier = ">=8.4.1" },
     { name = "pytest-cov", specifier = ">=6.2.1" },
