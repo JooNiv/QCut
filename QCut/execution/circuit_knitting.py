@@ -7,6 +7,7 @@ from __future__ import annotations
 import inspect
 import logging
 from dataclasses import replace
+from time import sleep
 
 import numpy as np
 from qiskit import QuantumCircuit, transpile
@@ -560,6 +561,22 @@ def _submit(backend, circuits, shots, max_batch_size, run_options):
     return backend.run(circuits, shots=shots, **options)
 
 
+#: How long to wait before asking for a job's results a second time.
+RESULT_RETRY_DELAY: float = 5.0
+
+
+def _result(job):
+    """A job's result, asked for twice if the results are not ready yet."""
+    try:
+        return job.result()
+    except Exception as error:
+        if "no results" not in str(error).lower():
+            raise
+        logger.info(f"Results not ready yet, asking again in {RESULT_RETRY_DELAY}s")
+        sleep(RESULT_RETRY_DELAY)
+        return job.result()
+
+
 def _backend_shot_cap(backend) -> int | None:
     """Return the most shots a backend takes in one job, if it says."""
     for probe in (
@@ -660,7 +677,7 @@ def _dispatch(  # noqa: PLR0913
         submitted.append((job, batch, nominal_shots / shots))
 
     for job, batch, scale in submitted:
-        result = job.result()
+        result = _result(job)
         for index, (targets, _circuit, _wanted) in enumerate(batch):
             for group, obs, sub in targets:
                 results[group][obs][sub] = CircuitResult(result, index, scale)
@@ -942,7 +959,7 @@ def run_experiments(  # noqa: C901
         )
 
     for job, batch in submitted:
-        result = job.result()
+        result = _result(job)
         for index, (key, _circ) in enumerate(batch):
             group_idx, obs_idx, sub_idx = key
             results[group_idx][obs_idx][sub_idx] = CircuitResult(result, index)
