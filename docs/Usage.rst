@@ -264,6 +264,24 @@ Execution
    results = ck.run_experiments(cut_experiment, backend=fake)
    expectation_values = ck.estimate_expectation_values(results)
 
+The cost of an experiment run can be checked before submission:
+
+.. code:: python
+
+   print(ck.estimate_run(cut_experiment, shots=4096, max_batch_size=40))
+
+``Experiment will run 136 circuits in 4 jobs with a total of 557056 shots. See the
+returned object for the breakdown.``
+
+.. code:: python
+
+   {'job1': JobEstimate(circuits=40, shots=4096),
+    'job2': JobEstimate(circuits=40, shots=4096), ...}
+
+Exact for non-cummunicating runs. Runs whose wire cuts communicate get executed in waves so that
+each wave after the first spends its shots on what the one before it measured. For these jobs
+the circuit count is exact and job and shot counts are estimates.
+
 :code:`backend` takes a Qiskit backend, a V2 sampler, or anything else shaped like a
 backend, which is what lets e.g. `fiqci-ems <https://github.com/FiQCI/fiqci-ems>`__ run the experiment:
 
