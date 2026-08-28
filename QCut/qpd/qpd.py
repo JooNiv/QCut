@@ -2,7 +2,7 @@
 
 """Define identity channel quasi probability decomposition."""
 
-from QCut.qpd_gates import *
+from QCut.qpd.qpd_gates import *
 
 identity_qpd = [
     {"op_0": idmeas, "op_1": zero_init, "c": 1 / 2},
@@ -84,10 +84,10 @@ iswap_qpd = [
     {"op_0": ymeas, "op_1": ry_m, "c": 1 / 4},
     {"op_0": ry_p, "op_1": ymeas, "c": -1 / 4},
     {"op_0": ry_m, "op_1": ymeas, "c": 1 / 4},
-    {"op_0": ayzp, "op_1": byz, "c": 1 / 4},
-    {"op_0": ayzm, "op_1": byz, "c": -1 / 4},
-    {"op_0": byz, "op_1": ayzp, "c": 1 / 4},
-    {"op_0": byz, "op_1": ayzm, "c": -1 / 4},
+    {"op_0": ayzp, "op_1": byz, "c": -1 / 4},
+    {"op_0": ayzm, "op_1": byz, "c": 1 / 4},
+    {"op_0": byz, "op_1": ayzp, "c": -1 / 4},
+    {"op_0": byz, "op_1": ayzm, "c": 1 / 4},
     {"op_0": azxp, "op_1": bzx, "c": -1 / 4},
     {"op_0": azxm, "op_1": bzx, "c": 1 / 4},
     {"op_0": bzx, "op_1": azxp, "c": -1 / 4},
