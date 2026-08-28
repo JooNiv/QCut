@@ -1,6 +1,10 @@
 """Tests for new gate cut functionality: cutSWAP, cutISWAP, CutLocation.gate_name,
-QPD_REGISTRY, _get_weights, and end-to-end SWAP/ISWAP cut pipelines."""
+QPD_REGISTRY, result normalisation, and end-to-end SWAP/ISWAP cut pipelines."""
 
+import copy
+from dataclasses import replace
+
+import numpy as np
 import pytest
 from qiskit import QuantumCircuit, QuantumRegister
 from qiskit.circuit import Instruction
@@ -9,9 +13,10 @@ from qiskit_aer import AerSimulator
 
 import QCut as ck
 from QCut.cutlocation import CutLocation, SingleQubitCutLocation
-from QCut.postprocess import _get_weights
-from QCut.qpd import cz_qpd, iswap_qpd, swap_qpd
-from QCut.qpd_operations import QPD_REGISTRY, get_qpd_combinations
+from QCut.execution.qcutresult import RawResult
+from QCut.options import CutOptions
+from QCut.qpd.qpd import cz_qpd, iswap_qpd, swap_qpd
+from QCut.qpd.qpd_operations import QPD_REGISTRY, get_qpd_combinations
 
 
 def test_cutSWAP_returns_instruction():
@@ -124,7 +129,7 @@ def test_get_qpd_combinations_iswap_count():
 
 
 def test_get_qpd_combinations_wire_cut_count():
-    from QCut.qpd import identity_qpd
+    from QCut.qpd.qpd import identity_qpd
 
     wire_loc = SingleQubitCutLocation(((QuantumRegister(1), 0), 0))
     combos = list(get_qpd_combinations([wire_loc]))
@@ -132,7 +137,7 @@ def test_get_qpd_combinations_wire_cut_count():
 
 
 def test_get_qpd_combinations_mixed_cuts():
-    from QCut.qpd import identity_qpd
+    from QCut.qpd.qpd import identity_qpd
 
     wire_loc = SingleQubitCutLocation(((QuantumRegister(1), 0), 0))
     gate_loc = _make_cut_location(gate_name="cz")
@@ -140,24 +145,89 @@ def test_get_qpd_combinations_mixed_cuts():
     assert len(combos) == len(identity_qpd) * len(cz_qpd)
 
 
-def test_get_weights_sum_equals_num_groups():
-    coefficients = [1 / 2, 1 / 2, -1 / 2, 1 / 2]
-    num_groups = 4
-    weights = list(_get_weights(coefficients, num_groups))
-    assert abs(sum(weights) - num_groups) < 1e-9
+def test_the_estimate_uses_probabilities_not_raw_counts():
+    """Scaling every count and the shot count together must not move the estimate.
+
+    Post-processing divides counts by the shots they were taken at, and nothing after
+    that may reintroduce a factor of the shot or sample count. The normalisation this
+    replaced multiplied by a synthetic sample count and divided it out again several
+    steps later, which was inert but left the invariant unguarded.
+    """
+    circuit = QuantumCircuit(3)
+    circuit.h(0)
+    circuit.ry(0.7, 1)
+    circuit.rx(0.4, 2)
+    circuit.cx(0, 1)
+    circuit.append(ck.cutSWAP(), [1, 2])
+    observables = SparsePauliOp(["IIZ", "IZI", "ZII"])
+
+    cut_circuit = ck.get_locations_and_subcircuits(circuit)
+    experiment = ck.get_experiment_circuits(cut_circuit, observables)
+    raw = ck.run_experiments(
+        experiment, backend=AerSimulator(seed_simulator=4321), shots=1024
+    )
+    first = ck.estimate_expectation_values(raw)
+
+    scale = 7
+    scaled = RawResult(
+        [
+            [
+                {
+                    sub: replace(leaf, scale=leaf.scale * scale)
+                    for sub, leaf in obs_group.items()
+                }
+                for obs_group in group
+            ]
+            for group in raw.results
+        ],
+        raw._shots * scale,
+        experiment,
+    )
+    second = ck.estimate_expectation_values(scaled)
+
+    assert np.allclose(first, second, atol=1e-12)
 
 
-def test_get_weights_proportional_to_abs_coeff():
-    coefficients = [1.0, 2.0, 1.0]
-    num_groups = 3
-    weights = list(_get_weights(coefficients, num_groups))
-    assert abs(weights[1] - 2 * weights[0]) < 1e-9
-    assert abs(weights[2] - weights[0]) < 1e-9
+def test_a_group_contributes_in_proportion_to_its_coefficient():
+    """The estimate is the plain quasiprobability sum, so doubling one group's
+    coefficient doubles what that group contributes.
 
+    This is what the removed weighting helper was expressing indirectly: it scaled each
+    group by ``num_groups * |c| / gamma`` and the estimator undid the ``gamma`` and the
+    ``num_groups`` again further down. Using the coefficient itself says the same thing
+    in one step, and this pins the property rather than the arithmetic.
+    """
+    circuit = QuantumCircuit(3)
+    circuit.h(0)
+    circuit.ry(0.7, 1)
+    circuit.cx(0, 1)
+    circuit.append(ck.cutSWAP(), [1, 2])
+    observables = SparsePauliOp(["IIZ", "IZI", "ZII"])
 
-def test_get_weights_zero_coefficients_raises():
-    with pytest.raises(ValueError, match="zero"):
-        list(_get_weights([0.0, 0.0], 2))
+    cut_circuit = ck.get_locations_and_subcircuits(circuit)
+    experiment = ck.get_experiment_circuits(cut_circuit, observables)
+    raw = ck.run_experiments(
+        experiment, backend=AerSimulator(seed_simulator=99), shots=1024
+    )
+
+    def with_coefficients(coefficients):
+        """The same results read against an experiment whose coefficients differ."""
+        altered = copy.copy(experiment)
+        altered.coefficients = coefficients
+        return np.array(
+            ck.estimate_expectation_values(RawResult(raw.results, raw._shots, altered))
+        )
+
+    original = list(experiment.coefficients)
+    baseline = with_coefficients(original)
+    bumped = with_coefficients(
+        [2 * c if index == 0 else c for index, c in enumerate(original)]
+    )
+    first_group = with_coefficients(
+        [c if index == 0 else 0.0 for index, c in enumerate(original)]
+    )
+
+    assert np.allclose(bumped - baseline, first_group, atol=1e-12)
 
 
 swap_circuit = QuantumCircuit(2)
@@ -174,11 +244,12 @@ def test_swap_cut_num_groups():
     assert cut_exp.num_groups == len(swap_qpd)
 
 
+@pytest.mark.sim
 def test_swap_cut_expectation_values():
     cut_qc = ck.get_locations_and_subcircuits(swap_circuit.copy())
     cut_exp = ck.get_experiment_circuits(cut_qc, _swap_observables)
     results = ck.run_experiments(cut_exp, backend=AerSimulator())
-    expvs = ck.estimate_expectation_values(results, cut_exp.expv_data())
+    expvs = ck.estimate_expectation_values(results)
     for computed, expected in zip(expvs, _swap_expected):
         assert abs(computed - expected) < 0.15
 
@@ -197,11 +268,12 @@ def test_iswap_cut_num_groups():
     assert cut_exp.num_groups == len(iswap_qpd)
 
 
+@pytest.mark.sim
 def test_iswap_cut_expectation_values():
     cut_qc = ck.get_locations_and_subcircuits(iswap_circuit.copy())
     cut_exp = ck.get_experiment_circuits(cut_qc, _iswap_observables)
     results = ck.run_experiments(cut_exp, backend=AerSimulator())
-    expvs = ck.estimate_expectation_values(results, cut_exp.expv_data())
+    expvs = ck.estimate_expectation_values(results)
     for computed, expected in zip(expvs, _iswap_expected):
         assert abs(computed - expected) < 0.15
 
@@ -222,7 +294,14 @@ def test_find_cuts_swap_circuit():
     qc.swap(1, 2)
     qc.swap(1, 2)
     qc.cx(2, 3)
-    cut_qc = ck.find_cuts(qc, num_partitions=2, max_qubits=[2, 2], cuts="gate")
+
+    options = CutOptions(
+        finder_num_partitions=2,
+        finder_max_qubits=[2, 2],
+        finder_cut_mode="gate",
+    )
+
+    cut_qc = ck.find_cuts(qc, options=options)
     assert len(cut_qc.subcircuits) == 2
 
 
@@ -235,5 +314,12 @@ def test_find_cuts_iswap_circuit():
     qc.iswap(1, 2)
     qc.iswap(1, 2)
     qc.cx(2, 3)
-    cut_qc = ck.find_cuts(qc, num_partitions=2, max_qubits=[2, 2], cuts="gate")
+
+    options = CutOptions(
+        finder_num_partitions=2,
+        finder_max_qubits=[2, 2],
+        finder_cut_mode="gate",
+    )
+
+    cut_qc = ck.find_cuts(qc, options=options)
     assert len(cut_qc.subcircuits) == 2

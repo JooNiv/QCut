@@ -3,9 +3,40 @@ Utility functions for converting quantum circuits to graph representations and
 vice versa, as well as functions for updating node and edge information in the graph.
 """
 
+import math
+
 import rustworkx as rx
 
-from QCut.qpd_operations import QPD_REGISTRY
+from QCut.qpd.qpd_generate import gamma as qpd_gamma
+from QCut.qpd.qpd_generate import qpd_from_gate
+from QCut.qpd.qpd_operations import QPD_REGISTRY
+
+#: METIS takes integer edge weights, so a weight is scaled before rounding. The scale
+#: has to resolve the gap between cheap cuts, since log(1.05) is only 0.049.
+WEIGHT_SCALE: int = 10000
+
+#: Stands in for "this cut is not allowed in the current mode". Must stay far above the
+#: total weight of any real cut set so METIS never prefers it.
+DISALLOWED_WEIGHT: int = 100000000000
+
+#: gamma of the identity-channel decomposition used for a wire cut.
+WIRE_GAMMA: int = 4
+
+
+def cut_weight(gamma: float) -> int:
+    """Turn a sampling overhead into an edge weight METIS can minimise correctly.
+
+    The overhead of a cut set is the *product* of its gammas, but METIS minimises the
+    *sum* of the cut edge weights. Taking the logarithm turns one into the other, so
+    ``log(gamma)`` is the weight that makes the partitioner optimise the real cost.
+    Using gamma directly, as this used to, systematically undervalues cheap cuts. An
+    ``rzz(0.3)`` at gamma 1.59 against a ``cz`` at gamma 3.00 reads as 1.9 times cheaper
+    added up but is 2.4 times cheaper multiplied.
+
+    A free cut at ``gamma = 1`` would weigh nothing, which is true of its shot cost but
+    not of the circuits it still adds, so the weight floor is one.
+    """
+    return max(1, round(math.log(gamma) * WEIGHT_SCALE))
 
 
 def weight_fn(edge_data):
@@ -84,23 +115,32 @@ def update_nodes_on_qubit(nodes_on_qubit, qubit, node):
         nodes_on_qubit[qubit].append(node)
 
 
-def get_gate_weight(gate_name, mode="gate"):
+def get_gate_weight(gate_name, mode="gate", gate=None):
     """
     Get the weight of a gate based on its name and the specified mode
     (gate or wire or both).
+
+    The weight is ``log(gamma)`` scaled by ``WEIGHT_SCALE``, see :func:`cut_weight`.
+
     Args:
         gate_name: The name of the gate.
         mode: The mode for calculating weight ("gate", "wire", or "both").
+        gate: The gate itself, required for gates with no hand-written QPD.
     Returns:
         The weight of the gate.
     """
     if mode == "wire":
-        return 100000000000
-    if gate_name not in QPD_REGISTRY:
-        raise ValueError(f"Gate {gate_name} not found in QPD_REGISTRY.")
+        return DISALLOWED_WEIGHT
+    if gate_name in QPD_REGISTRY:
+        gamma = sum(abs(term["c"]) for term in QPD_REGISTRY[gate_name])
+    elif gate is not None:
+        gamma = qpd_gamma(qpd_from_gate(gate))
     else:
-        qpd = QPD_REGISTRY[gate_name]
-        return int(sum([(abs(x["c"])) for x in qpd]))
+        raise ValueError(
+            f"Gate {gate_name} has no QPD in QPD_REGISTRY and no gate was supplied to "
+            "generate one from."
+        )
+    return cut_weight(gamma)
 
 
 def get_wire_weight(mode="wire"):
@@ -112,8 +152,8 @@ def get_wire_weight(mode="wire"):
         The weight of the wire.
     """
     if mode == "gate":
-        return 100000000000
-    return 4
+        return DISALLOWED_WEIGHT
+    return cut_weight(WIRE_GAMMA)
 
 
 def circ_to_graph(circuit, mode="both"):  # noqa: C901
@@ -129,6 +169,8 @@ def circ_to_graph(circuit, mode="both"):  # noqa: C901
 
     nodes_on_qubit = {}
 
+    # The operation is carried along as a fourth element so get_gate_weight can compute
+    # gamma for gates with no hand-written QPD.
     ops_2qb = [
         (
             idx,
@@ -136,6 +178,7 @@ def circ_to_graph(circuit, mode="both"):  # noqa: C901
                 x.operation.name,
                 x.operation.num_qubits,
                 [circuit.find_bit(i).index for i in x.qubits],
+                x.operation,
             ),
         )
         for idx, x in enumerate(circuit.data)
@@ -180,7 +223,7 @@ def circ_to_graph(circuit, mode="both"):  # noqa: C901
             G.add_edge(
                 added[-2],
                 added[-1],
-                (op[0], op[1][0], op[1][2], get_gate_weight(op[1][0], mode)),
+                (op[0], op[1][0], op[1][2], get_gate_weight(op[1][0], mode, op[1][3])),
             )
         elif op[1][2][1] not in track_nodes.keys():
             update_added(added_set, added, op)
@@ -199,7 +242,7 @@ def circ_to_graph(circuit, mode="both"):  # noqa: C901
             G.add_edge(
                 added[-2],
                 added[-1],
-                (op[0], op[1][0], op[1][2], get_gate_weight(op[1][0], mode)),
+                (op[0], op[1][0], op[1][2], get_gate_weight(op[1][0], mode, op[1][3])),
             )
             if ind == []:
                 G.add_edge(op[1][2][0], added[-1], (op[1][2][0], get_wire_weight(mode)))
@@ -227,7 +270,7 @@ def circ_to_graph(circuit, mode="both"):  # noqa: C901
             G.add_edge(
                 added[-2],
                 added[-1],
-                (op[0], op[1][0], op[1][2], get_gate_weight(op[1][0], mode)),
+                (op[0], op[1][0], op[1][2], get_gate_weight(op[1][0], mode, op[1][3])),
             )
             if ind == []:
                 G.add_edge(op[1][2][1], added[-1], (op[1][2][1], get_wire_weight(mode)))
@@ -251,7 +294,7 @@ def circ_to_graph(circuit, mode="both"):  # noqa: C901
             G.add_edge(
                 added[-2],
                 added[-1],
-                (op[0], op[1][0], op[1][2], get_gate_weight(op[1][0], mode)),
+                (op[0], op[1][0], op[1][2], get_gate_weight(op[1][0], mode, op[1][3])),
             )
             if ind0 == []:
                 G.add_edge(op[1][2][0], added[-1], (op[1][2][0], get_wire_weight(mode)))

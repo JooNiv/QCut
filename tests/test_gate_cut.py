@@ -25,7 +25,10 @@ cut_circuit.append(cut(), [1])
 cut_circuit.cx(1, 2)
 cut_circuit.cx(2, 3)
 
-subcirc_lens = [3, 4, 6]
+# cutGate now emits a single CutCX marker instead of transpiling CX into the {u, cz}
+# basis, so the two `u` gates that sat on the target wire are now KAK locals inside the
+# QPD operations.
+subcirc_lens = [3, 2, 6]
 
 res_expvs = [0.727323, 0.727323, 0.727323, 1.000000]
 
@@ -45,6 +48,7 @@ def test_cut_gate_subcircuits():
         assert len(circ.data) == subcirc_lens[ind]
 
 
+@pytest.mark.sim
 def test_cut_gate_expectation_values():
     cut_qc = ck.get_locations_and_subcircuits(cut_circuit.copy())
 
@@ -56,9 +60,7 @@ def test_cut_gate_expectation_values():
 
     results = ck.run_experiments(cut_experiment, backend=backend)
 
-    expectation_values = ck.estimate_expectation_values(
-        results, cut_experiment.expv_data()
-    )
+    expectation_values = ck.estimate_expectation_values(results)
 
     for ind, expv in enumerate(expectation_values):
         assert abs(expv - res_expvs[ind]) < 0.1
