@@ -11,6 +11,7 @@ from QCut.execution.backend_utility import (
     transpile_subcircuits,
 )
 from QCut.execution.circuit_knitting import (
+    estimate_run,
     get_experiment_circuits,
     run,
     run_cut_circuit,
@@ -34,6 +35,7 @@ __all__ = [
     "transpile_experiments",
     "transpile_subcircuits",
     "estimate_expectation_values",
+    "estimate_run",
     "get_experiment_circuits",
     "get_locations_and_subcircuits",
     "run",

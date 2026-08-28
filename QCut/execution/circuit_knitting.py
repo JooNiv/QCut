@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import inspect
 import logging
-from dataclasses import replace
+from dataclasses import dataclass, field, replace
 from time import sleep
 
 import numpy as np
@@ -646,6 +646,12 @@ def _batches(runnable, max_batch_size):
         yield batch
 
 
+def _batch_shots(batch, cap) -> int:
+    """The shots a batch runs at: the mean of what its own circuits asked for."""
+    shots = max(1, round(sum(job[2] for job in batch) / len(batch)))
+    return min(shots, cap) if cap is not None else shots
+
+
 def _dispatch(  # noqa: PLR0913
     jobs, backend, max_batch_size, nominal_shots, cap, results, run_options=None
 ) -> None:
@@ -673,9 +679,7 @@ def _dispatch(  # noqa: PLR0913
     # Submitted before any is collected, so the whole wave queues at once.
     submitted = []
     for batch in _batches(runnable, max_batch_size):
-        shots = max(1, round(sum(job[2] for job in batch) / len(batch)))
-        if cap is not None:
-            shots = min(shots, cap)
+        shots = _batch_shots(batch, cap)
         job = _submit(
             backend,
             [circuit for _t, circuit, _w in batch],
@@ -876,6 +880,158 @@ def _run_communicating(cut_experiment, shots, backend, max_batch_size, run_optio
 
     _apply_communication(cut_experiment, results)
     return results
+
+
+@dataclass(frozen=True)
+class JobEstimate:
+    """One ``run`` call: how many circuits it carries, at how many shots each."""
+
+    circuits: int
+    shots: int
+
+
+@dataclass(frozen=True)
+class RunEstimate:
+    """What running an experiment will cost, before anything is submitted."""
+
+    breakdown: dict[str, JobEstimate] = field(default_factory=dict)
+    exact: bool = True
+
+    @property
+    def jobs(self) -> int:
+        """How many ``run`` calls the experiment takes."""
+        return len(self.breakdown)
+
+    @property
+    def circuits(self) -> int:
+        """How many circuits are submitted, over every job."""
+        return sum(job.circuits for job in self.breakdown.values())
+
+    @property
+    def shots(self) -> int:
+        """How many shots the experiment spends in total."""
+        return sum(job.circuits * job.shots for job in self.breakdown.values())
+
+    def __str__(self) -> str:
+        """Format string."""
+        line = (
+            f"Experiment will run {self.circuits} circuits in {self.jobs} jobs with a "
+            f"total of {self.shots} shots."
+        )
+        if not self.exact:
+            line += (
+                " Past the first wave the shots each group gets depend on what the wave"
+                " before it measured. The circuit count is the most it can submit, the"
+                " job count the fewest it can take, since circuits wanting very"
+                " different shot counts cannot share a job, and the shot total is right"
+                " to rounding."
+            )
+        return f"{line} See the returned object for the breakdown."
+
+    def __repr__(self) -> str:
+        """Represent as string."""
+        return str(self)
+
+
+def _named(jobs: list[JobEstimate]) -> dict[str, JobEstimate]:
+    return {f"job{index}": job for index, job in enumerate(jobs, start=1)}
+
+
+def _estimated_batches(jobs, max_batch_size, cap) -> list[JobEstimate]:
+    """Batch a wave's jobs the way :func:`_dispatch` will, without running them."""
+    runnable = [job for job in jobs if _has_measurements(job[1])]
+    runnable.sort(key=lambda job: job[2])
+    return [
+        JobEstimate(len(batch), _batch_shots(batch, cap))
+        for batch in _batches(runnable, max_batch_size)
+    ]
+
+
+def _projected_wave_jobs(cut_experiment, wave: int, shots: int):
+    """A later wave's jobs as they would be if every group got an equal share."""
+    plan = cut_experiment.plan
+    return [
+        ([(group, obs, sub)], circuit, shots)
+        for group, obs_groups in enumerate(cut_experiment.experiments)
+        for obs, obs_group in enumerate(obs_groups)
+        for sub, circuit in obs_group.items()
+        if plan.waves.get(sub, 0) == wave
+    ]
+
+
+def estimate_run(
+    cut_experiment: CutExperiment,
+    shots: int = DEFAULT_SHOTS,
+    backend=None,
+    max_batch_size: int = 100,
+) -> RunEstimate:
+    """Work out what :func:`run_experiments` will cost, without submitting anything.
+
+    Exact for an experiment that runs in one go. One whose wire cuts communicate runs in
+    waves, and every wave after the first spends its shots in proportion to what the one
+    before it measured, so only that first wave is known in advance. The rest is worked
+    out as if every group got an equal share. That gives the most circuits a wave can
+    submit, since a group whose label never came up submits none, and the fewest jobs it
+    can take, since an uneven share puts circuits wanting very different shot counts in
+    jobs of their own.
+
+    Args:
+        cut_experiment (CutExperiment): the experiment circuits that would be run.
+        shots (int): shots per circuit, as passed to :func:`run_experiments`.
+        backend: the backend or sampler that would run it, read only for the most shots
+            it takes in one job.
+        max_batch_size (int): maximum number of circuits submitted per ``run`` call.
+
+    Returns:
+        RunEstimate: the circuits, jobs and shots the run takes, and a breakdown by job.
+
+    """
+    cap = _backend_shot_cap(backend) if backend is not None else None
+
+    if cut_experiment.plan is None:
+        runnable = [
+            circuit
+            for group in cut_experiment.experiments
+            for obs_group in group
+            for circuit in obs_group.values()
+            if _has_measurements(circuit)
+        ]
+        return RunEstimate(
+            _named(
+                [
+                    JobEstimate(len(runnable[start : start + max_batch_size]), shots)
+                    for start in range(0, len(runnable), max_batch_size)
+                ]
+            ),
+            exact=True,
+        )
+
+    plan = cut_experiment.plan
+    groups = len(cut_experiment.experiments)
+    subcircuits = list(cut_experiment.experiments[0][0])
+    measuring = sum(1 for sub in subcircuits if plan.waves.get(sub, 0) == 0)
+    preparing = len(subcircuits) - measuring
+    first_scale = MEASURE_SHARE * len(subcircuits) / measuring
+    later_scale = (
+        (1 - MEASURE_SHARE) * len(subcircuits) / preparing if preparing else 0.0
+    )
+
+    sharing: dict[tuple, list[int]] = {}
+    for group in range(groups):
+        sharing.setdefault(plan.keys[group], []).append(group)
+
+    estimates = _estimated_batches(
+        _first_wave_jobs(cut_experiment, shots, sharing, first_scale),
+        max_batch_size,
+        cap,
+    )
+    for wave in range(1, plan.last_wave + 1):
+        even = max(1, round(round(shots * groups * later_scale) / groups))
+        estimates += _estimated_batches(
+            _projected_wave_jobs(cut_experiment, wave, even), max_batch_size, cap
+        )
+
+    return RunEstimate(_named(estimates), exact=plan.last_wave == 0)
 
 
 def run_experiments(  # noqa: C901

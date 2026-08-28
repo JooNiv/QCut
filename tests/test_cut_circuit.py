@@ -199,6 +199,65 @@ def test_raw_results_hold_results_rather_than_counts():
     assert np.allclose(first, ck.estimate_expectation_values(raw))
 
 
+class _CountingBackend:
+    """Records every submission, so an estimate can be checked against the real run."""
+
+    def __init__(self, backend):
+        self._backend = backend
+        self.calls = []
+
+    def run(self, circuits, shots=1024, **options):
+        self.calls.append((len(circuits), shots))
+        return self._backend.run(circuits, shots=shots, **options)
+
+
+@pytest.mark.sim
+@pytest.mark.parametrize("max_batch_size", [100, 40])
+def test_a_plain_run_is_estimated_exactly(max_batch_size):
+    """Nothing about a run without communication depends on what it measures."""
+    marked, _plain, observables = _wire_and_gate_cut()
+    experiment = ck.get_experiment_circuits(
+        ck.get_locations_and_subcircuits(marked), observables
+    )
+    estimate = ck.estimate_run(experiment, shots=1024, max_batch_size=max_batch_size)
+
+    backend = _CountingBackend(AerSimulator())
+    ck.run_experiments(
+        experiment, shots=1024, backend=backend, max_batch_size=max_batch_size
+    )
+
+    assert estimate.exact
+    assert estimate.jobs == len(backend.calls)
+    assert estimate.circuits == sum(circuits for circuits, _ in backend.calls)
+    assert estimate.shots == sum(circuits * shots for circuits, shots in backend.calls)
+
+
+@pytest.mark.sim
+def test_a_communicating_run_is_bounded_not_exact():
+    """Later waves spend their shots on what the wave before them measured.
+
+    So the circuit count is the most that can be submitted and the job count the fewest,
+    since circuits wanting very different shot counts cannot share a job.
+    """
+    marked, _plain, observables = _communicating_pair()
+    experiment = ck.get_experiment_circuits(
+        ck.get_locations_and_subcircuits(
+            marked, options=CutOptions(wire_cut_communication="always")
+        ),
+        observables,
+    )
+    estimate = ck.estimate_run(experiment, shots=1024)
+
+    backend = _CountingBackend(AerSimulator())
+    ck.run_experiments(experiment, shots=1024, backend=backend)
+
+    assert not estimate.exact
+    assert estimate.circuits >= sum(circuits for circuits, _ in backend.calls)
+    assert estimate.jobs <= len(backend.calls)
+    spent = sum(circuits * shots for circuits, shots in backend.calls)
+    assert estimate.shots == pytest.approx(spent, rel=0.01)
+
+
 class _NotReadyJob:
     """A job that refuses its results, the way one not quite ready does."""
 
