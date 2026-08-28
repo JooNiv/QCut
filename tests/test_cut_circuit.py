@@ -1,5 +1,6 @@
 import numpy as np
 import pytest
+from pydantic import TypeAdapter, ValidationError
 from qiskit import QuantumCircuit
 from qiskit.circuit import Parameter
 from qiskit.circuit.library import CXGate
@@ -9,6 +10,7 @@ from qiskit_aer.primitives import SamplerV2
 
 import QCut as ck
 from QCut import cut, cutGate
+from QCut.execution import circuit_knitting
 from QCut.execution.qcutresult import CircuitResult
 from QCut.options import CutOptions
 
@@ -195,6 +197,66 @@ def test_raw_results_hold_results_rather_than_counts():
     # Re-running the estimate on the same results has to give the same answer.
     first = ck.estimate_expectation_values(raw)
     assert np.allclose(first, ck.estimate_expectation_values(raw))
+
+
+class _NotReadyJob:
+    """A job that refuses its results, the way one not quite ready does."""
+
+    def __init__(self, *errors):
+        self.errors = list(errors)
+        self.calls = 0
+
+    def result(self):
+        self.calls += 1
+        if self.errors:
+            raise self.errors.pop(0)
+        return "counts"
+
+
+def _not_ready():
+    """The pydantic error IQM's client raises when the measurements are not there."""
+    try:
+        TypeAdapter(list[dict[str, list[list[int]]]]).validate_json(
+            '{"detail": ["No results available for this job."]}'
+        )
+    except ValidationError as error:
+        return error
+    raise AssertionError("that json should not have validated")
+
+
+@pytest.mark.parametrize(
+    "error",
+    [
+        _not_ready(),
+        RuntimeError("No results were available for job abc even though it is done."),
+    ],
+    ids=["validation_error", "execution_error"],
+)
+def test_results_are_asked_for_again_when_they_are_not_ready(error, monkeypatch):
+    """A device can report a job done before its measurements can be fetched."""
+    monkeypatch.setattr(circuit_knitting, "RESULT_RETRY_DELAY", 0)
+    job = _NotReadyJob(error)
+
+    assert circuit_knitting._result(job) == "counts"
+    assert job.calls == 2
+
+
+def test_a_failure_that_is_not_about_readiness_is_raised():
+    """Only the not-ready-yet failure is worth asking again about."""
+    job = _NotReadyJob(ConnectionError("connection reset by peer"))
+
+    with pytest.raises(ConnectionError):
+        circuit_knitting._result(job)
+    assert job.calls == 1
+
+
+def test_results_still_missing_after_the_retry_raise(monkeypatch):
+    monkeypatch.setattr(circuit_knitting, "RESULT_RETRY_DELAY", 0)
+    job = _NotReadyJob(_not_ready(), _not_ready())
+
+    with pytest.raises(ValidationError):
+        circuit_knitting._result(job)
+    assert job.calls == 2
 
 
 def test_every_exported_name_exists():
