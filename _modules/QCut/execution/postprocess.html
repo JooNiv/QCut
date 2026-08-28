@@ -1,0 +1,614 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>QCut.execution.postprocess &#8212; QCut</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/sphinx-book-theme.css?v=3c74b3bc" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+    <script src="../../../_static/documentation_options.js?v=60ebb597"></script>
+    <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../../_static/scripts/sphinx-book-theme.js?v=fab101a9"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/QCut/execution/postprocess';</script>
+    <link rel="icon" href="../../../_static/QCut-logo.jpg"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="1.3.2.post1.dev14+g176d5596d" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../_static/QCut-logo.jpg" class="logo__image only-light" alt="QCut - Home"/>
+    <img src="../../../_static/QCut-logo.jpg" class="logo__image only-dark pst-js-only" alt="QCut - Home"/>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../../Usage.html">Basic Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Options.html">Options</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../Examples.html">Examples on using QCut</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../examples/WireCuts.html">Wire cuts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../examples/GateCuts.html">Gate cuts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../examples/AutomaticCuts.html">Automatic cuts</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../Notebooks.html">Notebooks</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../notebooks/QCutBasicUsage.html">Basic Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notebooks/QCutQAOAExample.html">QAOA Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notebooks/QCutOptionsExample.html">Cut Options Example</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../Theory.html">Theory</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../theory/CZ_derivation.html">CZ QPD derivation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../theory/SWAP_derivation.html">SWAP QPD derivation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../theory/General_2q_derivation.html">General two-qubit QPD derivation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../theory/Joint_rotation_derivation.html">Joint rotation gate cutting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../theory/Wire_derivation.html">Wire Cut QPD derivation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../theory/LOCC_wire_derivation.html">Wire cuts with classical communication</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Acknowledgement.html">Acknowledgements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../License.html">License</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../QCut.html">QCut API reference</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../_autosummary/QCut.html">QCut</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Changelog.html">Changelog</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button pst-navbar-icon"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button>
+
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1></h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for QCut.execution.postprocess</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">A module for post-processing the results obtained from running the cut circuits and</span>
+<span class="sd">calculating the estimated expectation values based on the results and the</span>
+<span class="sd">provided observables.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">itertools</span><span class="w"> </span><span class="kn">import</span> <span class="n">product</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">QCut.cutlocation</span><span class="w"> </span><span class="kn">import</span> <span class="n">SingleQubitCutLocation</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">QCut.execution.basis_transform</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">_combine_pauli_ops</span><span class="p">,</span>
+    <span class="n">_get_observable_circuit_index</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">QCut.execution.qcutresult</span><span class="w"> </span><span class="kn">import</span> <span class="n">RawResult</span><span class="p">,</span> <span class="n">SubResult</span><span class="p">,</span> <span class="n">TotalResult</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_process_results</span><span class="p">(</span>
+    <span class="n">results</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
+    <span class="n">shots</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">qpd_bits</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="n">TotalResult</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Transform results with post processing function {0,1} -&gt; [-1, 1].</span>
+
+<span class="sd">    Transform results so that we map 0 -&gt; -1 and 1 -&gt; 1. Gives processed results in form</span>
+<span class="sd">    [TotalResult0, TotalResult1, ...], where TotalResult is</span>
+<span class="sd">    [SubResult0, SubResult1, ...] and SubResult are [[[x0,x0,x0], [y0,y0], counts0],</span>
+<span class="sd">    [[x1,x1,x1], [y1,y1], counts1], ...].</span>
+
+<span class="sd">    Each outcome is weighted by how often it came up, so the weight carried through to</span>
+<span class="sd">    the estimator is that outcome&#39;s probability.</span>
+
+<span class="sd">    The qpd measurement bits are picked out by how many there are rather than by looking</span>
+<span class="sd">    for their register in the reported counts. A backend is free to rename or merge</span>
+<span class="sd">    classical registers -- IQM&#39;s transpiler does, when it routes through a resonator --</span>
+<span class="sd">    and a key split on whitespace quietly returns the wrong field when it does. The</span>
+<span class="sd">    widths come from the experiment, which knows them because it built the circuits.</span>
+
+<span class="sd">    Bits that were dropped for going unwritten are put back as -1, which is what an</span>
+<span class="sd">    unwritten bit reads as, so the sign is the one the full register would have given.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        results (list): results from experiment circuits</span>
+<span class="sd">        shots (int): number of shots the counts were taken at</span>
+<span class="sd">        qpd_bits (dict): per circuit, how many qpd bits it wrote and how many were</span>
+<span class="sd">            dropped. Without it the qpd register is taken to be the last whitespace</span>
+<span class="sd">            separated field, as it was before the widths were recorded.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">    -------</span>
+<span class="sd">        list[TotalResult]:</span>
+<span class="sd">            list of transformed results</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">processed_results</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">group_ind</span><span class="p">,</span> <span class="n">circ_group</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">results</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">exp_ind</span><span class="p">,</span> <span class="n">experiment_run</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">circ_group</span><span class="p">):</span>
+            <span class="n">experiment_run_results</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">sub_ind</span><span class="p">,</span> <span class="n">sub_result</span> <span class="ow">in</span> <span class="n">experiment_run</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">circuit_results</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">layout</span> <span class="o">=</span> <span class="p">(</span><span class="n">qpd_bits</span> <span class="ow">or</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">((</span><span class="n">group_ind</span><span class="p">,</span> <span class="n">exp_ind</span><span class="p">,</span> <span class="n">sub_ind</span><span class="p">))</span>
+                <span class="k">for</span> <span class="n">measurements</span><span class="p">,</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">sub_result</span><span class="o">.</span><span class="n">counts</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="k">if</span> <span class="n">layout</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="c1"># No widths recorded: fall back to splitting the key. A circuit</span>
+                        <span class="c1"># with nothing to write to its qpd register does not carry one,</span>
+                        <span class="c1"># so there may be a single field; pad to two either way, since</span>
+                        <span class="c1"># everything downstream reads the observable bits as the first</span>
+                        <span class="c1"># and the qpd bits as the second.</span>
+                        <span class="n">fields</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">measurements</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">f</span><span class="p">]</span>
+                        <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">fields</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+                            <span class="n">fields</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+                        <span class="n">result_eigenvalues</span> <span class="o">=</span> <span class="p">[</span>
+                            <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span> <span class="k">if</span> <span class="n">x</span> <span class="o">==</span> <span class="s2">&quot;0&quot;</span> <span class="k">else</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">field</span><span class="p">])</span>
+                            <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">fields</span>
+                        <span class="p">]</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">written</span><span class="p">,</span> <span class="n">dropped</span> <span class="o">=</span> <span class="n">layout</span>
+                        <span class="n">bits</span> <span class="o">=</span> <span class="n">measurements</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+                        <span class="n">split</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">bits</span><span class="p">)</span> <span class="o">-</span> <span class="n">written</span>
+                        <span class="n">qpd</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">dropped</span> <span class="o">+</span> <span class="p">[</span>
+                            <span class="o">-</span><span class="mi">1</span> <span class="k">if</span> <span class="n">x</span> <span class="o">==</span> <span class="s2">&quot;0&quot;</span> <span class="k">else</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">bits</span><span class="p">[</span><span class="n">split</span><span class="p">:]</span>
+                        <span class="p">]</span>
+                        <span class="n">result_eigenvalues</span> <span class="o">=</span> <span class="p">[</span>
+                            <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span> <span class="k">if</span> <span class="n">x</span> <span class="o">==</span> <span class="s2">&quot;0&quot;</span> <span class="k">else</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">bits</span><span class="p">[:</span><span class="n">split</span><span class="p">]]),</span>
+                            <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">qpd</span><span class="p">),</span>
+                        <span class="p">]</span>
+                    <span class="n">circuit_results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">SubResult</span><span class="p">(</span><span class="n">result_eigenvalues</span><span class="p">,</span> <span class="n">count</span> <span class="o">/</span> <span class="n">shots</span><span class="p">))</span>
+                <span class="n">experiment_run_results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">circuit_results</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">group_ind</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">processed_results</span><span class="p">):</span>
+                <span class="n">processed_results</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
+            <span class="n">processed_results</span><span class="p">[</span><span class="n">group_ind</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">TotalResult</span><span class="p">(</span><span class="n">experiment_run_results</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">processed_results</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_get_sub_expectation_values</span><span class="p">(</span>
+    <span class="n">experiment_run</span><span class="p">:</span> <span class="n">TotalResult</span><span class="p">,</span>
+    <span class="n">observables</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
+    <span class="n">map_qubits</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate sub expectation value for the result.</span>
+
+<span class="sd">    One subcircuit group&#39;s contribution: over every combination of the subcircuits&#39;</span>
+<span class="sd">    end-of-circuit outcomes, the product of their probabilities times the observable&#39;s</span>
+<span class="sd">    eigenvalue times the sign the mid-circuit measurements carry.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        experiment_run (TotalResult): results of a subcircuit pair</span>
+<span class="sd">        observables (list[int | list[int]]):</span>
+<span class="sd">            list of observables as qubit indices (Z-observables)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        list:</span>
+<span class="sd">            list of sub expectation values</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># generate all possible combinations between end of circuit measurements</span>
+    <span class="c1"># from subcircuit group</span>
+    <span class="n">sub_circuit_result_combinations</span> <span class="o">=</span> <span class="n">product</span><span class="p">(</span><span class="o">*</span><span class="n">experiment_run</span><span class="o">.</span><span class="n">subcircuits</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="c1"># initialize sub solution array</span>
+    <span class="n">sub_expectation_value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">observables</span><span class="p">))</span>
+
+    <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">circuit_result</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">sub_circuit_result_combinations</span><span class="p">):</span>
+        <span class="c1"># loop through results</span>
+        <span class="c1"># concat results to one array and reverse to account for qiskit qubit ordering</span>
+        <span class="n">full_result</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">i</span><span class="o">.</span><span class="n">measurements</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">circuit_result</span><span class="p">)]</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">full_result</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No measurement results found. This should not happen.&quot;</span><span class="p">)</span>
+            <span class="k">continue</span>
+
+        <span class="k">if</span> <span class="n">map_qubits</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">sorted_full_result</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                <span class="p">[</span>
+                    <span class="n">full_result</span><span class="p">[</span><span class="n">map_qubits</span><span class="p">[</span><span class="n">key</span><span class="p">]]</span>
+                    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">map_qubits</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="p">]</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">sorted_full_result</span> <span class="o">=</span> <span class="n">full_result</span>
+
+        <span class="n">sorted_full_result</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">reversed</span><span class="p">(</span><span class="n">sorted_full_result</span><span class="p">))</span>
+
+        <span class="n">qpd_measurement_coefficient</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># initial value for qpd</span>
+        <span class="n">probability</span> <span class="o">=</span> <span class="mf">1.0</span>  <span class="c1"># joint probability of this combination of outcomes</span>
+        <span class="k">for</span> <span class="n">res</span> <span class="ow">in</span> <span class="n">circuit_result</span><span class="p">:</span>
+            <span class="n">probability</span> <span class="o">*=</span> <span class="n">res</span><span class="o">.</span><span class="n">count</span>  <span class="c1"># already a probability, see _process_results</span>
+            <span class="n">qpd_measurement_coefficient</span> <span class="o">*=</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">measurements</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">observable_results</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">observables</span><span class="p">))</span>  <span class="c1"># initialize empty array</span>
+        <span class="c1"># for observables</span>
+        <span class="k">for</span> <span class="n">count</span><span class="p">,</span> <span class="n">obs</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">observables</span><span class="p">):</span>  <span class="c1"># populate observable array</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obs</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+                <span class="n">observable_results</span><span class="p">[</span><span class="n">count</span><span class="p">]</span> <span class="o">=</span> <span class="n">sorted_full_result</span><span class="p">[</span><span class="n">obs</span><span class="p">]</span>  <span class="c1"># if single qubit</span>
+            <span class="c1"># observable just save</span>
+            <span class="c1"># to array</span>
+            <span class="k">else</span><span class="p">:</span>  <span class="c1"># if multi qubit observable</span>
+                <span class="n">multi_qubit_observable_eigenvalue</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># initial eigenvalue</span>
+                <span class="k">for</span> <span class="n">sub_observables</span> <span class="ow">in</span> <span class="n">obs</span><span class="p">:</span>  <span class="c1"># multi qubit observable</span>
+                    <span class="n">multi_qubit_observable_eigenvalue</span> <span class="o">*=</span> <span class="n">sorted_full_result</span><span class="p">[</span>
+                        <span class="n">sub_observables</span>
+                    <span class="p">]</span>
+                    <span class="n">observable_results</span><span class="p">[</span><span class="n">count</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">obs</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">multi_qubit_observable_eigenvalue</span>
+                    <span class="p">)</span>
+
+        <span class="n">observable_expectation_value</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">qpd_measurement_coefficient</span> <span class="o">*</span> <span class="n">observable_results</span> <span class="o">*</span> <span class="n">probability</span>
+        <span class="p">)</span>
+        <span class="n">sub_expectation_value</span> <span class="o">+=</span> <span class="n">observable_expectation_value</span>
+
+    <span class="k">return</span> <span class="n">sub_expectation_value</span>
+
+
+<div class="viewcode-block" id="estimate_expectation_values">
+<a class="viewcode-back" href="../../../_autosummary/QCut.html#QCut.estimate_expectation_values">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">estimate_expectation_values</span><span class="p">(</span><span class="n">results</span><span class="p">:</span> <span class="n">RawResult</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Calculate the estimated expectation values.</span>
+
+<span class="sd">    Loop through processed results. For each result group generate all products of</span>
+<span class="sd">    different measurements from different subcircuits of the group. For each result</span>
+<span class="sd">    from qpd measurements calculate qpd coefficient and from counts calculate weight.</span>
+<span class="sd">    The estimate is the quasiprobability sum itself,</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">        \langle O \rangle = (-1)^{w+1} \sum_g c_g E_g</span>
+
+<span class="sd">    over the subcircuit groups, where :math:`c_g` is the group&#39;s coefficient,</span>
+<span class="sd">    :math:`E_g` is what :func:`_get_sub_expectation_values` returns for it, and</span>
+<span class="sd">    :math:`w` counts the wire cuts. That parity is the qpd register&#39;s sign convention:</span>
+<span class="sd">    every one of its bits maps 0 to -1, so an unwritten bit contributes -1 and only the</span>
+<span class="sd">    number allocated per subcircuit survives.</span>
+
+<span class="sd">    Multi-qubit observables pick up a further :math:`(-1)^{m+1}` for their :math:`m`</span>
+<span class="sd">    qubits, applied while their eigenvalues are multiplied together.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        results (RawResult): raw results from experiment circuits, carrying the</span>
+<span class="sd">            experiment they came from.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        np.ndarray:</span>
+<span class="sd">            one expectation value per observable, in the order they were given</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">raw_results</span> <span class="o">=</span> <span class="n">results</span>
+    <span class="n">experiment</span> <span class="o">=</span> <span class="n">raw_results</span><span class="o">.</span><span class="n">experiment</span>
+    <span class="k">if</span> <span class="n">experiment</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;These results carry no experiment, so there is nothing to interpret them &quot;</span>
+            <span class="s2">&quot;with. Results from QCut.run_experiments carry it already; a hand-built &quot;</span>
+            <span class="s2">&quot;RawResult has to be given the experiment it came from.&quot;</span>
+        <span class="p">)</span>
+    <span class="n">results_processed</span> <span class="o">=</span> <span class="n">_process_results</span><span class="p">(</span>
+        <span class="n">raw_results</span><span class="o">.</span><span class="n">results</span><span class="p">,</span> <span class="n">raw_results</span><span class="o">.</span><span class="n">_shots</span><span class="p">,</span> <span class="n">experiment</span><span class="o">.</span><span class="n">qpd_bits</span>
+    <span class="p">)</span>
+
+    <span class="n">wire_cuts</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span>
+        <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">experiment</span><span class="o">.</span><span class="n">cut_locations</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">SingleQubitCutLocation</span><span class="p">)]</span>
+    <span class="p">)</span>
+    <span class="n">parity</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">wire_cuts</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">measurement_settings</span> <span class="o">=</span> <span class="n">_combine_pauli_ops</span><span class="p">(</span><span class="n">experiment</span><span class="o">.</span><span class="n">observables</span><span class="p">)</span>
+
+    <span class="n">result_for_obs</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">obs</span> <span class="ow">in</span> <span class="n">experiment</span><span class="o">.</span><span class="n">observables</span><span class="o">.</span><span class="n">paulis</span><span class="p">:</span>
+        <span class="n">obs_circuit_info</span> <span class="o">=</span> <span class="n">_get_observable_circuit_index</span><span class="p">(</span><span class="n">obs</span><span class="p">,</span> <span class="n">measurement_settings</span><span class="p">)</span>
+        <span class="n">result_for_obs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">obs_circuit_info</span><span class="p">)</span>
+
+    <span class="n">expectation_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">experiment</span><span class="o">.</span><span class="n">observables</span><span class="p">))</span>
+
+    <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">obs_data</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">result_for_obs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">obs_data</span><span class="p">[</span><span class="s2">&quot;circuit_index&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;Observable cannot be measured </span>
+<span class="s2">                             with given measurement settings.&quot;&quot;&quot;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">experiment_run</span><span class="p">,</span> <span class="n">coefficient</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+            <span class="n">results_processed</span><span class="p">,</span> <span class="n">experiment</span><span class="o">.</span><span class="n">coefficients</span>
+        <span class="p">):</span>
+            <span class="n">cur_obs</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">obs_data</span><span class="p">[</span><span class="s2">&quot;obs_indices&quot;</span><span class="p">]</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">obs_data</span><span class="p">[</span><span class="s2">&quot;obs_indices&quot;</span><span class="p">])</span> <span class="o">==</span> <span class="mi">1</span>
+                <span class="k">else</span> <span class="p">[</span><span class="n">obs_data</span><span class="p">[</span><span class="s2">&quot;obs_indices&quot;</span><span class="p">]]</span>
+            <span class="p">)</span>
+            <span class="n">expectation_values</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">+=</span> <span class="p">(</span>
+                <span class="n">parity</span>
+                <span class="o">*</span> <span class="n">coefficient</span>
+                <span class="o">*</span> <span class="n">_get_sub_expectation_values</span><span class="p">(</span>
+                    <span class="n">experiment_run</span><span class="p">[</span><span class="n">obs_data</span><span class="p">[</span><span class="s2">&quot;circuit_index&quot;</span><span class="p">]],</span>
+                    <span class="n">cur_obs</span><span class="p">,</span>
+                    <span class="n">experiment</span><span class="o">.</span><span class="n">map_qubit</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">expectation_values</span></div>
+
+</pre></div>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Joonas Nivala
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2024, Joonas Nivala.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

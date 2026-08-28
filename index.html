@@ -42,7 +42,7 @@
 
     <script src="_static/jquery.js?v=5d32c60e"></script>
     <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-    <script src="_static/documentation_options.js?v=ddb9cf62"></script>
+    <script src="_static/documentation_options.js?v=60ebb597"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/scripts/sphinx-book-theme.js?v=fab101a9"></script>
@@ -50,10 +50,10 @@
     <link rel="icon" href="_static/QCut-logo.jpg"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Usage" href="Usage.html" />
+    <link rel="next" title="Basic Usage" href="Usage.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="1.3.2.post1.dev13+g0514c21f3" />
+  <meta name="docsearch:version" content="1.3.2.post1.dev14+g176d5596d" />
   </head>
   
   
@@ -150,26 +150,27 @@
     <div class="bd-toc-item navbar-nav active">
         <p aria-level="2" class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="Usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Usage.html">Basic Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Options.html">Options</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="Examples.html">Examples on using QCut</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="WireCuts.html">Wire cuts</a></li>
-<li class="toctree-l2"><a class="reference internal" href="GateCuts.html">Gate cuts</a></li>
-<li class="toctree-l2"><a class="reference internal" href="AutomaticCuts.html">Automatic cuts</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Multiple_cuts.html">Multiple cuts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/WireCuts.html">Wire cuts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/GateCuts.html">Gate cuts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/AutomaticCuts.html">Automatic cuts</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="Notebooks.html">Notebooks</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="examples/QCutBasicUsage.html">Basic Usage</a></li>
-<li class="toctree-l2"><a class="reference internal" href="examples/QCutCutSubsequentWires.html">Subsequent Wires</a></li>
-<li class="toctree-l2"><a class="reference internal" href="examples/QCutCutToThreeParts.html">Cut to Three parts</a></li>
-<li class="toctree-l2"><a class="reference internal" href="examples/QCutMultipleCutsOnSingleWire.html">Multiple cuts on a single wire</a></li>
-<li class="toctree-l2"><a class="reference internal" href="examples/QCutQAOAExample.html">QAOA Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/QCutBasicUsage.html">Basic Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/QCutQAOAExample.html">QAOA Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/QCutOptionsExample.html">Cut Options Example</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="Theory.html">Theory</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="theory/CZ_derivation.html">CZ QPD derivation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="theory/SWAP_derivation.html">SWAP QPD derivation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="theory/General_2q_derivation.html">General two-qubit QPD derivation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="theory/Joint_rotation_derivation.html">Joint rotation gate cutting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="theory/Wire_derivation.html">Wire Cut QPD derivation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="theory/LOCC_wire_derivation.html">Wire cuts with classical communication</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1"><a class="reference internal" href="Acknowledgement.html">Acknowledgements</a></li>
@@ -178,8 +179,6 @@
 <li class="toctree-l2"><a class="reference internal" href="_autosummary/QCut.html">QCut</a></li>
 </ul>
 </details></li>
-</ul>
-<ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="Changelog.html">Changelog</a></li>
 </ul>
 
@@ -303,7 +302,9 @@
 <button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <i class="fa-solid fa-magnifying-glass fa-lg"></i>
 </button>
-
+<button class="sidebar-toggle secondary-toggle btn btn-sm pst-navbar-icon" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
 </div></div>
       
     </div>
@@ -319,6 +320,15 @@
     <div id="print-main-content">
         <div id="jb-print-toc">
             
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#installation">Installation</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#benchmarks">Benchmarks</a></li>
+</ul>
+            </nav>
         </div>
     </div>
 </div>
@@ -330,54 +340,104 @@
                   
   <section id="qcut-documentation">
 <h1>QCut documentation<a class="headerlink" href="#qcut-documentation" title="Link to this heading">#</a></h1>
-<p>A package for performing circuit knitting with wire cuts on hardware with no reset-gates or mid-circuit measurements. Built on top of Qiskit.</p>
+<p>QCut is a quantum circuit knitting package capable of efficiently partitioning
+quantum circuits with wire and gate cuts using advanced LOCC and joint rotation decompositions
+along with the standard local decompositions. It is designed to be compatible with Qiskit and should
+be compatible with any Qiskit programmable backend but has been especially designed to be compatible
+with IQM’s qpus and the Finnish Quantum Computing Infrastructure (<a class="reference external" href="https://fiqci.fi/">FiQCI</a>).</p>
+<p>QCut has been built at CSC - IT Center for Science (Finnish IT Center for Science)</p>
 <div class="toctree-wrapper compound">
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="Usage.html">Usage</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="Usage.html#installation">Installation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Usage.html#basic-usage">Basic usage</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Usage.html#basic-usage-shorthand">Basic usage shorthand</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Usage.html#automatic-cuts">Automatic cuts</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Usage.html#running-on-iqm-fake-backends">Running on IQM fake backends</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Usage.html#running-on-fiqci">Running on FiQCI</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Usage.html#running-on-other-hardware">Running on other hardware</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="Examples.html">Examples on using QCut</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="WireCuts.html">Wire cuts</a></li>
-<li class="toctree-l2"><a class="reference internal" href="GateCuts.html">Gate cuts</a></li>
-<li class="toctree-l2"><a class="reference internal" href="AutomaticCuts.html">Automatic cuts</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Multiple_cuts.html">Multiple cuts</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="Notebooks.html">Notebooks</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="examples/QCutBasicUsage.html">Basic Usage</a></li>
-<li class="toctree-l2"><a class="reference internal" href="examples/QCutCutSubsequentWires.html">Subsequent Wires</a></li>
-<li class="toctree-l2"><a class="reference internal" href="examples/QCutCutToThreeParts.html">Cut to Three parts</a></li>
-<li class="toctree-l2"><a class="reference internal" href="examples/QCutMultipleCutsOnSingleWire.html">Multiple cuts on a single wire</a></li>
-<li class="toctree-l2"><a class="reference internal" href="examples/QCutQAOAExample.html">QAOA Example</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="Theory.html">Theory</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="theory/CZ_derivation.html">CZ QPD derivation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="theory/SWAP_derivation.html">SWAP QPD derivation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="theory/Wire_derivation.html">Wire Cut QPD derivation</a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="Usage.html">Basic Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Options.html">Options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples.html">Examples on using QCut</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Notebooks.html">Notebooks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Theory.html">Theory</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Acknowledgement.html">Acknowledgements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="License.html">License</a></li>
-<li class="toctree-l1"><a class="reference internal" href="QCut.html">QCut API reference</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="_autosummary/QCut.html">QCut</a></li>
-</ul>
-</li>
-</ul>
-</div>
-<div class="toctree-wrapper compound">
-<ul>
+<li class="toctree-l1"><a class="reference internal" href="QCut.html">QCut API reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Changelog.html">Changelog</a></li>
 </ul>
 </div>
+<section id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Link to this heading">#</a></h2>
+<p>For installation a UNIX-like system is currently needed due to pymetis being used for automatic cut finding. On Windows use WSL</p>
+<div class="line-block">
+<div class="line"><strong>Pip:</strong></div>
+<div class="line">Installation should be done via <code class="docutils literal notranslate"><span class="pre">uv</span></code></div>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>uv<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>QCut
+<span class="c1">#or</span>
+uv<span class="w"> </span>add<span class="w"> </span>QCut
+</pre></div>
+</div>
+<p>If using other than the default Qiskit version (newest) it is recommended to install Qiskit first before installing QCut.</p>
+<p>Using uv is the recommended install method.</p>
+<div class="line-block">
+<div class="line"><strong>Install from source</strong></div>
+<div class="line">It is also possible to use QCut by cloning this repository and
+including it in your project folder.</div>
+</div>
+<p><strong>IQM hardware and fake backends</strong></p>
+<p>QCut ships an extra for this, so the adapter comes with it:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>uv<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span><span class="s2">&quot;QCut[iqm]&quot;</span>
+</pre></div>
+</div>
+<p>That installs <a class="reference external" href="https://docs.meetiqm.com/iqm-client">IQM client</a> with its Qiskit
+adapter, which covers Qiskit 1.0 up to but not including 2.2. Installing the extra will
+therefore hold Qiskit below 2.2, put it in an environment whose Qiskit is already in
+range if you would rather the resolver left it alone.</p>
+<p>After installation just import the backend you want to use:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">iqm.qiskit_iqm</span><span class="w"> </span><span class="kn">import</span> <span class="n">IQMFakeAdonis</span>
+<span class="n">backend</span> <span class="o">=</span> <span class="n">IQMFakeAdonis</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="benchmarks">
+<h2>Benchmarks<a class="headerlink" href="#benchmarks" title="Link to this heading">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">benchmarks/QCutVsAddon.ipynb</span></code> in the repository compares QCut against IBM’s
+<a class="reference external" href="https://github.com/Qiskit/qiskit-addon-cutting">qiskit-addon-cutting</a> given the same
+cuts: the gamma each achieves, how many subexperiments that comes to, how long they take
+to generate, and what the two cut finders settle on under the same qubit budget.
+The benchmarks so QCut consitently matching or beating the Qiskit Cutting Addon.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>uv<span class="w"> </span>sync<span class="w"> </span>--group<span class="w"> </span>benchmark
+</pre></div>
+</div>
+<p>Where one of QCut’s joint decompositions applies, the same cuts cost less:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<colgroup>
+<col style="width: 40.0%" />
+<col style="width: 30.0%" />
+<col style="width: 30.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"></th>
+<th class="head"><p>QCut</p></th>
+<th class="head"><p>addon</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>three wires cut at the same point</p></td>
+<td><p>gamma 15, 240 subexperiments</p></td>
+<td><p>gamma 64, 1024</p></td>
+</tr>
+<tr class="row-odd"><td><p>three rotations crossing one split</p></td>
+<td><p>gamma 7.16, 264 subexperiments</p></td>
+<td><p>gamma 10.5, 432</p></td>
+</tr>
+<tr class="row-even"><td><p>an <code class="docutils literal notranslate"><span class="pre">rzz</span></code> and an <code class="docutils literal notranslate"><span class="pre">rxx</span></code> on each of three crossing pairs</p></td>
+<td><p>gamma 115</p></td>
+<td><p>gamma 203</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Where none applies, the QAOA layer at the sizes measured, the two agree exactly.
+Turning consolidation, joint rotation cutting and communicating wire cuts off reproduces
+the addon’s gamma in every case the notebook measures, which is what says the difference
+is those three and not something else.</p>
+</section>
 </section>
 
 
@@ -396,7 +456,7 @@
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Usage</p>
+        <p class="prev-next-title">Basic Usage</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -406,6 +466,24 @@
             </div>
             
             
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item"><div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#installation">Installation</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#benchmarks">Benchmarks</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
               
             
           </div>

@@ -41,7 +41,7 @@
 
     <script src="_static/jquery.js?v=5d32c60e"></script>
     <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-    <script src="_static/documentation_options.js?v=ddb9cf62"></script>
+    <script src="_static/documentation_options.js?v=60ebb597"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/scripts/sphinx-book-theme.js?v=fab101a9"></script>
@@ -51,7 +51,7 @@
     <link rel="search" title="Search" href="search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="1.3.2.post1.dev13+g0514c21f3" />
+  <meta name="docsearch:version" content="1.3.2.post1.dev14+g176d5596d" />
   </head>
   
   
@@ -148,26 +148,27 @@
     <div class="bd-toc-item navbar-nav active">
         <p aria-level="2" class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="Usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Usage.html">Basic Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Options.html">Options</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="Examples.html">Examples on using QCut</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="WireCuts.html">Wire cuts</a></li>
-<li class="toctree-l2"><a class="reference internal" href="GateCuts.html">Gate cuts</a></li>
-<li class="toctree-l2"><a class="reference internal" href="AutomaticCuts.html">Automatic cuts</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Multiple_cuts.html">Multiple cuts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/WireCuts.html">Wire cuts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/GateCuts.html">Gate cuts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/AutomaticCuts.html">Automatic cuts</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="Notebooks.html">Notebooks</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="examples/QCutBasicUsage.html">Basic Usage</a></li>
-<li class="toctree-l2"><a class="reference internal" href="examples/QCutCutSubsequentWires.html">Subsequent Wires</a></li>
-<li class="toctree-l2"><a class="reference internal" href="examples/QCutCutToThreeParts.html">Cut to Three parts</a></li>
-<li class="toctree-l2"><a class="reference internal" href="examples/QCutMultipleCutsOnSingleWire.html">Multiple cuts on a single wire</a></li>
-<li class="toctree-l2"><a class="reference internal" href="examples/QCutQAOAExample.html">QAOA Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/QCutBasicUsage.html">Basic Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/QCutQAOAExample.html">QAOA Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notebooks/QCutOptionsExample.html">Cut Options Example</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="Theory.html">Theory</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="theory/CZ_derivation.html">CZ QPD derivation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="theory/SWAP_derivation.html">SWAP QPD derivation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="theory/General_2q_derivation.html">General two-qubit QPD derivation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="theory/Joint_rotation_derivation.html">Joint rotation gate cutting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="theory/Wire_derivation.html">Wire Cut QPD derivation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="theory/LOCC_wire_derivation.html">Wire cuts with classical communication</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1"><a class="reference internal" href="Acknowledgement.html">Acknowledgements</a></li>
@@ -176,8 +177,6 @@
 <li class="toctree-l2"><a class="reference internal" href="_autosummary/QCut.html">QCut</a></li>
 </ul>
 </details></li>
-</ul>
-<ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="Changelog.html">Changelog</a></li>
 </ul>
 
@@ -282,28 +281,49 @@
 <h1 id="index">Index</h1>
 
 <div class="genindex-jumpbox">
- <a href="#C"><strong>C</strong></a>
+ <a href="#_"><strong>_</strong></a>
+ | <a href="#C"><strong>C</strong></a>
  | <a href="#E"><strong>E</strong></a>
  | <a href="#F"><strong>F</strong></a>
  | <a href="#G"><strong>G</strong></a>
+ | <a href="#J"><strong>J</strong></a>
  | <a href="#M"><strong>M</strong></a>
+ | <a href="#N"><strong>N</strong></a>
  | <a href="#Q"><strong>Q</strong></a>
  | <a href="#R"><strong>R</strong></a>
+ | <a href="#S"><strong>S</strong></a>
  | <a href="#T"><strong>T</strong></a>
+ | <a href="#W"><strong>W</strong></a>
  
 </div>
+<h2 id="_">_</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/QCut.html#QCut.CutOptions.__init__">__init__() (QCut.CutOptions method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
 <h2 id="C">C</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="_autosummary/QCut.html#QCut.cut">cut() (in module QCut)</a>
+      <li><a href="_autosummary/QCut.html#QCut.CutOptions.consolidate">consolidate (QCut.CutOptions attribute)</a>
 </li>
-      <li><a href="_autosummary/QCut.html#QCut.cutCZ">cutCZ() (in module QCut)</a>
+      <li><a href="_autosummary/QCut.html#QCut.CutOptions.consolidate_mode">consolidate_mode (QCut.CutOptions property)</a>
+</li>
+      <li><a href="_autosummary/QCut.html#QCut.consolidate_two_qubit_blocks">consolidate_two_qubit_blocks() (in module QCut)</a>
+</li>
+      <li><a href="_autosummary/QCut.html#QCut.cut">cut() (in module QCut)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/QCut.html#QCut.cutCZ">cutCZ() (in module QCut)</a>
+</li>
       <li><a href="_autosummary/QCut.html#QCut.cutGate">cutGate() (in module QCut)</a>
 </li>
       <li><a href="_autosummary/QCut.html#QCut.cutISWAP">cutISWAP() (in module QCut)</a>
+</li>
+      <li><a href="_autosummary/QCut.html#QCut.CutOptions">CutOptions (class in QCut)</a>
 </li>
       <li><a href="_autosummary/QCut.html#QCut.cutSWAP">cutSWAP() (in module QCut)</a>
 </li>
@@ -316,12 +336,28 @@
       <li><a href="_autosummary/QCut.html#QCut.estimate_expectation_values">estimate_expectation_values() (in module QCut)</a>
 </li>
   </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/QCut.html#QCut.estimate_run">estimate_run() (in module QCut)</a>
+</li>
+      <li><a href="_autosummary/QCut.html#QCut.CutOptions.expansion">expansion (QCut.CutOptions attribute)</a>
+</li>
+  </ul></td>
 </tr></table>
 
 <h2 id="F">F</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="_autosummary/QCut.html#QCut.find_cuts">find_cuts() (in module QCut)</a>
+</li>
+      <li><a href="_autosummary/QCut.html#QCut.CutOptions.finder_candidates">finder_candidates (QCut.CutOptions attribute)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/QCut.html#QCut.CutOptions.finder_cut_mode">finder_cut_mode (QCut.CutOptions attribute)</a>
+</li>
+      <li><a href="_autosummary/QCut.html#QCut.CutOptions.finder_max_qubits">finder_max_qubits (QCut.CutOptions attribute)</a>
+</li>
+      <li><a href="_autosummary/QCut.html#QCut.CutOptions.finder_num_partitions">finder_num_partitions (QCut.CutOptions attribute)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -338,9 +374,25 @@
   </ul></td>
 </tr></table>
 
+<h2 id="J">J</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/QCut.html#QCut.CutOptions.joint_rotation_cuts">joint_rotation_cuts (QCut.CutOptions attribute)</a>
+</li>
+  </ul></td>
+</tr></table>
+
 <h2 id="M">M</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/QCut.html#QCut.CutOptions.max_exact_groups">max_exact_groups (QCut.CutOptions attribute)</a>
+</li>
+      <li><a href="_autosummary/QCut.html#QCut.CutOptions.max_qubits">max_qubits (QCut.CutOptions property)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/QCut.html#QCut.CutOptions.min_communicating_block">min_communicating_block (QCut.CutOptions property)</a>
+</li>
       <li>
     module
 
@@ -348,6 +400,18 @@
         <li><a href="_autosummary/QCut.html#module-QCut">QCut</a>
 </li>
       </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="N">N</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/QCut.html#QCut.CutOptions.num_partitions">num_partitions (QCut.CutOptions property)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/QCut.html#QCut.CutOptions.num_samples">num_samples (QCut.CutOptions attribute)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -367,6 +431,8 @@
 <h2 id="R">R</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/QCut.html#QCut.CutOptions.replace">replace() (QCut.CutOptions method)</a>
+</li>
       <li><a href="_autosummary/QCut.html#QCut.run">run() (in module QCut)</a>
 </li>
   </ul></td>
@@ -374,6 +440,20 @@
       <li><a href="_autosummary/QCut.html#QCut.run_cut_circuit">run_cut_circuit() (in module QCut)</a>
 </li>
       <li><a href="_autosummary/QCut.html#QCut.run_experiments">run_experiments() (in module QCut)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="S">S</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/QCut.html#QCut.CutOptions.sample_count">sample_count (QCut.CutOptions property)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/QCut.html#QCut.CutOptions.seed">seed (QCut.CutOptions attribute)</a>
+</li>
+      <li><a href="_autosummary/QCut.html#QCut.CutOptions.should_sample">should_sample() (QCut.CutOptions method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -386,6 +466,14 @@
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="_autosummary/QCut.html#QCut.transpile_subcircuits">transpile_subcircuits() (in module QCut)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="W">W</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/QCut.html#QCut.CutOptions.wire_cut_communication">wire_cut_communication (QCut.CutOptions attribute)</a>
 </li>
   </ul></td>
 </tr></table>

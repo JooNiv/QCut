@@ -1,0 +1,568 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Cutting wires with classical communication &#8212; QCut</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=3c74b3bc" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../_static/jquery.js?v=5d32c60e"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+    <script src="../_static/documentation_options.js?v=60ebb597"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=fab101a9"></script>
+    <script>window.MathJax = {"tex": {"macros": {"ket": ["\\left|#1\\right\\rangle", 1], "bra": ["\\left\\langle#1\\right|", 1], "braket": ["\\left\\langle#1\\middle|#2\\right\\rangle", 2], "Tr": "\\operatorname{Tr}"}}, "options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'theory/LOCC_wire_derivation';</script>
+    <link rel="icon" href="../_static/QCut-logo.jpg"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Acknowledgements" href="../Acknowledgement.html" />
+    <link rel="prev" title="Deriving Optimal QPD for Wire Cuts" href="Wire_derivation.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="1.3.2.post1.dev14+g176d5596d" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/QCut-logo.jpg" class="logo__image only-light" alt="QCut - Home"/>
+    <img src="../_static/QCut-logo.jpg" class="logo__image only-dark pst-js-only" alt="QCut - Home"/>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../Usage.html">Basic Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Options.html">Options</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../Examples.html">Examples on using QCut</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../examples/WireCuts.html">Wire cuts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/GateCuts.html">Gate cuts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/AutomaticCuts.html">Automatic cuts</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../Notebooks.html">Notebooks</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../notebooks/QCutBasicUsage.html">Basic Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notebooks/QCutQAOAExample.html">QAOA Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notebooks/QCutOptionsExample.html">Cut Options Example</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="../Theory.html">Theory</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="CZ_derivation.html">CZ QPD derivation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="SWAP_derivation.html">SWAP QPD derivation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="General_2q_derivation.html">General two-qubit QPD derivation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Joint_rotation_derivation.html">Joint rotation gate cutting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Wire_derivation.html">Wire Cut QPD derivation</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">Wire cuts with classical communication</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="../Acknowledgement.html">Acknowledgements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../License.html">License</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../QCut.html">QCut API reference</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../_autosummary/QCut.html">QCut</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="../Changelog.html">Changelog</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/theory/LOCC_wire_derivation.md" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.md</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button pst-navbar-icon"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button>
+
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+<button class="sidebar-toggle secondary-toggle btn btn-sm pst-navbar-icon" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Cutting wires with classical communication</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#why-local-operations-cannot-do-better">Why local operations cannot do better</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-construction">The construction</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#getting-the-bases">Getting the bases</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#where-the-terms-come-from">Where the terms come from</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#running-it-in-waves">Running it in waves</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#what-it-actually-buys">What it actually buys</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#references">References</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="cutting-wires-with-classical-communication">
+<h1>Cutting wires with classical communication<a class="headerlink" href="#cutting-wires-with-classical-communication" title="Link to this heading">#</a></h1>
+<p><strong>Cutting a wire costs <span class="math notranslate nohighlight">\(\gamma = 4\)</span>, and cutting <span class="math notranslate nohighlight">\(n\)</span> of them costs <span class="math notranslate nohighlight">\(4^n\)</span>. That is already optimal for local operations alone, so cutting wires as a block buys nothing by itself. Letting the two sides exchange the measured outcome changes it to <span class="math notranslate nohighlight">\(2^{n+1} - 1\)</span>, and drops the number of channels from <span class="math notranslate nohighlight">\(8^n\)</span> to <span class="math notranslate nohighlight">\(2^n + 1\)</span>. The implementation is <code class="docutils literal notranslate"><span class="pre">QCut/qpd_locc.py</span></code>. What that gains in practice is not the whole <span class="math notranslate nohighlight">\(\gamma\)</span> story, and the last section is about why.</strong></p>
+<section id="why-local-operations-cannot-do-better">
+<h2>Why local operations cannot do better<a class="headerlink" href="#why-local-operations-cannot-do-better" title="Link to this heading">#</a></h2>
+<p>The <a class="reference internal" href="Wire_derivation.html"><span class="std std-doc">wire cut derivation</span></a> decomposes the identity channel into eight measure-and-prepare terms with <span class="math notranslate nohighlight">\(\gamma = 4\)</span>. That is provably the best possible without communication, and unlike gate cuts it stays that way for a block. Proposition 4.1 of <a class="reference internal" href="#locc-ref">[1]</a> shows</p>
+<div class="math notranslate nohighlight">
+\[
+\gamma_{\mathrm{LO}}\bigl(\mathrm{Id}^{\otimes n}\bigr) = 4^n
+\]</div>
+<p>exactly, so applying the single-wire table <span class="math notranslate nohighlight">\(n\)</span> times is already optimal. There is nothing to gain from treating a block jointly, which is the opposite of the situation for <a class="reference internal" href="Joint_rotation_derivation.html"><span class="std std-doc">parallel rotation gates</span></a>.</p>
+<p>Communication changes that. Proposition 4.2 of the same work gives</p>
+<div class="math notranslate nohighlight">
+\[
+\gamma_{\mathrm{LOCC}}\bigl(\mathrm{Id}^{\otimes n}\bigr) = 2^{n+1} - 1
+\]</div>
+<p>so one wire costs 3 rather than 4, two cost 7 rather than 16, three cost 15 rather than 64. Note that even a single wire improves, which does not happen for gate cuts.</p>
+</section>
+<section id="the-construction">
+<h2>The construction<a class="headerlink" href="#the-construction" title="Link to this heading">#</a></h2>
+<p>The protocol that attains it and needs no ancilla qubits is Theorem 3 of <a class="reference internal" href="#locc-ref">[2]</a>,</p>
+<div class="math notranslate nohighlight">
+\[
+\mathrm{Id}^{\otimes n}(\cdot) =
+\sum_{i=1}^{2^n}\sum_{j\in\{0,1\}^n}
+  \mathrm{Tr}\bigl[U_i|j\rangle\langle j|U_i^\dagger\,(\cdot)\bigr]\;
+  U_i|j\rangle\langle j|U_i^\dagger
+\;-\;(2^n-1)\sum_j \mathrm{Tr}\bigl[|j\rangle\langle j|\,(\cdot)\bigr]\,\rho_j
+\]</div>
+<p>with <span class="math notranslate nohighlight">\(\rho_j\)</span> the uniform mixture over the computational basis states other than <span class="math notranslate nohighlight">\(|j\rangle\)</span>. In words, <strong>measure in one of the <span class="math notranslate nohighlight">\(2^n+1\)</span> mutually unbiased bases and prepare the state you just measured</strong>, except in the computational basis where you prepare any of the others and flip the sign. Summing the absolute coefficients gives <span class="math notranslate nohighlight">\(2^n + (2^n - 1)\)</span>, which is the optimum above.</p>
+<p>The prepared state depends on the measured outcome. That dependence <em>is</em> the classical communication, and as long as this communication only flows one way, it can be realised as classical processing in between circuit executions. For cases where the communication flows both ways real time communication between the QPUs would be required. This is not supported.</p>
+<section id="getting-the-bases">
+<h3>Getting the bases<a class="headerlink" href="#getting-the-bases" title="Link to this heading">#</a></h3>
+<p>The <span class="math notranslate nohighlight">\(2^n+1\)</span> mutually unbiased bases correspond to a partition of the <span class="math notranslate nohighlight">\(4^n-1\)</span> non-identity Pauli strings into <span class="math notranslate nohighlight">\(2^n+1\)</span> sets of <span class="math notranslate nohighlight">\(2^n-1\)</span> commuting strings, each a maximal isotropic subspace of <span class="math notranslate nohighlight">\(\mathbb{F}_2^{2n}\)</span> under the symplectic form. Identifying <span class="math notranslate nohighlight">\(\mathbb{F}_2^n\)</span> with <span class="math notranslate nohighlight">\(\mathrm{GF}(2^n)\)</span> produces them all at once as</p>
+<div class="math notranslate nohighlight">
+\[
+L_\alpha = \{(x \mid \alpha x) : x \in \mathrm{GF}(2^n)\}, \qquad
+L_\infty = \{(0 \mid y)\}
+\]</div>
+<p>one for each field element plus the point at infinity. The subspaces are isotropic because multiplication in the field commutes.</p>
+<p>Each basis is then the joint eigenbasis of its subspace, pinned down uniquely by weighting the <span class="math notranslate nohighlight">\(n\)</span> generators by distinct powers of two before diagonalising, so that every sign pattern lands on its own eigenvalue.</p>
+</section>
+<section id="where-the-terms-come-from">
+<h3>Where the terms come from<a class="headerlink" href="#where-the-terms-come-from" title="Link to this heading">#</a></h3>
+<p>The measured label <span class="math notranslate nohighlight">\(j\)</span> is an <strong>outcome</strong>, not a term of the decomposition. Its <span class="math notranslate nohighlight">\(2^n\)</span> values share one channel’s coefficient between them, because <span class="math notranslate nohighlight">\(\sum_j \mathrm{Tr}[\Pi_{ij}\rho] = 1\)</span>. <code class="docutils literal notranslate"><span class="pre">locc_wire_qpd</span></code> still emits one entry per <span class="math notranslate nohighlight">\((\text{channel}, \text{label}, \text{prepared state})\)</span>, giving <span class="math notranslate nohighlight">\(2^n(2^{n+1}-1)\)</span> entries, and gives each a coefficient of <span class="math notranslate nohighlight">\(1/2^n\)</span> of its channel’s. The estimator recovers the missing factor by weighting each label by how often it actually came up. That keeps the coefficient one-norm equal to <span class="math notranslate nohighlight">\(2^{n+1}-1\)</span> and lets everything downstream treat these like any other terms.</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head text-left"><p>wires</p></th>
+<th class="head text-left"><p>channels</p></th>
+<th class="head text-left"><p>circuits</p></th>
+<th class="head text-left"><p><span class="math notranslate nohighlight">\(\gamma\)</span></p></th>
+<th class="head text-left"><p>without communication</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td class="text-left"><p>1</p></td>
+<td class="text-left"><p>3</p></td>
+<td class="text-left"><p>6</p></td>
+<td class="text-left"><p>3</p></td>
+<td class="text-left"><p>8 circuits, <span class="math notranslate nohighlight">\(\gamma = 4\)</span></p></td>
+</tr>
+<tr class="row-odd"><td class="text-left"><p>2</p></td>
+<td class="text-left"><p>5</p></td>
+<td class="text-left"><p>28</p></td>
+<td class="text-left"><p>7</p></td>
+<td class="text-left"><p>64 circuits, <span class="math notranslate nohighlight">\(\gamma = 16\)</span></p></td>
+</tr>
+<tr class="row-even"><td class="text-left"><p>3</p></td>
+<td class="text-left"><p>9</p></td>
+<td class="text-left"><p>120</p></td>
+<td class="text-left"><p>15</p></td>
+<td class="text-left"><p>512 circuits, <span class="math notranslate nohighlight">\(\gamma = 64\)</span></p></td>
+</tr>
+<tr class="row-odd"><td class="text-left"><p>4</p></td>
+<td class="text-left"><p>17</p></td>
+<td class="text-left"><p>496</p></td>
+<td class="text-left"><p>31</p></td>
+<td class="text-left"><p>4096 circuits, <span class="math notranslate nohighlight">\(\gamma = 256\)</span></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</section>
+<section id="running-it-in-waves">
+<h2>Running it in waves<a class="headerlink" href="#running-it-in-waves" title="Link to this heading">#</a></h2>
+<p>A communicating cut forces its measuring side to run before its preparing side, so the subcircuits acquire a dependency, and those dependencies chain. Cutting a circuit into <span class="math notranslate nohighlight">\(A\)</span>, <span class="math notranslate nohighlight">\(B\)</span> and <span class="math notranslate nohighlight">\(C\)</span> so that <span class="math notranslate nohighlight">\(A\)</span> feeds <span class="math notranslate nohighlight">\(B\)</span> and <span class="math notranslate nohighlight">\(B\)</span> feeds <span class="math notranslate nohighlight">\(C\)</span> needs to then be ran in three “waves”, because <span class="math notranslate nohighlight">\(B\)</span>’s own measured outcome is what decides what <span class="math notranslate nohighlight">\(C\)</span> prepares. The wave of a subcircuit is the longest chain reaching it. If wire cuts point both ways between the same two subcircuits the dependencies form a cycle, no order can satisfy them, and one direction keeps the non-communicating table.</p>
+<p>Wave one holds everything no label can affect. Groups that differ only in which label they answer share those circuits, so they run once for the whole set rather than once per group. Each later wave splits its shots in proportion to how often the labels it depends on came up.</p>
+<p>The waves do not get equal shares of the budget. That sharing is exactly what makes a measuring shot worth more than a preparing one. It buys precision for every group answering that circuit at once, while a preparing shot buys it for one group. Dividing the budget evenly over the subcircuits, which is what a wave-agnostic rule amounts to, therefore over-funds the measuring wave.</p>
+<p>Nothing here runs one shot at a time. Within a wave the circuits are sorted by how many shots they want and grouped into batches, each running at the mean of what its own circuits asked for. A batch closes on whichever comes first of <code class="docutils literal notranslate"><span class="pre">max_batch_size</span></code> circuits or a spread of more than a factor of two in what they asked for. The size limit keeps a job within what the backend will take, the spread limit stops a generous <code class="docutils literal notranslate"><span class="pre">max_batch_size</span></code> from collapsing a whole wave into one job at one shot count, which would be uniform allocation and would discard the proportional split. Uniform allocation is never better: by Cauchy-Schwarz its variance <span class="math notranslate nohighlight">\(G\sum_i p_i^2/T\)</span> is at least the proportional <span class="math notranslate nohighlight">\((\sum_i p_i)^2/T\)</span>, and the gap widens exactly as the label distribution skews.</p>
+</section>
+<section id="what-it-actually-buys">
+<h2>What it actually buys<a class="headerlink" href="#what-it-actually-buys" title="Link to this heading">#</a></h2>
+<p>The circuit count improvement is real and large, 28 against 64 at two wires, 120 against 512 at three.</p>
+<p>The shot cost is more subtle, and the ideal <span class="math notranslate nohighlight">\(\gamma\)</span> overstates it. The protocol assumes the prepared state can follow the measured outcome <strong>shot by shot</strong>. Batched runs have to emulate that, so a group’s measuring side is read from only the shots whose label matched, rescaled by <span class="math notranslate nohighlight">\(2^n\)</span>. Its variance is then <span class="math notranslate nohighlight">\(2^n/N\)</span> rather than <span class="math notranslate nohighlight">\(1/N\)</span>, and only the sharing of that circuit between the channel’s <span class="math notranslate nohighlight">\(2^n\)</span> groups pays for the difference. It pays for it exactly, leaving nothing over, the measuring side comes out at parity, not ahead.</p>
+<p>That is why the realised gain falls short of the ideal <span class="math notranslate nohighlight">\(\gamma\)</span>. The <span class="math notranslate nohighlight">\(\gamma\)</span> of a decomposition bounds the shot cost on the assumption that every term’s per-shot estimator is capped at one. The local terms are products of two unconditioned Pauli expectations and sit far below that cap, while the rescaling above puts the communicating terms near it, so the two decompositions approach their own bounds by different margins and the ratio of the <span class="math notranslate nohighlight">\(\gamma\)</span>s overpredicts the ratio of the costs.</p>
+<p>How far short is circuit dependent and this page does not put a number on it. Measurements taken by sampling the estimator’s variance were too noisy to support one — repeats of a single configuration moved by factors approaching two — and settling it wants the variance evaluated in closed form from exact term values rather than sampled. What is not in doubt is that a single wire costs more in shots than the local tables while saving only a quarter of the circuits, and that blocks of two and more save on shots, circuits and jobs together.</p>
+<p>That is why <code class="docutils literal notranslate"><span class="pre">wire_cut_communication</span></code> defaults to <code class="docutils literal notranslate"><span class="pre">&quot;auto&quot;</span></code>, which uses communication only for blocks of two or more wires.</p>
+<p>Removing the <span class="math notranslate nohighlight">\(2^n\)</span> rescaling altogether would need genuine per-shot feed-forward between the two halves, mid-circuit measurement with the preparation conditioned on it, which is not efficient on current hardware.</p>
+</section>
+<section id="references">
+<span id="locc-ref"></span><h2>References<a class="headerlink" href="#references" title="Link to this heading">#</a></h2>
+<ol class="arabic simple">
+<li><p>L. Brenner, C. Piveteau and D. Sutter, <em>Optimal wire cutting with classical communication</em>, <a class="reference external" href="https://arxiv.org/abs/2302.03366">arXiv:2302.03366</a>. Proposition 4.1 for <span class="math notranslate nohighlight">\(\gamma_{\mathrm{LO}} = 4^n\)</span> and Proposition 4.2 for <span class="math notranslate nohighlight">\(\gamma_{\mathrm{LOCC}} = 2^{n+1}-1\)</span>. Its own protocol is teleportation based and needs one ancilla per wire.</p></li>
+<li><p>H. Harada, K. Wada and N. Yamamoto, <em>Doubly optimal parallel wire cutting without ancilla qubits</em>, PRX Quantum <strong>5</strong>, 040308 (2024), <a class="reference external" href="https://arxiv.org/abs/2303.07340">arXiv:2303.07340</a>. Theorem 3 is the decomposition used here, optimal in both the overhead and the number of channels, and free of ancillas.</p></li>
+</ol>
+</section>
+</section>
+
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="Wire_derivation.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Deriving Optimal QPD for Wire Cuts</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="../Acknowledgement.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Acknowledgements</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item"><div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#why-local-operations-cannot-do-better">Why local operations cannot do better</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-construction">The construction</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#getting-the-bases">Getting the bases</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#where-the-terms-come-from">Where the terms come from</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#running-it-in-waves">Running it in waves</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#what-it-actually-buys">What it actually buys</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#references">References</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Joonas Nivala
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2024, Joonas Nivala.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

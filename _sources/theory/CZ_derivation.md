@@ -1,6 +1,6 @@
 # Deriving optimal QPD for the CZ gate
 
-**Here we will briefly go over where the decomposition for the CZ gate used comes from and how that is transfromed to operations implementable on a quantum computer. The derivation is based on [[1]](#references).**
+**Here we will briefly go over where the decomposition for the CZ gate used comes from and how that is transformed to operations implementable on a quantum computer. The derivation is based on [[1]](#cz-ref).**
 
 ## Background
 
@@ -17,7 +17,7 @@ CZ = \exp(i\pi Z \otimes I/4) \cdot \exp(i\pi I \otimes Z/4) \cdot \exp(-i\pi Z 
 
 We can immediately see that the first two channels are just local single qubit Z rotations, S gates in this case. The only non-local part is then the third term $\exp(-i\pi Z \otimes Z/4)$ and so has the form $\exp(i\theta A_1 \otimes A_2)$ with $A_1 = A_2 = Z, \theta = -\pi/4$
 
-## Apply Lemma 1 from [[1]](#references)
+## Apply Lemma 1 from [[1]](#cz-ref)
 
 The lemma states that we can decompose the super operator $S(\exp(i\theta A_1 \otimes A_2))$ as:
 
@@ -60,7 +60,7 @@ Here Meas is the computational basis measurement and Z S means first applying th
 
 Summing over the absolute coefficients we get $\gamma=3$ which is optimal (without communication).
 
-(references)=
+(cz-ref)=
 ## References
 1. K. Mitarai and K. Fujii, "Constructing a virtual two-qubit gate by sampling single-qubit operations", New J. Phys., vol. 23, no. 2, p. 023021, Feb. 2021, doi: 10.1088/1367-2630/abd7bc.
 
@@ -154,5 +154,5 @@ Nos this gets multiplied by the extra factors from the terms in Appendix A (sinc
 
 $\frac{1}{16}*2^2*|1 + i|^2 = \frac{1}{16}*4*2=\frac{1}{2}$
 
-And finally this is multiplied by the $\alpha_1 \alpha_2$ factor from the sum yielding $\pm \frac{1}{2}$ as the coeffcient for term 3 depending on the $\alpha's$.
+And finally this is multiplied by the $\alpha_1 \alpha_2$ factor from the sum yielding $\pm \frac{1}{2}$ as the coefficient for term 3 depending on the $\alpha's$.
 

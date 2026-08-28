@@ -1,6 +1,6 @@
 # Swap derivation
 
-**Naively one could decompose a SWAP gate into 3 CZ gates (plus local unitaries) and decompose those using the optimal CZ QPD giving a decomposition with $\gamma=3^3=27$, sampling overhead of $27^2$, and 216 elements in the QPD. However, luckily this is far from optimal. Utilising KAK decomposition and some tricks from [[1]](#ref) we can achieve a decomposition with $\gamma=7$, sampling overhead of 49, and 34 elements in QPD. In this document we'll go over this decomposition. The same method can also be used to optimally decompose othe two qubit gates.** 
+**Naively one could decompose a SWAP gate into 3 CZ gates (plus local unitaries) and decompose those using the optimal CZ QPD giving a decomposition with $\gamma=3^3=27$, sampling overhead of $27^2$, and 216 elements in the QPD. However, luckily this is far from optimal. Utilising KAK decomposition and some tricks from [[1]](#ref) we can achieve a decomposition with $\gamma=7$, sampling overhead of 49, and 34 elements in QPD. In this document we'll go over this decomposition. The same method can also be used to optimally decompose other two qubit gates.** 
 
 ## Pauli expansion
 
@@ -48,7 +48,7 @@ Any two qubit unitary can be written as [[2]](#ref):
     U = (K_1 \otimes K_2)\exp[-i(\theta_1X\otimes X + \theta_2Y\otimes Y + \theta_3Z\otimes Z)](K_3 \otimes K4)
 \end{equation}
 
-Where $K_i$ are local unitaries and $\theta_i$ are the non-local paramters. For swap gate the local parts are trivial. Since SWAP is already diagonal in the Pauli basis $K_i=I$. [Equation 3](#eq3) then simplifies to just $\exp[-i(\theta_1X\otimes X + \theta_2Y\otimes Y + \theta_3Z\otimes Z)]$. To evaluate this we note that the Pauli terms commute and they all square to identity and write:
+Where $K_i$ are local unitaries and $\theta_i$ are the non-local parameters. For swap gate the local parts are trivial. Since SWAP is already diagonal in the Pauli basis $K_i=I$. [Equation 3](#eq3) then simplifies to just $\exp[-i(\theta_1X\otimes X + \theta_2Y\otimes Y + \theta_3Z\otimes Z)]$. To evaluate this we note that the Pauli terms commute and they all square to identity and write:
 
 \begin{equation}
     \begin{aligned}
@@ -209,7 +209,7 @@ From [[1]](#ref) equation 19 with $u_\alpha u_{\alpha'}^*$=1/4 (all real and equ
     U=\sum_\alpha|u_\alpha|^2\sigma_\alpha^{\otimes 2} + \sum_{\alpha<\alpha'}2Re(u_\alpha u_{\alpha'}^*)(A_{\alpha\alpha'}^{\otimes2}-B_{\alpha\alpha}^{\otimes 2})
 \end{equation}
 
-Note that here we omit the last term of the equation since for SWAP it is 0. However if deriving the QPD for e.g an iSWAP gate the last term would also be relevant.
+Note that here we omit the last term of the equation since for SWAP it is 0. However if deriving the QPD for e.g an iSWAP gate the last term would also be relevant. That general case is worked through in [General two-qubit QPD derivation](General_2q_derivation.md), which QCut uses to generate a QPD for any two-qubit gate.
 
 The first term is simple for it just applies a Pauli gate to both qubits with coefficient of $|u_\alpha|^2=\frac{1}{4}$. The entries are then:
 
@@ -224,7 +224,7 @@ For term two we can again treat it as four Kraus families. Note that the base co
 
 ### Family 1
 
-Operator normalised, no extra terms. Coeffcient is 1/2:
+Operator normalised, no extra terms. Coefficient is 1/2:
 
 | Qubit 1              | Qubit 2               | Coef|
 | :-----               | :-----:               | ---:|
@@ -253,7 +253,7 @@ Expanding $(B^+-B^-)$ gives $B^+B^+-B^+B^--B^-B^++B^-B^-$, the $\pm$ factor in t
 
 ### Family 3
 
-Similarly as for family two we exapand and get $\pm1/8$ just without the extra -1 prefactor so the terms are:
+Similarly as for family two we expand and get $\pm1/8$ just without the extra -1 prefactor so the terms are:
 
 | Qubit 1     | Qubit 2     | Coef     |
 | :-----      | :-----:     |-----:    |

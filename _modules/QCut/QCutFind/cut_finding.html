@@ -41,7 +41,7 @@
 
     <script src="../../../_static/jquery.js?v=5d32c60e"></script>
     <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-    <script src="../../../_static/documentation_options.js?v=ddb9cf62"></script>
+    <script src="../../../_static/documentation_options.js?v=60ebb597"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/scripts/sphinx-book-theme.js?v=fab101a9"></script>
@@ -51,7 +51,7 @@
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="1.3.2.post1.dev13+g0514c21f3" />
+  <meta name="docsearch:version" content="1.3.2.post1.dev14+g176d5596d" />
   </head>
   
   
@@ -148,26 +148,27 @@
     <div class="bd-toc-item navbar-nav active">
         <p aria-level="2" class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="../../../Usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Usage.html">Basic Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Options.html">Options</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../Examples.html">Examples on using QCut</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../../WireCuts.html">Wire cuts</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../GateCuts.html">Gate cuts</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../AutomaticCuts.html">Automatic cuts</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../Multiple_cuts.html">Multiple cuts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../examples/WireCuts.html">Wire cuts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../examples/GateCuts.html">Gate cuts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../examples/AutomaticCuts.html">Automatic cuts</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../Notebooks.html">Notebooks</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../../examples/QCutBasicUsage.html">Basic Usage</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../examples/QCutCutSubsequentWires.html">Subsequent Wires</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../examples/QCutCutToThreeParts.html">Cut to Three parts</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../examples/QCutMultipleCutsOnSingleWire.html">Multiple cuts on a single wire</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../examples/QCutQAOAExample.html">QAOA Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notebooks/QCutBasicUsage.html">Basic Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notebooks/QCutQAOAExample.html">QAOA Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notebooks/QCutOptionsExample.html">Cut Options Example</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../Theory.html">Theory</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../theory/CZ_derivation.html">CZ QPD derivation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../theory/SWAP_derivation.html">SWAP QPD derivation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../theory/General_2q_derivation.html">General two-qubit QPD derivation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../theory/Joint_rotation_derivation.html">Joint rotation gate cutting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../theory/Wire_derivation.html">Wire Cut QPD derivation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../theory/LOCC_wire_derivation.html">Wire cuts with classical communication</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../Acknowledgement.html">Acknowledgements</a></li>
@@ -176,8 +177,6 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../_autosummary/QCut.html">QCut</a></li>
 </ul>
 </details></li>
-</ul>
-<ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../../../Changelog.html">Changelog</a></li>
 </ul>
 
@@ -283,18 +282,54 @@
 <span class="sd">The main cut finding workflow for QCut.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+
 <span class="kn">import</span><span class="w"> </span><span class="nn">rustworkx</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">rx</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">qiskit</span><span class="w"> </span><span class="kn">import</span> <span class="n">transpile</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">qiskit.circuit</span><span class="w"> </span><span class="kn">import</span> <span class="n">CircuitInstruction</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">QCut.circuit_preparation</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_locations_and_subcircuits</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">QCut.cutting.circuit_preparation</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_locations_and_subcircuits</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">QCut.cutting.consolidate</span><span class="w"> </span><span class="kn">import</span> <span class="n">consolidate_two_qubit_blocks</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">QCut.errors.qcuterror</span><span class="w"> </span><span class="kn">import</span> <span class="n">QCutError</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">QCut.options</span><span class="w"> </span><span class="kn">import</span> <span class="n">CutOptions</span><span class="p">,</span> <span class="n">resolve</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">QCut.QCutFind.graph_circuit_utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">circ_to_graph</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">QCut.QCutFind.metis</span><span class="w"> </span><span class="kn">import</span> <span class="n">k_way_metis_partition</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">QCut.QCutFind.metis</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">BUDGET_UFACTORS</span><span class="p">,</span>
+    <span class="n">FREE_UFACTOR</span><span class="p">,</span>
+    <span class="n">k_way_metis_partition</span><span class="p">,</span>
+    <span class="n">qubit_node_weights</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">QCut.QCutFind.refine</span><span class="w"> </span><span class="kn">import</span> <span class="n">refine_cuts</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">QCut.qpd_gates</span><span class="w"> </span><span class="kn">import</span> <span class="n">QPD_GATE_REGISTRY</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">QCut.qpd_gates</span><span class="w"> </span><span class="kn">import</span> <span class="n">cut_op</span> <span class="k">as</span> <span class="n">cut</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">QCut.qpd.qpd_gates</span><span class="w"> </span><span class="kn">import</span> <span class="n">QPD_GATE_REGISTRY</span><span class="p">,</span> <span class="n">CutTwoQubitGate</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">QCut.qpd.qpd_gates</span><span class="w"> </span><span class="kn">import</span> <span class="n">cut_op</span> <span class="k">as</span> <span class="n">cut</span>
 
-<span class="n">BASIS_GATES</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;cz&quot;</span><span class="p">,</span> <span class="s2">&quot;swap&quot;</span><span class="p">,</span> <span class="s2">&quot;iswap&quot;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">]</span>
+<span class="c1">#: Basis the circuit is transpiled into before the interaction graph is built. The</span>
+<span class="c1">#: two-qubit entries stop transpilation from breaking apart gates that could be cut</span>
+<span class="c1">#: whole, which would cost one cut per cz rather than one cut at the gate&#39;s own gamma.</span>
+<span class="n">BASIS_GATES</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;r&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;u&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;cz&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;swap&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;iswap&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;cx&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;cy&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ch&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ecr&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;dcx&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;rxx&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ryy&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;rzz&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;rzx&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;crx&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;cry&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;crz&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;cp&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;xx_plus_yy&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;xx_minus_yy&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+
+<span class="n">logger</span><span class="p">:</span> <span class="n">logging</span><span class="o">.</span><span class="n">Logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">extract_cuts</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">labels</span><span class="p">):</span>  <span class="c1"># noqa: C901</span>
@@ -380,14 +415,15 @@
                 <span class="p">)</span>
             <span class="p">)</span>
             <span class="n">target_index</span> <span class="o">=</span> <span class="n">i</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">offset</span>
-            <span class="n">qctest</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">target_index</span><span class="p">)</span>
+            <span class="n">original</span> <span class="o">=</span> <span class="n">qctest</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">target_index</span><span class="p">)</span>
 
             <span class="n">gate_name</span> <span class="o">=</span> <span class="n">j</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-            <span class="k">if</span> <span class="n">gate_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">QPD_GATE_REGISTRY</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;No cut marker registered for gate &#39;</span><span class="si">{</span><span class="n">gate_name</span><span class="si">}</span><span class="s2">&#39;.&quot;</span>
-                <span class="p">)</span>
-            <span class="n">cut_marker</span> <span class="o">=</span> <span class="n">QPD_GATE_REGISTRY</span><span class="p">[</span><span class="n">gate_name</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">gate_name</span> <span class="ow">in</span> <span class="n">QPD_GATE_REGISTRY</span><span class="p">:</span>
+                <span class="n">cut_marker</span> <span class="o">=</span> <span class="n">QPD_GATE_REGISTRY</span><span class="p">[</span><span class="n">gate_name</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># No dedicated marker, so wrap the gate we just removed and let its QPD</span>
+                <span class="c1"># be generated from its matrix at expansion time.</span>
+                <span class="n">cut_marker</span> <span class="o">=</span> <span class="n">CutTwoQubitGate</span><span class="p">(</span><span class="n">original</span><span class="o">.</span><span class="n">operation</span><span class="p">)</span>
 
             <span class="c1"># Insert the cut operation</span>
             <span class="n">insert_or_append</span><span class="p">(</span>
@@ -414,14 +450,52 @@
     <span class="k">return</span> <span class="n">qctest</span>
 
 
+<span class="k">def</span><span class="w"> </span><span class="nf">_cheaper_find_cuts</span><span class="p">(</span><span class="n">circuit</span><span class="p">,</span> <span class="n">options</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Find cuts both with and without consolidation and keep the cheaper plan.</span>
+
+<span class="sd">    Merging runs of gates on a pair lowers each pair&#39;s cost but can raise the total,</span>
+<span class="sd">    since a merged run of gates about different axes can no longer join a joint</span>
+<span class="sd">    decomposition. Here it also changes what the partitioner sees, so the two plans may</span>
+<span class="sd">    cut different gates and cannot be compared any other way.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">QCut.qpd.qpd_operations</span><span class="w"> </span><span class="kn">import</span> <span class="n">plan_cost</span>
+
+    <span class="n">candidates</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">first_error</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;always&quot;</span><span class="p">,</span> <span class="s2">&quot;never&quot;</span><span class="p">):</span>
+        <span class="n">forced</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">consolidate</span><span class="o">=</span><span class="n">label</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">found</span> <span class="o">=</span> <span class="n">find_cuts</span><span class="p">(</span><span class="n">circuit</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span> <span class="n">options</span><span class="o">=</span><span class="n">forced</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>  <span class="c1"># noqa: BLE001, PERF203</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;the </span><span class="si">%s</span><span class="s2"> plan could not be cut: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">error</span><span class="p">)</span>
+            <span class="n">first_error</span> <span class="o">=</span> <span class="n">first_error</span> <span class="ow">or</span> <span class="n">error</span>
+            <span class="k">continue</span>
+        <span class="n">candidates</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">plan_cost</span><span class="p">(</span><span class="n">found</span><span class="p">,</span> <span class="n">forced</span><span class="p">),</span> <span class="n">label</span><span class="p">,</span> <span class="n">found</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">candidates</span><span class="p">:</span>
+        <span class="c1"># Neither plan works, so report why rather than inventing a new message.</span>
+        <span class="k">raise</span> <span class="n">first_error</span> <span class="ow">or</span> <span class="n">QCutError</span><span class="p">(</span><span class="s2">&quot;no cutting plan could be found&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Stable sort, so a tie keeps &quot;always&quot; and therefore the plan with fewer cuts.</span>
+    <span class="n">candidates</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">candidate</span><span class="p">:</span> <span class="n">candidate</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">cost</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">chosen</span> <span class="o">=</span> <span class="n">candidates</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">candidates</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Consolidation is </span><span class="si">{</span><span class="s1">&#39;on&#39;</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">label</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s1">&#39;always&#39;</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">&#39;off&#39;</span><span class="si">}</span><span class="s2"> for this run, &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;since it costs gamma </span><span class="si">{</span><span class="n">cost</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2"> against </span><span class="si">{</span><span class="n">candidates</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2"> the other &quot;</span>
+            <span class="s2">&quot;way.&quot;</span>
+        <span class="p">)</span>
+    <span class="c1"># Hand back the options the caller passed, not the forced ones the search used, so</span>
+    <span class="c1"># both consolidation paths behave the same. Which way it went is in the log.</span>
+    <span class="n">chosen</span><span class="o">.</span><span class="n">options</span> <span class="o">=</span> <span class="n">options</span>
+    <span class="k">return</span> <span class="n">chosen</span>
+
+
 <div class="viewcode-block" id="find_cuts">
 <a class="viewcode-back" href="../../../_autosummary/QCut.html#QCut.find_cuts">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">find_cuts</span><span class="p">(</span>  <span class="c1"># noqa: C901</span>
     <span class="n">circuit</span><span class="p">,</span>
-    <span class="n">num_partitions</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">max_qubits</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">cuts</span><span class="o">=</span><span class="s2">&quot;both&quot;</span><span class="p">,</span>
-    <span class="n">more_data</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">options</span><span class="p">:</span> <span class="n">CutOptions</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Partition a quantum circuit into subcircuits by inserting cut operations.</span>
 
@@ -433,31 +507,18 @@
 
 <span class="sd">    Args:</span>
 <span class="sd">        circuit (QuantumCircuit): The input quantum circuit to partition.</span>
-<span class="sd">        num_partitions (int, optional): Number of partitions to create. If None,</span>
-<span class="sd">            determined from max_qubits.</span>
-<span class="sd">        max_qubits (list[int], optional): Maximum number of qubits allowed in each</span>
-<span class="sd">            partition. If specified, must match num_partitions.</span>
-<span class="sd">        cuts (str, optional): Type of cuts to insert. Can be &quot;both&quot;, &quot;gate&quot;, or &quot;wire&quot;.</span>
-<span class="sd">            Defaults to &quot;both&quot;.</span>
-<span class="sd">        more_data (bool, optional): If True, returns additional data for debugging and</span>
-<span class="sd">            analysis. Defaults to False.</span>
+<span class="sd">        options (CutOptions, optional): configuration for the run. Defaults to</span>
+<span class="sd">            QCut.options.DEFAULT_OPTIONS.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        tuple: If more_data is False, returns:</span>
-<span class="sd">            - list[list[int]]: Qubit locations for each subcircuit.</span>
-<span class="sd">            - list[QuantumCircuit]: List of subcircuits after cuts.</span>
-<span class="sd">            - list[dict]: Mapping of qubits for each subcircuit.</span>
-<span class="sd">        If more_data is True, returns:</span>
-<span class="sd">            - list[list[int]]: Qubit locations for each subcircuit.</span>
-<span class="sd">            - list[QuantumCircuit]: List of subcircuits after cuts.</span>
-<span class="sd">            - list[dict]: Mapping of qubits for each subcircuit.</span>
-<span class="sd">            - QuantumCircuit: The circuit with cuts inserted.</span>
-<span class="sd">            - list: Data describing the cuts.</span>
-<span class="sd">            - list: Additional cut data for testing.</span>
-<span class="sd">            - dict: Partition labels for each node.</span>
-<span class="sd">            - rustworkx.PyGraph: The graph representation of the circuit.</span>
-<span class="sd">            - dict: Mapping of nodes to qubits.</span>
+<span class="sd">        CutCircuit: A circuit with cut operations inserted, ready for decomposition into</span>
+<span class="sd">        subcircuits.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">options</span> <span class="o">=</span> <span class="n">resolve</span><span class="p">(</span><span class="n">options</span><span class="p">)</span>
+
+    <span class="n">num_partitions</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">num_partitions</span>
+    <span class="n">max_qubits</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">max_qubits</span>
+    <span class="n">cuts</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">finder_cut_mode</span>
 
     <span class="k">if</span> <span class="n">num_partitions</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">max_qubits</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -470,7 +531,7 @@
         <span class="p">)</span>
 
     <span class="k">if</span> <span class="p">(</span><span class="n">max_qubits</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">max_qubits</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">)</span> <span class="ow">or</span> <span class="n">num_partitions</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Number of partitions has to be atleast 2&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Number of partitions has to be at least 2&quot;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">num_partitions</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">circuit</span><span class="p">,</span> <span class="p">[],</span> <span class="p">[]</span>
@@ -478,6 +539,16 @@
     <span class="n">circuit</span><span class="o">.</span><span class="n">remove_final_measurements</span><span class="p">()</span>
 
     <span class="n">circuit</span> <span class="o">=</span> <span class="n">transpile</span><span class="p">(</span><span class="n">circuit</span><span class="p">,</span> <span class="n">optimization_level</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">basis_gates</span><span class="o">=</span><span class="n">BASIS_GATES</span><span class="p">)</span>
+
+    <span class="n">mode</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">consolidate_mode</span>
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;auto&quot;</span> <span class="ow">and</span> <span class="n">consolidate_two_qubit_blocks</span><span class="p">(</span><span class="n">circuit</span><span class="p">)</span> <span class="ow">is</span> <span class="n">circuit</span><span class="p">:</span>
+        <span class="n">mode</span> <span class="o">=</span> <span class="s2">&quot;never&quot;</span>  <span class="c1"># nothing was worth merging, so there is nothing to compare</span>
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;auto&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">_cheaper_find_cuts</span><span class="p">(</span><span class="n">circuit</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;always&quot;</span> <span class="ow">or</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;auto&quot;</span><span class="p">:</span>
+        <span class="c1"># Before the graph is built, so a merged run shows up as one edge to cut rather</span>
+        <span class="c1"># than several. Nothing is marked yet, so every pair is a candidate.</span>
+        <span class="n">circuit</span> <span class="o">=</span> <span class="n">consolidate_two_qubit_blocks</span><span class="p">(</span><span class="n">circuit</span><span class="p">)</span>
 
     <span class="n">graph</span><span class="p">,</span> <span class="n">nodes_on_qubit</span> <span class="o">=</span> <span class="n">circ_to_graph</span><span class="p">(</span><span class="n">circuit</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">cuts</span><span class="p">)</span>
 
@@ -487,44 +558,91 @@
         <span class="k">for</span> <span class="n">comp_ind</span><span class="p">,</span> <span class="n">comp</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">components</span><span class="p">):</span>
             <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">comp</span><span class="p">:</span>
                 <span class="n">labels</span><span class="p">[</span><span class="n">node</span><span class="p">]</span> <span class="o">=</span> <span class="n">comp_ind</span>
-        <span class="n">cut_data</span><span class="p">,</span> <span class="n">cut_data_test</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+        <span class="n">candidates</span> <span class="o">=</span> <span class="p">[(</span><span class="n">labels</span><span class="p">,</span> <span class="p">[],</span> <span class="p">[])]</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">labels</span> <span class="o">=</span> <span class="n">k_way_metis_partition</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">num_partitions</span><span class="p">)</span>
-        <span class="n">cut_data</span><span class="p">,</span> <span class="n">cut_data_test</span> <span class="o">=</span> <span class="n">extract_cuts</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span>
+        <span class="c1"># METIS minimises the weighted edge cut, which is the true cost only while no</span>
+        <span class="c1"># cuts share a decomposition, and it returns just the best partitioning it saw</span>
+        <span class="c1"># by that measure. Asking for one partitioning per seed and costing each whole</span>
+        <span class="c1"># plan afterwards compares them by what they actually cost. The seeds are fixed,</span>
+        <span class="c1"># so the answer is reproducible; ``options.seed`` shifts them as a set.</span>
+        <span class="n">base</span> <span class="o">=</span> <span class="mi">0</span> <span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">seed</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">int</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">seed</span><span class="p">)</span>
+        <span class="c1"># A qubit budget has to be asked for, not repaired for. The graph&#39;s nodes are</span>
+        <span class="c1"># wire segments, so METIS balancing node counts says nothing about how many</span>
+        <span class="c1"># qubits a partition ends up holding, and the repair afterwards moves whole</span>
+        <span class="c1"># qubits across and pays in cuts for each. Weighting the nodes so a partition&#39;s</span>
+        <span class="c1"># weight is its qubit count, and naming the share each may hold, gets the</span>
+        <span class="c1"># constraint met by the partitioner instead.</span>
+        <span class="k">if</span> <span class="n">max_qubits</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">weights</span><span class="p">,</span> <span class="n">targets</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+            <span class="n">ufactors</span> <span class="o">=</span> <span class="p">(</span><span class="n">FREE_UFACTOR</span><span class="p">,)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">weights</span> <span class="o">=</span> <span class="n">qubit_node_weights</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">nodes_on_qubit</span><span class="p">)</span>
+            <span class="n">total</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">max_qubits</span><span class="p">)</span>
+            <span class="n">targets</span> <span class="o">=</span> <span class="p">[</span><span class="n">allowance</span> <span class="o">/</span> <span class="n">total</span> <span class="k">for</span> <span class="n">allowance</span> <span class="ow">in</span> <span class="n">max_qubits</span><span class="p">]</span>
+            <span class="n">ufactors</span> <span class="o">=</span> <span class="n">BUDGET_UFACTORS</span>
+        <span class="n">candidates</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">offset</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">options</span><span class="o">.</span><span class="n">finder_candidates</span><span class="p">)):</span>
+            <span class="n">labels</span> <span class="o">=</span> <span class="n">k_way_metis_partition</span><span class="p">(</span>
+                <span class="n">graph</span><span class="p">,</span>
+                <span class="n">num_partitions</span><span class="p">,</span>
+                <span class="n">seed</span><span class="o">=</span><span class="n">base</span> <span class="o">+</span> <span class="n">offset</span> <span class="o">//</span> <span class="nb">len</span><span class="p">(</span><span class="n">ufactors</span><span class="p">),</span>
+                <span class="n">ncuts</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                <span class="n">node_weights</span><span class="o">=</span><span class="n">weights</span><span class="p">,</span>
+                <span class="n">targets</span><span class="o">=</span><span class="n">targets</span><span class="p">,</span>
+                <span class="n">ufactor</span><span class="o">=</span><span class="n">ufactors</span><span class="p">[</span><span class="n">offset</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">ufactors</span><span class="p">)],</span>
+            <span class="p">)</span>
+            <span class="n">candidates</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">labels</span><span class="p">,</span> <span class="o">*</span><span class="n">extract_cuts</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">labels</span><span class="p">)))</span>
 
-    <span class="k">if</span> <span class="n">max_qubits</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">cut_data</span><span class="p">,</span> <span class="n">cut_data_test</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="n">refine_cuts</span><span class="p">(</span>
-            <span class="n">cut_data</span><span class="p">,</span>
-            <span class="n">cut_data_test</span><span class="p">,</span>
-            <span class="n">labels</span><span class="p">,</span>
-            <span class="n">graph</span><span class="p">,</span>
-            <span class="n">max_qubits</span><span class="p">,</span>
-            <span class="n">nodes_on_qubit</span><span class="p">,</span>
-            <span class="n">circuit</span><span class="p">,</span>
-            <span class="n">cuts</span><span class="p">,</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">QCut.qpd.qpd_operations</span><span class="w"> </span><span class="kn">import</span> <span class="n">plan_cost</span>  <span class="c1"># local: avoids an import cycle</span>
+
+    <span class="n">best</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">for</span> <span class="n">labels</span><span class="p">,</span> <span class="n">cut_data</span><span class="p">,</span> <span class="n">cut_data_test</span> <span class="ow">in</span> <span class="n">candidates</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">max_qubits</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">cut_data</span><span class="p">,</span> <span class="n">cut_data_test</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="n">refine_cuts</span><span class="p">(</span>
+                <span class="n">cut_data</span><span class="p">,</span>
+                <span class="n">cut_data_test</span><span class="p">,</span>
+                <span class="n">labels</span><span class="p">,</span>
+                <span class="n">graph</span><span class="p">,</span>
+                <span class="n">max_qubits</span><span class="p">,</span>
+                <span class="n">nodes_on_qubit</span><span class="p">,</span>
+                <span class="n">circuit</span><span class="p">,</span>
+                <span class="n">cuts</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="n">cut_circuit</span> <span class="o">=</span> <span class="n">add_cuts_to_circuit</span><span class="p">(</span><span class="n">circuit</span><span class="p">,</span> <span class="n">cut_data</span><span class="p">,</span> <span class="n">cut_data_test</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">max_qubits</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">final_cut_circuit</span> <span class="o">=</span> <span class="n">get_locations_and_subcircuits</span><span class="p">(</span>
+                <span class="n">cut_circuit</span><span class="p">,</span> <span class="n">max_qubits</span><span class="o">=</span><span class="n">max_qubits</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">options</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">final_cut_circuit</span> <span class="o">=</span> <span class="n">get_locations_and_subcircuits</span><span class="p">(</span>
+                <span class="n">cut_circuit</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">options</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Costed after refinement, because refinement can add cuts of its own.</span>
+        <span class="n">cost</span> <span class="o">=</span> <span class="n">plan_cost</span><span class="p">(</span><span class="n">final_cut_circuit</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">best</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">cost</span> <span class="o">&lt;</span> <span class="n">best</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="n">best</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">cost</span><span class="p">,</span>
+                <span class="n">final_cut_circuit</span><span class="p">,</span>
+                <span class="n">cut_circuit</span><span class="p">,</span>
+                <span class="n">cut_data</span><span class="p">,</span>
+                <span class="n">cut_data_test</span><span class="p">,</span>
+                <span class="n">labels</span><span class="p">,</span>
+            <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">best</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># pragma: no cover - there is always at least one candidate</span>
+        <span class="k">raise</span> <span class="n">QCutError</span><span class="p">(</span><span class="s2">&quot;no candidate partition could be costed&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">candidates</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Costed </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">candidates</span><span class="p">)</span><span class="si">}</span><span class="s2"> candidate partition(s), keeping one at &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;gamma=</span><span class="si">{</span><span class="n">best</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">.6g</span><span class="si">}</span><span class="s2">.&quot;</span>
         <span class="p">)</span>
+    <span class="n">_</span><span class="p">,</span> <span class="n">final_cut_circuit</span><span class="p">,</span> <span class="n">cut_circuit</span><span class="p">,</span> <span class="n">cut_data</span><span class="p">,</span> <span class="n">cut_data_test</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="n">best</span>
 
-    <span class="n">cut_circuit</span> <span class="o">=</span> <span class="n">add_cuts_to_circuit</span><span class="p">(</span><span class="n">circuit</span><span class="p">,</span> <span class="n">cut_data</span><span class="p">,</span> <span class="n">cut_data_test</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">max_qubits</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">final_cut_circuit</span> <span class="o">=</span> <span class="n">get_locations_and_subcircuits</span><span class="p">(</span>
-            <span class="n">cut_circuit</span><span class="p">,</span> <span class="n">max_qubits</span><span class="o">=</span><span class="n">max_qubits</span>
-        <span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">final_cut_circuit</span> <span class="o">=</span> <span class="n">get_locations_and_subcircuits</span><span class="p">(</span><span class="n">cut_circuit</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">more_data</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">final_cut_circuit</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="p">(</span>
-            <span class="n">final_cut_circuit</span><span class="p">,</span>
-            <span class="n">cut_circuit</span><span class="p">,</span>
-            <span class="n">cut_data</span><span class="p">,</span>
-            <span class="n">cut_data_test</span><span class="p">,</span>
-            <span class="n">labels</span><span class="p">,</span>
-            <span class="n">graph</span><span class="p">,</span>
-            <span class="n">nodes_on_qubit</span><span class="p">,</span>
-        <span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">final_cut_circuit</span></div>
 
 </pre></div>
 

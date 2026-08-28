@@ -42,10 +42,12 @@
 
     <script src="../_static/jquery.js?v=5d32c60e"></script>
     <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-    <script src="../_static/documentation_options.js?v=ddb9cf62"></script>
+    <script src="../_static/documentation_options.js?v=60ebb597"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/sphinx-book-theme.js?v=fab101a9"></script>
+    <script>window.MathJax = {"tex": {"macros": {"ket": ["\\left|#1\\right\\rangle", 1], "bra": ["\\left\\langle#1\\right|", 1], "braket": ["\\left\\langle#1\\middle|#2\\right\\rangle", 2], "Tr": "\\operatorname{Tr}"}}, "options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_autosummary/QCut';</script>
     <link rel="icon" href="../_static/QCut-logo.jpg"/>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -54,7 +56,7 @@
     <link rel="prev" title="QCut API reference" href="../QCut.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="1.3.2.post1.dev13+g0514c21f3" />
+  <meta name="docsearch:version" content="1.3.2.post1.dev14+g176d5596d" />
   </head>
   
   
@@ -149,26 +151,27 @@
     <div class="bd-toc-item navbar-nav active">
         <p aria-level="2" class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="../Usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Usage.html">Basic Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Options.html">Options</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../Examples.html">Examples on using QCut</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../WireCuts.html">Wire cuts</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../GateCuts.html">Gate cuts</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../AutomaticCuts.html">Automatic cuts</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../Multiple_cuts.html">Multiple cuts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/WireCuts.html">Wire cuts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/GateCuts.html">Gate cuts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/AutomaticCuts.html">Automatic cuts</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../Notebooks.html">Notebooks</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../examples/QCutBasicUsage.html">Basic Usage</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../examples/QCutCutSubsequentWires.html">Subsequent Wires</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../examples/QCutCutToThreeParts.html">Cut to Three parts</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../examples/QCutMultipleCutsOnSingleWire.html">Multiple cuts on a single wire</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../examples/QCutQAOAExample.html">QAOA Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notebooks/QCutBasicUsage.html">Basic Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notebooks/QCutQAOAExample.html">QAOA Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notebooks/QCutOptionsExample.html">Cut Options Example</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../Theory.html">Theory</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="../theory/CZ_derivation.html">CZ QPD derivation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../theory/SWAP_derivation.html">SWAP QPD derivation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../theory/General_2q_derivation.html">General two-qubit QPD derivation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../theory/Joint_rotation_derivation.html">Joint rotation gate cutting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../theory/Wire_derivation.html">Wire Cut QPD derivation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../theory/LOCC_wire_derivation.html">Wire cuts with classical communication</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1"><a class="reference internal" href="../Acknowledgement.html">Acknowledgements</a></li>
@@ -177,8 +180,6 @@
 <li class="toctree-l2 current active"><a class="current reference internal" href="#">QCut</a></li>
 </ul>
 </details></li>
-</ul>
-<ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../Changelog.html">Changelog</a></li>
 </ul>
 
@@ -328,6 +329,7 @@
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.transpile_experiments"><code class="docutils literal notranslate"><span class="pre">transpile_experiments()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.transpile_subcircuits"><code class="docutils literal notranslate"><span class="pre">transpile_subcircuits()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.estimate_expectation_values"><code class="docutils literal notranslate"><span class="pre">estimate_expectation_values()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.estimate_run"><code class="docutils literal notranslate"><span class="pre">estimate_run()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.get_experiment_circuits"><code class="docutils literal notranslate"><span class="pre">get_experiment_circuits()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.get_locations_and_subcircuits"><code class="docutils literal notranslate"><span class="pre">get_locations_and_subcircuits()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.run"><code class="docutils literal notranslate"><span class="pre">run()</span></code></a></li>
@@ -339,6 +341,29 @@
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.cutISWAP"><code class="docutils literal notranslate"><span class="pre">cutISWAP()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.cutGate"><code class="docutils literal notranslate"><span class="pre">cutGate()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.find_cuts"><code class="docutils literal notranslate"><span class="pre">find_cuts()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.CutOptions"><code class="docutils literal notranslate"><span class="pre">CutOptions</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.CutOptions.consolidate"><code class="docutils literal notranslate"><span class="pre">CutOptions.consolidate</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.CutOptions.joint_rotation_cuts"><code class="docutils literal notranslate"><span class="pre">CutOptions.joint_rotation_cuts</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.CutOptions.wire_cut_communication"><code class="docutils literal notranslate"><span class="pre">CutOptions.wire_cut_communication</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.CutOptions.expansion"><code class="docutils literal notranslate"><span class="pre">CutOptions.expansion</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.CutOptions.max_exact_groups"><code class="docutils literal notranslate"><span class="pre">CutOptions.max_exact_groups</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.CutOptions.num_samples"><code class="docutils literal notranslate"><span class="pre">CutOptions.num_samples</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.CutOptions.seed"><code class="docutils literal notranslate"><span class="pre">CutOptions.seed</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.CutOptions.finder_candidates"><code class="docutils literal notranslate"><span class="pre">CutOptions.finder_candidates</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.CutOptions.finder_cut_mode"><code class="docutils literal notranslate"><span class="pre">CutOptions.finder_cut_mode</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.CutOptions.finder_max_qubits"><code class="docutils literal notranslate"><span class="pre">CutOptions.finder_max_qubits</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.CutOptions.finder_num_partitions"><code class="docutils literal notranslate"><span class="pre">CutOptions.finder_num_partitions</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.CutOptions.consolidate_mode"><code class="docutils literal notranslate"><span class="pre">CutOptions.consolidate_mode</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.CutOptions.min_communicating_block"><code class="docutils literal notranslate"><span class="pre">CutOptions.min_communicating_block</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.CutOptions.sample_count"><code class="docutils literal notranslate"><span class="pre">CutOptions.sample_count</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.CutOptions.num_partitions"><code class="docutils literal notranslate"><span class="pre">CutOptions.num_partitions</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.CutOptions.max_qubits"><code class="docutils literal notranslate"><span class="pre">CutOptions.max_qubits</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.CutOptions.should_sample"><code class="docutils literal notranslate"><span class="pre">CutOptions.should_sample()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.CutOptions.replace"><code class="docutils literal notranslate"><span class="pre">CutOptions.replace()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.CutOptions.__init__"><code class="docutils literal notranslate"><span class="pre">CutOptions.__init__()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.consolidate_two_qubit_blocks"><code class="docutils literal notranslate"><span class="pre">consolidate_two_qubit_blocks()</span></code></a></li>
 </ul>
             </nav>
         </div>
@@ -355,19 +380,28 @@
 <p>Init circuit knitting.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="QCut.transpile_experiments">
-<span class="sig-prename descclassname"><span class="pre">QCut.</span></span><span class="sig-name descname"><span class="pre">transpile_experiments</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cut_experiment</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">CutExperiment</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backend</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimization_level</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transpile_options</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">CutExperiment</span></span></span><a class="reference internal" href="../_modules/QCut/backend_utility.html#transpile_experiments"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.transpile_experiments" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">QCut.</span></span><span class="sig-name descname"><span class="pre">transpile_experiments</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cut_experiment</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">CutExperiment</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backend</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimization_level</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transpile_options</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_iqm_transpiler</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">CutExperiment</span></span></span><a class="reference internal" href="../_modules/QCut/execution/backend_utility.html#transpile_experiments"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.transpile_experiments" title="Link to this definition">#</a></dt>
 <dd><p>Transpile experiment circuits. Transpiles all generated experiment circuits for
 a given backend. Most often one should use <cite>transpile_subcircuits</cite> instead, as that
 only transpiles subcircuits before experiment generation which is a lot more
 efficient. This function is mainly provided for special cases where one needs/wants
 extra control over the transpilation of experiment circuits.</p>
+<p>As with <a class="reference internal" href="#QCut.transpile_subcircuits" title="QCut.transpile_subcircuits"><code class="xref py py-func docutils literal notranslate"><span class="pre">transpile_subcircuits()</span></code></a>, an IQM backend is handed to IQM’s own
+transpiler when the adapter is installed, with the same defaults inverted and for
+the same reasons. No placeholders are left at this point, so nothing has to be
+hidden from it as barriers – and nothing has to give up IQM’s single-qubit
+optimisation either, which is why this route produces the shallower circuits of the
+two, at the cost of transpiling every experiment circuit rather than each subcircuit
+once. The layout still has to be recorded afterwards.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>cut_experiment</strong> – (CutExperiment): Experiment circuits to be transpiled.</p></li>
 <li><p><strong>backend</strong> (<em>str</em>) – Backend to transpile to.</p></li>
 <li><p><strong>optimization_level</strong> (<em>int</em>) – Optimization level for transpilation (0-3).</p></li>
-<li><p><strong>transpile_options</strong> (<em>dict</em>) – Arguments passed to qiskit transpile function.</p></li>
+<li><p><strong>transpile_options</strong> (<em>dict</em>) – Arguments passed to the transpiler.</p></li>
+<li><p><strong>use_iqm_transpiler</strong> (<em>bool</em>) – Whether an IQM backend may use IQM’s transpiler.
+Pass False for the ordinary qiskit path.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -381,7 +415,7 @@ extra control over the transpilation of experiment circuits.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="QCut.transpile_subcircuits">
-<span class="sig-prename descclassname"><span class="pre">QCut.</span></span><span class="sig-name descname"><span class="pre">transpile_subcircuits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cut_circuit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">CutCircuit</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backend</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimization_level</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transpile_options</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">CutCircuit</span></span></span><a class="reference internal" href="../_modules/QCut/backend_utility.html#transpile_subcircuits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.transpile_subcircuits" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">QCut.</span></span><span class="sig-name descname"><span class="pre">transpile_subcircuits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cut_circuit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">CutCircuit</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backend</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimization_level</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transpile_options</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_iqm_transpiler</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">CutCircuit</span></span></span><a class="reference internal" href="../_modules/QCut/execution/backend_utility.html#transpile_subcircuits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.transpile_subcircuits" title="Link to this definition">#</a></dt>
 <dd><p>Transpile subcircuits for a given backend. More efficient than transpiling
 experiment circuits as it only transpiles each subcircuit once instead of
 each experiment circuit. However, may lead to suboptimal transpilation results as
@@ -389,13 +423,22 @@ the tranpiler cannot use the backend object directly due to need to retain
 some placeholder gates for cuts and observables. <cite>transpile_options</cite> can be used
 to pass additional options to the transpiler. For more control over transpilation
 of experiment circuits, use <cite>transpile_experiments</cite> or manually transpile them.</p>
+<p>On an IQM backend this gives up IQM’s single-qubit optimisation, which would
+otherwise commute Z rotations across the cut placeholders and put them on the wrong
+side of a cut. Nothing can be told to leave the placeholders alone – a barrier is a
+scheduling directive there, not an algebraic wall – so circuits come out perhaps a
+fifth deeper than they need to be. <a class="reference internal" href="#QCut.transpile_experiments" title="QCut.transpile_experiments"><code class="xref py py-func docutils literal notranslate"><span class="pre">transpile_experiments()</span></code></a> has no placeholders
+left to protect and keeps the optimisation, so it is the one to use when the depth
+matters more than the transpilation time.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>subcircuits</strong> (<em>list</em><em>[</em><em>QuantumCircuit</em><em>]</em>) – List of subcircuits to be transpiled.</p></li>
+<li><p><strong>cut_circuit</strong> (<em>CutCircuit</em>) – The split circuit whose subcircuits are transpiled.</p></li>
 <li><p><strong>backend</strong> – Backend to transpile to.</p></li>
 <li><p><strong>optimization_level</strong> (<em>int</em>) – Optimization level for transpilation (0-3).</p></li>
-<li><p><strong>transpile_options</strong> (<em>dict</em>) – Arguments passed to qiskit transpile function.</p></li>
+<li><p><strong>transpile_options</strong> (<em>dict</em>) – Arguments passed to the transpiler.</p></li>
+<li><p><strong>use_iqm_transpiler</strong> (<em>bool</em>) – Whether an IQM backend may use IQM’s transpiler.
+Pass False for the ordinary qiskit path.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -409,71 +452,90 @@ of experiment circuits, use <cite>transpile_experiments</cite> or manually trans
 
 <dl class="py function">
 <dt class="sig sig-object py" id="QCut.estimate_expectation_values">
-<span class="sig-prename descclassname"><span class="pre">QCut.</span></span><span class="sig-name descname"><span class="pre">estimate_expectation_values</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">RawResult</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expv_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/QCut/postprocess.html#estimate_expectation_values"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.estimate_expectation_values" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">QCut.</span></span><span class="sig-name descname"><span class="pre">estimate_expectation_values</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">RawResult</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../_modules/QCut/execution/postprocess.html#estimate_expectation_values"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.estimate_expectation_values" title="Link to this definition">#</a></dt>
 <dd><p>Calculate the estimated expectation values.</p>
 <p>Loop through processed results. For each result group generate all products of
 different measurements from different subcircuits of the group. For each result
 from qpd measurements calculate qpd coefficient and from counts calculate weight.
-Get results for qubits corresponding to the observables. If multiqubit observable
-multiply individual qubit eigenvalues and multiply by (-1)^(m+1) where m is number
-of qubits in the observable. Multiply by weight and add to sub expectation value.
-Once all results iterated over move to next circuit group. Lastly multiply
-by total cut cost and divide by number of samples.</p>
+The estimate is the quasiprobability sum itself,</p>
+<div class="math notranslate nohighlight">
+\[\langle O \rangle = (-1)^{w+1} \sum_g c_g E_g\]</div>
+<p>over the subcircuit groups, where <span class="math notranslate nohighlight">\(c_g\)</span> is the group’s coefficient,
+<span class="math notranslate nohighlight">\(E_g\)</span> is what <code class="xref py py-func docutils literal notranslate"><span class="pre">_get_sub_expectation_values()</span></code> returns for it, and
+<span class="math notranslate nohighlight">\(w\)</span> counts the wire cuts. That parity is the qpd register’s sign convention:
+every one of its bits maps 0 to -1, so an unwritten bit contributes -1 and only the
+number allocated per subcircuit survives.</p>
+<p>Multi-qubit observables pick up a further <span class="math notranslate nohighlight">\((-1)^{m+1}\)</span> for their <span class="math notranslate nohighlight">\(m\)</span>
+qubits, applied while their eigenvalues are multiplied together.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>results</strong> (<em>RawResult</em>) – raw results from experiment circuits, carrying the
+experiment they came from.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>one expectation value per observable, in the order they were given</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QCut.estimate_run">
+<span class="sig-prename descclassname"><span class="pre">QCut.</span></span><span class="sig-name descname"><span class="pre">estimate_run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cut_experiment</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">CutExperiment</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shots</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">4096</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_batch_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">RunEstimate</span></span></span><a class="reference internal" href="../_modules/QCut/execution/circuit_knitting.html#estimate_run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.estimate_run" title="Link to this definition">#</a></dt>
+<dd><p>Work out what <a class="reference internal" href="#QCut.run_experiments" title="QCut.run_experiments"><code class="xref py py-func docutils literal notranslate"><span class="pre">run_experiments()</span></code></a> will cost, without submitting anything.</p>
+<p>Exact for an experiment that runs in one go. One whose wire cuts communicate runs in
+waves, and every wave after the first spends its shots in proportion to what the one
+before it measured, so only that first wave is known in advance. The rest is worked
+out as if every group got an equal share. That gives the most circuits a wave can
+submit, since a group whose label never came up submits none, and the fewest jobs it
+can take, since an uneven share puts circuits wanting very different shot counts in
+jobs of their own.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>results</strong> (<em>RawResult</em>) – raw results from experiment circuits</p></li>
-<li><p><strong>coefficients</strong> (<em>list</em><em>[</em><em>int</em><em>]</em>) – list of coefficients for each subcircuit group</p></li>
-<li><p><strong>cut_locations</strong> (<em>np.ndarray</em><em>[</em><em>CutLocation</em><em>]</em>) – cut locations</p></li>
-<li><p><strong>observables</strong> (<em>list</em><em>[</em><em>int</em><em> | </em><em>list</em><em>[</em><em>int</em><em>]</em><em>]</em>) – observables to calculate expectation values for</p></li>
+<li><p><strong>cut_experiment</strong> (<em>CutExperiment</em>) – the experiment circuits that would be run.</p></li>
+<li><p><strong>shots</strong> (<em>int</em>) – shots per circuit, as passed to <a class="reference internal" href="#QCut.run_experiments" title="QCut.run_experiments"><code class="xref py py-func docutils literal notranslate"><span class="pre">run_experiments()</span></code></a>.</p></li>
+<li><p><strong>backend</strong> – the backend or sampler that would run it, read only for the most shots
+it takes in one job.</p></li>
+<li><p><strong>max_batch_size</strong> (<em>int</em>) – maximum number of circuits submitted per <code class="docutils literal notranslate"><span class="pre">run</span></code> call.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>expectation values as a list of floats</p>
+<dd class="field-even"><p>the circuits, jobs and shots the run takes, and a breakdown by job.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>list[float]</p>
+<dd class="field-odd"><p>RunEstimate</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="QCut.get_experiment_circuits">
-<span class="sig-prename descclassname"><span class="pre">QCut.</span></span><span class="sig-name descname"><span class="pre">get_experiment_circuits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cut_circuit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">CutCircuit</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">observables</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">SparsePauliOp</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">CutExperiment</span></span></span><a class="reference internal" href="../_modules/QCut/circuit_knitting.html#get_experiment_circuits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.get_experiment_circuits" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">QCut.</span></span><span class="sig-name descname"><span class="pre">get_experiment_circuits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cut_circuit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">CutCircuit</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">observables</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">SparsePauliOp</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">CutExperiment</span></span></span><a class="reference internal" href="../_modules/QCut/execution/circuit_knitting.html#get_experiment_circuits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.get_experiment_circuits" title="Link to this definition">#</a></dt>
 <dd><p>Generate experiment circuits by inserting QPD operations on
 measure/initialize/cutCZ nodes.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>subcircuits</strong> (<em>list</em><em>[</em><em>QuantumCircuit</em><em>]</em>) – subcircuits with measure/initialize nodes.</p></li>
-<li><p><strong>cut_locations</strong> (<em>np.ndarray</em><em>[</em><em>CutLocation</em><em>]</em>) – cut locations.</p></li>
+<li><p><strong>cut_circuit</strong> (<em>CutCircuit</em>) – The cut circuit to generate experiment circuits for.</p></li>
+<li><p><strong>observables</strong> (<em>SparsePauliOp</em>) – The observables to measure.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><dl class="simple">
-<dt>A tuple containing:</dt><dd><ul class="simple">
-<li><p>CutCircuit: A CutCircuit object containing the experiment circuits.</p></li>
-<li><p>list[int]: A list of coefficients for each circuit.</p></li>
-<li><dl class="simple">
-<dt>list[tuple[int, int, int]]:</dt><dd><p>A list of index pointers to results that need additional post-processing
-due to identity basis measurement.</p>
-</dd>
-</dl>
-</li>
-</ul>
-</dd>
-</dl>
-</p>
+<dd class="field-even"><p>An object containing the generated experiment circuits and
+related information.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>tuple</p>
+<dd class="field-odd"><p>CutExperiment</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="QCut.get_locations_and_subcircuits">
-<span class="sig-prename descclassname"><span class="pre">QCut.</span></span><span class="sig-name descname"><span class="pre">get_locations_and_subcircuits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">circuit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">QuantumCircuit</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_qubits</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">CutCircuit</span></span></span><a class="reference internal" href="../_modules/QCut/circuit_preparation.html#get_locations_and_subcircuits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.get_locations_and_subcircuits" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">QCut.</span></span><span class="sig-name descname"><span class="pre">get_locations_and_subcircuits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">circuit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">QuantumCircuit</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_qubits</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#QCut.CutOptions" title="QCut.options.CutOptions"><span class="pre">CutOptions</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">CutCircuit</span></span></span><a class="reference internal" href="../_modules/QCut/cutting/circuit_preparation.html#get_locations_and_subcircuits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.get_locations_and_subcircuits" title="Link to this definition">#</a></dt>
 <dd><p>Get cut locations and subcircuits with placeholder operations.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -481,80 +543,78 @@ due to identity basis measurement.</p>
 <li><p><strong>circuit</strong> (<em>QuantumCircuit</em>) – circuit with cuts inserted</p></li>
 <li><p><strong>max_qubits</strong> (<em>list</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – list of maximum qubits per subcircuit when using automatic cut
 finding. If None, no constraint is used. Defaults to None.
-In general it is not necesary to manually specify this parameter.</p></li>
+In general it is not necessary to manually specify this parameter.</p></li>
+<li><p><strong>options</strong> (<a class="reference internal" href="#QCut.CutOptions" title="QCut.CutOptions"><em>CutOptions</em></a><em>, </em><em>optional</em>) – configuration for the run. Defaults to
+QCut.options.DEFAULT_OPTIONS.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><dl class="simple">
-<dt>A tuple containing:</dt><dd><ul class="simple">
-<li><p>list[SingleQubitCutLocation]: Locations of the cuts as a list</p></li>
-<li><p>list[QuantumCircuit]: Subcircuits with placeholder operations</p></li>
-<li><dl class="simple">
-<dt>dict[int:int]: map of subcircuit qubit indices to original circuit</dt><dd><p>qubit indices</p>
-</dd>
-</dl>
-</li>
-</ul>
-</dd>
-</dl>
-</p>
+<dd class="field-even"><p>the subcircuits, the cut locations, and the map of subcircuit qubit
+indices to original circuit qubit indices.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>tuple</p>
+<dd class="field-odd"><p>CutCircuit</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="QCut.run">
-<span class="sig-prename descclassname"><span class="pre">QCut.</span></span><span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">circuit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">QuantumCircuit</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">observables</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">SparsePauliOp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">AerSimulator('aer_simulator')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_batch_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/QCut/circuit_knitting.html#run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.run" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">QCut.</span></span><span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">circuit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">QuantumCircuit</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">observables</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">SparsePauliOp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">AerSimulator('aer_simulator')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_batch_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#QCut.CutOptions" title="QCut.options.CutOptions"><span class="pre">CutOptions</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shots</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">4096</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../_modules/QCut/execution/circuit_knitting.html#run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.run" title="Link to this definition">#</a></dt>
 <dd><p>Run the whole circuit knitting sequence with one function call.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>circuit</strong> (<em>QuantumCircuit</em>) – circuit with cut experiments</p></li>
-<li><p><strong>observables</strong> (<em>list</em><em>[</em><em>int</em><em> | </em><em>list</em><em>[</em><em>int</em><em>]</em><em>]</em>) – list of observbles in the form of qubit indices (Z-obsevable).</p></li>
+<li><p><strong>observables</strong> (<em>list</em><em>[</em><em>int</em><em> | </em><em>list</em><em>[</em><em>int</em><em>]</em><em>]</em>) – list of observbles in the form of qubit indices (Z-observable).</p></li>
 <li><p><strong>backend</strong> – backend to use for running experiment circuits (optional)</p></li>
 <li><p><strong>max_batch_size</strong> (<em>int</em>) – maximum number of circuits submitted per backend.run
 call (optional)</p></li>
+<li><p><strong>options</strong> (<a class="reference internal" href="#QCut.CutOptions" title="QCut.CutOptions"><em>CutOptions</em></a>) – configuration for the run (optional)</p></li>
+<li><p><strong>shots</strong> (<em>int</em>) – number of shots per circuit run, as in <a class="reference internal" href="#QCut.run_experiments" title="QCut.run_experiments"><code class="xref py py-func docutils literal notranslate"><span class="pre">run_experiments()</span></code></a>
+(optional)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>a list of expectation values</p>
+<dd class="field-even"><p>one expectation value per observable, in the order given</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>list</p>
+<dd class="field-odd"><p>np.ndarray</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="QCut.run_cut_circuit">
-<span class="sig-prename descclassname"><span class="pre">QCut.</span></span><span class="sig-name descname"><span class="pre">run_cut_circuit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cut_circuit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">CutCircuit</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">observables</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">SparsePauliOp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">AerSimulator('aer_simulator')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_batch_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/QCut/circuit_knitting.html#run_cut_circuit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.run_cut_circuit" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">QCut.</span></span><span class="sig-name descname"><span class="pre">run_cut_circuit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cut_circuit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">CutCircuit</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">observables</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">SparsePauliOp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">AerSimulator('aer_simulator')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_batch_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#QCut.CutOptions" title="QCut.options.CutOptions"><span class="pre">CutOptions</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shots</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">4096</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../_modules/QCut/execution/circuit_knitting.html#run_cut_circuit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.run_cut_circuit" title="Link to this definition">#</a></dt>
 <dd><p>After splitting the circuit run the rest of the circuit knitting sequence.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>subcircuits</strong> (<em>list</em><em>[</em><em>QuantumCircuit</em><em>]</em>) – subcircuits containing the placeholder operations</p></li>
-<li><p><strong>cut_locations</strong> (<em>np.ndarray</em><em>[</em><em>CutLocation</em><em>]</em>) – list of cut locations</p></li>
-<li><p><strong>observables</strong> (<em>list</em><em>[</em><em>int</em><em> | </em><em>list</em><em>[</em><em>int</em><em>]</em><em>]</em>) – list of observables as qubit indices (Z observable)</p></li>
+<li><p><strong>cut_circuit</strong> (<em>CutCircuit</em>) – the split circuit, carrying its placeholder
+operations and cut locations</p></li>
+<li><p><strong>observables</strong> (<em>SparsePauliOp</em>) – the observables to estimate</p></li>
 <li><p><strong>backend</strong> – backend to use for running experiment circuits (optional)</p></li>
 <li><p><strong>max_batch_size</strong> (<em>int</em>) – maximum number of circuits submitted per backend.run
 call (optional)</p></li>
+<li><p><strong>options</strong> (<a class="reference internal" href="#QCut.CutOptions" title="QCut.CutOptions"><em>CutOptions</em></a>) – configuration, overriding what the CutCircuit carries
+(optional)</p></li>
+<li><p><strong>shots</strong> (<em>int</em>) – number of shots per circuit run, as in <a class="reference internal" href="#QCut.run_experiments" title="QCut.run_experiments"><code class="xref py py-func docutils literal notranslate"><span class="pre">run_experiments()</span></code></a>
+(optional)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>a list of expectation values</p>
+<dd class="field-even"><p>one expectation value per observable, in the order given</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>list</p>
+<dd class="field-odd"><p>np.ndarray</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="QCut.run_experiments">
-<span class="sig-prename descclassname"><span class="pre">QCut.</span></span><span class="sig-name descname"><span class="pre">run_experiments</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cut_experiment</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">CutExperiment</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shots</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">4096</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_batch_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">RawResult</span></span></span><a class="reference internal" href="../_modules/QCut/circuit_knitting.html#run_experiments"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.run_experiments" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">QCut.</span></span><span class="sig-name descname"><span class="pre">run_experiments</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cut_experiment</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">CutExperiment</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shots</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">4096</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_batch_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_options</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">RawResult</span></span></span><a class="reference internal" href="../_modules/QCut/execution/circuit_knitting.html#run_experiments"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.run_experiments" title="Link to this definition">#</a></dt>
 <dd><p>Run experiment circuits.</p>
 <p>Loop through experiment circuits and then loop through circuit group and run each
 circuit. Store results as [group0, group1, …] where group is [res0, res1, …].
@@ -564,58 +624,89 @@ results from the qpd_meas class register.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>experiment_circuits</strong> (<em>CutCircuit</em>) – experiment circuits</p></li>
-<li><p><strong>cut_locations</strong> (<em>np.ndarray</em><em>[</em><em>CutLocation</em><em>]</em>) – list of cut locations</p></li>
-<li><p><strong>shots</strong> (<em>int</em>) – number of shots per circuit run (optional)</p></li>
-<li><p><strong>backend</strong> – backend used for running the circuits (optional)</p></li>
+<li><p><strong>cut_experiment</strong> (<em>CutExperiment</em>) – the experiment circuits to run</p></li>
+<li><p><strong>shots</strong> (<em>int</em>) – number of shots per circuit run (optional). Communicating wire
+cuts spend it differently: the waves split a total of <code class="docutils literal notranslate"><span class="pre">shots</span></code> times the
+number of groups per subcircuit between them, in proportion to how often
+each label came up, so individual circuits run at very different counts and
+only that total is fixed. See <code class="xref py py-func docutils literal notranslate"><span class="pre">_run_communicating()</span></code>.</p></li>
+<li><p><strong>backend</strong> – backend or V2 sampler used for running the circuits.
+A sampler is run through its own interface and its results are read
+per register, so the circuits must already be in its target’s basis.</p></li>
 <li><p><strong>max_batch_size</strong> (<em>int</em>) – maximum number of circuits submitted per backend.run
-call. Larger batches reduce per-job overhead on real hardware.</p></li>
+call. Larger batches reduce per-job overhead on real hardware. A target that
+batches on its own account, as e.g. fiqci-ems does, is given this size
+too, so it does not split a batch QCut has already sized.</p></li>
+<li><p><strong>run_options</strong> (<em>dict</em>) – passed on to every <code class="docutils literal notranslate"><span class="pre">run</span></code> call. Use it for whatever the
+target takes per run, since QCut sets only <code class="docutils literal notranslate"><span class="pre">shots</span></code> itself.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>list of transformed results</p>
+<dd class="field-even"><p>the raw counts, carrying the experiment they came from so that
+<a class="reference internal" href="#QCut.estimate_expectation_values" title="QCut.estimate_expectation_values"><code class="xref py py-func docutils literal notranslate"><span class="pre">QCut.estimate_expectation_values()</span></code></a> can be called on them alone</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>list[TotalResult]</p>
+<dd class="field-odd"><p>RawResult</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="QCut.cut">
-<span class="sig-prename descclassname"><span class="pre">QCut.</span></span><span class="sig-name descname"><span class="pre">cut</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">QuantumCircuit</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Instruction</span></span></span><a class="reference internal" href="../_modules/QCut/qpd_gates.html#cut"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.cut" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">QCut.</span></span><span class="sig-name descname"><span class="pre">cut</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">QuantumCircuit</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Instruction</span></span></span><a class="reference internal" href="../_modules/QCut/qpd/qpd_gates.html#cut"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.cut" title="Link to this definition">#</a></dt>
 <dd><p>Return a single qubit wire cut instruction.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="QCut.cutCZ">
-<span class="sig-prename descclassname"><span class="pre">QCut.</span></span><span class="sig-name descname"><span class="pre">cutCZ</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">QuantumCircuit</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Instruction</span></span></span><a class="reference internal" href="../_modules/QCut/qpd_gates.html#cutCZ"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.cutCZ" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">QCut.</span></span><span class="sig-name descname"><span class="pre">cutCZ</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">QuantumCircuit</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Instruction</span></span></span><a class="reference internal" href="../_modules/QCut/qpd/qpd_gates.html#cutCZ"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.cutCZ" title="Link to this definition">#</a></dt>
 <dd><p>Return a two qubit cutCZ gate instruction.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="QCut.cutSWAP">
-<span class="sig-prename descclassname"><span class="pre">QCut.</span></span><span class="sig-name descname"><span class="pre">cutSWAP</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">QuantumCircuit</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Instruction</span></span></span><a class="reference internal" href="../_modules/QCut/qpd_gates.html#cutSWAP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.cutSWAP" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">QCut.</span></span><span class="sig-name descname"><span class="pre">cutSWAP</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">QuantumCircuit</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Instruction</span></span></span><a class="reference internal" href="../_modules/QCut/qpd/qpd_gates.html#cutSWAP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.cutSWAP" title="Link to this definition">#</a></dt>
 <dd><p>Return a two qubit cutSWAP gate instruction.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="QCut.cutISWAP">
-<span class="sig-prename descclassname"><span class="pre">QCut.</span></span><span class="sig-name descname"><span class="pre">cutISWAP</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">QuantumCircuit</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Instruction</span></span></span><a class="reference internal" href="../_modules/QCut/qpd_gates.html#cutISWAP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.cutISWAP" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">QCut.</span></span><span class="sig-name descname"><span class="pre">cutISWAP</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">QuantumCircuit</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Instruction</span></span></span><a class="reference internal" href="../_modules/QCut/qpd/qpd_gates.html#cutISWAP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.cutISWAP" title="Link to this definition">#</a></dt>
 <dd><p>Return a two qubit cutISWAP gate instruction.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="QCut.cutGate">
-<span class="sig-prename descclassname"><span class="pre">QCut.</span></span><span class="sig-name descname"><span class="pre">cutGate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Gate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">control</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">single_qubit_basis</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="../_modules/QCut/qpd_gates.html#cutGate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.cutGate" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">QCut.</span></span><span class="sig-name descname"><span class="pre">cutGate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Gate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">control</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">single_qubit_basis</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="../_modules/QCut/qpd/qpd_gates.html#cutGate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.cutGate" title="Link to this definition">#</a></dt>
 <dd><p>Return a CutGate circuit decomposing the input gate with QPD cut markers.</p>
 <p>control and target together define the ordered physical qubit mapping for
 gate inputs 0..n-1: gate input i maps to physical qubit (controls + targets)[i].</p>
+<p>A two-qubit gate becomes a single <code class="xref py py-class docutils literal notranslate"><span class="pre">CutTwoQubitGate</span></code> marker, so its QPD is
+generated from its matrix at expansion time. Larger gates are still transpiled into
+the <code class="docutils literal notranslate"><span class="pre">{u,</span> <span class="pre">cz,</span> <span class="pre">swap,</span> <span class="pre">iswap}</span></code> basis first, which turns them into several cuts.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>gate</strong> (<em>Gate</em>) – the gate to cut.</p></li>
+<li><p><strong>control</strong> (<em>int</em><em> | </em><em>list</em><em>[</em><em>int</em><em>]</em>) – qubit, or qubits, the gate’s first inputs map to.</p></li>
+<li><p><strong>target</strong> (<em>int</em><em> | </em><em>list</em><em>[</em><em>int</em><em>]</em>) – qubit, or qubits, its remaining inputs map to.</p></li>
+<li><p><strong>single_qubit_basis</strong> (<em>list</em><em>[</em><em>str</em><em>]</em>) – basis the single-qubit parts are translated
+into, if the default is not wanted (optional).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>keyword arguments for <code class="docutils literal notranslate"><span class="pre">QuantumCircuit.append</span></code>, so the call site reads
+<code class="docutils literal notranslate"><span class="pre">circuit.append(**cutGate(...))</span></code>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="QCut.find_cuts">
-<span class="sig-prename descclassname"><span class="pre">QCut.</span></span><span class="sig-name descname"><span class="pre">find_cuts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">circuit</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_partitions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_qubits</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cuts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'both'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">more_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/QCut/QCutFind/cut_finding.html#find_cuts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.find_cuts" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">QCut.</span></span><span class="sig-name descname"><span class="pre">find_cuts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">circuit</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#QCut.CutOptions" title="QCut.options.CutOptions"><span class="pre">CutOptions</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/QCut/QCutFind/cut_finding.html#find_cuts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.find_cuts" title="Link to this definition">#</a></dt>
 <dd><p>Partition a quantum circuit into subcircuits by inserting cut operations.</p>
 <p>Converts the input circuit into a graph representation and partitions it into the
 specified number of subcircuits using METIS partitioning. Optionally refines the
@@ -626,41 +717,173 @@ mappings are returned.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>circuit</strong> (<em>QuantumCircuit</em>) – The input quantum circuit to partition.</p></li>
-<li><p><strong>num_partitions</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of partitions to create. If None,
-determined from max_qubits.</p></li>
-<li><p><strong>max_qubits</strong> (<em>list</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – Maximum number of qubits allowed in each
-partition. If specified, must match num_partitions.</p></li>
-<li><p><strong>cuts</strong> (<em>str</em><em>, </em><em>optional</em>) – Type of cuts to insert. Can be “both”, “gate”, or “wire”.
-Defaults to “both”.</p></li>
-<li><p><strong>more_data</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, returns additional data for debugging and
-analysis. Defaults to False.</p></li>
+<li><p><strong>options</strong> (<a class="reference internal" href="#QCut.CutOptions" title="QCut.CutOptions"><em>CutOptions</em></a><em>, </em><em>optional</em>) – configuration for the run. Defaults to
+QCut.options.DEFAULT_OPTIONS.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><dl class="simple">
-<dt>If more_data is False, returns:</dt><dd><ul class="simple">
-<li><p>list[list[int]]: Qubit locations for each subcircuit.</p></li>
-<li><p>list[QuantumCircuit]: List of subcircuits after cuts.</p></li>
-<li><p>list[dict]: Mapping of qubits for each subcircuit.</p></li>
-</ul>
-</dd>
-<dt>If more_data is True, returns:</dt><dd><ul class="simple">
-<li><p>list[list[int]]: Qubit locations for each subcircuit.</p></li>
-<li><p>list[QuantumCircuit]: List of subcircuits after cuts.</p></li>
-<li><p>list[dict]: Mapping of qubits for each subcircuit.</p></li>
-<li><p>QuantumCircuit: The circuit with cuts inserted.</p></li>
-<li><p>list: Data describing the cuts.</p></li>
-<li><p>list: Additional cut data for testing.</p></li>
-<li><p>dict: Partition labels for each node.</p></li>
-<li><p>rustworkx.PyGraph: The graph representation of the circuit.</p></li>
-<li><p>dict: Mapping of nodes to qubits.</p></li>
-</ul>
-</dd>
-</dl>
-</p>
+<dd class="field-even"><p>A circuit with cut operations inserted, ready for decomposition into
+subcircuits.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>tuple</p>
+<dd class="field-odd"><p>CutCircuit</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="QCut.CutOptions">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">QCut.</span></span><span class="sig-name descname"><span class="pre">CutOptions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">consolidate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'auto'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'always'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'never'</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">joint_rotation_cuts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wire_cut_communication</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'auto'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'always'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'never'</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expansion</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'auto'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'exact'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'sample'</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_exact_groups</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_samples</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">finder_candidates</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">finder_cut_mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'both'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'wire'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'gate'</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'both'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">finder_max_qubits</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">finder_num_partitions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/QCut/options.html#CutOptions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.CutOptions" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Configuration for a cutting run.</p>
+<p><code class="docutils literal notranslate"><span class="pre">consolidate</span></code> merges runs of gates acting on the same qubit pair into one gate
+before cutting, so the pair costs one cut instead of several. See
+<code class="xref py py-data docutils literal notranslate"><span class="pre">ConsolidateStrategy</span></code>. Merging can cost more than it saves once joint cutting
+is in play, because a merged run of gates about different axes is no longer a
+single-axis rotation and cannot be bundled, so <code class="docutils literal notranslate"><span class="pre">&quot;auto&quot;</span></code> compares the two plans
+outright rather than guessing.</p>
+<p><code class="docutils literal notranslate"><span class="pre">joint_rotation_cuts</span></code> cuts parallel two-qubit rotation gates with one joint
+decomposition instead of one each, which costs strictly less in both sampling
+overhead and circuit count.</p>
+<p><code class="docutils literal notranslate"><span class="pre">wire_cut_communication</span></code> lets the two sides of a wire cut exchange the measured
+outcome, which lowers the overhead of a block of <code class="docutils literal notranslate"><span class="pre">n</span></code> parallel wires from <code class="docutils literal notranslate"><span class="pre">4**n</span></code>
+to <code class="docutils literal notranslate"><span class="pre">2**(n+1)</span> <span class="pre">-</span> <span class="pre">1</span></code>. It makes those experiments run in two phases, since the state
+one side prepares depends on what the other measured. See
+<code class="xref py py-data docutils literal notranslate"><span class="pre">CommunicationStrategy</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">expansion</span></code> decides how the decomposition becomes experiment circuits, see
+<code class="xref py py-data docutils literal notranslate"><span class="pre">ExpansionStrategy</span></code>. Under <code class="docutils literal notranslate"><span class="pre">&quot;auto&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">max_exact_groups</span></code> is the largest
+exact group count still enumerated rather than sampled. When sampling,
+<code class="docutils literal notranslate"><span class="pre">num_samples</span></code> draws are taken, defaulting to <code class="docutils literal notranslate"><span class="pre">max_exact_groups</span></code>, and <code class="docutils literal notranslate"><span class="pre">seed</span></code>
+fixes the sampler for a reproducible experiment set.</p>
+<p><code class="docutils literal notranslate"><span class="pre">finder_candidates</span></code> is how many candidate partitions the cut finder generates and
+costs before keeping the cheapest. METIS returns only the partitioning that
+minimises its own objective, the weighted edge cut, which stops being the true cost
+once cuts share a decomposition, so several are generated and compared on what they
+actually cost. Under a qubit budget they vary by how much imbalance METIS is allowed
+before they vary by seed, since that changes the partition more. Both are fixed,
+which makes the finder reproducible; <code class="docutils literal notranslate"><span class="pre">seed</span></code> shifts the seeds as a set.</p>
+<p><code class="docutils literal notranslate"><span class="pre">finder_cut_mode</span></code> limits the finder to wire cuts, to gate cuts, or lets it use
+both. <code class="docutils literal notranslate"><span class="pre">finder_num_partitions</span></code> asks for a number of pieces and
+<code class="docutils literal notranslate"><span class="pre">finder_max_qubits</span></code> for a size limit per piece, either one number for all of them
+or a list with one entry per partition. With neither given the finder splits in two.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="QCut.CutOptions.consolidate">
+<span class="sig-name descname"><span class="pre">consolidate</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'auto'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'always'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'never'</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bool</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'auto'</span></span><a class="headerlink" href="#QCut.CutOptions.consolidate" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="QCut.CutOptions.joint_rotation_cuts">
+<span class="sig-name descname"><span class="pre">joint_rotation_cuts</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></span><a class="headerlink" href="#QCut.CutOptions.joint_rotation_cuts" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="QCut.CutOptions.wire_cut_communication">
+<span class="sig-name descname"><span class="pre">wire_cut_communication</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'auto'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'always'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'never'</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bool</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'auto'</span></span><a class="headerlink" href="#QCut.CutOptions.wire_cut_communication" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="QCut.CutOptions.expansion">
+<span class="sig-name descname"><span class="pre">expansion</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'auto'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'exact'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'sample'</span></span><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'auto'</span></span><a class="headerlink" href="#QCut.CutOptions.expansion" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="QCut.CutOptions.max_exact_groups">
+<span class="sig-name descname"><span class="pre">max_exact_groups</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1000</span></span><a class="headerlink" href="#QCut.CutOptions.max_exact_groups" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="QCut.CutOptions.num_samples">
+<span class="sig-name descname"><span class="pre">num_samples</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#QCut.CutOptions.num_samples" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="QCut.CutOptions.seed">
+<span class="sig-name descname"><span class="pre">seed</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#QCut.CutOptions.seed" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="QCut.CutOptions.finder_candidates">
+<span class="sig-name descname"><span class="pre">finder_candidates</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">5</span></span><a class="headerlink" href="#QCut.CutOptions.finder_candidates" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="QCut.CutOptions.finder_cut_mode">
+<span class="sig-name descname"><span class="pre">finder_cut_mode</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'both'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'wire'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'gate'</span></span><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'both'</span></span><a class="headerlink" href="#QCut.CutOptions.finder_cut_mode" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="QCut.CutOptions.finder_max_qubits">
+<span class="sig-name descname"><span class="pre">finder_max_qubits</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#QCut.CutOptions.finder_max_qubits" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="QCut.CutOptions.finder_num_partitions">
+<span class="sig-name descname"><span class="pre">finder_num_partitions</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#QCut.CutOptions.finder_num_partitions" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="QCut.CutOptions.consolidate_mode">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">consolidate_mode</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><a class="headerlink" href="#QCut.CutOptions.consolidate_mode" title="Link to this definition">#</a></dt>
+<dd><p>The consolidation strategy, with <code class="docutils literal notranslate"><span class="pre">True</span></code> and <code class="docutils literal notranslate"><span class="pre">False</span></code> normalised.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="QCut.CutOptions.min_communicating_block">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">min_communicating_block</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></span><a class="headerlink" href="#QCut.CutOptions.min_communicating_block" title="Link to this definition">#</a></dt>
+<dd><p>Smallest wire cut block that will use classical communication.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="QCut.CutOptions.sample_count">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">sample_count</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></span><a class="headerlink" href="#QCut.CutOptions.sample_count" title="Link to this definition">#</a></dt>
+<dd><p>Number of draws to use when sampling.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="QCut.CutOptions.num_partitions">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">num_partitions</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></span><a class="headerlink" href="#QCut.CutOptions.num_partitions" title="Link to this definition">#</a></dt>
+<dd><p>Number of partitions to cut the circuit into.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="QCut.CutOptions.max_qubits">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">max_qubits</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#QCut.CutOptions.max_qubits" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="QCut.CutOptions.should_sample">
+<span class="sig-name descname"><span class="pre">should_sample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">exact_groups</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/QCut/options.html#CutOptions.should_sample"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.CutOptions.should_sample" title="Link to this definition">#</a></dt>
+<dd><p>Whether an experiment of <code class="docutils literal notranslate"><span class="pre">exact_groups</span></code> combinations should be sampled.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="QCut.CutOptions.replace">
+<span class="sig-name descname"><span class="pre">replace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">changes</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#QCut.CutOptions" title="QCut.options.CutOptions"><span class="pre">CutOptions</span></a></span></span><a class="reference internal" href="../_modules/QCut/options.html#CutOptions.replace"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.CutOptions.replace" title="Link to this definition">#</a></dt>
+<dd><p>Return a copy with <code class="docutils literal notranslate"><span class="pre">changes</span></code> applied.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="QCut.CutOptions.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">consolidate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'auto'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'always'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'never'</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">joint_rotation_cuts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wire_cut_communication</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'auto'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'always'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'never'</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expansion</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'auto'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'exact'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'sample'</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_exact_groups</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_samples</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">finder_candidates</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">finder_cut_mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'both'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'wire'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'gate'</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'both'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">finder_max_qubits</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">finder_num_partitions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#QCut.CutOptions.__init__" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="QCut.consolidate_two_qubit_blocks">
+<span class="sig-prename descclassname"><span class="pre">QCut.</span></span><span class="sig-name descname"><span class="pre">consolidate_two_qubit_blocks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">circuit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">QuantumCircuit</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">restrict_to</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">set</span><span class="p"><span class="pre">[</span></span><span class="pre">frozenset</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">QuantumCircuit</span></span></span><a class="reference internal" href="../_modules/QCut/cutting/consolidate.html#consolidate_two_qubit_blocks"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#QCut.consolidate_two_qubit_blocks" title="Link to this definition">#</a></dt>
+<dd><p>Merge runs of gates acting on the same qubit pair into single unitaries.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>circuit</strong> – circuit to rewrite. Two-qubit cut markers are unwrapped, merged and
+marked again. Wire cut markers end a run and are left in place.</p></li>
+<li><p><strong>restrict_to</strong> – if given, only these qubit pairs are considered. Pass the marked
+pairs to leave gates alone that were never going to be cut.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>An equivalent circuit. Returns the input unchanged if nothing was worth merging.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -717,6 +940,7 @@ analysis. Defaults to False.</p></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.transpile_experiments"><code class="docutils literal notranslate"><span class="pre">transpile_experiments()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.transpile_subcircuits"><code class="docutils literal notranslate"><span class="pre">transpile_subcircuits()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.estimate_expectation_values"><code class="docutils literal notranslate"><span class="pre">estimate_expectation_values()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.estimate_run"><code class="docutils literal notranslate"><span class="pre">estimate_run()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.get_experiment_circuits"><code class="docutils literal notranslate"><span class="pre">get_experiment_circuits()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.get_locations_and_subcircuits"><code class="docutils literal notranslate"><span class="pre">get_locations_and_subcircuits()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.run"><code class="docutils literal notranslate"><span class="pre">run()</span></code></a></li>
@@ -728,6 +952,29 @@ analysis. Defaults to False.</p></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.cutISWAP"><code class="docutils literal notranslate"><span class="pre">cutISWAP()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.cutGate"><code class="docutils literal notranslate"><span class="pre">cutGate()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.find_cuts"><code class="docutils literal notranslate"><span class="pre">find_cuts()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.CutOptions"><code class="docutils literal notranslate"><span class="pre">CutOptions</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.CutOptions.consolidate"><code class="docutils literal notranslate"><span class="pre">CutOptions.consolidate</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.CutOptions.joint_rotation_cuts"><code class="docutils literal notranslate"><span class="pre">CutOptions.joint_rotation_cuts</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.CutOptions.wire_cut_communication"><code class="docutils literal notranslate"><span class="pre">CutOptions.wire_cut_communication</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.CutOptions.expansion"><code class="docutils literal notranslate"><span class="pre">CutOptions.expansion</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.CutOptions.max_exact_groups"><code class="docutils literal notranslate"><span class="pre">CutOptions.max_exact_groups</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.CutOptions.num_samples"><code class="docutils literal notranslate"><span class="pre">CutOptions.num_samples</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.CutOptions.seed"><code class="docutils literal notranslate"><span class="pre">CutOptions.seed</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.CutOptions.finder_candidates"><code class="docutils literal notranslate"><span class="pre">CutOptions.finder_candidates</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.CutOptions.finder_cut_mode"><code class="docutils literal notranslate"><span class="pre">CutOptions.finder_cut_mode</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.CutOptions.finder_max_qubits"><code class="docutils literal notranslate"><span class="pre">CutOptions.finder_max_qubits</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.CutOptions.finder_num_partitions"><code class="docutils literal notranslate"><span class="pre">CutOptions.finder_num_partitions</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.CutOptions.consolidate_mode"><code class="docutils literal notranslate"><span class="pre">CutOptions.consolidate_mode</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.CutOptions.min_communicating_block"><code class="docutils literal notranslate"><span class="pre">CutOptions.min_communicating_block</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.CutOptions.sample_count"><code class="docutils literal notranslate"><span class="pre">CutOptions.sample_count</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.CutOptions.num_partitions"><code class="docutils literal notranslate"><span class="pre">CutOptions.num_partitions</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.CutOptions.max_qubits"><code class="docutils literal notranslate"><span class="pre">CutOptions.max_qubits</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.CutOptions.should_sample"><code class="docutils literal notranslate"><span class="pre">CutOptions.should_sample()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.CutOptions.replace"><code class="docutils literal notranslate"><span class="pre">CutOptions.replace()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.CutOptions.__init__"><code class="docutils literal notranslate"><span class="pre">CutOptions.__init__()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#QCut.consolidate_two_qubit_blocks"><code class="docutils literal notranslate"><span class="pre">consolidate_two_qubit_blocks()</span></code></a></li>
 </ul>
   </nav></div>
 

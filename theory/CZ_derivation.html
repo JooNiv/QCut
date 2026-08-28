@@ -42,11 +42,11 @@
 
     <script src="../_static/jquery.js?v=5d32c60e"></script>
     <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-    <script src="../_static/documentation_options.js?v=ddb9cf62"></script>
+    <script src="../_static/documentation_options.js?v=60ebb597"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/sphinx-book-theme.js?v=fab101a9"></script>
-    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script>window.MathJax = {"tex": {"macros": {"ket": ["\\left|#1\\right\\rangle", 1], "bra": ["\\left\\langle#1\\right|", 1], "braket": ["\\left\\langle#1\\middle|#2\\right\\rangle", 2], "Tr": "\\operatorname{Tr}"}}, "options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'theory/CZ_derivation';</script>
     <link rel="icon" href="../_static/QCut-logo.jpg"/>
@@ -56,7 +56,7 @@
     <link rel="prev" title="Theory" href="../Theory.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="1.3.2.post1.dev13+g0514c21f3" />
+  <meta name="docsearch:version" content="1.3.2.post1.dev14+g176d5596d" />
   </head>
   
   
@@ -151,26 +151,27 @@
     <div class="bd-toc-item navbar-nav active">
         <p aria-level="2" class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="../Usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Usage.html">Basic Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Options.html">Options</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../Examples.html">Examples on using QCut</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../WireCuts.html">Wire cuts</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../GateCuts.html">Gate cuts</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../AutomaticCuts.html">Automatic cuts</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../Multiple_cuts.html">Multiple cuts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/WireCuts.html">Wire cuts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/GateCuts.html">Gate cuts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/AutomaticCuts.html">Automatic cuts</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../Notebooks.html">Notebooks</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../examples/QCutBasicUsage.html">Basic Usage</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../examples/QCutCutSubsequentWires.html">Subsequent Wires</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../examples/QCutCutToThreeParts.html">Cut to Three parts</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../examples/QCutMultipleCutsOnSingleWire.html">Multiple cuts on a single wire</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../examples/QCutQAOAExample.html">QAOA Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notebooks/QCutBasicUsage.html">Basic Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notebooks/QCutQAOAExample.html">QAOA Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notebooks/QCutOptionsExample.html">Cut Options Example</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="../Theory.html">Theory</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
 <li class="toctree-l2 current active"><a class="current reference internal" href="#">CZ QPD derivation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="SWAP_derivation.html">SWAP QPD derivation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="General_2q_derivation.html">General two-qubit QPD derivation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Joint_rotation_derivation.html">Joint rotation gate cutting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Wire_derivation.html">Wire Cut QPD derivation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="LOCC_wire_derivation.html">Wire cuts with classical communication</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1"><a class="reference internal" href="../Acknowledgement.html">Acknowledgements</a></li>
@@ -179,8 +180,6 @@
 <li class="toctree-l2"><a class="reference internal" href="../_autosummary/QCut.html">QCut</a></li>
 </ul>
 </details></li>
-</ul>
-<ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../Changelog.html">Changelog</a></li>
 </ul>
 
@@ -344,7 +343,7 @@
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#calculating-coefficients">2. Calculating coefficients</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#term-1">Term 1</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#term-2">Term 2</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">Term 3</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">Term 3</a></li>
 </ul>
 </li>
 </ul>
@@ -362,7 +361,7 @@
                   
   <section class="tex2jax_ignore mathjax_ignore" id="deriving-optimal-qpd-for-the-cz-gate">
 <h1>Deriving optimal QPD for the CZ gate<a class="headerlink" href="#deriving-optimal-qpd-for-the-cz-gate" title="Link to this heading">#</a></h1>
-<p><strong>Here we will briefly go over where the decomposition for the CZ gate used comes from and how that is transfromed to operations implementable on a quantum computer. The derivation is based on <a class="reference internal" href="#references">[1]</a>.</strong></p>
+<p><strong>Here we will briefly go over where the decomposition for the CZ gate used comes from and how that is transformed to operations implementable on a quantum computer. The derivation is based on <a class="reference internal" href="#cz-ref">[1]</a>.</strong></p>
 <section id="background">
 <h2>Background<a class="headerlink" href="#background" title="Link to this heading">#</a></h2>
 <p>The goal is to decompose a quantum channel implementing the CZ gate into a set of local channels implementable as single qubits operations. This decomposed channel can then be sampled to approximate the expectation values of the original channel.</p>
@@ -370,17 +369,17 @@
 <section id="factor-the-cz-gate">
 <h2>Factor the CZ gate<a class="headerlink" href="#factor-the-cz-gate" title="Link to this heading">#</a></h2>
 <p>The CZ gate can (upto global phase) be decomposed as:</p>
-<div class="amsmath math notranslate nohighlight" id="equation-4fed2510-053d-4ca4-af21-babc68929062">
-<span id="eq1"></span><span class="eqno">(1)<a class="headerlink" href="#equation-4fed2510-053d-4ca4-af21-babc68929062" title="Permalink to this equation">#</a></span>\[\begin{equation}
+<div class="amsmath math notranslate nohighlight" id="equation-5669eff5-7118-4383-8541-94a32be8ebd3">
+<span id="eq1"></span><span class="eqno">(1)<a class="headerlink" href="#equation-5669eff5-7118-4383-8541-94a32be8ebd3" title="Permalink to this equation">#</a></span>\[\begin{equation}
 CZ = \exp(i\pi Z \otimes I/4) \cdot \exp(i\pi I \otimes Z/4) \cdot \exp(-i\pi Z \otimes Z/4) 
 \end{equation}\]</div>
 <p>We can immediately see that the first two channels are just local single qubit Z rotations, S gates in this case. The only non-local part is then the third term <span class="math notranslate nohighlight">\(\exp(-i\pi Z \otimes Z/4)\)</span> and so has the form <span class="math notranslate nohighlight">\(\exp(i\theta A_1 \otimes A_2)\)</span> with <span class="math notranslate nohighlight">\(A_1 = A_2 = Z, \theta = -\pi/4\)</span></p>
 </section>
 <section id="apply-lemma-1-from-1">
-<h2>Apply Lemma 1 from <a class="reference internal" href="#references">[1]</a><a class="headerlink" href="#apply-lemma-1-from-1" title="Link to this heading">#</a></h2>
+<h2>Apply Lemma 1 from <a class="reference internal" href="#cz-ref">[1]</a><a class="headerlink" href="#apply-lemma-1-from-1" title="Link to this heading">#</a></h2>
 <p>The lemma states that we can decompose the super operator <span class="math notranslate nohighlight">\(S(\exp(i\theta A_1 \otimes A_2))\)</span> as:</p>
-<div class="amsmath math notranslate nohighlight" id="equation-589c4b85-027e-46cb-9117-8226ae927ea4">
-<span id="eq2"></span><span class="eqno">(2)<a class="headerlink" href="#equation-589c4b85-027e-46cb-9117-8226ae927ea4" title="Permalink to this equation">#</a></span>\[\begin{equation}
+<div class="amsmath math notranslate nohighlight" id="equation-55ef8093-d7b9-4a3d-b97a-aa8d679d487c">
+<span id="eq2"></span><span class="eqno">(2)<a class="headerlink" href="#equation-55ef8093-d7b9-4a3d-b97a-aa8d679d487c" title="Permalink to this equation">#</a></span>\[\begin{equation}
 \begin{aligned}
 S(\exp(i\theta A_1 \otimes A_2)) &amp;= \cos^2(\theta)S(I \otimes I) + \sin^2(\theta)S(A_1 \otimes A_2) + 1/8 \cos(\theta)\sin(\theta) \\ 
 &amp; \sum_{(\alpha_1, \alpha_2) \in \{\pm 1\}} \alpha_1 \alpha_2 [S((I+\alpha_1A_1) \otimes S(I+i\alpha_2A_2)) + \\
@@ -439,7 +438,7 @@ S(\exp(i\theta A_1 \otimes A_2)) &amp;= \cos^2(\theta)S(I \otimes I) + \sin^2(\t
 </section>
 </section>
 <section id="references">
-<span id="id1"></span><h2>References<a class="headerlink" href="#references" title="Link to this heading">#</a></h2>
+<span id="cz-ref"></span><h2>References<a class="headerlink" href="#references" title="Link to this heading">#</a></h2>
 <ol class="arabic simple">
 <li><p>K. Mitarai and K. Fujii, “Constructing a virtual two-qubit gate by sampling single-qubit operations”, New J. Phys., vol. 23, no. 2, p. 023021, Feb. 2021, doi: 10.1088/1367-2630/abd7bc.</p></li>
 </ol>
@@ -516,12 +515,12 @@ For <span class="math notranslate nohighlight">\(\alpha = +1\)</span></p>
 <h4>Term 2<a class="headerlink" href="#term-2" title="Link to this heading">#</a></h4>
 <p><span class="math notranslate nohighlight">\(\sin^2(\pi /4)=\frac{1}{2}\)</span></p>
 </section>
-<section id="id2">
-<h4>Term 3<a class="headerlink" href="#id2" title="Link to this heading">#</a></h4>
+<section id="id1">
+<h4>Term 3<a class="headerlink" href="#id1" title="Link to this heading">#</a></h4>
 <p><span class="math notranslate nohighlight">\(\frac{1}{8}\cos(\pi/4)\sin(\pi/4) = \frac{1}{16}\)</span></p>
 <p>Nos this gets multiplied by the extra factors from the terms in Appendix A (since they can be moved out of the sum). This then gives us:</p>
 <p><span class="math notranslate nohighlight">\(\frac{1}{16}*2^2*|1 + i|^2 = \frac{1}{16}*4*2=\frac{1}{2}\)</span></p>
-<p>And finally this is multiplied by the <span class="math notranslate nohighlight">\(\alpha_1 \alpha_2\)</span> factor from the sum yielding <span class="math notranslate nohighlight">\(\pm \frac{1}{2}\)</span> as the coeffcient for term 3 depending on the <span class="math notranslate nohighlight">\(\alpha's\)</span>.</p>
+<p>And finally this is multiplied by the <span class="math notranslate nohighlight">\(\alpha_1 \alpha_2\)</span> factor from the sum yielding <span class="math notranslate nohighlight">\(\pm \frac{1}{2}\)</span> as the coefficient for term 3 depending on the <span class="math notranslate nohighlight">\(\alpha's\)</span>.</p>
 </section>
 </section>
 </section>
@@ -591,7 +590,7 @@ For <span class="math notranslate nohighlight">\(\alpha = +1\)</span></p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#calculating-coefficients">2. Calculating coefficients</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#term-1">Term 1</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#term-2">Term 2</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">Term 3</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">Term 3</a></li>
 </ul>
 </li>
 </ul>

@@ -42,21 +42,21 @@
 
     <script src="../_static/jquery.js?v=5d32c60e"></script>
     <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-    <script src="../_static/documentation_options.js?v=ddb9cf62"></script>
+    <script src="../_static/documentation_options.js?v=60ebb597"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/sphinx-book-theme.js?v=fab101a9"></script>
-    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script>window.MathJax = {"tex": {"macros": {"ket": ["\\left|#1\\right\\rangle", 1], "bra": ["\\left\\langle#1\\right|", 1], "braket": ["\\left\\langle#1\\middle|#2\\right\\rangle", 2], "Tr": "\\operatorname{Tr}"}}, "options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'theory/Wire_derivation';</script>
     <link rel="icon" href="../_static/QCut-logo.jpg"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Acknowledgements" href="../Acknowledgement.html" />
-    <link rel="prev" title="Swap derivation" href="SWAP_derivation.html" />
+    <link rel="next" title="Cutting wires with classical communication" href="LOCC_wire_derivation.html" />
+    <link rel="prev" title="Cutting parallel rotation gates together" href="Joint_rotation_derivation.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="1.3.2.post1.dev13+g0514c21f3" />
+  <meta name="docsearch:version" content="1.3.2.post1.dev14+g176d5596d" />
   </head>
   
   
@@ -151,26 +151,27 @@
     <div class="bd-toc-item navbar-nav active">
         <p aria-level="2" class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="../Usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Usage.html">Basic Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Options.html">Options</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../Examples.html">Examples on using QCut</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../WireCuts.html">Wire cuts</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../GateCuts.html">Gate cuts</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../AutomaticCuts.html">Automatic cuts</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../Multiple_cuts.html">Multiple cuts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/WireCuts.html">Wire cuts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/GateCuts.html">Gate cuts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/AutomaticCuts.html">Automatic cuts</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../Notebooks.html">Notebooks</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../examples/QCutBasicUsage.html">Basic Usage</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../examples/QCutCutSubsequentWires.html">Subsequent Wires</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../examples/QCutCutToThreeParts.html">Cut to Three parts</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../examples/QCutMultipleCutsOnSingleWire.html">Multiple cuts on a single wire</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../examples/QCutQAOAExample.html">QAOA Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notebooks/QCutBasicUsage.html">Basic Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notebooks/QCutQAOAExample.html">QAOA Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notebooks/QCutOptionsExample.html">Cut Options Example</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="../Theory.html">Theory</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="CZ_derivation.html">CZ QPD derivation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="SWAP_derivation.html">SWAP QPD derivation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="General_2q_derivation.html">General two-qubit QPD derivation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Joint_rotation_derivation.html">Joint rotation gate cutting</a></li>
 <li class="toctree-l2 current active"><a class="current reference internal" href="#">Wire Cut QPD derivation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="LOCC_wire_derivation.html">Wire cuts with classical communication</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1"><a class="reference internal" href="../Acknowledgement.html">Acknowledgements</a></li>
@@ -179,8 +180,6 @@
 <li class="toctree-l2"><a class="reference internal" href="../_autosummary/QCut.html">QCut</a></li>
 </ul>
 </details></li>
-</ul>
-<ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../Changelog.html">Changelog</a></li>
 </ul>
 
@@ -342,7 +341,7 @@
                   
   <section class="tex2jax_ignore mathjax_ignore" id="deriving-optimal-qpd-for-wire-cuts">
 <h1>Deriving Optimal QPD for Wire Cuts<a class="headerlink" href="#deriving-optimal-qpd-for-wire-cuts" title="Link to this heading">#</a></h1>
-<p><strong>Here we will briefly go over where the decomposition used for wire cuts comes from and how that is transfromed to operations implementable on a quantum computer. The derivation is based on <a class="reference internal" href="#wire-ref">[1][2]</a>.</strong></p>
+<p><strong>Here we will briefly go over where the decomposition used for wire cuts comes from and how that is transformed to operations implementable on a quantum computer. The derivation is based on <a class="reference internal" href="#wire-ref">[1][2]</a>.</strong></p>
 <section id="decompose-single-qubit-density-matrix">
 <h2>Decompose Single Qubit Density Matrix<a class="headerlink" href="#decompose-single-qubit-density-matrix" title="Link to this heading">#</a></h2>
 <p>Any single qubit density matrix can be decomposed as:</p>
@@ -431,7 +430,7 @@
 </tbody>
 </table>
 </div>
-<p>Note that here the identity basis measurement (I) stands for a measurement that always reutrns the <span class="math notranslate nohighlight">\(\ket{0}\)</span> state. Practically this means not measuring and leaving a classical bit in the initial 0 position.</p>
+<p>Note that here the identity basis measurement (I) stands for a measurement that always returns the <span class="math notranslate nohighlight">\(\ket{0}\)</span> state. Practically this means not measuring and leaving a classical bit in the initial 0 position.</p>
 <p>We have now decomposed any single qubit density matrix <span class="math notranslate nohighlight">\(\rho\)</span> as <span class="math notranslate nohighlight">\(\sum_{i=1}^8c_iTr[O_i\rho]\rho_i\)</span>.</p>
 <p>Summing over the absolute coefficient we get <span class="math notranslate nohighlight">\(\gamma=4\)</span> which is optimal (without communication).</p>
 </section>
@@ -456,20 +455,20 @@
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="SWAP_derivation.html"
+       href="Joint_rotation_derivation.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Swap derivation</p>
+        <p class="prev-next-title">Cutting parallel rotation gates together</p>
       </div>
     </a>
     <a class="right-next"
-       href="../Acknowledgement.html"
+       href="LOCC_wire_derivation.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Acknowledgements</p>
+        <p class="prev-next-title">Cutting wires with classical communication</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
