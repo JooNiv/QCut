@@ -1,18 +1,22 @@
 """Tests for CircuitKnitting package."""  # noqa: N999
 
 import numpy as np
+import pytest
 from qiskit import QuantumCircuit
 from qiskit.quantum_info import SparsePauliOp
 from qiskit_aer import AerSimulator
 
 import QCut as ck
 import tests.solutions_1q as sq
-from QCut.circuit_knitting import run
 
 # import QCut as ck
-from QCut.circuit_preparation import _get_cut_locations, get_locations_and_subcircuits
-from QCut.postprocess import _process_results
-from QCut.qcutresult import SubResult, TotalResult
+from QCut.cutting.circuit_preparation import (
+    _get_cut_locations,
+    get_locations_and_subcircuits,
+)
+from QCut.execution.circuit_knitting import run
+from QCut.execution.postprocess import _process_results
+from QCut.execution.qcutresult import SubResult, TotalResult
 
 
 def _remove_obsm(subcircuits: list[QuantumCircuit]):
@@ -62,6 +66,7 @@ def test_separate_subcircuits() -> None:
             assert len(subcirc.data) == sq.subcircuit_len[solution_index][circ_index]
 
 
+@pytest.mark.sim
 def test_results_exist() -> None:
     circ = QuantumCircuit(2)
     circ.h(0)
@@ -75,7 +80,7 @@ def test_results_exist() -> None:
 
     res = ck.run_experiments(cut_experiment, backend=AerSimulator())
 
-    result = _process_results(res.result(), res._shots, res._samples)
+    result = _process_results(res.result(), res._shots)
 
     assert isinstance(result[0][0], TotalResult)
 
@@ -86,6 +91,7 @@ def test_results_exist() -> None:
     assert str(result[0][0].subcircuits[0][0][0])
 
 
+@pytest.mark.sim
 def test_expectation_values() -> None:
     """Test the expectation values of the test circuits.
 

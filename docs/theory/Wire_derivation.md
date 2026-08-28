@@ -1,6 +1,6 @@
 # Deriving Optimal QPD for Wire Cuts
 
-**Here we will briefly go over where the decomposition used for wire cuts comes from and how that is transfromed to operations implementable on a quantum computer. The derivation is based on [[1][2]](#wire_ref).**
+**Here we will briefly go over where the decomposition used for wire cuts comes from and how that is transformed to operations implementable on a quantum computer. The derivation is based on [[1][2]](#wire_ref).**
 
 ## Decompose Single Qubit Density Matrix
 
@@ -52,7 +52,7 @@ Now writing out all the measure prepare channels for I, X, Y, Z:
 | Y       | $\ket{i}\bra{i}$   | 1/2  |
 | Y       | $\ket{-i}\bra{-i}$ | -1/2 |
 
-Note that here the identity basis measurement (I) stands for a measurement that always reutrns the $\ket{0}$ state. Practically this means not measuring and leaving a classical bit in the initial 0 position.
+Note that here the identity basis measurement (I) stands for a measurement that always returns the $\ket{0}$ state. Practically this means not measuring and leaving a classical bit in the initial 0 position.
 
 We have now decomposed any single qubit density matrix $\rho$ as $\sum_{i=1}^8c_iTr[O_i\rho]\rho_i$.
 

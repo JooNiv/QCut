@@ -40,12 +40,21 @@ dev = [
     "pytest-cov>=6.2.1",
     "ruff>=0.12.1",
     "ty >=0.0.15",
+    "pydantic>=2.12.5",
 ]
 docs = [
     "sphinx==9.0.4",
     "myst-nb",
     "sphinx-book-theme",
     "sphinx_lesson",
+]
+# Comparing QCut against IBM's circuit-knitting addon: uv run --group benchmark ...
+benchmark = [
+    "qiskit-addon-cutting>=0.10",
+    "matplotlib>=3.10.5",
+    "notebook>=7.4.5",
+    "pandas>=2.2",
+    "networkx>=3.0",
 ]
 
 
@@ -57,6 +66,23 @@ changelog = "https://github.com/JooNiv/QCut/blob/main/CHANGELOG.rst"
 
 [project.optional-dependencies]
 dev = ["pytest", "pytest-cov", "ruff"]
+
+# Support for running on IQM hardware: pip install qcut[iqm]
+#
+# The Qiskit adapter lives in iqm-client's own "qiskit" extra, which covers qiskit 1.0
+# up to but not including 2.2. That spans everything QCut supports except the newest
+# qiskit, so installing this extra next to qiskit 2.2 or later will make the resolver
+# try to move qiskit back; install it into an environment whose qiskit is in range.
+#
+# The choice of adapter cannot be made automatically. Environment markers can key on the
+# python version, the platform and the OS, but there is no marker for the version of
+# another package, so a dependency cannot say "this one if qiskit is old, that one
+# otherwise". What the resolver does do is pick an iqm-client whose own qiskit
+# requirement your qiskit satisfies, which covers the range in one line.
+# Older qiskit does not need a different package: the adapter used to live in a
+# separate qiskit-iqm, but everything that supported is supported here too, and pinning
+# both is not even resolvable since qiskit-iqm caps iqm-client below 23.
+iqm = ["iqm-client[qiskit]>=33"]
 
 [tool.setuptools.packages.find]
 where = ["."]
@@ -106,3 +132,10 @@ docstring-code-line-length = "dynamic"
 
 [tool.pytest.ini_options]
 python_files = ["tests.py", "test_*.py"]
+markers = [
+    "slow: end-to-end simulation, skipped by the qiskit version matrix",
+    "sim: runs circuits on a simulator; deselect with -m \"not sim\" for a fast loop",
+]
+
+[tool.ty.rules]
+unused-type-ignore-comment = "ignore"

@@ -145,6 +145,8 @@ def _get_obs_subcircuits(
             modified_circuit = pm.run(subcircuit)
             if modified_circuit.num_qubits == 0:
                 continue
+
+            modified_circuit._layout = subcircuit.layout
             pm_circs[ind] = modified_circuit
         obs_subcircuits.append(pm_circs)
     return obs_subcircuits
