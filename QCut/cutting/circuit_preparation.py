@@ -14,7 +14,9 @@ from qiskit.converters import circuit_to_dag, dag_to_circuit
 
 from QCut.cutcircuit import CutCircuit
 from QCut.cutlocation import CutLocation, SingleQubitCutLocation
-from QCut.qcuterror import QCutError
+from QCut.cutting.consolidate import consolidate_two_qubit_blocks, marker_gate
+from QCut.errors.qcuterror import QCutError
+from QCut.options import CutOptions, resolve
 
 logger: logging.Logger = logging.getLogger(__name__)
 
@@ -28,7 +30,7 @@ def _get_cut_locations(circuit):
     # if operation is a Cut() instruction remove it and add registers and
     # offset index to cut_locations
 
-    # rename varibales to be more descriptive (namely qs)
+    # rename variables to be more descriptive (namely qs)
     while index < len(circuit):
         op = circuit_data[index]
         if "Cut" in op.operation.name:
@@ -43,7 +45,15 @@ def _get_cut_locations(circuit):
                 cut_locations.append(SingleQubitCutLocation((qubits[0], index)))
             else:
                 gate_name = op.operation.name.replace("Cut", "").lower()
-                cut_locations.append(CutLocation((qubits, index), gate_name=gate_name))
+                # CutTwoQubitGate markers carry the gate so a QPD can be generated
+                # from it. The per-gate markers do not need to.
+                cut_locations.append(
+                    CutLocation(
+                        (qubits, index),
+                        gate_name=gate_name,
+                        gate=getattr(op.operation, "gate", None),
+                    )
+                )
 
             # adjust index to account for removed operation
             index -= 1
@@ -147,7 +157,12 @@ def _move_to_new_wire(orig: QuantumCircuit) -> QuantumCircuit:
     new.add_bits(new_qubits)
 
     # 3) Replay every instruction, splitting on Measure
-    for inst, qargs, cargs in orig.data:
+    for instruction in orig.data:
+        inst, qargs, cargs = (
+            instruction.operation,
+            instruction.qubits,
+            instruction.clbits,
+        )
         # map every qarg via our current mapping
         mapped_qs = [qubit_map[q] for q in qargs]
 
@@ -198,10 +213,14 @@ def _add_cbits(subcircuits):
                 clbits += 1
                 clbits_qpd += 1
 
-        circ.add_register(ClassicalRegister(clbits_qpd, "qpd_meas"))
-        circ.add_register(
-            ClassicalRegister(circ.num_qubits - clbits_qpd + clbits, "meas")
-        )
+        # A register of no bits still counts as a register, and a backend that refuses
+        # jobs carrying one it cannot see written to -- IQM's does -- rejects the whole
+        # experiment over it. Since it holds no bits, leaving it out moves nothing.
+        meas_size = circ.num_qubits - clbits_qpd + clbits
+        if clbits_qpd:
+            circ.add_register(ClassicalRegister(clbits_qpd, "qpd_meas"))
+        if meas_size:
+            circ.add_register(ClassicalRegister(meas_size, "meas"))
 
     return subcircuits
 
@@ -227,9 +246,112 @@ def get_qubit_map(subcircuits: list[QuantumCircuit]):
     return map_qubit
 
 
+def _consolidate_marked_pairs(circuit: QuantumCircuit) -> QuantumCircuit:
+    """Merge runs of gates on qubit pairs that carry a cut marker.
+
+    Pairs with no marker are left alone. Merging them would not change any cutting cost
+    and would only replace named gates by generic unitaries.
+    """
+    marked = {
+        frozenset(circuit.find_bit(q).index for q in instruction.qubits)
+        for instruction in circuit.data
+        if marker_gate(instruction.operation) is not None
+    }
+    if not marked:
+        return circuit
+    return consolidate_two_qubit_blocks(circuit, restrict_to=marked)
+
+
+def _split(
+    prepared: QuantumCircuit,
+    max_qubits: list[int] | None,
+    options: CutOptions,
+) -> CutCircuit:
+    """Turn one marked circuit into subcircuits with placeholder operations."""
+    from QCut.QCutFind import construct_final_subcircuits
+
+    working = prepared.copy()
+    for qubit in range(working.num_qubits):
+        obs_m = QuantumCircuit(1, name=f"obs_{qubit}")
+        working.append(obs_m.to_instruction(), [qubit])
+
+    cut_locations = _get_cut_locations(working)
+    circuit1 = _insert_cut_nodes(working, cut_locations)
+    circuit_new = _move_to_new_wire(circuit1.copy())
+    subcircuits = _add_cbits(_separate_subcircuits(circuit_new))
+
+    fixed_circs = []
+    for subcircuit in subcircuits:
+        rebuilt = QuantumCircuit(subcircuit.num_qubits)
+        # By name, not by position: a register of no bits is not created at all, so
+        # which index holds which is not fixed.
+        for register in subcircuit.cregs:
+            rebuilt.add_register(register)
+        for instruction in subcircuit.data:
+            qubits = [
+                rebuilt.qubits[subcircuit.qubits.index(q)] for q in instruction.qubits
+            ]
+            rebuilt.append(CircuitInstruction(instruction.operation, qubits))
+        fixed_circs.append(rebuilt)
+
+    if len(fixed_circs) <= 1:
+        raise QCutError(
+            "Invalid cuts. Check documentation to see how cuts should be placed."
+        )
+
+    if max_qubits and len(fixed_circs) != len(max_qubits):
+        fixed_circs = construct_final_subcircuits(fixed_circs, max_qubits)
+
+    return CutCircuit(
+        fixed_circs, cut_locations, get_qubit_map(fixed_circs), options=options
+    )
+
+
+def _cheaper_split(
+    unmerged: QuantumCircuit,
+    merged: QuantumCircuit,
+    max_qubits: list[int] | None,
+    options: CutOptions,
+) -> CutCircuit:
+    """Split both ways and keep whichever plan costs less.
+
+    Merging a run of gates on one pair lowers that pair's cost but can raise the total,
+    because a merged run of gates about different axes is no longer a single-axis
+    rotation and so can no longer join a joint decomposition. Which way wins depends on
+    the whole circuit, so both plans are costed outright.
+    """
+    from QCut.qpd.qpd_operations import plan_cost
+
+    candidates = []
+    first_error = None
+    for label, prepared in (("merged", merged), ("unmerged", unmerged)):
+        try:
+            split = _split(prepared, max_qubits, options)
+        except QCutError as error:  # noqa: PERF203
+            logger.debug("the %s plan does not split: %s", label, error)
+            first_error = first_error or error
+            continue
+        candidates.append((plan_cost(split, options), label, split))
+
+    if not candidates:
+        # Neither plan works, so report why rather than inventing a new message.
+        raise first_error or QCutError("the circuit could not be split")
+
+    candidates.sort(key=lambda candidate: candidate[0])
+    cost, label, chosen = candidates[0]
+    if len(candidates) > 1:
+        logger.info(
+            f"Consolidation is {'on' if label == 'merged' else 'off'} for this run, "
+            f"since the {label} plan costs gamma {cost:.4f} against "
+            f"{candidates[1][0]:.4f} for the {candidates[1][1]} one."
+        )
+    return chosen
+
+
 def get_locations_and_subcircuits(
     circuit: QuantumCircuit,
     max_qubits: list[int] | None = None,
+    options: CutOptions | None = None,
 ) -> CutCircuit:
     """Get cut locations and subcircuits with placeholder operations.
 
@@ -238,66 +360,43 @@ def get_locations_and_subcircuits(
         max_qubits (list[int], optional):
             list of maximum qubits per subcircuit when using automatic cut
             finding. If None, no constraint is used. Defaults to None.
-            In general it is not necesary to manually specify this parameter.
+            In general it is not necessary to manually specify this parameter.
+        options (CutOptions, optional): configuration for the run. Defaults to
+            QCut.options.DEFAULT_OPTIONS.
 
     Returns:
-        tuple: A tuple containing:
-            - list[SingleQubitCutLocation]: Locations of the cuts as a list
-            - list[QuantumCircuit]: Subcircuits with placeholder operations
-            - dict[int:int]: map of subcircuit qubit indices to original circuit
-                            qubit indices
+        CutCircuit: the subcircuits, the cut locations, and the map of subcircuit qubit
+        indices to original circuit qubit indices.
 
     """
-    from QCut.QCutFind import construct_final_subcircuits
+    options = resolve(options)
+    prepared = circuit.copy().decompose(["CutGate"])
 
-    circuit_copy = circuit.copy()  # copy to avoid modifying the original circuit
-    circuit_copy = circuit_copy.decompose(["CutGate"])
-    for i in range(circuit.num_qubits):
-        obs_m = QuantumCircuit(1, name=f"obs_{i}")
-        obs_m = obs_m.to_instruction()
-        circuit_copy.append(obs_m, [i])
-    cut_locations = _get_cut_locations(circuit_copy)
-    circuit1 = _insert_cut_nodes(circuit_copy, cut_locations)
-    circuit_new = _move_to_new_wire(circuit1.copy())
-    subcircuits = _separate_subcircuits(circuit_new)
+    # Consolidation has to happen before the obs_i tags go on, since those touch every
+    # qubit and would end every run. Cut locations are recorded afterwards, so a merged
+    # run counts as one cut.
+    merged = None
+    if options.consolidate_mode != "never":
+        merged = _consolidate_marked_pairs(prepared)
+        if merged is prepared:
+            merged = None  # nothing was worth merging, so there is nothing to compare
 
-    subcircuits = _add_cbits(subcircuits)
-    fixed_circs = []
-    for i in subcircuits:
-        test = QuantumCircuit(i.num_qubits)
-        test.add_register(i.cregs[0])
-        test.add_register(i.cregs[1])
+    if merged is None:
+        cut_circuit = _split(prepared, max_qubits, options)
+    elif options.consolidate_mode == "always":
+        cut_circuit = _split(merged, max_qubits, options)
+    else:
+        cut_circuit = _cheaper_split(prepared, merged, max_qubits, options)
 
-        for j in i.data:
-            qubits = [test.qubits[i.qubits.index(q)] for q in j.qubits]
-            test.append(CircuitInstruction(j.operation, qubits))
-
-        fixed_circs.append(test)
-    if len(fixed_circs) <= 1:
-        raise QCutError(
-            "Invalid cuts. Check documentation to see how cuts should be placed."
-        )
-
-    if max_qubits and len(fixed_circs) != len(max_qubits):
-        """if max_qubits is None:
-            raise QCutError(
-                "max_qubits must be specified when automatic cut finding with " \
-                "max_qubits constraint is used."
-            )"""
-        fixed_circs = construct_final_subcircuits(fixed_circs, max_qubits)
-
-    map_qubits = get_qubit_map(fixed_circs)
-
+    locations = cut_circuit.cut_locations
     num_wire_cuts = len(
-        [loc for loc in cut_locations if isinstance(loc, SingleQubitCutLocation)]
+        [loc for loc in locations if isinstance(loc, SingleQubitCutLocation)]
     )
-    num_gate_cuts = len([loc for loc in cut_locations if isinstance(loc, CutLocation)])
-
     logger.info(
-        f"Found {len(cut_locations)} cut locations"
+        f"Found {len(locations)} cut locations"
         f"({num_wire_cuts})"
-        f" wire cut(s) and {num_gate_cuts} gate cut(s))"
-        f" and separated into {len(fixed_circs)} subcircuits."
+        f" wire cut(s) and {len(locations) - num_wire_cuts} gate cut(s))"
+        f" and separated into {cut_circuit.num_subcircuits} subcircuits."
     )
 
-    return CutCircuit(fixed_circs, cut_locations, map_qubits)
+    return cut_circuit
