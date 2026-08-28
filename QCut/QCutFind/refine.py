@@ -401,9 +401,17 @@ def refine_cuts(
         nodes_on_qubit,
     )
 
-    zipped_data = list(zip(cut_data_test_loc, cut_data_loc))
+    # Drop gate cuts left behind by reverting and swapping, whose ends are now on the
+    # same side. A wire cut's entry names a neighbouring edge, so skip those.
+    kept = [
+        (test, data)
+        for test, data in zip(cut_data_test_loc, cut_data_loc)
+        if len(test) == 2 or labels_loc.get(data[0]) != labels_loc.get(data[1])
+    ]
+    if not kept:
+        return [], [], labels_loc
 
-    zipped_data.sort(key=lambda x: x[1][2][0])
-    cut_data_test_loc, cut_data_loc = map(list, zip(*zipped_data))
+    kept.sort(key=lambda x: x[1][2][0])
+    cut_data_test_loc, cut_data_loc = map(list, zip(*kept))
 
     return cut_data_loc, cut_data_test_loc, labels_loc

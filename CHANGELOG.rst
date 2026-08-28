@@ -2,6 +2,134 @@
 Changelog
 =========
 
+**Version 2.0.0**
+=================
+
+Breaking changes
+----------------
+
+- :code:`RawResult` no longer takes a :code:`samples` argument. It is now
+  :code:`RawResult(results, shots, experiment=None)` and carries the experiment itself.
+- :code:`RawResult.result()` keeps its shape but each subcircuit now holds a
+  :code:`CircuitResult` containing what the backend or sampler returned, plus the shot scale and
+  the label selection that group takes from it rather than a counts dict. Call
+  :code:`.counts()` on one for the counts.
+- Modules are grouped into subpackages: :code:`QCut.qpd`, :code:`QCut.cutting`,
+  :code:`QCut.execution`, :code:`QCut.errors` and :code:`QCut.utils`. The names exported
+  from :code:`QCut` are unchanged; code importing a module directly has to be updated.
+- :code:`find_cuts()` is now deterministic and costs several candidate partitions before
+  choosing, so it returns different, cheaper plans than 1.3.2 did for the same circuit.
+- :code:`find_cuts()` now reads its configuration from a :code:`CutOptions` object rather than from keyword arguments. See
+  `Options <https://jooniv.github.io/QCut/Options.html>`__ and `Automatic cuts <https://jooniv.github.io/QCut/examples/AutomaticCuts.html>`__ for details.
+- Cut edge weights are :code:`log gamma` rather than :code:`gamma`, which also changes
+  which cuts are chosen. See `Automatic cuts <https://jooniv.github.io/QCut/examples/AutomaticCuts.html>`__.
+- Subcircuits are no longer given empty classical registers, and an unused
+  :code:`qpd_meas` register is dropped. Code reading registers by position rather than by
+  name has to be updated.
+- :code:`CutExperiment.expv_data()` is gone and :code:`estimate_expectation_values()`
+  takes only the results, which now carry the experiment they came from. Replace
+  :code:`estimate_expectation_values(results, experiment.expv_data())` with
+  :code:`estimate_expectation_values(results)`.
+  See `Usage <https://jooniv.github.io/QCut/Usage.html>`__.
+- :code:`get_experiment_circuits()` no longer modifies the :code:`CutCircuit` it is
+  given, so one can be reused for several observable sets.
+- :code:`transpile_subcircuits()` raises rather than quietly overriding when
+  :code:`remove_final_rzs` or :code:`optimize_single_qubits` is passed for an IQM
+  backend. Those rewrite a circuit that still carries cut placeholders; use
+  :code:`transpile_experiments()` instead.
+- :code:`perform_move_routing` now defaults to whether the backend needs it, on for a
+  resonator device and off otherwise, and an explicit value is honoured either way.
+
+Cutting arbitrary two-qubit gates
+---------------------------------
+
+- Any two-qubit gate can be cut, with the decomposition derived from its KAK
+  coordinates. See `Gate cuts <https://jooniv.github.io/QCut/examples/GateCuts.html>`__ and
+  `Theory <https://jooniv.github.io/QCut/Theory.html>`__.
+
+Joint cutting of parallel rotation gates
+----------------------------------------
+
+- Single-axis rotation gates running in parallel between the same two partitions share
+  one decomposition: two parallel :code:`rzz` cost 30 subexperiments instead of 36, three
+  cost 132 instead of 216. On by default.
+  See `the derivation <https://jooniv.github.io/QCut/theory/Joint_rotation_derivation.html>`__.
+
+Wire cuts with classical communication
+--------------------------------------
+
+- A block of parallel wire cuts can exchange the measured outcome, taking the overhead
+  from :code:`4**n` to :code:`2**(n+1) - 1` and two wires from 64 subexperiments to 28.
+  These run in waves. Used by default for blocks of two or more.
+  See `the derivation <https://jooniv.github.io/QCut/theory/LOCC_wire_derivation.html>`__.
+
+Gate consolidation
+------------------
+
+- Runs of gates on the same qubit pair are merged before cutting, so the pair costs one
+  cut. Runs need not be contiguous, gates that commute with the run are moved out of the
+  way. On by default, and compared against not merging.
+  See `Options <https://jooniv.github.io/QCut/Options.html>`__.
+
+Sampling instead of enumerating
+-------------------------------
+
+- The experiment can be sampled from the quasiprobability distribution rather than
+  enumerated, which bounds the number of circuits when the exact count is out of reach.
+  Automatic above 1000 groups. See `Options <https://jooniv.github.io/QCut/Options.html>`__.
+
+Configuration
+-------------
+
+- Added :code:`CutOptions`, collected once and carried through the run. Covers
+  consolidation, joint cuts, wire cut communication, expansion strategy, sampling and the
+  cut finder. See `Options <https://jooniv.github.io/QCut/Options.html>`__.
+
+Knowing what a cut costs
+------------------------
+
+- :code:`CutCircuit.gamma` is the sampling overhead of a split and
+  :code:`CutCircuit.optimal_gamma` the least those same cuts could cost with every
+  decomposition available. Both are closed form, so the cost of a plan can be read
+  before any experiment circuits are built. :code:`CutExperiment` carries both forward.
+
+Running on real hardware
+------------------------
+
+- Improved and fixed bugs in transpilation for real backends.
+- Better IQM support: :code:`pip install "QCut[iqm]"`, and both transpile helpers use IQM's own
+  transpiler for IQM backends, resonator machines included. Pass
+  :code:`use_iqm_transpiler=False` to opt out.
+  See `Usage <https://jooniv.github.io/QCut/Usage.html>`__.
+- Resonator devices are supported by both transpile helpers. Their MOVE gates are routed
+  while the subcircuits still carry cut placeholders, which the routing pass used to
+  drop along with the classical registers and the layout.
+  :code:`use_iqm_transpiler=False` raises for them, since standard qiskit has no MOVE gate.
+- :code:`transpile_experiments()` works on IQM backends.
+- A block of parallel wire cuts is never bundled for a resonator device, which reports
+  its qubits as fully coupled but has no two-qubit gate that avoids its resonator. Those
+  cuts fall back to one block per wire rather than to the local decomposition.
+- :code:`run_experiments()` also takes a V2 sampler as its :code:`backend`, on both the
+  plain and the communicating execution path. Note that
+  :code:`qiskit.primitives.StatevectorSampler` cannot be used, since it refuses
+  mid-circuit measurements.
+- Every batch of a wave is submitted before any of it is collected, so a run queues all
+  of its jobs at once rather than waiting out each batch in turn.
+- :code:`run_experiments()` takes :code:`run_options`, passed on to every :code:`run`
+  call. A target that batches on its own account, such as
+  `fiqci-ems <https://github.com/FiQCI/fiqci-ems>`__ does, is also given QCut's
+  :code:`max_batch_size`, so it does not split a batch QCut has already sized.
+- :code:`run()` and :code:`run_cut_circuit()` now take :code:`shots`.
+
+Other
+-----
+
+- :code:`from QCut import *` no longer raises.
+- Test suite split into tiers. See :code:`CONTRIBUTING.md`.
+- Dropped pickle, experiment generation is much faster.
+- :code:`finder_max_qubits` no longer raises when given as a list.
+- Benchmarks against IBM's cutting addon, in :code:`benchmarks/`.
+
 **Version 1.3.2**
 =================
 - Fix bug in how weights for different gates were being handled by `QCutFind`.
