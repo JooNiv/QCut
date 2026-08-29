@@ -15,9 +15,9 @@
   - [Transpilation](#transpilation)
   - [Execution](#execution)
     - [Shorthand](#shorthand)
+    - [Probability distributions](#probability-distributions)
     - [Running on FiQCI](#running-on-fiqci)
     - [Running on other hardware](#running-on-other-hardware)
-  - [Probability distributions](#probability-distributions)
   - [Logging](#logging)
 - [Benchmarks](#benchmarks)
 - [Documentation](#documentation)
@@ -426,19 +426,11 @@ print(ck.run_cut_circuit(found, observables, sim))
 
 `[0.932540 0.717683 0.386038 0.775063]`
 
-### Running on FiQCI
+### Probability distributions
 
-For running on real hardware using the Lumi supercomputer follow the instructions [here](https://docs.csc.fi/computing/quantum-computing/running-quantum-jobs/). If you are used to using Qiskit on jupyter notebooks it is recommended to use the [Lumi web interface](https://docs.lumi-supercomputer.eu/runjobs/webui/).
-
-### Running on other hardware
-
-Running on other providers such as IBM is untested at the moment but as long as the hardware can be accessed with Qiskit QCut should be compatible.
-
-## Probability distributions
-
-A cut experiment estimates expectation values, so there are no counts of the uncut
-circuit to tally. The distribution over a chosen set of qubits can still be recovered
-from them. Pass `qubits` instead of `observables`:
+A cut experiment estimates expectation values, so there are no counts to tally, but the
+distribution over a chosen set of qubits can still be recovered from them. Pass `qubits`
+instead of `observables`:
 
 ```python
 cut_experiment = ck.get_experiment_circuits(cut_circuit, qubits=[0, 1])
@@ -447,23 +439,45 @@ results = ck.run_experiments(cut_experiment, shots=4096, backend=sim)
 probs = ck.estimate_probabilities(results)
 ```
 
-`{'00': 0.8535, '01': 0.0033, '10': 0.1087, '11': 0.0345}`
+`{'00': 0.8658, '01': -0.0024, '10': 0.1041, '11': 0.0324}`
 
-QCut estimates every Pauli Z over those qubits and inverts them with the inverse
-Walsh-Hadamard transform. That costs `2**k` values for `k` qubits but no extra circuits since
-Z observables all commute, so they share one measurement setting and the experiment is
-the size it would have been for a single observable. See
+This costs `2**k` values for `k` qubits but no extra circuits, since the Z observables it
+needs all commute. See
 [the derivation](https://jooniv.github.io/QCut/theory/Probability_reconstruction.html).
 
 The result is a dict, so it indexes and plots like one, and carries three views:
 
 ```python
-probs['00']                     # 0.8535
+probs['00']                     # 0.8658
 probs.quasi_probabilities()     # the same values, as a plain dict
-probs.nearest_probabilities()   # closest true distribution
+probs.nearest_probabilities()   # closest true distribution, negatives projected away
 probs.counts()                  # scaled by the shots the experiment ran at
 probs.counts(shots=1000)        # or by any other shots
 ```
+
+Against the same circuit run whole:
+
+```python
+from qiskit.result import marginal_counts
+from qiskit.visualization import plot_histogram
+
+measured = circuit.measure_all(inplace=False)
+counts = sim.run(transpile(measured, sim), shots=4096).result().get_counts()
+
+plot_histogram(
+    [probs.counts(), marginal_counts(counts, [0, 1])], legend=["QCut", "uncut circuit"]
+)
+```
+
+![](./docs/_static/images/probs1.png)
+
+### Running on FiQCI
+
+For running on real hardware using the Lumi supercomputer follow the instructions [here](https://docs.csc.fi/computing/quantum-computing/running-quantum-jobs/). If you are used to using Qiskit on jupyter notebooks it is recommended to use the [Lumi web interface](https://docs.lumi-supercomputer.eu/runjobs/webui/).
+
+### Running on other hardware
+
+Running on other providers such as IBM is untested at the moment but as long as the hardware can be accessed with Qiskit QCut should be compatible.
 
 ## Logging
 
