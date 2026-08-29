@@ -165,7 +165,7 @@ def get_experiment_circuits(  # noqa: C901
     Args:
         cut_circuit (CutCircuit): The cut circuit to generate experiment circuits for.
         observables (SparsePauliOp): The observables to measure.
-        qubits (list[int]): The qubits to measure. 
+        qubits (list[int]): The qubits to measure.
 
         One of observables or qubits must be provided.
 
@@ -175,14 +175,14 @@ def get_experiment_circuits(  # noqa: C901
 
     """
 
-    if observables is None and qubits is None:
-        raise ValueError("Either observables or qubits must be provided.")
-
     if observables is not None and qubits is not None:
         raise ValueError("Only one of observables or qubits can be provided.")
 
-    if observables is None:
+    if qubits is not None:
         observables = _all_z_paulis_for_subset(cut_circuit.uncut_num_qubits, qubits)
+
+    if observables is None:
+        raise ValueError("Either observables or qubits must be provided.")
 
     num_qubits = 0
     for subcircuit in cut_circuit.subcircuits:
@@ -509,13 +509,13 @@ def get_experiment_circuits(  # noqa: C901
             bundle_waves,
         )
     cut_experiment = CutExperiment(
-        experiment_circuits = experiment_circuits,
-        cut_locations = cut_circuit.cut_locations,
-        map_qubit = cut_circuit.map_qubit,
-        coefficients = coefficients,
-        observables = observables,
-        qubits = qubits,
-        can_reconstruct_probabilities = qubits is not None,
+        experiment_circuits=experiment_circuits,
+        cut_locations=cut_circuit.cut_locations,
+        map_qubit=cut_circuit.map_qubit,
+        coefficients=coefficients,
+        observables=observables,
+        qubits=qubits,
+        can_reconstruct_probabilities=qubits is not None,
         backend=backend,
         options=options,
         num_draws=num_draws,
