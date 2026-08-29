@@ -2,6 +2,13 @@
 Changelog
 =========
 
+**Version 2.1.2**
+=================
+
+- :code:`transpile_subcircuits()` followed by :code:`get_experiment_circuits()` or
+  :code:`run_cut_circuit()` no longer raises :code:`AttributeError` on a non IQM
+  :code:`BackendV2`, such as :code:`GenericBackendV2` or one of IBM's.
+
 **Version 2.1.1**
 =================
 
