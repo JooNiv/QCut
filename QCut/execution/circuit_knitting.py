@@ -29,7 +29,7 @@ from QCut.execution.basis_transform import (
     _get_obs_subcircuits,
 )
 from QCut.execution.postprocess import estimate_expectation_values
-from QCut.execution.probabilities import all_z_paulis_for_subset
+from QCut.execution.probabilities import _all_z_paulis_for_subset
 from QCut.execution.qcutresult import CircuitResult, RawResult
 from QCut.options import CutOptions
 from QCut.qpd.bundle import (
@@ -182,7 +182,7 @@ def get_experiment_circuits(  # noqa: C901
         raise ValueError("Only one of observables or qubits can be provided.")
 
     if observables is None:
-        observables = all_z_paulis_for_subset(cut_circuit.uncut_num_qubits, qubits)
+        observables = _all_z_paulis_for_subset(cut_circuit.uncut_num_qubits, qubits)
 
     num_qubits = 0
     for subcircuit in cut_circuit.subcircuits:
