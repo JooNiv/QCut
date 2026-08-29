@@ -59,23 +59,8 @@ def estimate_probabilities(result: RawResult) -> dict[str, float]:
         "function to enable this feature.")
 
     exps = estimate_expectation_values(result)
-    label = result.experiment.observables.paulis[-1].to_label()
-    filtered = ''.join([char for char in label if char == 'Z'])
-
-    len_subset = len(filtered)
-
-    print(f"Estimating probabilities for {len_subset} qubits.")
-    
+    len_subset = len(result.experiment.qubits)    
     subsets = _gen_subsets(len_subset)
-
-    print(f"Generated {len(subsets)} subsets for {len_subset} qubits.")
-
     expv_mapping = _map_expvs_to_subsets(exps, subsets)
-
-    print(f"Mapped expectation values to {len(expv_mapping)} subsets.")
-
     bits = _gen_bitstrings(len_subset)
-
-    print(f"Generated {len(bits)} bitstrings for {len_subset} qubits.")
-
     return _reconstruct_probs(expv_mapping, bits)
