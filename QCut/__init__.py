@@ -11,6 +11,8 @@ from QCut.execution.backend_utility import (
     transpile_subcircuits,
 )
 from QCut.execution.circuit_knitting import (
+    JobEstimate,
+    RunEstimate,
     estimate_run,
     get_experiment_circuits,
     run,
@@ -21,8 +23,10 @@ from QCut.execution.postprocess import (
     estimate_expectation_values,
 )
 from QCut.execution.probabilities import (
+    QuasiProbabilities,
     estimate_probabilities,
 )
+from QCut.execution.qcutresult import CircuitResult, RawResult
 from QCut.options import DEFAULT_OPTIONS, CutOptions
 from QCut.QCutFind import find_cuts
 from QCut.qpd.qpd_gates import cut, cutCZ, cutGate, cutISWAP, cutSWAP
@@ -54,4 +58,9 @@ __all__ = [
     "DEFAULT_OPTIONS",
     "consolidate_two_qubit_blocks",
     "estimate_probabilities",
+    "QuasiProbabilities",
+    "RunEstimate",
+    "JobEstimate",
+    "RawResult",
+    "CircuitResult",
 ]
