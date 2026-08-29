@@ -8,3 +8,4 @@ Notebooks
    Basic Usage <notebooks/QCutBasicUsage.ipynb>
    QAOA Example <notebooks/QCutQAOAExample.ipynb>
    Cut Options Example <notebooks/QCutOptionsExample.ipynb>
+   Probability Distributions <notebooks/QCutProbabilities.ipynb>

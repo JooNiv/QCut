@@ -11,3 +11,4 @@ Theory
    Joint rotation gate cutting <theory/Joint_rotation_derivation.md>
    Wire Cut QPD derivation <theory/Wire_derivation.md>
    Wire cuts with classical communication <theory/LOCC_wire_derivation.md>
+   Reconstructing a probability distribution <theory/Probability_reconstruction.md>
