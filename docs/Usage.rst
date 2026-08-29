@@ -381,6 +381,38 @@ Running on other providers such as IBM is untested at the moment but as
 long as the hardware can be accessed with Qiskit version > 1.0 QCut
 should be compatible.
 
+Probability distributions
+-------------------------
+
+A cut experiment estimates expectation values, so there are no counts of the uncut
+circuit to tally. The distribution over a chosen set of qubits can still be recovered
+from them. Pass :code:`qubits` instead of :code:`observables`:
+
+.. code:: python
+
+   cut_experiment = ck.get_experiment_circuits(cut_circuit, qubits=[0, 1])
+   results = ck.run_experiments(cut_experiment, shots=4096, backend=sim)
+
+   probs = ck.estimate_probabilities(results)
+
+``{'00': 0.492, '01': -0.0067, '10': 0.0068, '11': 0.5079}``
+
+QCut estimates every Pauli Z over those qubits and inverts them with the inverse
+Walsh-Hadamard transform. That costs :code:`2**k` values for :code:`k` qubits but no
+extra circuits since Z observables all commute, so they share one measurement setting and the
+experiment is the size it would have been for a single observable. See
+:doc:`the derivation <theory/Probability_reconstruction>`.
+
+The result is a dict, so it indexes and plots like one, and carries three views:
+
+.. code:: python
+
+   probs['00']                     # 0.492
+   probs.quasi_probabilities()     # the same values, as a plain dict
+   probs.nearest_probabilities()   # closest true distribution
+   probs.counts()                  # scaled by the shots the experiment ran at
+   probs.counts(shots=1000)        # or by any other shots
+
 Logging
 -------
 
