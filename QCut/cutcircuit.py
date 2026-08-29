@@ -7,6 +7,7 @@ from __future__ import annotations
 from typing import Iterable
 
 from qiskit import QuantumCircuit
+from qiskit.quantum_info import SparsePauliOp
 
 from QCut.cutlocation import CutLocation, SingleQubitCutLocation
 from QCut.options import CutOptions, resolve
@@ -120,8 +121,9 @@ class CutExperiment:
         cut_locations: list[CutLocation | SingleQubitCutLocation],
         map_qubit: dict[int, int],
         coefficients: Iterable[float],
-        observables,
         can_reconstruct_probabilities: bool = False,
+        observables: SparsePauliOp | None = None,
+        qubits: list[int] | None = None,
         backend=None,
         options: CutOptions | None = None,
         num_draws: int | None = None,
@@ -156,6 +158,7 @@ class CutExperiment:
         self.map_qubit = map_qubit
         self.coefficients = coefficients
         self.observables = observables
+        self.qubits = qubits
         self.options = resolve(options)
         self._num_draws = num_draws
         self.plan = plan
@@ -200,6 +203,7 @@ class CutExperiment:
                 map_qubit=self.map_qubit,
                 coefficients=self.coefficients,
                 observables=self.observables,
+                qubits=self.qubits,
                 options=self.options,
                 num_draws=self._num_draws,
                 plan=self.plan,
