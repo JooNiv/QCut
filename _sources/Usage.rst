@@ -366,6 +366,52 @@ It is not necessary to go through each of the aforementioned steps individually.
 
 ``[0.932540 0.717683 0.386038 0.775063]``
 
+Probability distributions
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+A cut experiment estimates expectation values, so there are no counts to tally, but the
+distribution over a chosen set of qubits can still be recovered from them. Pass
+:code:`qubits` instead of :code:`observables`:
+
+.. code:: python
+
+   cut_experiment = ck.get_experiment_circuits(cut_circuit, qubits=[0, 1])
+   results = ck.run_experiments(cut_experiment, shots=4096, backend=sim)
+
+   probs = ck.estimate_probabilities(results)
+
+``{'00': 0.8658, '01': -0.0024, '10': 0.1041, '11': 0.0324}``
+
+This costs :code:`2**k` values for :code:`k` qubits but no extra circuits, since the Z
+observables it needs all commute. See
+:doc:`the derivation <theory/Probability_reconstruction>`.
+
+The result is a dict, so it indexes and plots like one, and carries three views:
+
+.. code:: python
+
+   probs['00']                     # 0.8658
+   probs.quasi_probabilities()     # the same values, as a plain dict
+   probs.nearest_probabilities()   # closest true distribution, negatives projected away
+   probs.counts()                  # scaled by the shots the experiment ran at
+   probs.counts(shots=1000)        # or by any other shots
+
+Against the same circuit run whole:
+
+.. code:: python
+
+   from qiskit.result import marginal_counts
+   from qiskit.visualization import plot_histogram
+
+   measured = circuit.measure_all(inplace=False)
+   counts = sim.run(transpile(measured, sim), shots=4096).result().get_counts()
+
+   plot_histogram(
+       [probs.counts(), marginal_counts(counts, [0, 1])], legend=["QCut", "uncut circuit"]
+   )
+
+.. image:: _static/images/probs1.png
+
 Running on FiQCI
 ~~~~~~~~~~~~~~~~
 
@@ -382,38 +428,6 @@ Running on other hardware
 Running on other providers such as IBM is untested at the moment but as
 long as the hardware can be accessed with Qiskit version > 1.0 QCut
 should be compatible.
-
-Probability distributions
--------------------------
-
-A cut experiment estimates expectation values, so there are no counts of the uncut
-circuit to tally. The distribution over a chosen set of qubits can still be recovered
-from them. Pass :code:`qubits` instead of :code:`observables`:
-
-.. code:: python
-
-   cut_experiment = ck.get_experiment_circuits(cut_circuit, qubits=[0, 1])
-   results = ck.run_experiments(cut_experiment, shots=4096, backend=sim)
-
-   probs = ck.estimate_probabilities(results)
-
-``{'00': 0.8535, '01': 0.0033, '10': 0.1087, '11': 0.0345}``
-
-QCut estimates every Pauli Z over those qubits and inverts them with the inverse
-Walsh-Hadamard transform. That costs :code:`2**k` values for :code:`k` qubits but no
-extra circuits since Z observables all commute, so they share one measurement setting and the
-experiment is the size it would have been for a single observable. See
-:doc:`the derivation <theory/Probability_reconstruction>`.
-
-The result is a dict, so it indexes and plots like one, and carries three views:
-
-.. code:: python
-
-   probs['00']                     # 0.8535
-   probs.quasi_probabilities()     # the same values, as a plain dict
-   probs.nearest_probabilities()   # closest true distribution
-   probs.counts()                  # scaled by the shots the experiment ran at
-   probs.counts(shots=1000)        # or by any other shots
 
 Logging
 -------

@@ -42,7 +42,7 @@
 
     <script src="_static/jquery.js?v=5d32c60e"></script>
     <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-    <script src="_static/documentation_options.js?v=0b424906"></script>
+    <script src="_static/documentation_options.js?v=27791fc8"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/scripts/sphinx-book-theme.js?v=fab101a9"></script>
@@ -54,7 +54,7 @@
     <link rel="prev" title="QCut documentation" href="index.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="2.0.0.post1.dev7+gdd4efd72e" />
+  <meta name="docsearch:version" content="2.1.0.post1.dev1+g49d2ed67f" />
   </head>
   
   
@@ -336,11 +336,11 @@
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#transpilation">Transpilation</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#execution">Execution</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#shorthand">Shorthand</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#probability-distributions">Probability distributions</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#running-on-fiqci">Running on FiQCI</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#running-on-other-hardware">Running on other hardware</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#probability-distributions">Probability distributions</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#logging">Logging</a></li>
 </ul>
             </nav>
@@ -658,6 +658,43 @@ from QCut contain mid-circuit measurements and that sampler refuses those.
 <p><code class="docutils literal notranslate"><span class="pre">[0.926887</span> <span class="pre">0.699149</span> <span class="pre">0.372935</span> <span class="pre">0.765253]</span></code></p>
 <p><code class="docutils literal notranslate"><span class="pre">[0.932540</span> <span class="pre">0.717683</span> <span class="pre">0.386038</span> <span class="pre">0.775063]</span></code></p>
 </section>
+<section id="probability-distributions">
+<h3>Probability distributions<a class="headerlink" href="#probability-distributions" title="Link to this heading">#</a></h3>
+<p>A cut experiment estimates expectation values, so there are no counts to tally, but the
+distribution over a chosen set of qubits can still be recovered from them. Pass
+<code class="code docutils literal notranslate"><span class="pre">qubits</span></code> instead of <code class="code docutils literal notranslate"><span class="pre">observables</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cut_experiment</span> <span class="o">=</span> <span class="n">ck</span><span class="o">.</span><span class="n">get_experiment_circuits</span><span class="p">(</span><span class="n">cut_circuit</span><span class="p">,</span> <span class="n">qubits</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">ck</span><span class="o">.</span><span class="n">run_experiments</span><span class="p">(</span><span class="n">cut_experiment</span><span class="p">,</span> <span class="n">shots</span><span class="o">=</span><span class="mi">4096</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="n">sim</span><span class="p">)</span>
+
+<span class="n">probs</span> <span class="o">=</span> <span class="n">ck</span><span class="o">.</span><span class="n">estimate_probabilities</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">{'00':</span> <span class="pre">0.8658,</span> <span class="pre">'01':</span> <span class="pre">-0.0024,</span> <span class="pre">'10':</span> <span class="pre">0.1041,</span> <span class="pre">'11':</span> <span class="pre">0.0324}</span></code></p>
+<p>This costs <code class="code docutils literal notranslate"><span class="pre">2**k</span></code> values for <code class="code docutils literal notranslate"><span class="pre">k</span></code> qubits but no extra circuits, since the Z
+observables it needs all commute. See
+<a class="reference internal" href="theory/Probability_reconstruction.html"><span class="doc">the derivation</span></a>.</p>
+<p>The result is a dict, so it indexes and plots like one, and carries three views:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">probs</span><span class="p">[</span><span class="s1">&#39;00&#39;</span><span class="p">]</span>                     <span class="c1"># 0.8658</span>
+<span class="n">probs</span><span class="o">.</span><span class="n">quasi_probabilities</span><span class="p">()</span>     <span class="c1"># the same values, as a plain dict</span>
+<span class="n">probs</span><span class="o">.</span><span class="n">nearest_probabilities</span><span class="p">()</span>   <span class="c1"># closest true distribution, negatives projected away</span>
+<span class="n">probs</span><span class="o">.</span><span class="n">counts</span><span class="p">()</span>                  <span class="c1"># scaled by the shots the experiment ran at</span>
+<span class="n">probs</span><span class="o">.</span><span class="n">counts</span><span class="p">(</span><span class="n">shots</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>        <span class="c1"># or by any other shots</span>
+</pre></div>
+</div>
+<p>Against the same circuit run whole:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit.result</span><span class="w"> </span><span class="kn">import</span> <span class="n">marginal_counts</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit.visualization</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_histogram</span>
+
+<span class="n">measured</span> <span class="o">=</span> <span class="n">circuit</span><span class="o">.</span><span class="n">measure_all</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">counts</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">transpile</span><span class="p">(</span><span class="n">measured</span><span class="p">,</span> <span class="n">sim</span><span class="p">),</span> <span class="n">shots</span><span class="o">=</span><span class="mi">4096</span><span class="p">)</span><span class="o">.</span><span class="n">result</span><span class="p">()</span><span class="o">.</span><span class="n">get_counts</span><span class="p">()</span>
+
+<span class="n">plot_histogram</span><span class="p">(</span>
+    <span class="p">[</span><span class="n">probs</span><span class="o">.</span><span class="n">counts</span><span class="p">(),</span> <span class="n">marginal_counts</span><span class="p">(</span><span class="n">counts</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])],</span> <span class="n">legend</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;QCut&quot;</span><span class="p">,</span> <span class="s2">&quot;uncut circuit&quot;</span><span class="p">]</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<img alt="_images/probs1.png" src="_images/probs1.png" />
+</section>
 <section id="running-on-fiqci">
 <h3>Running on FiQCI<a class="headerlink" href="#running-on-fiqci" title="Link to this heading">#</a></h3>
 <p>For running on real hardware through the Lumi supercomputer’s FiQCI
@@ -673,32 +710,6 @@ interface</a>.</p>
 long as the hardware can be accessed with Qiskit version &gt; 1.0 QCut
 should be compatible.</p>
 </section>
-</section>
-<section id="probability-distributions">
-<h2>Probability distributions<a class="headerlink" href="#probability-distributions" title="Link to this heading">#</a></h2>
-<p>A cut experiment estimates expectation values, so there are no counts of the uncut
-circuit to tally. The distribution over a chosen set of qubits can still be recovered
-from them. Pass <code class="code docutils literal notranslate"><span class="pre">qubits</span></code> instead of <code class="code docutils literal notranslate"><span class="pre">observables</span></code>:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cut_experiment</span> <span class="o">=</span> <span class="n">ck</span><span class="o">.</span><span class="n">get_experiment_circuits</span><span class="p">(</span><span class="n">cut_circuit</span><span class="p">,</span> <span class="n">qubits</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
-<span class="n">results</span> <span class="o">=</span> <span class="n">ck</span><span class="o">.</span><span class="n">run_experiments</span><span class="p">(</span><span class="n">cut_experiment</span><span class="p">,</span> <span class="n">shots</span><span class="o">=</span><span class="mi">4096</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="n">sim</span><span class="p">)</span>
-
-<span class="n">probs</span> <span class="o">=</span> <span class="n">ck</span><span class="o">.</span><span class="n">estimate_probabilities</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
-</pre></div>
-</div>
-<p><code class="docutils literal notranslate"><span class="pre">{'00':</span> <span class="pre">0.8535,</span> <span class="pre">'01':</span> <span class="pre">0.0033,</span> <span class="pre">'10':</span> <span class="pre">0.1087,</span> <span class="pre">'11':</span> <span class="pre">0.0345}</span></code></p>
-<p>QCut estimates every Pauli Z over those qubits and inverts them with the inverse
-Walsh-Hadamard transform. That costs <code class="code docutils literal notranslate"><span class="pre">2**k</span></code> values for <code class="code docutils literal notranslate"><span class="pre">k</span></code> qubits but no
-extra circuits since Z observables all commute, so they share one measurement setting and the
-experiment is the size it would have been for a single observable. See
-<a class="reference internal" href="theory/Probability_reconstruction.html"><span class="doc">the derivation</span></a>.</p>
-<p>The result is a dict, so it indexes and plots like one, and carries three views:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">probs</span><span class="p">[</span><span class="s1">&#39;00&#39;</span><span class="p">]</span>                     <span class="c1"># 0.8535</span>
-<span class="n">probs</span><span class="o">.</span><span class="n">quasi_probabilities</span><span class="p">()</span>     <span class="c1"># the same values, as a plain dict</span>
-<span class="n">probs</span><span class="o">.</span><span class="n">nearest_probabilities</span><span class="p">()</span>   <span class="c1"># closest true distribution</span>
-<span class="n">probs</span><span class="o">.</span><span class="n">counts</span><span class="p">()</span>                  <span class="c1"># scaled by the shots the experiment ran at</span>
-<span class="n">probs</span><span class="o">.</span><span class="n">counts</span><span class="p">(</span><span class="n">shots</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>        <span class="c1"># or by any other shots</span>
-</pre></div>
-</div>
 </section>
 <section id="logging">
 <h2>Logging<a class="headerlink" href="#logging" title="Link to this heading">#</a></h2>
@@ -780,11 +791,11 @@ and that job’s id, and how a communicating run split its shots between waves.<
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#transpilation">Transpilation</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#execution">Execution</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#shorthand">Shorthand</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#probability-distributions">Probability distributions</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#running-on-fiqci">Running on FiQCI</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#running-on-other-hardware">Running on other hardware</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#probability-distributions">Probability distributions</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#logging">Logging</a></li>
 </ul>
   </nav></div>
