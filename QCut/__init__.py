@@ -20,6 +20,9 @@ from QCut.execution.circuit_knitting import (
 from QCut.execution.postprocess import (
     estimate_expectation_values,
 )
+from QCut.execution.probabilities import (
+    estimate_probabilities,
+)
 from QCut.options import DEFAULT_OPTIONS, CutOptions
 from QCut.QCutFind import find_cuts
 from QCut.qpd.qpd_gates import cut, cutCZ, cutGate, cutISWAP, cutSWAP
@@ -50,4 +53,5 @@ __all__ = [
     "CutOptions",
     "DEFAULT_OPTIONS",
     "consolidate_two_qubit_blocks",
+    "estimate_probabilities",
 ]
