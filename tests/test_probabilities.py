@@ -174,6 +174,36 @@ def test_observables_and_qubits_are_mutually_exclusive():
         )
 
 
+@pytest.mark.sim
+@pytest.mark.parametrize("shorthand", ["run", "run_cut_circuit"])
+def test_the_shorthands_reconstruct_when_given_qubits(shorthand):
+    """``run`` and ``run_cut_circuit`` take ``qubits`` the way the long form does."""
+    marked, plain = _bell_with_a_gate_cut()
+    target = marked if shorthand == "run" else ck.get_locations_and_subcircuits(marked)
+
+    probs = getattr(ck, shorthand)(
+        target, backend=AerSimulator(), shots=SHOTS, qubits=[0, 1]
+    )
+
+    assert isinstance(probs, QuasiProbabilities)
+    assert probs.shots == SHOTS
+    exact = _exact_marginal(plain, [0, 1])
+    for key, value in probs.nearest_probabilities().items():
+        assert value == pytest.approx(exact.get(key, 0.0), abs=0.05)
+
+
+@pytest.mark.parametrize("shorthand", ["run", "run_cut_circuit"])
+def test_the_shorthands_also_need_exactly_one_of_the_two(shorthand):
+    """Checked before any circuit is built, not once the experiment is assembled."""
+    marked, _plain = _bell_with_a_gate_cut()
+    target = marked if shorthand == "run" else ck.get_locations_and_subcircuits(marked)
+
+    with pytest.raises(ValueError, match="Either observables or qubits"):
+        getattr(ck, shorthand)(target)
+    with pytest.raises(ValueError, match="Only one of observables or qubits"):
+        getattr(ck, shorthand)(target, SparsePauliOp(["IIZ"]), qubits=[0])
+
+
 @pytest.mark.parametrize(
     ("qubits", "message"),
     [

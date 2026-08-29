@@ -2,6 +2,13 @@
 Changelog
 =========
 
+**Version 2.1.1**
+=================
+
+- :code:`run()` and :code:`run_cut_circuit()` take :code:`qubits` as well, and return the
+  reconstructed distribution instead of expectation values when given it.
+  :code:`observables` is optional on both, and passing neither or both raises.
+
 **Version 2.1.0**
 =================
 

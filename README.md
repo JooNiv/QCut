@@ -441,6 +441,9 @@ probs = ck.estimate_probabilities(results)
 
 `{'00': 0.8658, '01': -0.0024, '10': 0.1041, '11': 0.0324}`
 
+`run()` and `run_cut_circuit()` take `qubits` in the same way, and hand back the
+distribution rather than expectation values.
+
 This costs `2**k` values for `k` qubits but no extra circuits, since the Z observables it
 needs all commute. See
 [the derivation](https://jooniv.github.io/QCut/theory/Probability_reconstruction.html).
