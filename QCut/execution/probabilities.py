@@ -15,10 +15,10 @@ class QuasiProbabilities(dict):
     scales that to a shot count.
 
     The sum of elements is exactly one, but that is by construction rather than evidence
-    of anything. The empty subset contributes one and every other subset cancels over 
+    of anything. The empty subset contributes one and every other subset cancels over
     the bitstrings, so the sum is one however wrong the estimate is. An individual value
-    can come out negative, because each is a signed sum of separately estimated 
-    expectation values. How negative says how far this estimate sits from a 
+    can come out negative, because each is a signed sum of separately estimated
+    expectation values. How negative says how far this estimate sits from a
     physical distribution.
 
     Attributes:
@@ -90,7 +90,30 @@ class QuasiProbabilities(dict):
 def _all_z_paulis_for_subset(
     number_of_qubits: int, qubit_indices: list[int]
 ) -> SparsePauliOp:
-    """Return a list of all n-qubit Pauli Z operators."""
+    """Every Pauli Z string over ``qubit_indices``, identity excluded.
+
+    Args:
+        number_of_qubits (int): width of the uncut circuit, which the strings span.
+        qubit_indices (list[int]): the qubits to measure, in the order their bits are
+            read back.
+
+    Returns:
+        SparsePauliOp: the ``2**k - 1`` non-identity Z strings, ordered so that the
+        ``i``-th carries Z on the qubits named by the set bits of ``i``.
+
+    Raises:
+        ValueError: the qubits are empty, repeated, or outside the circuit.
+    """
+    if not qubit_indices:
+        raise ValueError("qubits must name at least one qubit")
+    if len(set(qubit_indices)) != len(qubit_indices):
+        raise ValueError(f"qubits must not repeat, got {qubit_indices}")
+    outside = [q for q in qubit_indices if not 0 <= q < number_of_qubits]
+    if outside:
+        raise ValueError(
+            f"qubits {outside} are outside the {number_of_qubits}-qubit circuit"
+        )
+
     paulis = []
     for i in range(2 ** len(qubit_indices)):
         pauli_str = ["I"] * number_of_qubits
