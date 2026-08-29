@@ -382,6 +382,9 @@ distribution over a chosen set of qubits can still be recovered from them. Pass
 
 ``{'00': 0.8658, '01': -0.0024, '10': 0.1041, '11': 0.0324}``
 
+:code:`run()` and :code:`run_cut_circuit()` take :code:`qubits` in the same way, and hand
+back the distribution rather than expectation values.
+
 This costs :code:`2**k` values for :code:`k` qubits but no extra circuits, since the Z
 observables it needs all commute. See
 :doc:`the derivation <theory/Probability_reconstruction>`.
