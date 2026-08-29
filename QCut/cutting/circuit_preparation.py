@@ -369,6 +369,9 @@ def get_locations_and_subcircuits(
         indices to original circuit qubit indices.
 
     """
+
+    circuit.remove_final_measurements()
+
     options = resolve(options)
     prepared = circuit.copy().decompose(["CutGate"])
 
