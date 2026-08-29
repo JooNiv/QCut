@@ -22,6 +22,7 @@ class CutCircuit:
         subcircuits: list[QuantumCircuit],
         cut_locations: list[CutLocation | SingleQubitCutLocation],
         map_qubit: dict[int, int],
+        uncut_num_qubits: int,
         backend=None,
         options: CutOptions | None = None,
     ) -> None:
@@ -30,6 +31,7 @@ class CutCircuit:
         self.subcircuits = subcircuits
         self.cut_locations = cut_locations
         self.map_qubit = map_qubit
+        self.uncut_num_qubits = uncut_num_qubits
         self.backend = backend
         self.options = resolve(options)
         self._gamma: tuple[float, float] | None = None
@@ -97,6 +99,7 @@ class CutCircuit:
                 map_qubit=self.map_qubit,
                 backend=self.backend,
                 options=self.options,
+                uncut_num_qubits=self.uncut_num_qubits,
             )
 
     @property

@@ -377,6 +377,7 @@ def transpile_subcircuits(
             cut_locations=cut_circuit.cut_locations,
             map_qubit=cut_circuit.map_qubit,
             options=cut_circuit.options,
+            uncut_num_qubits=cut_circuit.uncut_num_qubits,
             backend=backend,
         )
 
@@ -412,6 +413,7 @@ def transpile_subcircuits(
         cut_locations=cut_circuit.cut_locations,
         map_qubit=cut_circuit.map_qubit,
         options=cut_circuit.options,
+        uncut_num_qubits=cut_circuit.uncut_num_qubits,
         backend=backend,
     )
 

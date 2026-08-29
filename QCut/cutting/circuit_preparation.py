@@ -303,7 +303,11 @@ def _split(
         fixed_circs = construct_final_subcircuits(fixed_circs, max_qubits)
 
     return CutCircuit(
-        fixed_circs, cut_locations, get_qubit_map(fixed_circs), options=options
+        fixed_circs,
+        cut_locations,
+        get_qubit_map(fixed_circs),
+        uncut_num_qubits=working.num_qubits,
+        options=options
     )
 
 
