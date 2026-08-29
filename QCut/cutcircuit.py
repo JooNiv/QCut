@@ -7,6 +7,7 @@ from __future__ import annotations
 from typing import Iterable
 
 from qiskit import QuantumCircuit
+from qiskit.quantum_info import SparsePauliOp
 
 from QCut.cutlocation import CutLocation, SingleQubitCutLocation
 from QCut.options import CutOptions, resolve
@@ -22,6 +23,7 @@ class CutCircuit:
         subcircuits: list[QuantumCircuit],
         cut_locations: list[CutLocation | SingleQubitCutLocation],
         map_qubit: dict[int, int],
+        uncut_num_qubits: int,
         backend=None,
         options: CutOptions | None = None,
     ) -> None:
@@ -30,6 +32,7 @@ class CutCircuit:
         self.subcircuits = subcircuits
         self.cut_locations = cut_locations
         self.map_qubit = map_qubit
+        self.uncut_num_qubits = uncut_num_qubits
         self.backend = backend
         self.options = resolve(options)
         self._gamma: tuple[float, float] | None = None
@@ -97,6 +100,7 @@ class CutCircuit:
                 map_qubit=self.map_qubit,
                 backend=self.backend,
                 options=self.options,
+                uncut_num_qubits=self.uncut_num_qubits,
             )
 
     @property
@@ -117,7 +121,9 @@ class CutExperiment:
         cut_locations: list[CutLocation | SingleQubitCutLocation],
         map_qubit: dict[int, int],
         coefficients: Iterable[float],
-        observables,
+        can_reconstruct_probabilities: bool = False,
+        observables: SparsePauliOp | None = None,
+        qubits: list[int] | None = None,
         backend=None,
         options: CutOptions | None = None,
         num_draws: int | None = None,
@@ -152,12 +158,14 @@ class CutExperiment:
         self.map_qubit = map_qubit
         self.coefficients = coefficients
         self.observables = observables
+        self.qubits = qubits
         self.options = resolve(options)
         self._num_draws = num_draws
         self.plan = plan
         self.qpd_bits = qpd_bits or {}
         self._gamma = gamma
         self._optimal_gamma = optimal_gamma
+        self._can_reconstruct_probabilities = can_reconstruct_probabilities
 
     def assign_parameters(
         self, parameters: dict, inplace=False
@@ -195,6 +203,7 @@ class CutExperiment:
                 map_qubit=self.map_qubit,
                 coefficients=self.coefficients,
                 observables=self.observables,
+                qubits=self.qubits,
                 options=self.options,
                 num_draws=self._num_draws,
                 plan=self.plan,
@@ -259,3 +268,13 @@ class CutExperiment:
     def optimal_gamma(self) -> float | None:
         """The least these cuts could have cost with every decomposition available."""
         return self._optimal_gamma
+
+    @property
+    def can_reconstruct_probabilities(self) -> bool:
+        """Whether these circuits carry the observables a distribution needs.
+
+        True only when the experiment was built from ``qubits`` rather than from
+        observables of the caller's own, since reconstructing a distribution needs every
+        Pauli Z over those qubits and nothing less will do.
+        """
+        return self._can_reconstruct_probabilities

@@ -303,7 +303,11 @@ def _split(
         fixed_circs = construct_final_subcircuits(fixed_circs, max_qubits)
 
     return CutCircuit(
-        fixed_circs, cut_locations, get_qubit_map(fixed_circs), options=options
+        fixed_circs,
+        cut_locations,
+        get_qubit_map(fixed_circs),
+        uncut_num_qubits=working.num_qubits,
+        options=options,
     )
 
 
@@ -369,8 +373,11 @@ def get_locations_and_subcircuits(
         indices to original circuit qubit indices.
 
     """
+
     options = resolve(options)
-    prepared = circuit.copy().decompose(["CutGate"])
+    prepared = circuit.copy()
+    prepared.remove_final_measurements()
+    prepared = prepared.decompose(["CutGate"])
 
     # Consolidation has to happen before the obs_i tags go on, since those touch every
     # qubit and would end every run. Cut locations are recorded afterwards, so a merged

@@ -17,6 +17,7 @@
     - [Shorthand](#shorthand)
     - [Running on FiQCI](#running-on-fiqci)
     - [Running on other hardware](#running-on-other-hardware)
+  - [Probability distributions](#probability-distributions)
   - [Logging](#logging)
 - [Benchmarks](#benchmarks)
 - [Documentation](#documentation)
@@ -115,14 +116,15 @@ from iqm.qiskit_iqm import IQMFakeAdonis
 **2: Start by defining a QuantumCircuit just like in Qiskit**
 
 ```python
-circuit  =  QuantumCircuit(4)
+circuit = QuantumCircuit(5)
 
-mult = 1.635
-circuit.r(mult*0.46262, mult*0.1446, 0)
+for qubit in range(5):
+    circuit.ry(0.4 + 0.3*qubit, qubit)
 circuit.cx(0,1)
 circuit.cx(1,2)
 circuit.cx(2,3)
-   
+circuit.cx(3,4)
+
 circuit.draw("mpl")
 ```
 
@@ -133,14 +135,15 @@ circuit.draw("mpl")
 Note that here we don't insert any measurements. Measurements will be automatically handled by QCut.
 
 ```python
-marked_circuit = QuantumCircuit(4)
+marked_circuit = QuantumCircuit(5)
 
-mult = 1.635
-marked_circuit.r(mult*0.46262, mult*0.1446, 0)
-marked_circuit.append(**cutGate(CXGate(), 0, 1))
-marked_circuit.append(cut(), [1])
-marked_circuit.cx(1,2)
+for qubit in range(5):
+    marked_circuit.ry(0.4 + 0.3*qubit, qubit)
+marked_circuit.cx(0,1)
+marked_circuit.append(**cutGate(CXGate(), 1, 2))
 marked_circuit.cx(2,3)
+marked_circuit.append(cut(), [3])
+marked_circuit.cx(3,4)
 
 marked_circuit.decompose(gates_to_decompose=["CutGate"]).draw("mpl")
 ```
@@ -183,7 +186,7 @@ cut_circuit.subcircuits[2].draw("mpl")
 **5: Generate experiment circuits**
 
 ```python
-observables = SparsePauliOp(["IIIZ", "IIZI", "IZII", "IIZZ"])
+observables = SparsePauliOp(["IIIIZ", "IIIZI", "IIZII", "IIIZZ"])
 
 cut_experiment = ck.get_experiment_circuits(cut_circuit, observables)
 
@@ -333,7 +336,7 @@ The cost of an experiment run can be checked before submission:
 print(ck.estimate_run(cut_experiment, shots=4096, max_batch_size=40))
 ```
 
-`Experiment will run 136 circuits in 4 jobs with a total of 557056 shots. See the returned object for the breakdown.`
+`Experiment will run 144 circuits in 4 jobs with a total of 589824 shots. See the returned object for the breakdown.`
 
 ```python
 {'job1': JobEstimate(circuits=40, shots=4096), 'job2': JobEstimate(circuits=40, shots=4096), ...}
@@ -395,17 +398,17 @@ print(f"Noisy expectation values with fake backend:{np.array(exps)}")
 print(f"Exact expectation values with ideal simulator :{np.array(exact_expvals)}")
 ```
 
-`QCut expectation values:[0.717485 0.609957 0.543766 0.817580]`
+`QCut expectation values:[0.763209 0.602396 0.328544 0.575471]`
 
-`Noisy expectation values with fake backend:[0.687500 0.565430 0.643066 0.741699]`
+`Noisy expectation values with fake backend:[0.846680 0.564941 0.323242 0.593262]`
 
-`Exact expectation values with ideal simulator :[0.727323 0.727323 0.727323 1.000000]`
+`Exact expectation values with ideal simulator :[0.921061 0.704466 0.380625 0.764842]`
 
 As we can see QCut is able to accurately reconstruct the expectation values and be more accurate that just using the fake backend as is. (Note that since this is a probabilistic method the results vary a bit each run)
 
 Additionally we can execute QCut using the ideal Aer simulator and see that we get (practically) exact results:
 
-`QCut expectation values:[0.690713 0.739844 0.739844 1.003056]`
+`QCut expectation values:[0.920158 0.706660 0.379018 0.778012]`
 
 ### Shorthand
 
@@ -419,9 +422,9 @@ print(ck.run(marked_circuit, observables, sim, shots=2**12))
 print(ck.run_cut_circuit(found, observables, sim))
 ```
 
-`[0.726020 0.759453 0.759453 1.016661]`
+`[0.926887 0.699149 0.372935 0.765253]`
 
-`[0.721704 0.721704 0.769150 0.977080]`
+`[0.932540 0.717683 0.386038 0.775063]`
 
 ### Running on FiQCI
 
@@ -430,6 +433,37 @@ For running on real hardware using the Lumi supercomputer follow the instruction
 ### Running on other hardware
 
 Running on other providers such as IBM is untested at the moment but as long as the hardware can be accessed with Qiskit QCut should be compatible.
+
+## Probability distributions
+
+A cut experiment estimates expectation values, so there are no counts of the uncut
+circuit to tally. The distribution over a chosen set of qubits can still be recovered
+from them. Pass `qubits` instead of `observables`:
+
+```python
+cut_experiment = ck.get_experiment_circuits(cut_circuit, qubits=[0, 1])
+results = ck.run_experiments(cut_experiment, shots=4096, backend=sim)
+
+probs = ck.estimate_probabilities(results)
+```
+
+`{'00': 0.8535, '01': 0.0033, '10': 0.1087, '11': 0.0345}`
+
+QCut estimates every Pauli Z over those qubits and inverts them with the inverse
+Walsh-Hadamard transform. That costs `2**k` values for `k` qubits but no extra circuits since
+Z observables all commute, so they share one measurement setting and the experiment is
+the size it would have been for a single observable. See
+[the derivation](https://jooniv.github.io/QCut/theory/Probability_reconstruction.html).
+
+The result is a dict, so it indexes and plots like one, and carries three views:
+
+```python
+probs['00']                     # 0.8535
+probs.quasi_probabilities()     # the same values, as a plain dict
+probs.nearest_probabilities()   # closest true distribution
+probs.counts()                  # scaled by the shots the experiment ran at
+probs.counts(shots=1000)        # or by any other shots
+```
 
 ## Logging
 

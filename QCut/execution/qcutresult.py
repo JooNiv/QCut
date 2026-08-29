@@ -131,6 +131,11 @@ class RawResult:
         """The experiment these results came from, if it was recorded."""
         return self._experiment
 
+    @property
+    def shots(self) -> int:
+        """The shot count the experiment was run at."""
+        return self._shots
+
     def result(self) -> list[list[dict[int, CircuitResult]]]:
         """
         Get raw results for all experiments, as ``[group][observable][subcircuit]``.

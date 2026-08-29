@@ -2,6 +2,26 @@
 Changelog
 =========
 
+**Version 2.1.0**
+=================
+
+Reconstructing a probability distribution
+-----------------------------------------
+
+- :code:`get_experiment_circuits()` takes :code:`qubits` in place of
+  :code:`observables`, and :code:`estimate_probabilities()` then reconstructs the
+  distribution over those qubits by an inverse Walsh-Hadamard transform. Costs
+  :code:`2**k` observables but no extra circuits, since they share one measurement
+  setting.
+  See `the derivation <https://jooniv.github.io/QCut/theory/Probability_reconstruction.html>`__.
+- The result is a :code:`dict` of quasi-probabilities, which can be negative.
+  :code:`nearest_probabilities()` gives the closest true distribution and
+  :code:`counts()` scales it by the shots the experiment ran at, or by one of your own.
+- A circuit carrying final measurements can be cut. They are removed on a copy, so the
+  circuit passed in is left as it was.
+- :code:`RawResult.shots` and :code:`CutExperiment.can_reconstruct_probabilities` are
+  public, and the types the public functions return are importable from :code:`QCut`.
+
 **Version 2.0.0**
 =================
 

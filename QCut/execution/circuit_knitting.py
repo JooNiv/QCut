@@ -29,6 +29,7 @@ from QCut.execution.basis_transform import (
     _get_obs_subcircuits,
 )
 from QCut.execution.postprocess import estimate_expectation_values
+from QCut.execution.probabilities import _all_z_paulis_for_subset
 from QCut.execution.qcutresult import CircuitResult, RawResult
 from QCut.options import CutOptions
 from QCut.qpd.bundle import (
@@ -155,7 +156,8 @@ def _transpiled(circuit: QuantumCircuit, basis, cache: dict) -> QuantumCircuit:
 
 def get_experiment_circuits(  # noqa: C901
     cut_circuit: CutCircuit,
-    observables: SparsePauliOp,
+    observables: SparsePauliOp | None = None,
+    qubits: list[int] | None = None,
 ) -> CutExperiment:
     """Generate experiment circuits by inserting QPD operations on
     measure/initialize/cutCZ nodes.
@@ -163,12 +165,24 @@ def get_experiment_circuits(  # noqa: C901
     Args:
         cut_circuit (CutCircuit): The cut circuit to generate experiment circuits for.
         observables (SparsePauliOp): The observables to measure.
+        qubits (list[int]): The qubits to measure.
+
+        One of observables or qubits must be provided.
 
     Returns:
         CutExperiment: An object containing the generated experiment circuits and
         related information.
 
     """
+
+    if observables is not None and qubits is not None:
+        raise ValueError("Only one of observables or qubits can be provided.")
+
+    if qubits is not None:
+        observables = _all_z_paulis_for_subset(cut_circuit.uncut_num_qubits, qubits)
+
+    if observables is None:
+        raise ValueError("Either observables or qubits must be provided.")
 
     num_qubits = 0
     for subcircuit in cut_circuit.subcircuits:
@@ -495,11 +509,13 @@ def get_experiment_circuits(  # noqa: C901
             bundle_waves,
         )
     cut_experiment = CutExperiment(
-        experiment_circuits,
-        cut_circuit.cut_locations,
-        cut_circuit.map_qubit,
-        coefficients,
-        observables,
+        experiment_circuits=experiment_circuits,
+        cut_locations=cut_circuit.cut_locations,
+        map_qubit=cut_circuit.map_qubit,
+        coefficients=coefficients,
+        observables=observables,
+        qubits=qubits,
+        can_reconstruct_probabilities=qubits is not None,
         backend=backend,
         options=options,
         num_draws=num_draws,

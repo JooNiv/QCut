@@ -131,28 +131,13 @@ def revert_wire_cuts(
         connected_flat = [
             item for sublist in connected for item in sublist if len(item[2]) > 2
         ]
+        # Cuts made redundant here are not dropped here. The labels below are still
+        # being rewritten, so whether a cut's ends have landed on the same side is not
+        # settled yet. `refine_cuts` filters them out once, after the labels are final.
         for x in connected_flat:
             if x[2] not in cut_data_test:
                 cut_data_test.append(x[2])
                 cut_data.append(x)
-            # Should be able to somehow make the below work to get rid of redundant
-            # cuts TODO
-            """else:
-                if x[0] in nodes_on_qubit[wirecut["data"][1][0]] or x[1] in 
-                nodes_on_qubit[wirecut["data"][1][0]]:
-
-                    zipped = list(zip(cut_data, cut_data_test))
-                    ind_var = x if x in cut_data else (x[1], x[0], x[2])
-                    ind = zipped.index((ind_var, x[2]))
-                    #continue
-                    #if x in cut_data:
-                    #    cut_data.pop(ind)
-                    #else:
-                    #    cut_data.pop(ind)
-                    cut_data.pop(ind)
-                    cut_data_test.pop(ind)
-                else:
-                    continue"""
 
         for i in to_flip:
             ind = (
@@ -289,11 +274,11 @@ def swap_qubits(  # noqa: C901
         for n in nodes_set:
             labels[n] = to_label
 
-        # Update gate cut set membership
+        # Update gate cut set membership. A cut whose ends have just landed on the same
+        # side is left in place rather than removed: a later relabelling can separate
+        # them again, so only `refine_cuts` knows which are really redundant.
         for u, v, d in gate_edges_touching_nodes(nodes):
             if labels[u] == labels[v] and (d in cut_data_test):
-                # Should be able to make this work to get rid of redundant cuts TODO
-                # remove_cut((u, v, d))
                 continue
             else:
                 add_cut((u, v, d))
