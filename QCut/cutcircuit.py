@@ -268,3 +268,13 @@ class CutExperiment:
     def optimal_gamma(self) -> float | None:
         """The least these cuts could have cost with every decomposition available."""
         return self._optimal_gamma
+
+    @property
+    def can_reconstruct_probabilities(self) -> bool:
+        """Whether these circuits carry the observables a distribution needs.
+
+        True only when the experiment was built from ``qubits`` rather than from
+        observables of the caller's own, since reconstructing a distribution needs every
+        Pauli Z over those qubits and nothing less will do.
+        """
+        return self._can_reconstruct_probabilities
