@@ -254,7 +254,7 @@ def find_cuts(  # noqa: C901
     if num_partitions == 1:
         return circuit, [], []
 
-    circuit.remove_final_measurements()
+    circuit = circuit.remove_final_measurements(inplace=False)
 
     circuit = transpile(circuit, optimization_level=0, basis_gates=BASIS_GATES)
 

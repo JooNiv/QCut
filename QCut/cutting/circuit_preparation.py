@@ -374,7 +374,7 @@ def get_locations_and_subcircuits(
 
     """
 
-    circuit.remove_final_measurements()
+    circuit = circuit.remove_final_measurements(inplace=False)
 
     options = resolve(options)
     prepared = circuit.copy().decompose(["CutGate"])
