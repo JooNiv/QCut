@@ -53,7 +53,7 @@ def _reconstruct_probs(expv_subset_mapping, bits):
 
 def estimate_probabilities(result: RawResult) -> dict[str, float]:
 
-    if not result.experiment.can_reconstruct_probabilities:
+    if not result.experiment._can_reconstruct_probabilities:
         raise ValueError("Cannot reconstruct probabilities for this experiment. " \
         "Pass ``qubits`` to the ``get_experiment_circuits`` " \
         "function to enable this feature.")
