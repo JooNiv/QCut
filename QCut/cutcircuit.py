@@ -121,6 +121,7 @@ class CutExperiment:
         map_qubit: dict[int, int],
         coefficients: Iterable[float],
         observables,
+        can_reconstruct_probabilities: bool = False,
         backend=None,
         options: CutOptions | None = None,
         num_draws: int | None = None,
@@ -161,6 +162,7 @@ class CutExperiment:
         self.qpd_bits = qpd_bits or {}
         self._gamma = gamma
         self._optimal_gamma = optimal_gamma
+        self._can_reconstruct_probabilities = can_reconstruct_probabilities
 
     def assign_parameters(
         self, parameters: dict, inplace=False
