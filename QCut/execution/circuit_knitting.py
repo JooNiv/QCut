@@ -29,7 +29,11 @@ from QCut.execution.basis_transform import (
     _get_obs_subcircuits,
 )
 from QCut.execution.postprocess import estimate_expectation_values
-from QCut.execution.probabilities import _all_z_paulis_for_subset
+from QCut.execution.probabilities import (
+    QuasiProbabilities,
+    _all_z_paulis_for_subset,
+    estimate_probabilities,
+)
 from QCut.execution.qcutresult import CircuitResult, RawResult
 from QCut.options import CutOptions
 from QCut.qpd.bundle import (
@@ -154,6 +158,25 @@ def _transpiled(circuit: QuantumCircuit, basis, cache: dict) -> QuantumCircuit:
     return transpiled
 
 
+def _check_measurement_spec(
+    observables: SparsePauliOp | None, qubits: list[int] | None
+) -> None:
+    """Check that exactly one of observables or qubits was given.
+
+    Args:
+        observables (SparsePauliOp): the observables to estimate, if given.
+        qubits (list[int]): the qubits to reconstruct a distribution over, if given.
+
+    Raises:
+        ValueError: neither was given, or both were.
+    """
+    if observables is not None and qubits is not None:
+        raise ValueError("Only one of observables or qubits can be provided.")
+
+    if observables is None and qubits is None:
+        raise ValueError("Either observables or qubits must be provided.")
+
+
 def get_experiment_circuits(  # noqa: C901
     cut_circuit: CutCircuit,
     observables: SparsePauliOp | None = None,
@@ -175,14 +198,12 @@ def get_experiment_circuits(  # noqa: C901
 
     """
 
-    if observables is not None and qubits is not None:
-        raise ValueError("Only one of observables or qubits can be provided.")
+    _check_measurement_spec(observables, qubits)
 
     if qubits is not None:
         observables = _all_z_paulis_for_subset(cut_circuit.uncut_num_qubits, qubits)
 
-    if observables is None:
-        raise ValueError("Either observables or qubits must be provided.")
+    assert observables is not None
 
     num_qubits = 0
     for subcircuit in cut_circuit.subcircuits:
@@ -1154,12 +1175,13 @@ def run_experiments(  # noqa: C901
 
 def run_cut_circuit(
     cut_circuit: CutCircuit,
-    observables: SparsePauliOp,
+    observables: SparsePauliOp | None = None,
     backend=AerSimulator(),
     max_batch_size: int = 100,
     options: CutOptions | None = None,
     shots: int = DEFAULT_SHOTS,
-) -> np.ndarray:
+    qubits: list[int] | None = None,
+) -> np.ndarray | QuasiProbabilities:
     """After splitting the circuit run the rest of the circuit knitting sequence.
 
     Args:
@@ -1173,11 +1195,19 @@ def run_cut_circuit(
             (optional)
         shots (int): number of shots per circuit run, as in :func:`run_experiments`
             (optional)
+        qubits (list[int]): the qubits to reconstruct a distribution over, instead of
+            estimating observables (optional)
+
+        One of observables or qubits must be provided.
 
     Returns:
-        np.ndarray: one expectation value per observable, in the order given
+        np.ndarray | QuasiProbabilities: one expectation value per observable, in the
+        order given, or, when given ``qubits``, the reconstructed distribution over
+        them.
 
     """
+    _check_measurement_spec(observables, qubits)
+
     if options is not None:
         cut_circuit.options = options
 
@@ -1186,9 +1216,11 @@ def run_cut_circuit(
             cut_circuit, backend, optimization_level=3
         )
 
-        cut_experiment = get_experiment_circuits(transpiled_subcircuits, observables)
+        cut_experiment = get_experiment_circuits(
+            transpiled_subcircuits, observables, qubits
+        )
     else:
-        cut_experiment = get_experiment_circuits(cut_circuit, observables)
+        cut_experiment = get_experiment_circuits(cut_circuit, observables, qubits)
 
     results = run_experiments(
         cut_experiment,
@@ -1197,37 +1229,48 @@ def run_cut_circuit(
         max_batch_size=max_batch_size,
     )
 
+    if qubits is not None:
+        return estimate_probabilities(results)
+
     return estimate_expectation_values(results)
 
 
 def run(
     circuit: QuantumCircuit,
-    observables: SparsePauliOp,
+    observables: SparsePauliOp | None = None,
     backend=AerSimulator(),
     max_batch_size: int = 100,
     options: CutOptions | None = None,
     shots: int = DEFAULT_SHOTS,
-) -> np.ndarray:
+    qubits: list[int] | None = None,
+) -> np.ndarray | QuasiProbabilities:
     """Run the whole circuit knitting sequence with one function call.
 
     Args:
         circuit (QuantumCircuit): circuit with cut experiments
-        observables (list[int | list[int]]):
-            list of observbles in the form of qubit indices (Z-observable).
+        observables (SparsePauliOp): the observables to estimate
         backend: backend to use for running experiment circuits (optional)
         max_batch_size (int): maximum number of circuits submitted per backend.run
             call (optional)
         options (CutOptions): configuration for the run (optional)
         shots (int): number of shots per circuit run, as in :func:`run_experiments`
             (optional)
+        qubits (list[int]): the qubits to reconstruct a distribution over, instead of
+            estimating observables (optional)
+
+        One of observables or qubits must be provided.
 
     Returns:
-        np.ndarray: one expectation value per observable, in the order given
+        np.ndarray | QuasiProbabilities: one expectation value per observable, in the
+        order given, or, when given ``qubits``, the reconstructed distribution over
+        them.
 
     """
+    _check_measurement_spec(observables, qubits)
+
     # circuit = circuit.copy()
     cut_circuit = get_locations_and_subcircuits(circuit, options=options)
 
     return run_cut_circuit(
-        cut_circuit, observables, backend, max_batch_size, shots=shots
+        cut_circuit, observables, backend, max_batch_size, shots=shots, qubits=qubits
     )
