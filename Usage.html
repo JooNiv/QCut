@@ -42,7 +42,7 @@
 
     <script src="_static/jquery.js?v=5d32c60e"></script>
     <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-    <script src="_static/documentation_options.js?v=27791fc8"></script>
+    <script src="_static/documentation_options.js?v=b7946938"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/scripts/sphinx-book-theme.js?v=fab101a9"></script>
@@ -54,7 +54,7 @@
     <link rel="prev" title="QCut documentation" href="index.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="2.1.0.post1.dev1+g49d2ed67f" />
+  <meta name="docsearch:version" content="2.1.0.post1.dev2+gac6add169" />
   </head>
   
   
@@ -670,6 +670,8 @@ distribution over a chosen set of qubits can still be recovered from them. Pass
 </pre></div>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">{'00':</span> <span class="pre">0.8658,</span> <span class="pre">'01':</span> <span class="pre">-0.0024,</span> <span class="pre">'10':</span> <span class="pre">0.1041,</span> <span class="pre">'11':</span> <span class="pre">0.0324}</span></code></p>
+<p><code class="code docutils literal notranslate"><span class="pre">run()</span></code> and <code class="code docutils literal notranslate"><span class="pre">run_cut_circuit()</span></code> take <code class="code docutils literal notranslate"><span class="pre">qubits</span></code> in the same way, and hand
+back the distribution rather than expectation values.</p>
 <p>This costs <code class="code docutils literal notranslate"><span class="pre">2**k</span></code> values for <code class="code docutils literal notranslate"><span class="pre">k</span></code> qubits but no extra circuits, since the Z
 observables it needs all commute. See
 <a class="reference internal" href="theory/Probability_reconstruction.html"><span class="doc">the derivation</span></a>.</p>
