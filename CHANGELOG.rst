@@ -20,7 +20,7 @@ Reconstructing a probability distribution
 - A circuit carrying final measurements can be cut. They are removed on a copy, so the
   circuit passed in is left as it was.
 - :code:`RawResult.shots` and :code:`CutExperiment.can_reconstruct_probabilities` are
-  public.
+  public, and the types the public functions return are importable from :code:`QCut`.
 
 **Version 2.0.0**
 =================
