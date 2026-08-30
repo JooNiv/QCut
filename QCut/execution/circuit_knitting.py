@@ -424,7 +424,8 @@ def get_experiment_circuits(  # noqa: C901
         for obs_set in obs_subcircuits:
             cur_set_circuits = {}
             for id_meas_subcircuit_index, circ in obs_set.items():
-                subcircuit = circ.copy()
+                subcircuit = circ.copy_empty_like()
+                subcircuit._data = circ._data.copy(copy_instructions=False)
                 offset = 0
                 classical_bit_index = 0
                 qpd_qubits = []  # store the qubit indices of qubits used for qpd

@@ -200,7 +200,7 @@ def _insert_wire_cut_qpd(
             # remove extra classical bits and registers
             # _adjust_cregs(subcircuit)
             for subop in reversed(meas_op.data):
-                subcircuit.data.insert(
+                subcircuit._data.insert(
                     ind + offset,
                     CircuitInstruction(
                         operation=subop.operation, qubits=qubits_for_operation
@@ -209,7 +209,7 @@ def _insert_wire_cut_qpd(
         else:
             for subop in reversed(meas_op.data):
                 if subop.operation.name == "measure":
-                    subcircuit.data.insert(
+                    subcircuit._data.insert(
                         ind + offset,
                         CircuitInstruction(
                             operation=subop.operation,
@@ -218,7 +218,7 @@ def _insert_wire_cut_qpd(
                         ),
                     )
                 else:
-                    subcircuit.data.insert(
+                    subcircuit._data.insert(
                         ind + offset,
                         CircuitInstruction(
                             operation=subop.operation,
@@ -239,7 +239,7 @@ def _insert_wire_cut_qpd(
             subcircuit.qubits[subcircuit.find_bit(x).index] for x in op.qubits
         ]
         for subop in reversed(init_op.data):
-            subcircuit.data.insert(
+            subcircuit._data.insert(
                 ind + offset,
                 CircuitInstruction(
                     operation=subop.operation, qubits=qubits_for_operation
@@ -279,7 +279,7 @@ def _insert_2qubit_gate_cut_qpd(  # noqa: C901
             # if meas_op.name != "id-meas":
             #    _adjust_cregs(subcircuit)
             for subop in reversed(meas_op.data):
-                subcircuit.data.insert(
+                subcircuit._data.insert(
                     ind + offset,
                     CircuitInstruction(
                         operation=subop.operation, qubits=qubits_for_operation
@@ -288,7 +288,7 @@ def _insert_2qubit_gate_cut_qpd(  # noqa: C901
         else:
             for i, subop in enumerate(reversed(meas_op.data)):
                 if subop.operation.name in ["measure"]:
-                    subcircuit.data.insert(
+                    subcircuit._data.insert(
                         ind + offset,
                         CircuitInstruction(
                             operation=subop.operation,
@@ -297,7 +297,7 @@ def _insert_2qubit_gate_cut_qpd(  # noqa: C901
                         ),
                     )
                 else:
-                    subcircuit.data.insert(
+                    subcircuit._data.insert(
                         ind + offset,
                         CircuitInstruction(
                             operation=subop.operation,
@@ -328,7 +328,7 @@ def _insert_2qubit_gate_cut_qpd(  # noqa: C901
             # if meas_op.name != "id-meas":
             #    _adjust_cregs(subcircuit)
             for subop in reversed(meas_op.data):
-                subcircuit.data.insert(
+                subcircuit._data.insert(
                     ind + offset,
                     CircuitInstruction(
                         operation=subop.operation, qubits=qubits_for_operation
@@ -337,7 +337,7 @@ def _insert_2qubit_gate_cut_qpd(  # noqa: C901
         else:
             for i, subop in enumerate(reversed(meas_op.data)):
                 if subop.operation.name in ["measure"]:
-                    subcircuit.data.insert(
+                    subcircuit._data.insert(
                         ind + offset,
                         CircuitInstruction(
                             operation=subop.operation,
@@ -346,7 +346,7 @@ def _insert_2qubit_gate_cut_qpd(  # noqa: C901
                         ),
                     )
                 else:
-                    subcircuit.data.insert(
+                    subcircuit._data.insert(
                         ind + offset,
                         CircuitInstruction(
                             operation=subop.operation,
@@ -426,7 +426,7 @@ def _insert_bundle_qpd(  # noqa: PLR0913
         clbits = (
             [subcircuit.cregs[0][assigned[position]]] if position in assigned else []
         )
-        subcircuit.data.insert(
+        subcircuit._data.insert(
             ind + offset,
             CircuitInstruction(
                 operation=subop.operation,
