@@ -507,7 +507,7 @@ The job ids are the most important part. A job that fails or stalls on the devic
 
 # Benchmarks
 
-[`benchmarks/QCutVsAddon.ipynb`](./benchmarks/QCutVsAddon.ipynb) briefly compares QCut against IBM's [qiskit-addon-cutting](https://github.com/Qiskit/qiskit-addon-cutting) given the same cuts: the gamma each achieves, how many subexperiments that comes to, how long they take to generate, and what the two cut finders settle on under the same qubit budget. The benchmarks so QCut consitently matching or beating the Qiskit Cutting Addon.
+[`benchmarks/QCutVsAddon.ipynb`](./benchmarks/QCutVsAddon.ipynb) briefly compares QCut against IBM's [qiskit-addon-cutting](https://github.com/Qiskit/qiskit-addon-cutting) given the same cuts: the gamma each achieves, how many subexperiments that comes to, how long they take to generate, and what the two cut finders settle on under the same qubit budget. The benchmarks show QCut consistently matching or beating the Qiskit Cutting Addon.
 
 ```bash
 uv sync --group benchmark

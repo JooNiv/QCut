@@ -277,7 +277,7 @@ def transpile_subcircuits(
     Transpile subcircuits for a given backend. More efficient than transpiling
     experiment circuits as it only transpiles each subcircuit once instead of
     each experiment circuit. However, may lead to suboptimal transpilation results as
-    the tranpiler cannot use the backend object directly due to need to retain
+    the transpiler cannot use the backend object directly due to need to retain
     some placeholder gates for cuts and observables. `transpile_options` can be used
     to pass additional options to the transpiler. For more control over transpilation
     of experiment circuits, use `transpile_experiments` or manually transpile them.

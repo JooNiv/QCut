@@ -190,7 +190,7 @@ def _insert_wire_cut_qpd(
         # and insert current
         # qpd operation
         qubit_index = subcircuit.find_bit(op.qubits[0]).index
-        subcircuit.data.pop(ind + offset)  # remove plaxceholder
+        subcircuit.data.pop(ind + offset)  # remove placeholder
         # measure channel
         qpd_qubits.append(qubit_index)  # store index
         qubits_for_operation = [subcircuit.qubits[qubit_index]]
@@ -267,7 +267,7 @@ def _insert_2qubit_gate_cut_qpd(  # noqa: C901
         # qpd operation
 
         qubit_index = subcircuit.find_bit(op.qubits[0]).index
-        subcircuit.data.pop(ind + offset)  # remove plaxceholder
+        subcircuit.data.pop(ind + offset)  # remove placeholder
         # measure channel
         # qpd_qubits.append(qubit_index)  # store index
         qubits_for_operation = [subcircuit.qubits[qubit_index]]
@@ -315,7 +315,7 @@ def _insert_2qubit_gate_cut_qpd(  # noqa: C901
         # and insert current
         # qpd operation
         qubit_index = subcircuit.find_bit(op.qubits[0]).index
-        subcircuit.data.pop(ind + offset)  # remove plaxceholder
+        subcircuit.data.pop(ind + offset)  # remove placeholder
         # measure channel
         # qpd_qubits.append(qubit_index)  # store index
         qubits_for_operation = [subcircuit.qubits[qubit_index]]
