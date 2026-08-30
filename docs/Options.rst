@@ -106,7 +106,7 @@ before, so turning this on can only help. ``QCut.bundle.plan_bundles`` reports w
 grouped and what that saved at INFO level.
 
 Wire cuts with one-way classical communication
----------------------------------------------
+----------------------------------------------
 
 ``wire_cut_communication`` (default ``"auto"``) lets the two sides of a wire cut exchange
 the measured outcome. Cutting :math:`n` wires locally costs :math:`4^n` and that is
