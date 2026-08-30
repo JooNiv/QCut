@@ -35,6 +35,8 @@ Reconstructing a probability distribution
   circuit passed in is left as it was.
 - :code:`RawResult.shots` and :code:`CutExperiment.can_reconstruct_probabilities` are
   public, and the types the public functions return are importable from :code:`QCut`.
+- Generating experiment circuits is about a third quicker and takes about half the
+  memory.
 
 **Version 2.0.0**
 =================
