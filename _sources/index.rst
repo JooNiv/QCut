@@ -78,7 +78,7 @@ Benchmarks
 `qiskit-addon-cutting <https://github.com/Qiskit/qiskit-addon-cutting>`__ given the same
 cuts: the gamma each achieves, how many subexperiments that comes to, how long they take
 to generate, and what the two cut finders settle on under the same qubit budget. 
-The benchmarks so QCut consitently matching or beating the Qiskit Cutting Addon.
+The benchmarks show QCut consistently matching or beating the Qiskit Cutting Addon.
 
 .. code:: bash
 

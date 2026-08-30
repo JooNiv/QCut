@@ -42,7 +42,7 @@
 
     <script src="_static/jquery.js?v=5d32c60e"></script>
     <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-    <script src="_static/documentation_options.js?v=b7946938"></script>
+    <script src="_static/documentation_options.js?v=82da7f84"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/scripts/sphinx-book-theme.js?v=fab101a9"></script>
@@ -53,7 +53,7 @@
     <link rel="prev" title="QCut" href="_autosummary/QCut.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="2.1.0.post1.dev2+gac6add169" />
+  <meta name="docsearch:version" content="2.1.1.post1.dev1+g775bb70da" />
   </head>
   
   
@@ -325,6 +325,7 @@
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-2-1-2"><strong>Version 2.1.2</strong></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-2-1-1"><strong>Version 2.1.1</strong></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-2-1-0"><strong>Version 2.1.0</strong></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#reconstructing-a-probability-distribution">Reconstructing a probability distribution</a></li>
@@ -389,6 +390,21 @@
                   
   <section id="changelog">
 <span id="changes"></span><h1>Changelog<a class="headerlink" href="#changelog" title="Link to this heading">#</a></h1>
+<section id="version-2-1-2">
+<h2><strong>Version 2.1.2</strong><a class="headerlink" href="#version-2-1-2" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p><code class="code docutils literal notranslate"><span class="pre">transpile_subcircuits()</span></code> followed by <code class="code docutils literal notranslate"><span class="pre">get_experiment_circuits()</span></code> or
+<code class="code docutils literal notranslate"><span class="pre">run_cut_circuit()</span></code> no longer raises <code class="code docutils literal notranslate"><span class="pre">AttributeError</span></code> on a non IQM
+<code class="code docutils literal notranslate"><span class="pre">BackendV2</span></code>, such as <code class="code docutils literal notranslate"><span class="pre">GenericBackendV2</span></code> or one of IBM’s.</p></li>
+<li><p>Generating experiment circuits is about a third quicker and takes about half the
+memory.</p></li>
+<li><p>A generated QPD, joint rotation cuts included, merges the gate’s local unitaries into
+its operations instead of carrying them as separate gates, so the circuits hold about
+a third fewer instructions.</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">CutExperiment.group_size</span></code> returns the number of circuits in a group, as
+documented, rather than the instruction count of the first subcircuit.</p></li>
+</ul>
+</section>
 <section id="version-2-1-1">
 <h2><strong>Version 2.1.1</strong><a class="headerlink" href="#version-2-1-1" title="Link to this heading">#</a></h2>
 <ul class="simple">
@@ -701,8 +717,8 @@ call. A target that batches on its own account, such as
 <h2>Version 0.9.0<a class="headerlink" href="#version-0-9-0" title="Link to this heading">#</a></h2>
 <ul class="simple">
 <li><dl class="simple">
-<dt>Migrate from index based Z-observables to Qiskits SparsePauliOps</dt><dd><ul>
-<li><p>The observables parameter for all functions now takes a list of Qiskits <code class="code docutils literal notranslate"><span class="pre">SparsePauliOp</span></code> objects instead of lists of qubit indices.</p></li>
+<dt>Migrate from index based Z-observables to Qiskit’s SparsePauliOps</dt><dd><ul>
+<li><p>The observables parameter for all functions now takes a list of Qiskit’s <code class="code docutils literal notranslate"><span class="pre">SparsePauliOp</span></code> objects instead of lists of qubit indices.</p></li>
 <li><p>This allows for more general observables to be calculated, including multi-qubit observables and observables with different Pauli operators.</p></li>
 <li><p>Check documentation for details on how to use.</p></li>
 </ul>
@@ -801,7 +817,7 @@ call. A target that batches on its own account, such as
 <section id="version-0-2-4">
 <h2>Version 0.2.4<a class="headerlink" href="#version-0-2-4" title="Link to this heading">#</a></h2>
 <ul class="simple">
-<li><p>Bugfix for incorrect partitioning for cases where there are multipe cuts on a single wire</p></li>
+<li><p>Bugfix for incorrect partitioning for cases where there are multiple cuts on a single wire</p></li>
 </ul>
 </section>
 <section id="version-0-2-3">
@@ -862,7 +878,7 @@ call. A target that batches on its own account, such as
 <li><dl class="simple">
 <dt>Add Qiskit 1.0 support.</dt><dd><ul>
 <li><p>Supported versions now &gt;= 0.45.3, &lt; 1.2.</p></li>
-<li><p>No worflow changes. No migration required.</p></li>
+<li><p>No workflow changes. No migration required.</p></li>
 <li><p>Compatible with qiskit-iqm 13.15</p></li>
 </ul>
 </dd>
@@ -968,6 +984,7 @@ call. A target that batches on its own account, such as
   </div>
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-2-1-2"><strong>Version 2.1.2</strong></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-2-1-1"><strong>Version 2.1.1</strong></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-2-1-0"><strong>Version 2.1.0</strong></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#reconstructing-a-probability-distribution">Reconstructing a probability distribution</a></li>

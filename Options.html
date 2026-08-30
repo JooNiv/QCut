@@ -42,7 +42,7 @@
 
     <script src="_static/jquery.js?v=5d32c60e"></script>
     <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-    <script src="_static/documentation_options.js?v=b7946938"></script>
+    <script src="_static/documentation_options.js?v=82da7f84"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/scripts/sphinx-book-theme.js?v=fab101a9"></script>
@@ -56,7 +56,7 @@
     <link rel="prev" title="Basic Usage" href="Usage.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="2.1.0.post1.dev2+gac6add169" />
+  <meta name="docsearch:version" content="2.1.1.post1.dev1+g775bb70da" />
   </head>
   
   
@@ -330,7 +330,7 @@
                 <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#merging-gates-on-the-same-qubit-pair">Merging gates on the same qubit pair</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#cutting-parallel-rotation-gates-together">Cutting parallel rotation gates together</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#wire-cuts-with-one-way-clasical-communication">Wire cuts with one-way clasical communication</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#wire-cuts-with-one-way-classical-communication">Wire cuts with one-way classical communication</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#sampling-instead-of-enumerating">Sampling instead of enumerating</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#configuring-cut-finding-options">Configuring cut finding options</a></li>
 </ul>
@@ -363,7 +363,7 @@ resulting <code class="docutils literal notranslate"><span class="pre">CutCircui
 <p>Options are fixed before the subcircuits are built, because they decide how the
 quasiprobability decomposition is formed and therefore what its coefficients mean. A
 <code class="docutils literal notranslate"><span class="pre">CutOptions</span></code> is frozen for that reason. Use <code class="docutils literal notranslate"><span class="pre">options.replace(...)</span></code> for a modified copy,
-or reassign <code class="docutils literal notranslate"><span class="pre">QCut.DEFAULT_OPTIONS</span></code> to change the defaults process-wide. For more examplpes
+or reassign <code class="docutils literal notranslate"><span class="pre">QCut.DEFAULT_OPTIONS</span></code> to change the defaults process-wide. For more examples
 on using options, see <a class="reference internal" href="notebooks/QCutOptionsExample.html"><span class="doc">QCutOptionsExample.ipynb</span></a>.</p>
 <section id="merging-gates-on-the-same-qubit-pair">
 <h2>Merging gates on the same qubit pair<a class="headerlink" href="#merging-gates-on-the-same-qubit-pair" title="Link to this heading">#</a></h2>
@@ -433,8 +433,8 @@ qubits of one subcircuit at once. Anything that does not qualify is cut on its o
 before, so turning this on can only help. <code class="docutils literal notranslate"><span class="pre">QCut.bundle.plan_bundles</span></code> reports what it
 grouped and what that saved at INFO level.</p>
 </section>
-<section id="wire-cuts-with-one-way-clasical-communication">
-<h2>Wire cuts with one-way clasical communication<a class="headerlink" href="#wire-cuts-with-one-way-clasical-communication" title="Link to this heading">#</a></h2>
+<section id="wire-cuts-with-one-way-classical-communication">
+<h2>Wire cuts with one-way classical communication<a class="headerlink" href="#wire-cuts-with-one-way-classical-communication" title="Link to this heading">#</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">wire_cut_communication</span></code> (default <code class="docutils literal notranslate"><span class="pre">&quot;auto&quot;</span></code>) lets the two sides of a wire cut exchange
 the measured outcome. Cutting <span class="math notranslate nohighlight">\(n\)</span> wires locally costs <span class="math notranslate nohighlight">\(4^n\)</span> and that is
 provably the best possible, so a block of wires gains nothing on its own. Communicating
@@ -589,7 +589,7 @@ The seeds are fixed, so the finder is deterministic and reproducible.</p>
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#merging-gates-on-the-same-qubit-pair">Merging gates on the same qubit pair</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#cutting-parallel-rotation-gates-together">Cutting parallel rotation gates together</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#wire-cuts-with-one-way-clasical-communication">Wire cuts with one-way clasical communication</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#wire-cuts-with-one-way-classical-communication">Wire cuts with one-way classical communication</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#sampling-instead-of-enumerating">Sampling instead of enumerating</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#configuring-cut-finding-options">Configuring cut finding options</a></li>
 </ul>

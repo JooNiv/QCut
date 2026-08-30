@@ -21,7 +21,7 @@ resulting ``CutCircuit`` and ``CutExperiment``, so it only has to be given once.
 Options are fixed before the subcircuits are built, because they decide how the
 quasiprobability decomposition is formed and therefore what its coefficients mean. A
 ``CutOptions`` is frozen for that reason. Use ``options.replace(...)`` for a modified copy,
-or reassign ``QCut.DEFAULT_OPTIONS`` to change the defaults process-wide. For more examplpes
+or reassign ``QCut.DEFAULT_OPTIONS`` to change the defaults process-wide. For more examples
 on using options, see :doc:`QCutOptionsExample.ipynb <notebooks/QCutOptionsExample>`.
 
 Merging gates on the same qubit pair
@@ -105,8 +105,8 @@ qubits of one subcircuit at once. Anything that does not qualify is cut on its o
 before, so turning this on can only help. ``QCut.bundle.plan_bundles`` reports what it
 grouped and what that saved at INFO level.
 
-Wire cuts with one-way clasical communication
----------------------------------------------
+Wire cuts with one-way classical communication
+----------------------------------------------
 
 ``wire_cut_communication`` (default ``"auto"``) lets the two sides of a wire cut exchange
 the measured outcome. Cutting :math:`n` wires locally costs :math:`4^n` and that is

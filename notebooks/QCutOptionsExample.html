@@ -42,7 +42,7 @@
 
     <script src="../_static/jquery.js?v=5d32c60e"></script>
     <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-    <script src="../_static/documentation_options.js?v=b7946938"></script>
+    <script src="../_static/documentation_options.js?v=82da7f84"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/sphinx-book-theme.js?v=fab101a9"></script>
@@ -54,7 +54,7 @@
     <link rel="prev" title="QAOA Example" href="QCutQAOAExample.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="2.1.0.post1.dev2+gac6add169" />
+  <meta name="docsearch:version" content="2.1.1.post1.dev1+g775bb70da" />
   </head>
   
   
@@ -351,14 +351,14 @@ All of these options are configured with a single <code class="docutils literal 
 <li><p><code class="docutils literal notranslate"><span class="pre">auto</span></code> (default), <code class="docutils literal notranslate"><span class="pre">always</span></code> or <code class="docutils literal notranslate"><span class="pre">never</span></code>. <code class="docutils literal notranslate"><span class="pre">auto</span></code> compares cost with <code class="docutils literal notranslate"><span class="pre">joint_rotation_cuts</span></code> applied before consolidation since this sometimes results in cheaper decompositions.</p></li>
 </ul>
 </li>
-<li><p><code class="docutils literal notranslate"><span class="pre">joint_rotation_cuts</span></code>: whether to jointly cut parallel 2 qubit rotation gates using a join decomposition. The joint decomposition costs stricly less, both in circuits and overhead, than decomposing separately</p>
+<li><p><code class="docutils literal notranslate"><span class="pre">joint_rotation_cuts</span></code>: whether to jointly cut parallel 2 qubit rotation gates using a joint decomposition. The joint decomposition costs strictly less, both in circuits and overhead, than decomposing separately</p>
 <ul>
 <li><p><code class="docutils literal notranslate"><span class="pre">True</span></code> (default) or <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
 </ul>
 </li>
-<li><p><code class="docutils literal notranslate"><span class="pre">wire_cut_communication</span></code>: whether to use a wire cutting decomposition utilising one-way classical communication (LOCC) between subcircuits. Leads to a decomposition with less circuit. Also achieves smaller overheads on parallel blocks of more than 2 wire cuts.</p>
+<li><p><code class="docutils literal notranslate"><span class="pre">wire_cut_communication</span></code>: whether to use a wire cutting decomposition utilising one-way classical communication (LOCC) between subcircuits. Leads to a decomposition with fewer circuits. Also achieves smaller overheads on parallel blocks of more than 2 wire cuts.</p>
 <ul>
-<li><p><code class="docutils literal notranslate"><span class="pre">auto</span></code> (default), <code class="docutils literal notranslate"><span class="pre">always</span></code> or <code class="docutils literal notranslate"><span class="pre">never</span></code>. <code class="docutils literal notranslate"><span class="pre">auto</span></code> applies LOCC wire cuts on blocs of atleast 2 parallel wire cuts and otherwise defaults to non-communicating decomposition.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">auto</span></code> (default), <code class="docutils literal notranslate"><span class="pre">always</span></code> or <code class="docutils literal notranslate"><span class="pre">never</span></code>. <code class="docutils literal notranslate"><span class="pre">auto</span></code> applies LOCC wire cuts on blocks of at least 2 parallel wire cuts and otherwise defaults to non-communicating decomposition.</p></li>
 </ul>
 </li>
 <li><p><code class="docutils literal notranslate"><span class="pre">expansion</span></code>: whether to exactly enumerate through all of the generated experiment circuits from the decomposition or to sample it.</p>
@@ -366,12 +366,12 @@ All of these options are configured with a single <code class="docutils literal 
 <li><p><code class="docutils literal notranslate"><span class="pre">auto</span></code> (default), <code class="docutils literal notranslate"><span class="pre">exact</span></code> or <code class="docutils literal notranslate"><span class="pre">sample</span></code>. <code class="docutils literal notranslate"><span class="pre">auto</span></code> chooses between <code class="docutils literal notranslate"><span class="pre">exact</span></code> and <code class="docutils literal notranslate"><span class="pre">sample</span></code> based on <code class="docutils literal notranslate"><span class="pre">max_exact_groups</span></code></p></li>
 </ul>
 </li>
-<li><p><code class="docutils literal notranslate"><span class="pre">max_exact_groups</span></code>: thr maximum number of experiment groups to exactly enumerate through</p>
+<li><p><code class="docutils literal notranslate"><span class="pre">max_exact_groups</span></code>: the maximum number of experiment groups to exactly enumerate through</p>
 <ul>
 <li><p><code class="docutils literal notranslate"><span class="pre">int</span></code> default 1000</p></li>
 </ul>
 </li>
-<li><p><code class="docutils literal notranslate"><span class="pre">num_samples</span></code>: number of samlples to take from the decomposition when <code class="docutils literal notranslate"><span class="pre">expansion</span></code> is set to <code class="docutils literal notranslate"><span class="pre">sample</span></code></p>
+<li><p><code class="docutils literal notranslate"><span class="pre">num_samples</span></code>: number of samples to take from the decomposition when <code class="docutils literal notranslate"><span class="pre">expansion</span></code> is set to <code class="docutils literal notranslate"><span class="pre">sample</span></code></p>
 <ul>
 <li><p>defaults to <code class="docutils literal notranslate"><span class="pre">max_exact_groups</span></code></p></li>
 </ul>
@@ -622,7 +622,7 @@ Generated 96 circuits. In mode always.
 </div>
 </div>
 </div>
-<p>Notice that here the non-parallel wire cuts actually lead to more circuits in <code class="docutils literal notranslate"><span class="pre">auto</span></code> mode. This is die to how the implementation afects the actual achieved overhead. The ideal overhead of the LOCC cuts is always better than the non-communicating decomposition. However due to how it needs to be implemented to be efficient on actual hardware (no jobs with single circuit and single shot) the achieved overhead suffers somewhat and is slightly worse than the non-communicative one on non parallel wire cuts. This is way <code class="docutils literal notranslate"><span class="pre">auto</span></code> sometimes chooses to generate more circuits. In the end this is an situation dependant tradeoff where you are choosing between more samples/shots or more circuits.</p>
+<p>Notice that here the non-parallel wire cuts actually lead to more circuits in <code class="docutils literal notranslate"><span class="pre">auto</span></code> mode. This is due to how the implementation affects the actual achieved overhead. The ideal overhead of the LOCC cuts is always better than the non-communicating decomposition. However due to how it needs to be implemented to be efficient on actual hardware (no jobs with single circuit and single shot) the achieved overhead suffers somewhat and is slightly worse than the non-communicative one on non-parallel wire cuts. This is why <code class="docutils literal notranslate"><span class="pre">auto</span></code> sometimes chooses to generate more circuits. In the end this is a situation dependent tradeoff where you are choosing between more samples/shots or more circuits.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ghz</span> <span class="o">=</span> <span class="n">QuantumCircuit</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
