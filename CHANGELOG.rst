@@ -2,6 +2,20 @@
 Changelog
 =========
 
+**Version 2.1.2**
+=================
+
+- :code:`transpile_subcircuits()` followed by :code:`get_experiment_circuits()` or
+  :code:`run_cut_circuit()` no longer raises :code:`AttributeError` on a non IQM
+  :code:`BackendV2`, such as :code:`GenericBackendV2` or one of IBM's.
+- Generating experiment circuits is about a third quicker and takes about half the
+  memory.
+- A generated QPD, joint rotation cuts included, merges the gate's local unitaries into
+  its operations instead of carrying them as separate gates, so the circuits hold about
+  a third fewer instructions.
+- :code:`CutExperiment.group_size` returns the number of circuits in a group, as
+  documented, rather than the instruction count of the first subcircuit.
+
 **Version 2.1.1**
 =================
 
@@ -244,8 +258,8 @@ Version 0.9.1
 
 Version 0.9.0
 =============
-- Migrate from index based Z-observables to Qiskits SparsePauliOps
-    * The observables parameter for all functions now takes a list of Qiskits :code:`SparsePauliOp` objects instead of lists of qubit indices.
+- Migrate from index based Z-observables to Qiskit's SparsePauliOps
+    * The observables parameter for all functions now takes a list of Qiskit's :code:`SparsePauliOp` objects instead of lists of qubit indices.
     * This allows for more general observables to be calculated, including multi-qubit observables and observables with different Pauli operators.
     * Check documentation for details on how to use.
 
@@ -290,7 +304,7 @@ Version 0.3.0
 
 Version 0.2.4
 =============
-- Bugfix for incorrect partitioning for cases where there are multipe cuts on a single wire
+- Bugfix for incorrect partitioning for cases where there are multiple cuts on a single wire
 
 Version 0.2.3
 =============
@@ -323,7 +337,7 @@ Version 0.1.2
 =============
 - Add Qiskit 1.0 support.
     * Supported versions now >= 0.45.3, < 1.2.
-    * No worflow changes. No migration required.
+    * No workflow changes. No migration required.
     * Compatible with qiskit-iqm 13.15
 - Add Python 3.11 support.
     * Supported versions now >= 3.9, < 3.12.

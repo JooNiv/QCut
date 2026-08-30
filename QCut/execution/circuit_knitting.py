@@ -158,6 +158,39 @@ def _transpiled(circuit: QuantumCircuit, basis, cache: dict) -> QuantumCircuit:
     return transpiled
 
 
+def _backend_gate_names(backend) -> list[str]:
+    """The gate names a backend accepts, however that backend spells them.
+
+    A BackendV1 answers through its configuration, an IQM device through its
+    architecture, and any other BackendV2 through its target. IQM is asked before the
+    target because its architecture is what the prx rename below was written against.
+
+    Raises:
+        QCutError: the backend names its gates in none of the three ways.
+    """
+    configuration = getattr(backend, "configuration", None)
+    if configuration is not None:
+        try:
+            return list(configuration().basis_gates)
+        except Exception:  # noqa: BLE001 - a V2 backend may carry a stub that raises
+            pass
+
+    architecture = getattr(backend, "architecture", None)
+    if architecture is not None:
+        return list(architecture.gates.keys())
+
+    target = getattr(backend, "target", None)
+    if target is not None:
+        return list(target.operation_names)
+
+    raise QCutError(
+        f"cannot tell which gates {type(backend).__name__} accepts, because it has no "
+        "configuration(), no architecture and no target. Please raise an issue so this "
+        "backend can be supported. In the meantime, build the experiment circuits from "
+        "an untranspiled cut circuit and transpile them with transpile_experiments."
+    )
+
+
 def _check_measurement_spec(
     observables: SparsePauliOp | None, qubits: list[int] | None
 ) -> None:
@@ -249,10 +282,7 @@ def get_experiment_circuits(  # noqa: C901
     backend = None
     if check_circuit_type:
         backend = cut_circuit.backend
-        try:
-            basis = backend.configuration().basis_gates  # type: ignore[possibly-missing-attribute]
-        except Exception:
-            basis = list(backend.architecture.gates.keys())  # type: ignore[possibly-missing-attribute]
+        basis = _backend_gate_names(backend)
         basis = ["r" if gate == "prx" else gate for gate in basis]
         # A device's own gate list can name operations qiskit does not know, and it
         # refuses those through ``basis_gates`` rather than ignoring them. IQM's
@@ -394,7 +424,8 @@ def get_experiment_circuits(  # noqa: C901
         for obs_set in obs_subcircuits:
             cur_set_circuits = {}
             for id_meas_subcircuit_index, circ in obs_set.items():
-                subcircuit = circ.copy()
+                subcircuit = circ.copy_empty_like()
+                subcircuit._data = circ._data.copy(copy_instructions=False)
                 offset = 0
                 classical_bit_index = 0
                 qpd_qubits = []  # store the qubit indices of qubits used for qpd

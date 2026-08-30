@@ -8,7 +8,7 @@ The goal is to decompose a quantum channel implementing the CZ gate into a set o
 
 ## Factor the CZ gate
 
-The CZ gate can (upto global phase) be decomposed as:
+The CZ gate can (up to global phase) be decomposed as:
 
 (eq1)=
 \begin{equation}
@@ -84,7 +84,7 @@ I =& \begin{pmatrix}
 \end{aligned}
 $
 
-#### Imagnary term
+#### Imaginary term
 $I+i\alpha A$, with
 
 A = Z, $\alpha = \pm 1$
@@ -101,7 +101,7 @@ $
 \end{aligned}
 $
 
-This is exactly equal to the S/$S^\dagger$ gate (upto global phase which gets absorber by the coefficient).
+This is exactly equal to the S/$S^\dagger$ gate (up to global phase, which gets absorbed by the coefficient).
 
 #### Real term
 $I+\alpha A$, with

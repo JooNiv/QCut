@@ -33,7 +33,7 @@ from qiskit.circuit import Gate, QuantumCircuit
 from qiskit.synthesis import TwoQubitWeylDecomposition
 
 from QCut.errors.qcuterror import QCutError
-from QCut.qpd.qpd_generate import DEFAULT_TOL, _local_gate
+from QCut.qpd.qpd_generate import DEFAULT_TOL, _local_gate, merge_locals
 
 logger: logging.Logger = logging.getLogger(__name__)
 
@@ -286,17 +286,7 @@ def _with_side_locals(
     """
     if all(pre is None and post is None for pre, post in locals_):
         return op
-    out = QuantumCircuit(op.num_qubits, op.num_clbits, name=f"{op.name}'")
-    for qubit, (pre, _) in enumerate(locals_):
-        if pre is not None:
-            out.append(pre, [qubit])
-    out.compose(
-        op, qubits=range(op.num_qubits), clbits=range(op.num_clbits), inplace=True
-    )
-    for qubit, (_, post) in enumerate(locals_):
-        if post is not None:
-            out.append(post, [qubit])
-    return out
+    return merge_locals(op, locals_)
 
 
 def joint_rotation_qpd_from_gates(

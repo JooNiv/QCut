@@ -41,6 +41,7 @@ dev = [
     "ruff>=0.12.1",
     "ty >=0.0.15",
     "pydantic>=2.12.5",
+    "codespell>=2.3",
 ]
 docs = [
     "sphinx==9.0.4",
@@ -55,6 +56,7 @@ benchmark = [
     "notebook>=7.4.5",
     "pandas>=2.2",
     "networkx>=3.0",
+    "psutil>=5.9",
 ]
 
 
@@ -139,3 +141,8 @@ markers = [
 
 [tool.ty.rules]
 unused-type-ignore-comment = "ignore"
+
+[tool.codespell]
+skip = "./.venv,./.git,./.tox,./uv.lock,./htmlcov,./build,./dist,./QCut.egg-info,./docs/build,./docs/jupyter_execute,./.pytest_cache"
+ignore-words-list = "aer,ket,braket"
+ignore-regex = "[A-Za-z0-9+/]{40,}={0,2}"

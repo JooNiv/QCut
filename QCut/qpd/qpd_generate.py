@@ -243,20 +243,83 @@ def _local_gate(matrix: np.ndarray) -> Gate | None:
     return circuit.data[0].operation
 
 
+_MERGED: dict[bytes, Gate | None] = {}
+
+
+def _merged_gate(matrix: np.ndarray) -> Gate | None:
+    """:func:`_local_gate`, memoised.
+
+    A QPD's terms are built from the same handful of local products, and the Euler
+    decomposition costs more than every other part of the merge together.
+    """
+    key = matrix.round(12).tobytes()
+    if key not in _MERGED:
+        _MERGED[key] = _local_gate(matrix)
+    return _MERGED[key]
+
+
+def _run_gate(run: list[Gate]) -> Gate | None:
+    """The one gate a run of single-qubit gates comes to, or None for the identity."""
+    if len(run) == 1:
+        return run[0]
+    matrix = np.eye(2)
+    for gate in run:
+        matrix = gate.to_matrix() @ matrix
+    return _merged_gate(matrix)
+
+
+def merge_locals(
+    op: QuantumCircuit, locals_: list[tuple[Gate | None, Gate | None]]
+) -> QuantumCircuit:
+    """Return ``op`` wrapped in the per-qubit locals, one pair per qubit.
+
+    Every run of single-qubit gates on a qubit becomes one gate, and a run that comes
+    to the identity none at all. That costs a few matrix products per QPD, once, and
+    every experiment circuit built from the result then carries fewer instructions.
+    """
+    out = QuantumCircuit(op.num_qubits, op.num_clbits, name=f"{op.name}'")
+    runs: list[list[Gate]] = [[] if pre is None else [pre] for pre, _ in locals_]
+    index = {bit: i for i, bit in enumerate(op.qubits)}
+    index.update({bit: i for i, bit in enumerate(op.clbits)})
+
+    def flush(qubit: int) -> None:
+        run = runs[qubit]
+        if not run:
+            return
+        merged = _run_gate(run)
+        if merged is not None:
+            out.append(merged, [qubit])
+        run.clear()
+
+    for instruction in op.data:
+        qubits = [index[qubit] for qubit in instruction.qubits]
+        if len(qubits) == 1 and isinstance(instruction.operation, Gate):
+            runs[qubits[0]].append(instruction.operation)
+            continue
+        # anything else ends the runs on the qubits it touches, and gates on the other
+        # qubits keep accumulating: they cannot be reordered past it either way
+        for qubit in qubits:
+            flush(qubit)
+        out.append(
+            instruction.operation,
+            qubits,
+            [index[clbit] for clbit in instruction.clbits],
+        )
+
+    for qubit, (_, post) in enumerate(locals_):
+        if post is not None:
+            runs[qubit].append(post)
+        flush(qubit)
+    return out
+
+
 def _with_locals(
     primitive: QuantumCircuit, pre: Gate | None, post: Gate | None
 ) -> QuantumCircuit:
-    """Return a copy of ``primitive`` with ``pre`` prepended and ``post`` appended."""
+    """Return ``pre . primitive . post``, merged into as few gates as it takes."""
     if pre is None and post is None:
         return primitive.copy()
-    name = primitive.name if pre is None and post is None else f"{primitive.name}'"
-    out = QuantumCircuit(1, primitive.num_clbits, name=name)
-    if pre is not None:
-        out.append(pre, [0])
-    out.compose(primitive, qubits=[0], clbits=range(primitive.num_clbits), inplace=True)
-    if post is not None:
-        out.append(post, [0])
-    return out
+    return merge_locals(primitive, [(pre, post)])
 
 
 def qpd_from_u(u: np.ndarray, tol: float = DEFAULT_TOL) -> list[dict]:

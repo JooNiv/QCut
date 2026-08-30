@@ -137,7 +137,7 @@ We can split the operators in to four families:
 
 ### Family 1: $A^\pm$, $\alpha=0$
 
-The operarator is now $A_{0\alpha'} = \frac{I+\sigma_{\alpha'}}{2}$. These are projectors to the eigenstate of $\sigma_{\alpha'}$:
+The operator is now $A_{0\alpha'} = \frac{I+\sigma_{\alpha'}}{2}$. These are projectors to the eigenstate of $\sigma_{\alpha'}$:
 
 | Channel     | Operator                                            |  Circuit |
 | :-----      | :-----:                                             |  -----:  |
