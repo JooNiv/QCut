@@ -10,6 +10,11 @@ Changelog
   :code:`BackendV2`, such as :code:`GenericBackendV2` or one of IBM's.
 - Generating experiment circuits is about a third quicker and takes about half the
   memory.
+- A generated QPD, joint rotation cuts included, merges the gate's local unitaries into
+  its operations instead of carrying them as separate gates, so the circuits hold about
+  a third fewer instructions.
+- :code:`CutExperiment.group_size` returns the number of circuits in a group, as
+  documented, rather than the instruction count of the first subcircuit.
 
 **Version 2.1.1**
 =================
