@@ -54,10 +54,11 @@ If your changes should retain backwards compatibility to older Qiskit versions a
 uv run tox --parallel
 ```
 
-Finally make sure that documentation is up to date and builds properly by running:
+Finally make sure that documentation is up to date and builds with no warnings, which CI
+requires:
 
 ```shell
 uv sync --group docs
 cd docs
-uv run sphinx-build -v -b html . build/sphinx/html -W
+uv run sphinx-build -b html . build/sphinx/html -W -E
 ```
