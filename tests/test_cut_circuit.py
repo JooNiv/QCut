@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 from pydantic import TypeAdapter, ValidationError
 from qiskit import QuantumCircuit
-from qiskit.circuit import Parameter
+from qiskit.circuit import CircuitInstruction, Gate, Parameter
 from qiskit.circuit.library import CXGate
 from qiskit.quantum_info import SparsePauliOp, Statevector
 from qiskit_aer import AerSimulator
@@ -316,6 +316,54 @@ def test_results_still_missing_after_the_retry_raise(monkeypatch):
     with pytest.raises(ValidationError):
         circuit_knitting._result(job)
     assert job.calls == 2
+
+
+def test_the_private_qiskit_primitives_building_relies_on():
+    """Building experiment circuits goes past QuantumCircuit's public API twice.
+
+    ``data.insert`` runs the conversion meant for the deprecated three-tuple form and
+    ``copy`` copies every operation, and neither is wanted hundreds of thousands of
+    times. The replacements are private, so a qiskit that changes them should fail here
+    rather than somewhere inside a cut.
+    """
+    circuit = QuantumCircuit(2)
+    circuit.h(0)
+    circuit.append(Gate("marker", 1, []), [1])
+
+    instruction = CircuitInstruction(Gate("inserted", 1, []), (circuit.qubits[0],), ())
+    circuit._data.insert(1, instruction)
+    assert [i.operation.name for i in circuit.data] == ["h", "inserted", "marker"]
+    assert circuit.data[1].operation is instruction.operation
+
+    shared = circuit.copy_empty_like()
+    shared._data = circuit._data.copy(copy_instructions=False)
+    assert [i.operation.name for i in shared.data] == ["h", "inserted", "marker"]
+    assert all(a.operation is b.operation for a, b in zip(shared.data, circuit.data))
+
+    # the public copy does not share, which is the whole reason for the flag
+    assert circuit.copy().data[2].operation is not circuit.data[2].operation
+
+
+@pytest.mark.sim
+def test_experiment_circuits_share_their_operations():
+    """A consequence of the above, and what keeps the memory down at scale."""
+    marked, _plain, observables = _wire_and_gate_cut()
+    experiment = ck.get_experiment_circuits(
+        ck.get_locations_and_subcircuits(marked), observables
+    )
+
+    circuits = [
+        circuit
+        for group in experiment.experiments
+        for obs_group in group
+        for circuit in obs_group.values()
+    ]
+    instructions = sum(len(circuit.data) for circuit in circuits)
+    distinct = len({id(i.operation) for c in circuits for i in c.data})
+
+    assert instructions > 10 * distinct, (
+        f"{instructions} instructions over only {distinct} operations was expected"
+    )
 
 
 def test_every_exported_name_exists():
