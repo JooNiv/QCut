@@ -226,8 +226,8 @@ class CutExperiment:
 
     @property
     def group_size(self):
-        """Number of circuits in a group."""
-        return len(self.experiments[0][0][0])
+        """Number of circuits in a group, which is the same for every group."""
+        return self.num_circuits // self.num_groups
 
     @property
     def num_groups(self):
