@@ -247,9 +247,9 @@ Or every experiment circuit, afterwards:
 
 Given a cut circuit it is much the faster of the two, but the subcircuits still carry the
 cut and observable placeholders, so the transpiler is working on a circuit it cannot see
-all of. It therefore disallows :code:`remove_final_rzs` and :code:`optimize_single_qubits`
- and raises if you pass them. Given an
-experiment there are no placeholders left to, so it optimises further.
+all of. It therefore disallows :code:`remove_final_rzs` and
+:code:`optimize_single_qubits` and raises if you pass them. Given an experiment there are
+no placeholders left to, so it optimises further.
 
 Plain circuits are transpiled as they are, which is what a backend handed circuits rather
 than an experiment needs. See :doc:`examples/ParallelBackends`.
