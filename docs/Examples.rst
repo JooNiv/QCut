@@ -8,3 +8,4 @@ Examples on using QCut
    examples/WireCuts
    examples/GateCuts
    examples/AutomaticCuts
+   examples/ParallelBackends

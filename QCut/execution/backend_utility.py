@@ -7,7 +7,7 @@ from __future__ import annotations
 import logging
 from collections import defaultdict
 
-from qiskit import transpile
+from qiskit import QuantumCircuit, transpile
 from qiskit.circuit import Gate
 from qiskit.transpiler import PassManager, Target
 
@@ -421,7 +421,7 @@ def transpile_subcircuits(
 def transpile_experiments(
     cut_experiment: CutExperiment,
     backend,
-    optimization_level: int = 0,
+    optimization_level: int = 3,
     transpile_options: dict | None = None,
     use_iqm_transpiler: bool = True,
 ) -> CutExperiment:
@@ -455,49 +455,22 @@ def transpile_experiments(
     if not isinstance(cut_experiment, CutExperiment):
         raise ValueError("cut_experiment must be of type CutExperiment.")
 
-    iqm_transpile = _transpiler_for(backend, use_iqm_transpiler)
-
-    if iqm_transpile is not None:
-        options = {
-            "remove_final_rzs": False,
-            "perform_move_routing": is_resonator_backend(backend),
-            "optimization_level": optimization_level,
-        }
-        options.update(transpile_options or {})
-
-        def translate(circuit):
-            return _record_layout(
-                iqm_transpile(_drop_identities(circuit), backend, **options),
-                circuit.num_qubits,
-            )
-    else:
-        basis = sorted(
-            {
-                item[0].name
-                for item in backend._target.instructions
-                if isinstance(item[0].name, str)
-            }
+    translated = iter(
+        transpile_circuits(
+            [
+                circuit
+                for exps in cut_experiment.experiments
+                for exp in exps
+                for circuit in exp.values()
+            ],
+            backend,
+            optimization_level,
+            transpile_options,
+            use_iqm_transpiler,
         )
-
-        fallback_target = Target().from_configuration(
-            num_qubits=backend.num_qubits,
-            coupling_map=backend._coupling_map,
-            basis_gates=basis,
-        )
-
-        def translate(circuit):
-            return _record_layout(
-                transpile(
-                    circuit,
-                    target=fallback_target,
-                    optimization_level=optimization_level,
-                    **(transpile_options or {}),
-                ),
-                circuit.num_qubits,
-            )
-
+    )
     subexperiments = [
-        [{ind: translate(circ) for ind, circ in exp.items()} for exp in exps]
+        [{ind: next(translated) for ind in exp} for exp in exps]
         for exps in cut_experiment.experiments
     ]
 
@@ -516,3 +489,92 @@ def transpile_experiments(
         gamma=cut_experiment.gamma,
         optimal_gamma=cut_experiment.optimal_gamma,
     )
+
+
+def transpile_circuits(
+    circuits: CutCircuit | CutExperiment | list[QuantumCircuit],
+    backend,
+    optimization_level: int = 3,
+    transpile_options: dict | None = None,
+    use_iqm_transpiler: bool = True,
+):
+    """Transpile for a backend, whatever stage the circuits have reached.
+
+    A :class:`CutCircuit` goes to :func:`transpile_subcircuits`, which has placeholders
+    to protect, and a :class:`CutExperiment` to :func:`transpile_experiments`, which
+    does not. Plain circuits are transpiled as they are, which is what a backend given
+    circuits rather than an experiment needs -- see
+    :class:`~QCut.execution.parallel.ParallelBackend`.
+
+    Args:
+        circuits: a cut circuit, an experiment, or circuits with nothing left to hide.
+        backend: backend to transpile to.
+        optimization_level (int): optimization level for transpilation (0-3).
+        transpile_options (dict): arguments passed to the transpiler.
+        use_iqm_transpiler (bool): whether an IQM backend may use IQM's transpiler.
+
+    Returns:
+        The same kind of thing it was given, transpiled.
+    """
+    if isinstance(circuits, CutCircuit):
+        return transpile_subcircuits(
+            circuits,
+            backend,
+            optimization_level,
+            transpile_options,
+            use_iqm_transpiler,
+        )
+    if isinstance(circuits, CutExperiment):
+        return transpile_experiments(
+            circuits,
+            backend,
+            optimization_level,
+            transpile_options,
+            use_iqm_transpiler,
+        )
+
+    iqm_transpile = _transpiler_for(backend, use_iqm_transpiler)
+    if iqm_transpile is not None:
+        options = {
+            "remove_final_rzs": False,
+            "perform_move_routing": is_resonator_backend(backend),
+            "optimization_level": optimization_level,
+        }
+        options.update(transpile_options or {})
+        return [
+            _record_layout(
+                iqm_transpile(_drop_identities(circuit), backend, **options),
+                circuit.num_qubits,
+            )
+            for circuit in circuits
+        ]
+
+    # A simulator has no target to build one from, and needs none: it takes the
+    # circuits as they are, so it is handed itself instead.
+    target = None
+    if getattr(backend, "_target", None) is not None:
+        target = Target().from_configuration(
+            num_qubits=backend.num_qubits,
+            coupling_map=backend._coupling_map,
+            basis_gates=sorted(
+                {
+                    item[0].name
+                    for item in backend._target.instructions
+                    if isinstance(item[0].name, str)
+                }
+            ),
+        )
+
+    return [
+        _record_layout(
+            transpile(
+                circuit,
+                backend=None if target is not None else backend,
+                target=target,
+                optimization_level=optimization_level,
+                **(transpile_options or {}),
+            ),
+            circuit.num_qubits,
+        )
+        for circuit in circuits
+    ]

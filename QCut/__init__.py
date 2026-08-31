@@ -7,6 +7,7 @@ from QCut.cutting.circuit_preparation import (
 )
 from QCut.cutting.consolidate import consolidate_two_qubit_blocks
 from QCut.execution.backend_utility import (
+    transpile_circuits,
     transpile_experiments,
     transpile_subcircuits,
 )
@@ -19,6 +20,7 @@ from QCut.execution.circuit_knitting import (
     run_cut_circuit,
     run_experiments,
 )
+from QCut.execution.parallel import ParallelBackend
 from QCut.execution.postprocess import (
     estimate_expectation_values,
 )
@@ -39,6 +41,8 @@ finally:
     del version, PackageNotFoundError
 
 __all__ = [
+    "ParallelBackend",
+    "transpile_circuits",
     "transpile_experiments",
     "transpile_subcircuits",
     "estimate_expectation_values",

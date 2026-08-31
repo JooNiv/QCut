@@ -1,7 +1,8 @@
+import numpy as np
 from qiskit.quantum_info import SparsePauliOp
 from qiskit.result import QuasiDistribution
 
-from QCut.execution.postprocess import estimate_expectation_values
+from QCut.execution.postprocess import estimate_expectation_values, walsh_hadamard
 from QCut.execution.qcutresult import RawResult
 
 
@@ -125,45 +126,28 @@ def _all_z_paulis_for_subset(
     return SparsePauliOp(paulis[1:])
 
 
-def _gen_bitstrings(n):
-    """Generate all bitstrings of length n."""
-    return [format(i, f"0{n}b") for i in range(2**n)]
+def _reconstruct_probs(expvs, width: int) -> dict[str, float]:
+    """The distribution the expectation values describe.
 
+    The inverse Walsh-Hadamard transform of the expectation values, with the identity
+    carrying one. ``expvs`` is ordered so that entry ``i - 1`` is the Z string on the
+    qubits named by the set bits of ``i``, which is the indexing the transform reads.
 
-def _gen_subsets(n):
-    """Generate all subsets of a set of size n."""
-    subsets = []
-    for i in range(2**n):
-        subset = [j for j in range(n) if (i & (1 << j))]
-        subsets.append(subset)
-    return subsets
+    Args:
+        expvs (np.ndarray): the ``2**width - 1`` expectation values.
+        width (int): how many qubits were measured.
 
-
-def _map_expvs_to_subsets(expvs, subsets):
-    """Map expectation values to their corresponding subsets."""
-    expv_mapping = {(): 1.0}  # Initialize with the identity observable
-    subsets_no_empty = subsets[1:]  # Exclude the empty subset
-    for subset, expv in zip(subsets_no_empty, expvs):
-        expv_mapping[tuple(subset)] = expv
-    return expv_mapping
-
-
-def _parity_bits(bitstring, subset):
-    """Calculate the parity of a bitstring for a given subset of indices."""
-    bits = bitstring[::-1]
-    return sum(int(bits[i]) for i in subset) % 2
-
-
-def _reconstruct_probs(expv_subset_mapping, bits):
-    """Reconstruct the probabilities of each bitstring from the expectation values."""
-    probs = {}
-    for x in bits:
-        total = sum(
-            (-1) ** _parity_bits(x, subset) * expv
-            for subset, expv in expv_subset_mapping.items()
-        )
-        probs[x] = total / 2 ** len(bits[0])
-    return probs
+    Returns:
+        dict[str, float]: the quasi-probability of every bitstring.
+    """
+    coefficients = np.empty(1 << width)
+    coefficients[0] = 1.0
+    coefficients[1:] = expvs
+    spectrum = walsh_hadamard(coefficients) / (1 << width)
+    return {
+        format(outcome, f"0{width}b"): float(value)
+        for outcome, value in enumerate(spectrum)
+    }
 
 
 def estimate_probabilities(result: RawResult) -> QuasiProbabilities:
@@ -196,10 +180,6 @@ def estimate_probabilities(result: RawResult) -> QuasiProbabilities:
         )
 
     exps = estimate_expectation_values(result)
-    len_subset = len(result.experiment.qubits)
-    subsets = _gen_subsets(len_subset)
-    expv_mapping = _map_expvs_to_subsets(exps, subsets)
-    bits = _gen_bitstrings(len_subset)
     return QuasiProbabilities(
-        _reconstruct_probs(expv_mapping, bits), shots=result.shots
+        _reconstruct_probs(exps, len(result.experiment.qubits)), shots=result.shots
     )

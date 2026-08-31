@@ -208,6 +208,42 @@ class _CountingBackend:
         return self._backend.run(circuits, shots=shots, **options)
 
 
+class _RecordingSimulator(AerSimulator):
+    """A simulator that notes what each submission carried besides its circuits.
+
+    A plain stub would do, but the shorthands transpile for anything that is not an
+    ``AerSimulator``, and a stub has no target to transpile against.
+    """
+
+    def __init__(self):
+        super().__init__()
+        self.submitted = []
+
+    def run(self, circuits, shots=1024, **options):
+        self.submitted.append(options)
+        return super().run(circuits, shots=shots, **options)
+
+
+@pytest.mark.sim
+@pytest.mark.parametrize("shorthand", ["run", "run_cut_circuit"])
+def test_the_shorthands_pass_run_options_to_the_backend(shorthand):
+    """Whatever the backend takes beyond shots is only reachable through these."""
+    marked, _plain, observables = _wire_and_gate_cut()
+    target = marked if shorthand == "run" else ck.get_locations_and_subcircuits(marked)
+    backend = _RecordingSimulator()
+
+    getattr(ck, shorthand)(
+        target,
+        observables,
+        backend=backend,
+        shots=1024,
+        run_options={"seed_simulator": 7},
+    )
+
+    assert backend.submitted, "the backend was never called"
+    assert all(options["seed_simulator"] == 7 for options in backend.submitted)
+
+
 @pytest.mark.sim
 @pytest.mark.parametrize("max_batch_size", [100, 40])
 def test_a_plain_run_is_estimated_exactly(max_batch_size):

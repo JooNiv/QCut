@@ -74,7 +74,15 @@ def _finalize_subcircuit(
     layout = (subcircuit.metadata or {}).get("qcut_layout")
     if layout is None:
         layout = list(range(subcircuit.num_qubits))
-    meas_qubits = [wire for wire in layout if wire not in qpd_qubits]
+
+    # ``qcut_spent`` names the subcircuit's own qubits, which is what the observable
+    # register was sized against. ``qpd_qubits`` names the wires the placeholders sat
+    # on, and routing may have put two of them on one wire, so it cannot be counted.
+    spent = (subcircuit.metadata or {}).get("qcut_spent")
+    if spent is None:
+        meas_qubits = [wire for wire in layout if wire not in qpd_qubits]
+    else:
+        meas_qubits = [wire for qubit, wire in enumerate(layout) if qubit not in spent]
 
     dag = circuit_to_dag(subcircuit)
     idle = list(dag.idle_wires())
@@ -1212,6 +1220,7 @@ def run_cut_circuit(
     options: CutOptions | None = None,
     shots: int = DEFAULT_SHOTS,
     qubits: list[int] | None = None,
+    run_options: dict | None = None,
 ) -> np.ndarray | QuasiProbabilities:
     """After splitting the circuit run the rest of the circuit knitting sequence.
 
@@ -1228,6 +1237,8 @@ def run_cut_circuit(
             (optional)
         qubits (list[int]): the qubits to reconstruct a distribution over, instead of
             estimating observables (optional)
+        run_options (dict): passed on to the backend or sampler, as in
+            :func:`run_experiments` (optional)
 
         One of observables or qubits must be provided.
 
@@ -1258,6 +1269,7 @@ def run_cut_circuit(
         shots=shots,
         backend=backend,
         max_batch_size=max_batch_size,
+        run_options=run_options,
     )
 
     if qubits is not None:
@@ -1274,6 +1286,7 @@ def run(
     options: CutOptions | None = None,
     shots: int = DEFAULT_SHOTS,
     qubits: list[int] | None = None,
+    run_options: dict | None = None,
 ) -> np.ndarray | QuasiProbabilities:
     """Run the whole circuit knitting sequence with one function call.
 
@@ -1288,6 +1301,8 @@ def run(
             (optional)
         qubits (list[int]): the qubits to reconstruct a distribution over, instead of
             estimating observables (optional)
+        run_options (dict): passed on to the backend or sampler, as in
+            :func:`run_experiments` (optional)
 
         One of observables or qubits must be provided.
 
@@ -1303,5 +1318,11 @@ def run(
     cut_circuit = get_locations_and_subcircuits(circuit, options=options)
 
     return run_cut_circuit(
-        cut_circuit, observables, backend, max_batch_size, shots=shots, qubits=qubits
+        cut_circuit,
+        observables,
+        backend,
+        max_batch_size,
+        shots=shots,
+        qubits=qubits,
+        run_options=run_options,
     )

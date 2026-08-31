@@ -225,6 +225,24 @@ def _add_cbits(subcircuits):
     return subcircuits
 
 
+def _record_spent_qubits(subcircuits):
+    """Note which of each subcircuit's qubits end in a cut measurement.
+
+    That is what the observable register was sized against, so it is what the rest of
+    them have to be counted by. The wire a placeholder sits on will not do: routing is
+    free to reuse a wire once a cut has ended what was on it, and then two placeholders
+    share one wire and a qubit still to be measured looks like it is already spoken for.
+    """
+    for circ in subcircuits:
+        circ.metadata = dict(circ.metadata or {})
+        circ.metadata["qcut_spent"] = [
+            circ.find_bit(instruction.qubits[0]).index
+            for instruction in circ.data
+            if "Meas" in instruction.operation.name
+        ]
+    return subcircuits
+
+
 def get_qubit_map(subcircuits: list[QuantumCircuit]):
     def filter_obs_i(qc_data):
         return [i for i in qc_data if "obs" in i.operation.name]
@@ -303,7 +321,7 @@ def _split(
         fixed_circs = construct_final_subcircuits(fixed_circs, max_qubits)
 
     return CutCircuit(
-        fixed_circs,
+        _record_spent_qubits(fixed_circs),
         cut_locations,
         get_qubit_map(fixed_circs),
         uncut_num_qubits=working.num_qubits,

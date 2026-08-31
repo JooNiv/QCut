@@ -2,6 +2,25 @@
 Changelog
 =========
 
+**Version 2.1.3**
+=================
+
+- Reading results is orders of magnitude quicker. Each subcircuit is read once per group
+  rather than walking every combination of their outcomes, and observables sharing a
+  measurement setting are read together.
+- :code:`get_experiment_circuits()` no longer raises :code:`CircuitError: register size
+  error` on a transpiled subcircuit whose routing moved a qubit onto a wire a wire cut
+  had ended. The qubits left to measure are counted by qubit rather than by the wire
+  holding one.
+- :code:`run()` and :code:`run_cut_circuit()` take :code:`run_options` as well.
+- Added :code:`ParallelBackend`, which runs an experiment on several backends at once,
+  each batch transpiled for the one about to run it.
+  See `Running on several backends <https://jooniv.github.io/QCut/examples/ParallelBackends.html>`__.
+- Added :code:`transpile_circuits()`, which takes a :code:`CutCircuit`, a
+  :code:`CutExperiment` or plain circuits.
+- :code:`transpile_experiments()` defaults to :code:`optimization_level=3` rather than
+  :code:`0`, and no longer raises on a backend without a target, such as a simulator.
+
 **Version 2.1.2**
 =================
 

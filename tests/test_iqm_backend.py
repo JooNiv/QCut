@@ -572,6 +572,45 @@ def test_a_wide_block_can_survive_subcircuit_transpilation(backend, level):
     assert experiment.num_circuits <= build("never").num_circuits
 
 
+@pytest.mark.parametrize("backend", _direct_backends())
+@pytest.mark.parametrize("seed", [123, 126, 286])
+def test_routing_may_put_two_cuts_on_one_wire(backend, seed):
+    """The qubits left to measure are counted by qubit, not by the wire holding one.
+
+    A cut ends what was on its wire, and routing is free to move another qubit there
+    afterwards, so two placeholders can report the same wire. Counting wires then leaves
+    a qubit still to be measured looking like it is already spoken for, and the measure
+    is one bit short of its register. These seeds are three that did that.
+    """
+    marked, _plain, observables = _locc_pair()
+    cut_circuit = ck.get_locations_and_subcircuits(
+        marked, options=CutOptions(wire_cut_communication="never")
+    )
+    transpiled = ck.transpile_subcircuits(
+        cut_circuit,
+        backend,
+        optimization_level=0,
+        use_iqm_transpiler=False,
+        transpile_options={"seed_transpiler": seed},
+    )
+
+    experiment = ck.get_experiment_circuits(transpiled, observables)
+
+    for group in experiment.experiments:
+        for subcircuits in group:
+            for circuit in subcircuits.values():
+                meas = next(r for r in circuit.cregs if r.name == "meas")
+                written = {
+                    index
+                    for instruction in circuit.data
+                    if instruction.operation.name == "measure"
+                    for clbit in instruction.clbits
+                    for register, index in circuit.find_bit(clbit).registers
+                    if register.name == "meas"
+                }
+                assert written == set(range(meas.size))
+
+
 @pytest.mark.sim
 @pytest.mark.parametrize("option", sorted(_IQM_ENFORCED))
 def test_an_option_that_would_break_a_placeholder_is_refused(option):
