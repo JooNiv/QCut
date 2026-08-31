@@ -286,42 +286,38 @@ finder's own options and how it chooses.
 
 ## Transpilation
 
-Two helpers, differing in when they run:
+Two helpers, `transpile_subcircuits()` and `transpile_experiments()` , differing in when they run:
 
 ```python
 fake = IQMFakeAdonis() #noisy
 sim = AerSimulator() #ideal
 ```
 
-Each subcircuit once, before the experiment circuits are built:
+`transpile_circuits()` does whichever of the two the thing it is given calls for. Each
+subcircuit once, before the experiment circuits are built:
 
 ```python
-transpiled = ck.transpile_subcircuits(cut_circuit, fake, optimization_level=3)
+transpiled = ck.transpile_circuits(cut_circuit, fake, optimization_level=3)
 cut_experiment = ck.get_experiment_circuits(transpiled, observables)
 ```
 
 Or every experiment circuit, afterwards:
 
 ```python
-cut_experiment = ck.transpile_experiments(
+cut_experiment = ck.transpile_circuits(
     ck.get_experiment_circuits(cut_circuit, observables), fake, optimization_level=3
 )
 ```
 
-`transpile_subcircuits()` is much the faster of the two, but its subcircuits still carry
-the cut and observable placeholders, so the transpiler is working on a circuit it cannot
-see all of. It therefore holds `remove_final_rzs` and `optimize_single_qubits` off and
-raises if you pass them, because both move gates across a cut. `transpile_experiments()`
-has no placeholders left to protect and optimises further, so it is the one to use when
-depth matters more than transpilation time.
+Given a cut circuit it is much the faster of the two, but the subcircuits still carry the
+cut and observable placeholders, so the transpiler is working on a circuit it cannot see
+all of. On IQM backends It therefore disallows `remove_final_rzs` and `optimize_single_qubits` and raises. Given an experiment there are no
+placeholders left , so it optimises further.
 
 On an IQM backend both use IQM's own transpiler. Pass `use_iqm_transpiler=False` for the
 ordinary Qiskit path. On a resonator device such as `IQMFakeDeneb` the MOVE gates are
-routed in for you, and that path is required: Qiskit has no MOVE gate, so
-`use_iqm_transpiler=False` raises there. Note that Aer cannot execute a move-routed
-circuit, so run those on the device or on its fake backend. See
-[Basic usage](https://jooniv.github.io/QCut/Usage.html) for running against IQM fake
-backends and real hardware.
+routed in for you. See
+[Basic usage](https://jooniv.github.io/QCut/Usage.html) for running against IQM fake backends and real hardware.
 
 ## Execution
 
