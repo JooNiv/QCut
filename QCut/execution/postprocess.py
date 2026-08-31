@@ -6,7 +6,6 @@ provided observables.
 
 from __future__ import annotations
 
-from itertools import product
 from typing import Optional
 
 import numpy as np
@@ -98,107 +97,251 @@ def _process_results(
     return processed_results
 
 
-def _get_sub_expectation_values(
-    experiment_run: TotalResult,
-    observables: list,
-    map_qubits: Optional[dict[int, int]] = None,
-) -> np.ndarray:
-    """Calculate sub expectation value for the result.
+#: Widest set of measured qubits to read by transform. ``2**24`` weights is about
+#: 130 MB.
+MAX_TRANSFORM_QUBITS = 24
 
-    One subcircuit group's contribution: over every combination of the subcircuits'
-    end-of-circuit outcomes, the product of their probabilities times the observable's
-    eigenvalue times the sign the mid-circuit measurements carry.
+#: Read every Z string at once while the spectrum is at most this many times the number
+#: of observables asked for, and one at a time when they are sparser than that.
+MAX_TRANSFORM_SPREAD = 8
+
+
+def walsh_hadamard(values: np.ndarray) -> np.ndarray:
+    r"""The Walsh-Hadamard transform of ``values``, whose length must be a power of two.
+
+    Entry :math:`S` of the result is :math:`\sum_x (-1)^{|x \wedge S|} v_x`, the sum the
+    definitions below take over every subset. Doing them together costs
+    :math:`n 2^n` rather than :math:`4^n`.
 
     Args:
-        experiment_run (TotalResult): results of a subcircuit pair
-        observables (list[int | list[int]]):
-            list of observables as qubit indices (Z-observables)
+        values (np.ndarray): the vector to transform.
 
     Returns:
-        list:
-            list of sub expectation values
-
+        np.ndarray: the transform, in the same indexing.
     """
-    # generate all possible combinations between end of circuit measurements
-    # from subcircuit group
-    sub_circuit_result_combinations = product(*experiment_run.subcircuits[0])
+    transformed = np.asarray(values, dtype=float)
+    half = 1
+    while half < len(transformed):
+        pairs = transformed.reshape(-1, 2, half)
+        transformed = np.concatenate(
+            (pairs[:, 0] + pairs[:, 1], pairs[:, 0] - pairs[:, 1]), axis=1
+        ).reshape(-1)
+        half *= 2
+    return transformed
 
-    # initialize sub solution array
-    sub_expectation_value = np.zeros(len(observables))
 
-    for ind, circuit_result in enumerate(sub_circuit_result_combinations):
-        # loop through results
-        # concat results to one array and reverse to account for qiskit qubit ordering
-        full_result = np.concatenate(
-            [i.measurements[0] for i in reversed(circuit_result)]
+def _observables_by_setting(result_for_obs: list[dict]) -> dict[int, list[int]]:
+    """Observable indices grouped by the measurement setting that covers them."""
+    by_setting: dict[int, list[int]] = {}
+    for ind, obs_data in enumerate(result_for_obs):
+        by_setting.setdefault(obs_data["circuit_index"], []).append(ind)
+    return by_setting
+
+
+def _bit_layout(
+    subcircuits: list, positions: list[int], map_qubits: Optional[dict[int, int]]
+) -> list[tuple[list[int], list[int]]]:
+    """Which of ``positions`` each subcircuit holds, and where in its own outcome.
+
+    A position names a bit of the circuit-wide outcome, which is the subcircuits'
+    outcomes concatenated, permuted and reversed. Tracing indices through that gives
+    the same answer for every outcome, so it is worked out once.
+
+    Args:
+        subcircuits (list): one group's results, per subcircuit.
+        positions (list[int]): the measured qubits, one bit of the outcome each.
+        map_qubits (dict[int, int] | None): the permutation back to circuit order.
+
+    Returns:
+        list[tuple[list[int], list[int]]]: per subcircuit, which bits of the outcome it
+        carries and the index of each in that subcircuit's own measurements.
+    """
+    widths = [len(sub[0].measurements[0]) for sub in subcircuits]
+    starts = np.cumsum([0] + widths[:-1])
+    ids = np.concatenate([np.arange(s, s + w) for s, w in zip(starts, widths)][::-1])
+    if map_qubits is not None:
+        ids = np.array(
+            [ids[map_qubits[key]] for key in sorted(map_qubits.keys(), reverse=True)]
         )
+    ids = ids[::-1]
+    owner = np.concatenate([[s] * w for s, w in enumerate(widths)])
 
-        if full_result.size == 0:
-            raise ValueError("No measurement results found. This should not happen.")
+    layout = []
+    for index, start in enumerate(starts):
+        bits = [b for b, p in enumerate(positions) if owner[ids[p]] == index]
+        layout.append((bits, [ids[positions[b]] - start for b in bits]))
+    return layout
+
+
+def _outcome_spectrum(
+    results_processed: list,
+    experiment,
+    setting: int,
+    positions: list[int],
+    parity: int,
+) -> np.ndarray:
+    r"""For every Z string over ``positions``, the signed sum the estimator needs.
+
+    Entry :math:`S` is :math:`\sum_g c_g \sum_x w_x (-1)^{|x \wedge S|}`, over the
+    outcomes :math:`x` of group :math:`g` and the weight each carries.
+
+    A subcircuit's outcome fixes its own bits of :math:`x` only, and the weight is a
+    product over the subcircuits, so the sum factorises: each subcircuit is read on its
+    own and the transforms multiplied. Walking the outcomes jointly instead would cost
+    :math:`\prod_i m_i` for a group whose subcircuits reported :math:`m_i` outcomes
+    each, against :math:`\sum_i m_i` here, and :math:`m_i` grows with the shot count.
+
+    Args:
+        results_processed (list): processed results, one entry per group.
+        experiment (CutExperiment): the experiment the results came from.
+        setting (int): index of the measurement setting to read.
+        positions (list[int]): the measured qubits, one bit of the outcome each.
+        parity (int): the wire cut sign shared by every term.
+
+    Returns:
+        np.ndarray: ``2**len(positions)`` sums, indexed by Z string.
+    """
+    width = 1 << len(positions)
+    strings = np.arange(width)
+    spectrum = np.zeros(width)
+    spread: dict[tuple[int, ...], np.ndarray] = {}
+
+    for experiment_run, coefficient in zip(results_processed, experiment.coefficients):
+        subcircuits = experiment_run[setting].subcircuits[0]
+        if any(len(sub) == 0 for sub in subcircuits):
             continue
 
-        if map_qubits is not None:
-            sorted_full_result = np.array(
-                [
-                    full_result[map_qubits[key]]
-                    for key in sorted(map_qubits.keys(), reverse=True)
-                ]
+        group = np.full(width, float(parity * coefficient))
+        layout = _bit_layout(subcircuits, positions, experiment.map_qubit)
+        for sub, (bits, offsets) in zip(subcircuits, layout):
+            weights = np.zeros(1 << len(bits))
+            for res in sub:
+                outcome = 0
+                for bit, offset in enumerate(offsets):
+                    if res.measurements[0][offset] < 0:
+                        outcome |= 1 << bit
+                weights[outcome] += res.count * np.prod(res.measurements[1])
+
+            key = tuple(bits)
+            if key not in spread:
+                picked = np.zeros_like(strings)
+                for bit, position in enumerate(key):
+                    picked |= ((strings >> position) & 1) << bit
+                spread[key] = picked
+            group *= walsh_hadamard(weights)[spread[key]]
+        spectrum += group
+
+    return spectrum
+
+
+def _expectation_values_by_transform(
+    results_processed: list,
+    experiment,
+    setting: int,
+    positions: list[int],
+    observables: list[list[int]],
+    parity: int,
+) -> np.ndarray:
+    """Every observable of one measurement setting, from a single pass over the results.
+
+    Args:
+        results_processed (list): processed results, one entry per group.
+        experiment (CutExperiment): the experiment the results came from.
+        setting (int): index of the measurement setting to read.
+        positions (list[int]): the measured qubits covered by these observables.
+        observables (list[list[int]]): each observable as the qubits it acts on.
+        parity (int): the wire cut sign shared by every term.
+
+    Returns:
+        np.ndarray: one expectation value per entry of ``observables``.
+    """
+    spectrum = _outcome_spectrum(
+        results_processed, experiment, setting, positions, parity
+    )
+    bit_of = {position: bit for bit, position in enumerate(positions)}
+    masks = [sum(1 << bit_of[q] for q in obs) for obs in observables]
+    signs = np.array([(-1) ** (len(obs) + 1) for obs in observables])
+    return spectrum[masks] * signs
+
+
+def _expectation_values_by_factors(
+    results_processed: list,
+    experiment,
+    setting: int,
+    positions: list[int],
+    observables: list[list[int]],
+    parity: int,
+) -> np.ndarray:
+    """The same, for observables spanning too many qubits to hold every Z string.
+
+    Each subcircuit is still read once per group rather than walking the product of
+    their outcomes, but the observables are taken one at a time, so nothing of size
+    ``2**len(positions)`` is built. A subcircuit holding none of an observable's qubits
+    still contributes its own weight, which is what the identity entry of the transform
+    is in the other path.
+
+    Args:
+        results_processed (list): processed results, one entry per group.
+        experiment (CutExperiment): the experiment the results came from.
+        setting (int): index of the measurement setting to read.
+        positions (list[int]): the measured qubits covered by these observables.
+        observables (list[list[int]]): each observable as the qubits it acts on.
+        parity (int): the wire cut sign shared by every term.
+
+    Returns:
+        np.ndarray: one expectation value per entry of ``observables``.
+    """
+    values = np.zeros(len(observables))
+    bit_of = {position: bit for bit, position in enumerate(positions)}
+
+    for experiment_run, coefficient in zip(results_processed, experiment.coefficients):
+        subcircuits = experiment_run[setting].subcircuits[0]
+        if any(len(sub) == 0 for sub in subcircuits):
+            continue
+
+        group = np.full(len(observables), float(parity * coefficient))
+        layout = _bit_layout(subcircuits, positions, experiment.map_qubit)
+        for sub, (bits, offsets) in zip(subcircuits, layout):
+            eigenvalues = np.array([res.measurements[0] for res in sub])
+            weights = np.array(
+                [res.count * np.prod(res.measurements[1]) for res in sub]
             )
-        else:
-            sorted_full_result = full_result
+            offset_of = dict(zip(bits, offsets))
+            for ind, obs in enumerate(observables):
+                held = [offset_of[bit_of[q]] for q in obs if bit_of[q] in offset_of]
+                group[ind] *= weights @ (
+                    np.prod(eigenvalues[:, held], axis=1)
+                    if held
+                    else np.ones(len(weights))
+                )
+        values += group
 
-        sorted_full_result = list(reversed(sorted_full_result))
-
-        qpd_measurement_coefficient = 1  # initial value for qpd
-        probability = 1.0  # joint probability of this combination of outcomes
-        for res in circuit_result:
-            probability *= res.count  # already a probability, see _process_results
-            qpd_measurement_coefficient *= np.prod(res.measurements[1])
-        observable_results = np.empty(len(observables))  # initialize empty array
-        # for observables
-        for count, obs in enumerate(observables):  # populate observable array
-            if isinstance(obs, int):
-                observable_results[count] = sorted_full_result[obs]  # if single qubit
-            # observable just save
-            # to array
-            else:  # if multi qubit observable
-                multi_qubit_observable_eigenvalue = 1  # initial eigenvalue
-                for sub_observables in obs:  # multi qubit observable
-                    multi_qubit_observable_eigenvalue *= sorted_full_result[
-                        sub_observables
-                    ]
-                    observable_results[count] = (
-                        np.power(-1, len(obs) + 1) * multi_qubit_observable_eigenvalue
-                    )
-
-        observable_expectation_value = (
-            qpd_measurement_coefficient * observable_results * probability
-        )
-        sub_expectation_value += observable_expectation_value
-
-    return sub_expectation_value
+    return values * np.array([(-1) ** (len(obs) + 1) for obs in observables])
 
 
 def estimate_expectation_values(results: RawResult) -> np.ndarray:
     r"""Calculate the estimated expectation values.
 
-    Loop through processed results. For each result group generate all products of
-    different measurements from different subcircuits of the group. For each result
-    from qpd measurements calculate qpd coefficient and from counts calculate weight.
     The estimate is the quasiprobability sum itself,
 
     .. math::
 
         \langle O \rangle = (-1)^{w+1} \sum_g c_g E_g
 
-    over the subcircuit groups, where :math:`c_g` is the group's coefficient,
-    :math:`E_g` is what :func:`_get_sub_expectation_values` returns for it, and
-    :math:`w` counts the wire cuts. That parity is the qpd register's sign convention:
-    every one of its bits maps 0 to -1, so an unwritten bit contributes -1 and only the
-    number allocated per subcircuit survives.
+    over the subcircuit groups, where :math:`c_g` is the group's coefficient, :math:`w`
+    counts the wire cuts and :math:`E_g` is the group's own estimate: over the outcomes
+    of its subcircuits, the product of their probabilities times the observable's
+    eigenvalue times the sign the mid-circuit measurements carry. The parity is the qpd
+    register's sign convention: every one of its bits maps 0 to -1, so an unwritten bit
+    contributes -1 and only the number allocated per subcircuit survives.
 
     Multi-qubit observables pick up a further :math:`(-1)^{m+1}` for their :math:`m`
-    qubits, applied while their eigenvalues are multiplied together.
+    qubits.
+
+    :math:`E_g` factorises over the subcircuits, so each is read once per group rather
+    than walking the product of their outcomes, and the observables sharing a
+    measurement setting are read together rather than one pass each. See
+    :func:`_outcome_spectrum`.
 
     Args:
         results (RawResult): raw results from experiment circuits, carrying the
@@ -236,27 +379,30 @@ def estimate_expectation_values(results: RawResult) -> np.ndarray:
 
     expectation_values = np.zeros(len(experiment.observables))
 
-    for ind, obs_data in enumerate(result_for_obs):
+    for obs_data in result_for_obs:
         if obs_data["circuit_index"] is None:
-            raise ValueError("""Observable cannot be measured 
+            raise ValueError("""Observable cannot be measured
                              with given measurement settings.""")
 
-        for experiment_run, coefficient in zip(
-            results_processed, experiment.coefficients
-        ):
-            cur_obs = (
-                obs_data["obs_indices"]
-                if len(obs_data["obs_indices"]) == 1
-                else [obs_data["obs_indices"]]
-            )
-            expectation_values[ind] += (
-                parity
-                * coefficient
-                * _get_sub_expectation_values(
-                    experiment_run[obs_data["circuit_index"]],
-                    cur_obs,
-                    experiment.map_qubit,
-                )
-            )[0]
+    for setting, indices in _observables_by_setting(result_for_obs).items():
+        positions = sorted(
+            {q for ind in indices for q in result_for_obs[ind]["obs_indices"]}
+        )
+        together = len(positions) <= MAX_TRANSFORM_QUBITS and (
+            1 << len(positions)
+        ) <= MAX_TRANSFORM_SPREAD * len(indices)
+        read = (
+            _expectation_values_by_transform
+            if together
+            else _expectation_values_by_factors
+        )
+        expectation_values[indices] = read(
+            results_processed,
+            experiment,
+            setting,
+            positions,
+            [result_for_obs[ind]["obs_indices"] for ind in indices],
+            parity,
+        )
 
     return expectation_values
