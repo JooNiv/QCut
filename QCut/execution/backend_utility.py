@@ -550,30 +550,28 @@ def transpile_circuits(
         ]
 
     # A simulator has no target to build one from, and needs none: it takes the
-    # circuits as they are.
-    if getattr(backend, "_target", None) is None:
-        against = {"backend": backend}
-    else:
-        against = {
-            "target": Target().from_configuration(
-                num_qubits=backend.num_qubits,
-                coupling_map=backend._coupling_map,
-                basis_gates=sorted(
-                    {
-                        item[0].name
-                        for item in backend._target.instructions
-                        if isinstance(item[0].name, str)
-                    }
-                ),
-            )
-        }
+    # circuits as they are, so it is handed itself instead.
+    target = None
+    if getattr(backend, "_target", None) is not None:
+        target = Target().from_configuration(
+            num_qubits=backend.num_qubits,
+            coupling_map=backend._coupling_map,
+            basis_gates=sorted(
+                {
+                    item[0].name
+                    for item in backend._target.instructions
+                    if isinstance(item[0].name, str)
+                }
+            ),
+        )
 
     return [
         _record_layout(
             transpile(
                 circuit,
+                backend=None if target is not None else backend,
+                target=target,
                 optimization_level=optimization_level,
-                **against,
                 **(transpile_options or {}),
             ),
             circuit.num_qubits,
