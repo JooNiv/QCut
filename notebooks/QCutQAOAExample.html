@@ -42,7 +42,7 @@
 
     <script src="../_static/jquery.js?v=5d32c60e"></script>
     <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-    <script src="../_static/documentation_options.js?v=92559dd8"></script>
+    <script src="../_static/documentation_options.js?v=a96e8d77"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/sphinx-book-theme.js?v=fab101a9"></script>
@@ -54,7 +54,7 @@
     <link rel="prev" title="QCut Basic Usage" href="QCutBasicUsage.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="2.1.2.post1.dev1+gf7dbb69ec" />
+  <meta name="docsearch:version" content="2.1.2.post1.dev2+g2ff913a2c" />
   </head>
   
   
@@ -155,6 +155,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../examples/WireCuts.html">Wire cuts</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../examples/GateCuts.html">Gate cuts</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../examples/AutomaticCuts.html">Automatic cuts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples/ParallelBackends.html">Running on several backends</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="../Notebooks.html">Notebooks</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
@@ -364,7 +365,7 @@
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/8bbc771f3d6683dedb0cb165171c660e84de981a05fbbec19bf7b9a427ea9264.png" src="../_images/8bbc771f3d6683dedb0cb165171c660e84de981a05fbbec19bf7b9a427ea9264.png" />
+<img alt="../_images/c8f6c57c26f9d99c3e9c69d1b590666f43ea475d701306f2cadf2decb327bc5c.png" src="../_images/c8f6c57c26f9d99c3e9c69d1b590666f43ea475d701306f2cadf2decb327bc5c.png" />
 </div>
 </div>
 <div class="cell docutils container">
@@ -467,7 +468,7 @@
 
 <span class="n">cut_circuit</span> <span class="o">=</span> <span class="n">ck</span><span class="o">.</span><span class="n">get_locations_and_subcircuits</span><span class="p">(</span><span class="n">qca</span><span class="p">)</span>
 
-<span class="n">transpiled</span> <span class="o">=</span> <span class="n">ck</span><span class="o">.</span><span class="n">transpile_subcircuits</span><span class="p">(</span><span class="n">cut_circuit</span><span class="p">,</span> <span class="n">backend</span><span class="p">,</span> <span class="n">optimization_level</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">transpiled</span> <span class="o">=</span> <span class="n">ck</span><span class="o">.</span><span class="n">transpile_circuits</span><span class="p">(</span><span class="n">cut_circuit</span><span class="p">,</span> <span class="n">backend</span><span class="p">,</span> <span class="n">optimization_level</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
 
 <span class="n">cut_experiment</span> <span class="o">=</span> <span class="n">ck</span><span class="o">.</span><span class="n">get_experiment_circuits</span><span class="p">(</span><span class="n">transpiled</span><span class="p">,</span> <span class="n">observables</span><span class="p">)</span>
 
@@ -565,9 +566,9 @@
 <div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> message: Return from COBYLA because the trust region radius reaches its lower bound.
  success: True
   status: 0
-     fun: -1.8701171875
-       x: [ 3.446e+00 -3.451e+00]
-    nfev: 36
+     fun: -1.8798828125
+       x: [ 3.467e+00 -1.853e+00]
+    nfev: 32
    maxcv: 0.0
 </pre></div>
 </div>
@@ -590,9 +591,9 @@
 <div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> message: Return from COBYLA because the trust region radius reaches its lower bound.
  success: True
   status: 0
-     fun: -1.8534711599349976
-       x: [-3.484e-01 -2.792e+00]
-    nfev: 36
+     fun: -1.8325386047363281
+       x: [ 2.780e+00 -2.894e+00]
+    nfev: 31
    maxcv: 0.0
 </pre></div>
 </div>
@@ -614,7 +615,7 @@
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/abdfd1427fda0fba1b27ece0c5bca13f725942ac136ca16bc38dc6ee6e3a2e87.png" src="../_images/abdfd1427fda0fba1b27ece0c5bca13f725942ac136ca16bc38dc6ee6e3a2e87.png" />
+<img alt="../_images/18b42a8bb61c951b66fc65c4a0a255205f73d3c8fb1d46b2b71ca1f65208e1f8.png" src="../_images/18b42a8bb61c951b66fc65c4a0a255205f73d3c8fb1d46b2b71ca1f65208e1f8.png" />
 </div>
 </div>
 <div class="cell docutils container">
@@ -633,7 +634,7 @@
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/4a1b37185533cfdff0c0b694cedea2f1e7b70044e7793df03a59af6e95da65dd.png" src="../_images/4a1b37185533cfdff0c0b694cedea2f1e7b70044e7793df03a59af6e95da65dd.png" />
+<img alt="../_images/97dd2a15e2b472f44ebe9c0350cf548b3b3209d924e7113e163801f5b72e2f34.png" src="../_images/97dd2a15e2b472f44ebe9c0350cf548b3b3209d924e7113e163801f5b72e2f34.png" />
 </div>
 </div>
 <div class="cell docutils container">
@@ -650,7 +651,7 @@
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/cd8fe9d5eeb14c5069e0bba4e5b429050f39d4fd0d447a9218ae7457f2e1c9e4.png" src="../_images/cd8fe9d5eeb14c5069e0bba4e5b429050f39d4fd0d447a9218ae7457f2e1c9e4.png" />
+<img alt="../_images/87760cfe5b805926146187e0fb8c7dcde37d1ce67f850989bc37328507ffc6f4.png" src="../_images/87760cfe5b805926146187e0fb8c7dcde37d1ce67f850989bc37328507ffc6f4.png" />
 </div>
 </div>
 <div class="cell docutils container">
@@ -669,7 +670,7 @@
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/efdb0f9fa2152b89e1a659d4b25ef33bf90443a89c8cb679aedf081d2e50befa.png" src="../_images/efdb0f9fa2152b89e1a659d4b25ef33bf90443a89c8cb679aedf081d2e50befa.png" />
+<img alt="../_images/89bff3a07e682ced70dea1c674846a7168525dadb6fb810f9db7157d3d8a35f4.png" src="../_images/89bff3a07e682ced70dea1c674846a7168525dadb6fb810f9db7157d3d8a35f4.png" />
 </div>
 </div>
 <p>Only solution states have a high probability in both the cut and uncut cases</p>

@@ -42,7 +42,7 @@
 
     <script src="_static/jquery.js?v=5d32c60e"></script>
     <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-    <script src="_static/documentation_options.js?v=92559dd8"></script>
+    <script src="_static/documentation_options.js?v=a96e8d77"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/scripts/sphinx-book-theme.js?v=fab101a9"></script>
@@ -54,7 +54,7 @@
     <link rel="prev" title="QCut documentation" href="index.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="2.1.2.post1.dev1+gf7dbb69ec" />
+  <meta name="docsearch:version" content="2.1.2.post1.dev2+g2ff913a2c" />
   </head>
   
   
@@ -155,6 +155,7 @@
 <li class="toctree-l2"><a class="reference internal" href="examples/WireCuts.html">Wire cuts</a></li>
 <li class="toctree-l2"><a class="reference internal" href="examples/GateCuts.html">Gate cuts</a></li>
 <li class="toctree-l2"><a class="reference internal" href="examples/AutomaticCuts.html">Automatic cuts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/ParallelBackends.html">Running on several backends</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="Notebooks.html">Notebooks</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -545,34 +546,33 @@ chooses.</p>
 </section>
 <section id="transpilation">
 <h2>Transpilation<a class="headerlink" href="#transpilation" title="Link to this heading">#</a></h2>
-<p>Two helpers, differing in when they run:</p>
+<p>Two helpers, <code class="code docutils literal notranslate"><span class="pre">transpile_subcircuits()</span></code> and <code class="code docutils literal notranslate"><span class="pre">transpile_circuits()</span></code>, differing in when they run:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">fake</span> <span class="o">=</span> <span class="n">IQMFakeAdonis</span><span class="p">()</span> <span class="c1">#noisy</span>
 <span class="n">sim</span> <span class="o">=</span> <span class="n">AerSimulator</span><span class="p">()</span> <span class="c1">#ideal</span>
 </pre></div>
 </div>
-<p>Each subcircuit once, before the experiment circuits are built:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">transpiled</span> <span class="o">=</span> <span class="n">ck</span><span class="o">.</span><span class="n">transpile_subcircuits</span><span class="p">(</span><span class="n">cut_circuit</span><span class="p">,</span> <span class="n">fake</span><span class="p">,</span> <span class="n">optimization_level</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<p><code class="code docutils literal notranslate"><span class="pre">transpile_circuits()</span></code> does whichever of the two the thing it is given calls for.
+Each subcircuit once, before the experiment circuits are built:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">transpiled</span> <span class="o">=</span> <span class="n">ck</span><span class="o">.</span><span class="n">transpile_circuits</span><span class="p">(</span><span class="n">cut_circuit</span><span class="p">,</span> <span class="n">fake</span><span class="p">,</span> <span class="n">optimization_level</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
 <span class="n">cut_experiment</span> <span class="o">=</span> <span class="n">ck</span><span class="o">.</span><span class="n">get_experiment_circuits</span><span class="p">(</span><span class="n">transpiled</span><span class="p">,</span> <span class="n">observables</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Or every experiment circuit, afterwards:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cut_experiment</span> <span class="o">=</span> <span class="n">ck</span><span class="o">.</span><span class="n">transpile_experiments</span><span class="p">(</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cut_experiment</span> <span class="o">=</span> <span class="n">ck</span><span class="o">.</span><span class="n">transpile_circuits</span><span class="p">(</span>
     <span class="n">ck</span><span class="o">.</span><span class="n">get_experiment_circuits</span><span class="p">(</span><span class="n">cut_circuit</span><span class="p">,</span> <span class="n">observables</span><span class="p">),</span> <span class="n">fake</span><span class="p">,</span> <span class="n">optimization_level</span><span class="o">=</span><span class="mi">3</span>
 <span class="p">)</span>
 </pre></div>
 </div>
-<p><code class="code docutils literal notranslate"><span class="pre">transpile_subcircuits()</span></code> is much the faster of the two, but its subcircuits still
-carry the cut and observable placeholders, so the transpiler is working on a circuit it
-cannot see all of. It therefore holds <code class="code docutils literal notranslate"><span class="pre">remove_final_rzs</span></code> and
-<code class="code docutils literal notranslate"><span class="pre">optimize_single_qubits</span></code> off and raises if you pass them, because both move gates
-across a cut. <code class="code docutils literal notranslate"><span class="pre">transpile_experiments()</span></code> has no placeholders left to protect and
-optimises further, so it is the one to use when depth matters more than transpilation
-time.</p>
+<p>Given a cut circuit it is much the faster of the two, but the subcircuits still carry the
+cut and observable placeholders, so the transpiler is working on a circuit it cannot see
+all of. It therefore disallows <code class="code docutils literal notranslate"><span class="pre">remove_final_rzs</span></code> and
+<code class="code docutils literal notranslate"><span class="pre">optimize_single_qubits</span></code> and raises if you pass them. Given an experiment there are
+no placeholders left to, so it optimises further.</p>
+<p>Plain circuits are transpiled as they are, which is what a backend handed circuits rather
+than an experiment needs. See <a class="reference internal" href="examples/ParallelBackends.html"><span class="doc">Running on several backends</span></a>.</p>
 <p>On an IQM backend both use IQM’s own transpiler. Pass <code class="code docutils literal notranslate"><span class="pre">use_iqm_transpiler=False</span></code>
 for the ordinary Qiskit path. On a resonator device such as <code class="code docutils literal notranslate"><span class="pre">IQMFakeDeneb</span></code> the MOVE
-gates are routed in for you, and that path is required: Qiskit has no MOVE gate, so
-<code class="code docutils literal notranslate"><span class="pre">use_iqm_transpiler=False</span></code> raises there. Note that Aer cannot execute a move-routed
-circuit, so run those on the device or on its fake backend.</p>
+gates are routed in for you.</p>
 </section>
 <section id="execution">
 <h2>Execution<a class="headerlink" href="#execution" title="Link to this heading">#</a></h2>

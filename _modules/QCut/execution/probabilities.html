@@ -41,7 +41,7 @@
 
     <script src="../../../_static/jquery.js?v=5d32c60e"></script>
     <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-    <script src="../../../_static/documentation_options.js?v=92559dd8"></script>
+    <script src="../../../_static/documentation_options.js?v=a96e8d77"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/scripts/sphinx-book-theme.js?v=fab101a9"></script>
@@ -51,7 +51,7 @@
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="2.1.2.post1.dev1+gf7dbb69ec" />
+  <meta name="docsearch:version" content="2.1.2.post1.dev2+g2ff913a2c" />
   </head>
   
   
@@ -154,6 +154,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../examples/WireCuts.html">Wire cuts</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../examples/GateCuts.html">Gate cuts</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../examples/AutomaticCuts.html">Automatic cuts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../examples/ParallelBackends.html">Running on several backends</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../Notebooks.html">Notebooks</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -280,10 +281,11 @@
                 <article class="bd-article">
                   
   <h1>Source code for QCut.execution.probabilities</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit.quantum_info</span><span class="w"> </span><span class="kn">import</span> <span class="n">SparsePauliOp</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit.quantum_info</span><span class="w"> </span><span class="kn">import</span> <span class="n">SparsePauliOp</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">qiskit.result</span><span class="w"> </span><span class="kn">import</span> <span class="n">QuasiDistribution</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">QCut.execution.postprocess</span><span class="w"> </span><span class="kn">import</span> <span class="n">estimate_expectation_values</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">QCut.execution.postprocess</span><span class="w"> </span><span class="kn">import</span> <span class="n">estimate_expectation_values</span><span class="p">,</span> <span class="n">walsh_hadamard</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">QCut.execution.qcutresult</span><span class="w"> </span><span class="kn">import</span> <span class="n">RawResult</span>
 
 
@@ -422,45 +424,28 @@
     <span class="k">return</span> <span class="n">SparsePauliOp</span><span class="p">(</span><span class="n">paulis</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_gen_bitstrings</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate all bitstrings of length n.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="p">[</span><span class="nb">format</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;0</span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s2">b&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="n">n</span><span class="p">)]</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_reconstruct_probs</span><span class="p">(</span><span class="n">expvs</span><span class="p">,</span> <span class="n">width</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The distribution the expectation values describe.</span>
 
+<span class="sd">    The inverse Walsh-Hadamard transform of the expectation values, with the identity</span>
+<span class="sd">    carrying one. ``expvs`` is ordered so that entry ``i - 1`` is the Z string on the</span>
+<span class="sd">    qubits named by the set bits of ``i``, which is the indexing the transform reads.</span>
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_gen_subsets</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate all subsets of a set of size n.&quot;&quot;&quot;</span>
-    <span class="n">subsets</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="n">n</span><span class="p">):</span>
-        <span class="n">subset</span> <span class="o">=</span> <span class="p">[</span><span class="n">j</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="o">&amp;</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">j</span><span class="p">))]</span>
-        <span class="n">subsets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">subset</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">subsets</span>
+<span class="sd">    Args:</span>
+<span class="sd">        expvs (np.ndarray): the ``2**width - 1`` expectation values.</span>
+<span class="sd">        width (int): how many qubits were measured.</span>
 
-
-<span class="k">def</span><span class="w"> </span><span class="nf">_map_expvs_to_subsets</span><span class="p">(</span><span class="n">expvs</span><span class="p">,</span> <span class="n">subsets</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Map expectation values to their corresponding subsets.&quot;&quot;&quot;</span>
-    <span class="n">expv_mapping</span> <span class="o">=</span> <span class="p">{():</span> <span class="mf">1.0</span><span class="p">}</span>  <span class="c1"># Initialize with the identity observable</span>
-    <span class="n">subsets_no_empty</span> <span class="o">=</span> <span class="n">subsets</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>  <span class="c1"># Exclude the empty subset</span>
-    <span class="k">for</span> <span class="n">subset</span><span class="p">,</span> <span class="n">expv</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">subsets_no_empty</span><span class="p">,</span> <span class="n">expvs</span><span class="p">):</span>
-        <span class="n">expv_mapping</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">subset</span><span class="p">)]</span> <span class="o">=</span> <span class="n">expv</span>
-    <span class="k">return</span> <span class="n">expv_mapping</span>
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">_parity_bits</span><span class="p">(</span><span class="n">bitstring</span><span class="p">,</span> <span class="n">subset</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the parity of a bitstring for a given subset of indices.&quot;&quot;&quot;</span>
-    <span class="n">bits</span> <span class="o">=</span> <span class="n">bitstring</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-    <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">bits</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">subset</span><span class="p">)</span> <span class="o">%</span> <span class="mi">2</span>
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">_reconstruct_probs</span><span class="p">(</span><span class="n">expv_subset_mapping</span><span class="p">,</span> <span class="n">bits</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Reconstruct the probabilities of each bitstring from the expectation values.&quot;&quot;&quot;</span>
-    <span class="n">probs</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">bits</span><span class="p">:</span>
-        <span class="n">total</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span>
-            <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">**</span> <span class="n">_parity_bits</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">subset</span><span class="p">)</span> <span class="o">*</span> <span class="n">expv</span>
-            <span class="k">for</span> <span class="n">subset</span><span class="p">,</span> <span class="n">expv</span> <span class="ow">in</span> <span class="n">expv_subset_mapping</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
-        <span class="p">)</span>
-        <span class="n">probs</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="o">=</span> <span class="n">total</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">**</span> <span class="nb">len</span><span class="p">(</span><span class="n">bits</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-    <span class="k">return</span> <span class="n">probs</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        dict[str, float]: the quasi-probability of every bitstring.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">coefficients</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">width</span><span class="p">)</span>
+    <span class="n">coefficients</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
+    <span class="n">coefficients</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">=</span> <span class="n">expvs</span>
+    <span class="n">spectrum</span> <span class="o">=</span> <span class="n">walsh_hadamard</span><span class="p">(</span><span class="n">coefficients</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">width</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="nb">format</span><span class="p">(</span><span class="n">outcome</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;0</span><span class="si">{</span><span class="n">width</span><span class="si">}</span><span class="s2">b&quot;</span><span class="p">):</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">outcome</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">spectrum</span><span class="p">)</span>
+    <span class="p">}</span>
 
 
 <div class="viewcode-block" id="estimate_probabilities">
@@ -495,12 +480,8 @@
         <span class="p">)</span>
 
     <span class="n">exps</span> <span class="o">=</span> <span class="n">estimate_expectation_values</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
-    <span class="n">len_subset</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">qubits</span><span class="p">)</span>
-    <span class="n">subsets</span> <span class="o">=</span> <span class="n">_gen_subsets</span><span class="p">(</span><span class="n">len_subset</span><span class="p">)</span>
-    <span class="n">expv_mapping</span> <span class="o">=</span> <span class="n">_map_expvs_to_subsets</span><span class="p">(</span><span class="n">exps</span><span class="p">,</span> <span class="n">subsets</span><span class="p">)</span>
-    <span class="n">bits</span> <span class="o">=</span> <span class="n">_gen_bitstrings</span><span class="p">(</span><span class="n">len_subset</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">QuasiProbabilities</span><span class="p">(</span>
-        <span class="n">_reconstruct_probs</span><span class="p">(</span><span class="n">expv_mapping</span><span class="p">,</span> <span class="n">bits</span><span class="p">),</span> <span class="n">shots</span><span class="o">=</span><span class="n">result</span><span class="o">.</span><span class="n">shots</span>
+        <span class="n">_reconstruct_probs</span><span class="p">(</span><span class="n">exps</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">qubits</span><span class="p">)),</span> <span class="n">shots</span><span class="o">=</span><span class="n">result</span><span class="o">.</span><span class="n">shots</span>
     <span class="p">)</span></div>
 
 </pre></div>

@@ -41,7 +41,7 @@
 
     <script src="_static/jquery.js?v=5d32c60e"></script>
     <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-    <script src="_static/documentation_options.js?v=92559dd8"></script>
+    <script src="_static/documentation_options.js?v=a96e8d77"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/scripts/sphinx-book-theme.js?v=fab101a9"></script>
@@ -51,7 +51,7 @@
     <link rel="search" title="Search" href="search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="2.1.2.post1.dev1+gf7dbb69ec" />
+  <meta name="docsearch:version" content="2.1.2.post1.dev2+g2ff913a2c" />
   </head>
   
   
@@ -154,6 +154,7 @@
 <li class="toctree-l2"><a class="reference internal" href="examples/WireCuts.html">Wire cuts</a></li>
 <li class="toctree-l2"><a class="reference internal" href="examples/GateCuts.html">Gate cuts</a></li>
 <li class="toctree-l2"><a class="reference internal" href="examples/AutomaticCuts.html">Automatic cuts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/ParallelBackends.html">Running on several backends</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="Notebooks.html">Notebooks</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -294,6 +295,7 @@
  | <a href="#L"><strong>L</strong></a>
  | <a href="#M"><strong>M</strong></a>
  | <a href="#N"><strong>N</strong></a>
+ | <a href="#P"><strong>P</strong></a>
  | <a href="#Q"><strong>Q</strong></a>
  | <a href="#R"><strong>R</strong></a>
  | <a href="#S"><strong>S</strong></a>
@@ -311,6 +313,8 @@
 </li>
         <li><a href="_autosummary/QCut.html#QCut.JobEstimate.__init__">(QCut.JobEstimate method)</a>
 </li>
+        <li><a href="_autosummary/QCut.html#QCut.ParallelBackend.__init__">(QCut.ParallelBackend method)</a>
+</li>
         <li><a href="_autosummary/QCut.html#QCut.QuasiProbabilities.__init__">(QCut.QuasiProbabilities method)</a>
 </li>
         <li><a href="_autosummary/QCut.html#QCut.RawResult.__init__">(QCut.RawResult method)</a>
@@ -323,6 +327,10 @@
 
 <h2 id="B">B</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/QCut.html#QCut.ParallelBackend.backends">backends (QCut.ParallelBackend attribute)</a>
+</li>
+  </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="_autosummary/QCut.html#QCut.RunEstimate.breakdown">breakdown (QCut.RunEstimate attribute)</a>
 </li>
@@ -456,6 +464,8 @@
 </li>
       <li><a href="_autosummary/QCut.html#QCut.CutOptions.max_qubits">max_qubits (QCut.CutOptions property)</a>
 </li>
+      <li><a href="_autosummary/QCut.html#QCut.ParallelBackend.max_shots">max_shots (QCut.ParallelBackend property)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="_autosummary/QCut.html#QCut.CutOptions.min_communicating_block">min_communicating_block (QCut.CutOptions property)</a>
@@ -480,6 +490,14 @@
       <li><a href="_autosummary/QCut.html#QCut.CutOptions.num_partitions">num_partitions (QCut.CutOptions property)</a>
 </li>
       <li><a href="_autosummary/QCut.html#QCut.CutOptions.num_samples">num_samples (QCut.CutOptions attribute)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="P">P</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/QCut.html#QCut.ParallelBackend">ParallelBackend (class in QCut)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -514,12 +532,16 @@
 </li>
       <li><a href="_autosummary/QCut.html#QCut.CircuitResult.result">result (QCut.CircuitResult attribute)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="_autosummary/QCut.html#QCut.RawResult.result">result() (QCut.RawResult method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="_autosummary/QCut.html#QCut.run">run() (in module QCut)</a>
+
+      <ul>
+        <li><a href="_autosummary/QCut.html#QCut.ParallelBackend.run">(QCut.ParallelBackend method)</a>
 </li>
+      </ul></li>
       <li><a href="_autosummary/QCut.html#QCut.run_cut_circuit">run_cut_circuit() (in module QCut)</a>
 </li>
       <li><a href="_autosummary/QCut.html#QCut.run_experiments">run_experiments() (in module QCut)</a>
@@ -552,16 +574,20 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="_autosummary/QCut.html#QCut.CutOptions.should_sample">should_sample() (QCut.CutOptions method)</a>
 </li>
+      <li><a href="_autosummary/QCut.html#QCut.ParallelBackend.submitted">submitted (QCut.ParallelBackend attribute)</a>
+</li>
   </ul></td>
 </tr></table>
 
 <h2 id="T">T</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="_autosummary/QCut.html#QCut.transpile_experiments">transpile_experiments() (in module QCut)</a>
+      <li><a href="_autosummary/QCut.html#QCut.transpile_circuits">transpile_circuits() (in module QCut)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/QCut.html#QCut.transpile_experiments">transpile_experiments() (in module QCut)</a>
+</li>
       <li><a href="_autosummary/QCut.html#QCut.transpile_subcircuits">transpile_subcircuits() (in module QCut)</a>
 </li>
   </ul></td>

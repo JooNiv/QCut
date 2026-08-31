@@ -222,41 +222,41 @@ chooses.
 Transpilation
 -------------
 
-Two helpers, differing in when they run:
+Two helpers, :code:`transpile_subcircuits()` and :code:`transpile_circuits()`, differing in when they run:
 
 .. code:: python
 
    fake = IQMFakeAdonis() #noisy
    sim = AerSimulator() #ideal
 
+:code:`transpile_circuits()` does whichever of the two the thing it is given calls for.
 Each subcircuit once, before the experiment circuits are built:
 
 .. code:: python
 
-   transpiled = ck.transpile_subcircuits(cut_circuit, fake, optimization_level=3)
+   transpiled = ck.transpile_circuits(cut_circuit, fake, optimization_level=3)
    cut_experiment = ck.get_experiment_circuits(transpiled, observables)
 
 Or every experiment circuit, afterwards:
 
 .. code:: python
 
-   cut_experiment = ck.transpile_experiments(
+   cut_experiment = ck.transpile_circuits(
        ck.get_experiment_circuits(cut_circuit, observables), fake, optimization_level=3
    )
 
-:code:`transpile_subcircuits()` is much the faster of the two, but its subcircuits still
-carry the cut and observable placeholders, so the transpiler is working on a circuit it
-cannot see all of. It therefore holds :code:`remove_final_rzs` and
-:code:`optimize_single_qubits` off and raises if you pass them, because both move gates
-across a cut. :code:`transpile_experiments()` has no placeholders left to protect and
-optimises further, so it is the one to use when depth matters more than transpilation
-time.
+Given a cut circuit it is much the faster of the two, but the subcircuits still carry the
+cut and observable placeholders, so the transpiler is working on a circuit it cannot see
+all of. It therefore disallows :code:`remove_final_rzs` and
+:code:`optimize_single_qubits` and raises if you pass them. Given an experiment there are
+no placeholders left to, so it optimises further.
+
+Plain circuits are transpiled as they are, which is what a backend handed circuits rather
+than an experiment needs. See :doc:`examples/ParallelBackends`.
 
 On an IQM backend both use IQM's own transpiler. Pass :code:`use_iqm_transpiler=False`
 for the ordinary Qiskit path. On a resonator device such as :code:`IQMFakeDeneb` the MOVE
-gates are routed in for you, and that path is required: Qiskit has no MOVE gate, so
-:code:`use_iqm_transpiler=False` raises there. Note that Aer cannot execute a move-routed
-circuit, so run those on the device or on its fake backend.
+gates are routed in for you.
 
 Execution
 ---------

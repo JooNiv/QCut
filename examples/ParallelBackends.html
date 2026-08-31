@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Wire cuts &#8212; QCut</title>
+    <title>Running on several backends &#8212; QCut</title>
   
   
   
@@ -46,14 +46,12 @@
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/sphinx-book-theme.js?v=fab101a9"></script>
-    <script>window.MathJax = {"tex": {"macros": {"ket": ["\\left|#1\\right\\rangle", 1], "bra": ["\\left\\langle#1\\right|", 1], "braket": ["\\left\\langle#1\\middle|#2\\right\\rangle", 2], "Tr": "\\operatorname{Tr}"}}, "options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
-    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'examples/WireCuts';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'examples/ParallelBackends';</script>
     <link rel="icon" href="../_static/QCut-logo.jpg"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Gate cuts" href="GateCuts.html" />
-    <link rel="prev" title="Examples on using QCut" href="../Examples.html" />
+    <link rel="next" title="Notebooks" href="../Notebooks.html" />
+    <link rel="prev" title="Automatic cuts" href="AutomaticCuts.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="2.1.2.post1.dev2+g2ff913a2c" />
@@ -154,10 +152,10 @@
 <li class="toctree-l1"><a class="reference internal" href="../Usage.html">Basic Usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Options.html">Options</a></li>
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="../Examples.html">Examples on using QCut</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
-<li class="toctree-l2 current active"><a class="current reference internal" href="#">Wire cuts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="WireCuts.html">Wire cuts</a></li>
 <li class="toctree-l2"><a class="reference internal" href="GateCuts.html">Gate cuts</a></li>
 <li class="toctree-l2"><a class="reference internal" href="AutomaticCuts.html">Automatic cuts</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ParallelBackends.html">Running on several backends</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">Running on several backends</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../Notebooks.html">Notebooks</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -243,7 +241,7 @@
       
       
       
-      <li><a href="../_sources/examples/WireCuts.rst" target="_blank"
+      <li><a href="../_sources/examples/ParallelBackends.rst" target="_blank"
    class="btn btn-sm btn-download-source-button dropdown-item"
    title="Download source file"
    data-bs-placement="left" data-bs-toggle="tooltip"
@@ -319,7 +317,7 @@
               
 
 <div id="jb-print-docs-body" class="onlyprint">
-    <h1>Wire cuts</h1>
+    <h1>Running on several backends</h1>
     <!-- Table of contents -->
     <div id="print-main-content">
         <div id="jb-print-toc">
@@ -329,8 +327,9 @@
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#cutting-several-wires-at-once">Cutting several wires at once</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#what-it-costs-to-run">What it costs to run</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#why-it-can-be-shared">Why it can be shared</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#machines-of-different-sizes">Machines of different sizes</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#writing-your-own">Writing your own</a></li>
 </ul>
             </nav>
         </div>
@@ -342,100 +341,96 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="wire-cuts">
-<h1>Wire cuts<a class="headerlink" href="#wire-cuts" title="Link to this heading">#</a></h1>
-<p>Wire cuts can be used to cut the wires of qubits in a circuit. This is done by inserting special cut instructions into the circuit.</p>
-<p>A wire cut marks a point on a qubit’s wire where the qubit is measured and a fresh state
-prepared, so everything before the cut and everything after it can run as separate
-circuits. Unlike a gate cut it does not need a gate to attach to, which makes it the
-only option where a qubit has to be handed from one partition to another without an
-interaction to cut.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit</span><span class="w"> </span><span class="kn">import</span> <span class="n">QuantumCircuit</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">QCut</span><span class="w"> </span><span class="kn">import</span> <span class="n">cut</span>
-
-<span class="n">cut_circuit</span> <span class="o">=</span> <span class="n">QuantumCircuit</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
-<span class="n">cut_circuit</span><span class="o">.</span><span class="n">h</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-<span class="n">cut_circuit</span><span class="o">.</span><span class="n">cx</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
-<span class="n">cut_circuit</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cut</span><span class="p">(),</span> <span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-<span class="n">cut_circuit</span><span class="o">.</span><span class="n">cx</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
-
-<span class="n">cut_circuit</span><span class="o">.</span><span class="n">draw</span><span class="p">(</span><span class="s2">&quot;mpl&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
-<p>After this the circuit can be processed as usual with QCut (take a look at the Usage documentation for more details).</p>
-<section id="cutting-several-wires-at-once">
-<h2>Cutting several wires at once<a class="headerlink" href="#cutting-several-wires-at-once" title="Link to this heading">#</a></h2>
-<p>Cutting <span class="math notranslate nohighlight">\(n\)</span> wires separately costs <span class="math notranslate nohighlight">\(4^n\)</span>, since each wire cut costs 4 and
-the overheads multiply. Wires cut at the same point in the circuit can do better than
-that if the two sides are allowed to exchange the measured outcome: the side that
-measures tells the side that prepares what it saw, and the block then costs
-<span class="math notranslate nohighlight">\(2^{n+1} - 1\)</span>.</p>
-<div class="pst-scrollable-table-container"><table class="table">
-<thead>
-<tr class="row-odd"><th class="head"><p>wires in the block</p></th>
-<th class="head"><p>cut separately</p></th>
-<th class="head"><p>exchanging outcomes</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p>1</p></td>
-<td><p>4</p></td>
-<td><p>3</p></td>
-</tr>
-<tr class="row-odd"><td><p>2</p></td>
-<td><p>16</p></td>
-<td><p>7</p></td>
-</tr>
-<tr class="row-even"><td><p>3</p></td>
-<td><p>64</p></td>
-<td><p>15</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<p>The shot count scales as <span class="math notranslate nohighlight">\(\gamma^2\)</span>, so a block of two is around five times
-cheaper and a block of three around eighteen times. The construction is ancilla-free and
-is derived in <a class="reference internal" href="../Theory.html"><span class="doc">Theory</span></a>.</p>
+  <section id="running-on-several-backends">
+<h1>Running on several backends<a class="headerlink" href="#running-on-several-backends" title="Link to this heading">#</a></h1>
+<p>A cut experiment is a collection of many independent circuits, so it does not have to run on one
+machine. <a class="reference internal" href="../_autosummary/QCut.html#QCut.ParallelBackend" title="QCut.ParallelBackend"><code class="xref py py-class docutils literal notranslate"><span class="pre">ParallelBackend</span></code></a> takes several backends and
+hands them the batches in turn.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit</span><span class="w"> </span><span class="kn">import</span> <span class="n">QuantumCircuit</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">qiskit.quantum_info</span><span class="w"> </span><span class="kn">import</span> <span class="n">SparsePauliOp</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit.circuit.library</span><span class="w"> </span><span class="kn">import</span> <span class="n">CXGate</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">QCut</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ck</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">QCut</span><span class="w"> </span><span class="kn">import</span> <span class="n">cut</span><span class="p">,</span> <span class="n">CutOptions</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">QCut</span><span class="w"> </span><span class="kn">import</span> <span class="n">ParallelBackend</span><span class="p">,</span> <span class="n">cutGate</span>
 
-<span class="n">circuit</span> <span class="o">=</span> <span class="n">QuantumCircuit</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
-<span class="n">circuit</span><span class="o">.</span><span class="n">h</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">circuit</span> <span class="o">=</span> <span class="n">QuantumCircuit</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">qubit</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">6</span><span class="p">):</span>
+    <span class="n">circuit</span><span class="o">.</span><span class="n">ry</span><span class="p">(</span><span class="mf">0.4</span> <span class="o">+</span> <span class="mf">0.2</span> <span class="o">*</span> <span class="n">qubit</span><span class="p">,</span> <span class="n">qubit</span><span class="p">)</span>
 <span class="n">circuit</span><span class="o">.</span><span class="n">cx</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-<span class="n">circuit</span><span class="o">.</span><span class="n">cx</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-
-<span class="c1"># Two wires cut at the same point, so they can share one decomposition.</span>
-<span class="n">circuit</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cut</span><span class="p">(),</span> <span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-<span class="n">circuit</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cut</span><span class="p">(),</span> <span class="p">[</span><span class="mi">2</span><span class="p">])</span>
-
-<span class="n">circuit</span><span class="o">.</span><span class="n">cx</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-<span class="n">circuit</span><span class="o">.</span><span class="n">cx</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
-
-<span class="n">observables</span> <span class="o">=</span> <span class="n">SparsePauliOp</span><span class="p">([</span><span class="s2">&quot;IIIZ&quot;</span><span class="p">,</span> <span class="s2">&quot;IIZI&quot;</span><span class="p">,</span> <span class="s2">&quot;IZII&quot;</span><span class="p">,</span> <span class="s2">&quot;IIZZ&quot;</span><span class="p">])</span>
+<span class="n">circuit</span><span class="o">.</span><span class="n">cx</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+<span class="n">circuit</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="o">**</span><span class="n">cutGate</span><span class="p">(</span><span class="n">CXGate</span><span class="p">(),</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+<span class="n">circuit</span><span class="o">.</span><span class="n">cx</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
 
 <span class="n">cut_circuit</span> <span class="o">=</span> <span class="n">ck</span><span class="o">.</span><span class="n">get_locations_and_subcircuits</span><span class="p">(</span><span class="n">circuit</span><span class="p">)</span>
-<span class="n">experiment</span> <span class="o">=</span> <span class="n">ck</span><span class="o">.</span><span class="n">get_experiment_circuits</span><span class="p">(</span><span class="n">cut_circuit</span><span class="p">,</span> <span class="n">observables</span><span class="p">)</span>
+<span class="n">experiment</span> <span class="o">=</span> <span class="n">ck</span><span class="o">.</span><span class="n">get_experiment_circuits</span><span class="p">(</span><span class="n">cut_circuit</span><span class="p">,</span> <span class="n">SparsePauliOp</span><span class="p">([</span><span class="s2">&quot;IIIIIZ&quot;</span><span class="p">]))</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="n">experiment</span><span class="o">.</span><span class="n">num_circuits</span><span class="p">)</span>
+<span class="n">backend</span> <span class="o">=</span> <span class="n">ParallelBackend</span><span class="p">([</span><span class="n">first_device</span><span class="p">,</span> <span class="n">second_device</span><span class="p">])</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">ck</span><span class="o">.</span><span class="n">run_experiments</span><span class="p">(</span><span class="n">experiment</span><span class="p">,</span> <span class="n">shots</span><span class="o">=</span><span class="mi">4096</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="n">backend</span><span class="p">)</span>
+
+<span class="n">expectation_values</span> <span class="o">=</span> <span class="n">ck</span><span class="o">.</span><span class="n">estimate_expectation_values</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
+
+<span class="n">backend</span><span class="o">.</span><span class="n">submitted</span>  <span class="c1"># circuits given to each, e.g. [1728, 1728]</span>
 </pre></div>
 </div>
-<p>That gives 56 circuits. <code class="docutils literal notranslate"><span class="pre">CutOptions(wire_cut_communication=&quot;never&quot;)</span></code> cuts the two
-wires independently instead, for 128.</p>
+<section id="why-it-can-be-shared">
+<h2>Why it can be shared<a class="headerlink" href="#why-it-can-be-shared" title="Link to this heading">#</a></h2>
+<p>QCut submits every batch of a wave before collecting any of it, so the machines queue at
+the same time rather than one after another. Communicating wire cuts still run in waves,
+because a preparing side needs the measuring side’s outcome, but the circuits <em>within</em> a
+wave are independent and are shared like any others.</p>
+<p>The experiment is not transpiled beforehand. Each batch is transpiled for the backend
+about to run it, so only one batch is ever held in its transpiled form and the
+experiment itself stays as it was built.</p>
 </section>
-<section id="what-it-costs-to-run">
-<h2>What it costs to run<a class="headerlink" href="#what-it-costs-to-run" title="Link to this heading">#</a></h2>
-<p>Exchanging the outcome means one side cannot be run until the other has been, so the
-experiment runs in waves rather than all at once: every measuring subcircuit first, then
-the preparing ones, with each wave’s shots allocated according to what the previous wave
-actually measured. Chains take more than two waves, since a subcircuit can be a
-preparing side and a measuring side at the same time.</p>
-<p>The advertised <span class="math notranslate nohighlight">\(\gamma\)</span> assumes the prepared state follows the measured outcome
-shot by shot. Emulating that with batched runs and post-selection costs extra, and at a
-single wire that extra outweighs the gain, which is why <code class="docutils literal notranslate"><span class="pre">wire_cut_communication</span></code>
-defaults to <code class="docutils literal notranslate"><span class="pre">&quot;auto&quot;</span></code> and applies only to blocks of two or more. <code class="docutils literal notranslate"><span class="pre">&quot;always&quot;</span></code> uses it
-for any block including single wires, and <code class="docutils literal notranslate"><span class="pre">&quot;never&quot;</span></code> for none. See <a class="reference internal" href="../Options.html"><span class="doc">Options</span></a>.</p>
+<section id="machines-of-different-sizes">
+<h2>Machines of different sizes<a class="headerlink" href="#machines-of-different-sizes" title="Link to this heading">#</a></h2>
+<p>A batch only goes to a backend with room for it, so the pieces that fit anywhere are
+shared while the widest go to the backends that can fit them. Cutting a circuit into a
+wide piece and a narrow one and giving it a large device and a small one uses both:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">backend</span> <span class="o">=</span> <span class="n">ParallelBackend</span><span class="p">([</span><span class="n">five_qubit_device</span><span class="p">,</span> <span class="n">twenty_qubit_device</span><span class="p">])</span>
+<span class="n">ck</span><span class="o">.</span><span class="n">run_experiments</span><span class="p">(</span><span class="n">experiment</span><span class="p">,</span> <span class="n">shots</span><span class="o">=</span><span class="mi">4096</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="n">backend</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>If nothing is wide enough for a subcircuit, QCut says so rather than letting the device
+refuse the job. Cut into smaller pieces with <code class="docutils literal notranslate"><span class="pre">max_qubits</span></code>, or pass a larger backend.</p>
+</section>
+<section id="writing-your-own">
+<h2>Writing your own<a class="headerlink" href="#writing-your-own" title="Link to this heading">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">ParallelBackend</span></code> is not special: QCut asks a backend only for
+<code class="docutils literal notranslate"><span class="pre">run(circuits,</span> <span class="pre">shots=...,</span> <span class="pre">**options)</span></code> returning a job whose <code class="docutils literal notranslate"><span class="pre">result()</span></code> gives counts
+by position. Anything answering that can decide for itself where circuits go.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">QCut</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ck</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">MyParallelBackend</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">backends</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">backends</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">backends</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_turn</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">circuits</span><span class="p">,</span> <span class="n">shots</span><span class="o">=</span><span class="mi">1024</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">):</span>
+        <span class="n">backend</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">backends</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_turn</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">backends</span><span class="p">)]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_turn</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">ready</span> <span class="o">=</span> <span class="n">ck</span><span class="o">.</span><span class="n">transpile_circuits</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">circuits</span><span class="p">),</span> <span class="n">backend</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">backend</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">ready</span><span class="p">,</span> <span class="n">shots</span><span class="o">=</span><span class="n">shots</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><a class="reference internal" href="../_autosummary/QCut.html#QCut.transpile_circuits" title="QCut.transpile_circuits"><code class="xref py py-func docutils literal notranslate"><span class="pre">transpile_circuits()</span></code></a> is what QCut transpiles with
+itself, so an IQM device goes through IQM’s own transpiler and a resonator machine gets
+its MOVE routing. It takes a <code class="docutils literal notranslate"><span class="pre">CutCircuit</span></code>, a <code class="docutils literal notranslate"><span class="pre">CutExperiment</span></code> or plain circuits.</p>
+<p>Four things keep it correct:</p>
+<ul class="simple">
+<li><p><strong>Return the backend’s own job.</strong> Its <code class="docutils literal notranslate"><span class="pre">result()</span></code> already answers <code class="docutils literal notranslate"><span class="pre">get_counts(index)</span></code>
+for that batch, which is what QCut reads. Splitting one batch across machines instead
+means merging the results back into submission order yourself.</p></li>
+<li><p><strong>Pass ``shots`` through untouched.</strong> It is what the estimate divides by, and the waves
+allocate it themselves.</p></li>
+<li><p><strong>Submit one batch per call and do not merge them.</strong> The batches are already sized, and
+waves are grouped so that circuits wanting very different shot counts do not share
+a job.</p></li>
+<li><p><strong>Do not wait for results inside</strong> <code class="docutils literal notranslate"><span class="pre">run</span></code>. Returning immediately is what leaves the
+machines running at the same time.</p></li>
+</ul>
+<p>A backend that declares <code class="docutils literal notranslate"><span class="pre">max_shots</span></code> has it respected; <code class="docutils literal notranslate"><span class="pre">ParallelBackend</span></code> reports the
+smallest of its own, since a batch may land on any of them. Add <code class="docutils literal notranslate"><span class="pre">max_batch_size</span></code> to
+<code class="docutils literal notranslate"><span class="pre">run</span></code>’s signature to use the value QCut used.</p>
 </section>
 </section>
 
@@ -451,20 +446,20 @@ for any block including single wires, and <code class="docutils literal notransl
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="../Examples.html"
+       href="AutomaticCuts.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Examples on using QCut</p>
+        <p class="prev-next-title">Automatic cuts</p>
       </div>
     </a>
     <a class="right-next"
-       href="GateCuts.html"
+       href="../Notebooks.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Gate cuts</p>
+        <p class="prev-next-title">Notebooks</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -486,8 +481,9 @@ for any block including single wires, and <code class="docutils literal notransl
   </div>
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#cutting-several-wires-at-once">Cutting several wires at once</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#what-it-costs-to-run">What it costs to run</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#why-it-can-be-shared">Why it can be shared</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#machines-of-different-sizes">Machines of different sizes</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#writing-your-own">Writing your own</a></li>
 </ul>
   </nav></div>
 
