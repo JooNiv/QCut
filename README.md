@@ -1,6 +1,6 @@
 [![Current Release](https://img.shields.io/github/v/release/JooNiv/QCut?cacheSeconds=1)](https://github.com/JooNiv/QCut/releases)
 [![Coverage Status](https://img.shields.io/coverallsCoverage/github/JooNiv/QCut?cacheSeconds=0)](https://coveralls.io/github/JooNiv/QCut?branch=main)
-![Python](https://img.shields.io/badge/python-3.10_|_3.11-blue)
+![Python](https://img.shields.io/badge/python-3.11_|_3.12-blue)
 [![License](https://img.shields.io/badge/license-Apache_2.0-orange)](https://opensource.org/licenses/Apache-2.0)
 
 
