@@ -210,7 +210,7 @@ class CutExperiment:
                 qpd_bits=self.qpd_bits,
                 gamma=self._gamma,
                 optimal_gamma=self._optimal_gamma,
-                can_reconstruct_probabilities=self._can_reconstruct_probabilities
+                can_reconstruct_probabilities=self._can_reconstruct_probabilities,
             )
 
     @property
