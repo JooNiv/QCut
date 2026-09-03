@@ -2,6 +2,10 @@
 Changelog
 =========
 
+**Version 2.1.4**
+=================
+- Small fixes to transpilation on IQM Star backends
+
 **Version 2.1.3**
 =================
 
