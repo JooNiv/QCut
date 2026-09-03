@@ -17,7 +17,7 @@ Create a new branch for your changes. Once you are done lint and type check all 
 
 ```shell
 uv run ruff check --fix
-uvx ty check /QCut
+uvx ty check QCut
 uv run codespell
 ```
 
