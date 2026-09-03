@@ -398,6 +398,34 @@ def test_a_move_routed_circuit_is_read_the_same_without_its_layout(case):
                 validate_circuit(stripped, backend)
 
 
+@pytest.mark.sim
+@pytest.mark.slow
+@pytest.mark.parametrize("backend", _backends())
+def test_an_x_or_y_observable_reaches_the_device(backend):
+    """Its basis change has to arrive as the device's own gates.
+
+    Every other case here measures in Z, which needs no basis change at all.
+    """
+    marked, plain, _z_only = _gate_cut()
+    observables = SparsePauliOp(["IIXX", "YYII", "IIIZ", "IXYI"])
+    state = Statevector(plain)
+    exact = np.array(
+        [float(np.real(state.expectation_value(p))) for p in observables.paulis]
+    )
+
+    cut_circuit = ck.get_locations_and_subcircuits(marked.copy())
+    transpiled = ck.transpile_subcircuits(cut_circuit, backend, optimization_level=3)
+    experiment = ck.get_experiment_circuits(transpiled, observables)
+
+    _accepted_by(backend, experiment)
+
+    results = ck.run_experiments(
+        experiment, backend=_ideal(transpiled.subcircuits, backend), shots=SHOTS
+    )
+    values = np.array(ck.estimate_expectation_values(results))
+    assert np.allclose(values, exact, atol=TOLERANCE)
+
+
 @pytest.mark.parametrize(
     "transpile", [ck.transpile_subcircuits, ck.transpile_experiments]
 )
