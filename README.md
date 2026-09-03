@@ -40,7 +40,7 @@ Check out [docs](https://jooniv.github.io/QCut/) for instructions and more examp
 For installation a UNIX-like system is currently needed due to [PyMetis](https://github.com/inducer/pymetis) being used for automatic cut finding. On Windows use WSL
 
 **Pip:**  
-Installation should be done via `uv`
+Installation should be done via [`uv`](https://docs.astral.sh/uv/)
 
 ```bash
 uv pip install QCut
