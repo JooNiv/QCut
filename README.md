@@ -37,7 +37,7 @@ Check out [docs](https://jooniv.github.io/QCut/) for instructions and more examp
 
 # Installation
 
-For installation a UNIX-like system is currently needed due to pymetis being used for automatic cut finding. On Windows use WSL
+For installation a UNIX-like system is currently needed due to [PyMetis](https://github.com/inducer/pymetis) being used for automatic cut finding. On Windows use WSL
 
 **Pip:**  
 Installation should be done via `uv`
