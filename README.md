@@ -58,7 +58,7 @@ uv pip install "QCut[iqm]"
 uv add "QCut[iqm]"
 ```
 
-This pulls in IQM's Qiskit adapter, which supports Qiskit 1.0 up to but not including
+This pulls in IQM's Qiskit adapter ([iqm-client](https://docs.iqm.tech/iqm-client/)), which supports Qiskit 1.0 up to but not including
 2.2, so installing it will hold Qiskit below 2.2. Install it into an environment whose
 Qiskit is already in that range if you would rather the resolver did not move it.
 
