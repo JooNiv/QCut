@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import logging
 
-from qiskit import ClassicalRegister, QuantumCircuit
+from qiskit import ClassicalRegister, QuantumCircuit, QuantumRegister
 
 from QCut.errors.qcuterror import QCutError
 
@@ -15,6 +15,15 @@ logger: logging.Logger = logging.getLogger(__name__)
 #: Register the probe measurements are written to. Named so it cannot collide with a
 #: register QCut put there itself.
 PROBE_REGISTER: str = "qcut_move_probe"
+
+
+def _positions(bits) -> dict:
+    """Where each bit sits in the circuit's own bit list.
+
+    Not ``find_bit``, which answers from the registers. On a MOVE-routed circuit the two
+    disagree, and it is this one that a submitted circuit is read by.
+    """
+    return {bit: index for index, bit in enumerate(bits)}
 
 
 def is_resonator_backend(backend) -> bool:
@@ -28,6 +37,7 @@ def is_resonator_backend(backend) -> bool:
 def _barrier_labels(circuit: QuantumCircuit) -> dict[int, list[str | None]]:
     """Every barrier's label, grouped by the wire it sits on, in per-wire order."""
     labels: dict[int, list[str | None]] = {}
+    wires = _positions(circuit.qubits)
     for instruction in circuit.data:
         if instruction.operation.name != "barrier":
             continue
@@ -37,8 +47,9 @@ def _barrier_labels(circuit: QuantumCircuit) -> dict[int, list[str | None]]:
                 f"be put back on the right wire, but one spans "
                 f"{len(instruction.qubits)}"
             )
-        wire = circuit.find_bit(instruction.qubits[0]).index
-        labels.setdefault(wire, []).append(instruction.operation.label)
+        labels.setdefault(wires[instruction.qubits[0]], []).append(
+            instruction.operation.label
+        )
     return labels
 
 
@@ -54,12 +65,12 @@ def _with_probe(circuit: QuantumCircuit) -> QuantumCircuit:
 def _probe_layout(routed: QuantumCircuit, num_logical: int) -> list[int]:
     """Which wire each qubit ended on, read off where its probe measurement sits."""
     wires: dict[int, int] = {}
+    qubits = _positions(routed.qubits)
+    clbits = _positions(routed.clbits)
     for instruction in routed.data:
         if instruction.operation.name != "measure":
             continue
-        wires[routed.find_bit(instruction.clbits[0]).index] = routed.find_bit(
-            instruction.qubits[0]
-        ).index
+        wires[clbits[instruction.clbits[0]]] = qubits[instruction.qubits[0]]
 
     if sorted(wires) != list(range(num_logical)):
         raise QCutError(
@@ -77,10 +88,14 @@ def _restore(
 ) -> QuantumCircuit:
     """
     Drop the probe measurements, put the labels and registers back.
+
+    Rebuilt onto one register in wire order. The routed circuit's own ``ancilla,
+    resonators, q`` would number the wires differently from the order they are in.
     """
     pending = {wires[qubit]: list(marks) for qubit, marks in labels.items()}
+    order = _positions(routed.qubits)
 
-    out = QuantumCircuit(*routed.qregs, name=routed.name)
+    out = QuantumCircuit(QuantumRegister(routed.num_qubits, "q"), name=routed.name)
     for name, size in registers:
         out.add_register(ClassicalRegister(size, name))
 
@@ -88,8 +103,9 @@ def _restore(
         operation = instruction.operation
         if operation.name == "measure":
             continue
+        qubits = [out.qubits[order[qubit]] for qubit in instruction.qubits]
         if operation.name == "barrier":
-            wire = routed.find_bit(instruction.qubits[0]).index
+            wire = order[instruction.qubits[0]]
             if not pending.get(wire):
                 raise QCutError(
                     f"move routing left a barrier on wire {wire}, which held no "
@@ -99,14 +115,14 @@ def _restore(
             if label is not None:
                 operation = operation.to_mutable()
                 operation.label = label
-        out.append(operation, instruction.qubits, [])
+        out.append(operation, qubits, [])
 
     if any(pending.values()):
         missing = {wire: marks for wire, marks in pending.items() if marks}
         raise QCutError(f"move routing dropped placeholder(s) {missing}")
 
-    # The backend reads this to tell a qubit wire from a resonator one. Without it a
-    # gate on the wire holding the last qubit is refused as a gate on the resonator.
+    # Marks the circuit as laid out on physical wires: without it a backend, and the
+    # QASM exporter, take the wires for logical qubits and place the gates elsewhere.
     out._layout = routed.layout
     return out
 
