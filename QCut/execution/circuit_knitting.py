@@ -315,14 +315,12 @@ def get_experiment_circuits(  # noqa: C901
         x_meas_ops.h(0)
         x_meas_ops.name = "X-meas"
         x_meas_ops = transpile(x_meas_ops, basis_gates=basis)
-        x_meas_ops = x_meas_ops.to_instruction()
 
         y_meas_ops = QuantumCircuit(1)
         y_meas_ops.sdg(0)
         y_meas_ops.h(0)
         y_meas_ops.name = "Y-meas"
         y_meas_ops = transpile(y_meas_ops, basis_gates=basis)
-        y_meas_ops = y_meas_ops.to_instruction()
 
         ops = {"X-meas": x_meas_ops, "Y-meas": y_meas_ops}
 
