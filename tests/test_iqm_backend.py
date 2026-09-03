@@ -37,6 +37,7 @@ from QCut.qpd.qpd_operations import coupling_filter
 iqm = pytest.importorskip(
     "iqm.qiskit_iqm", reason='needs the IQM adapter: pip install "QCut[iqm]"'
 )
+validate_circuit = iqm.iqm_circuit_validation.validate_circuit
 
 #: Loose, because these run few shots on purpose: the failures being guarded against are
 #: wrong-qubit and wrong-register ones, which miss by order one, not by a fraction.
@@ -371,6 +372,58 @@ def test_a_resonator_device_gets_its_moves_inserted():
         ]
 
     _accepted_by(backend, ck.get_experiment_circuits(transpiled, observables))
+
+
+@pytest.mark.sim
+@pytest.mark.slow
+@pytest.mark.parametrize("case", sorted(CASES))
+def test_a_move_routed_circuit_is_read_the_same_without_its_layout(case):
+    """Wire n has to be physical qubit n, not merely say so in the layout.
+
+    A target that submits OpenQASM numbers the wires by position and reads no layout.
+    """
+    backend = iqm.IQMFakeDeneb()
+    marked, _plain, observables = CASES[case]()
+    cut_circuit = ck.get_locations_and_subcircuits(
+        marked.copy(), options=CutOptions(wire_cut_communication="always")
+    )
+    transpiled = ck.transpile_subcircuits(cut_circuit, backend, optimization_level=3)
+    experiment = ck.get_experiment_circuits(transpiled, observables)
+
+    for group in experiment.experiments:
+        for obs_group in group:
+            for circuit in obs_group.values():
+                stripped = circuit.copy()
+                stripped._layout = None
+                validate_circuit(stripped, backend)
+
+
+@pytest.mark.sim
+@pytest.mark.slow
+@pytest.mark.parametrize("backend", _backends())
+def test_an_x_or_y_observable_reaches_the_device(backend):
+    """Its basis change has to arrive as the device's own gates.
+
+    Every other case here measures in Z, which needs no basis change at all.
+    """
+    marked, plain, _z_only = _gate_cut()
+    observables = SparsePauliOp(["IIXX", "YYII", "IIIZ", "IXYI"])
+    state = Statevector(plain)
+    exact = np.array(
+        [float(np.real(state.expectation_value(p))) for p in observables.paulis]
+    )
+
+    cut_circuit = ck.get_locations_and_subcircuits(marked.copy())
+    transpiled = ck.transpile_subcircuits(cut_circuit, backend, optimization_level=3)
+    experiment = ck.get_experiment_circuits(transpiled, observables)
+
+    _accepted_by(backend, experiment)
+
+    results = ck.run_experiments(
+        experiment, backend=_ideal(transpiled.subcircuits, backend), shots=SHOTS
+    )
+    values = np.array(ck.estimate_expectation_values(results))
+    assert np.allclose(values, exact, atol=TOLERANCE)
 
 
 @pytest.mark.parametrize(
