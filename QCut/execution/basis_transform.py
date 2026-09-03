@@ -9,10 +9,7 @@ from __future__ import annotations
 from copy import deepcopy
 
 from qiskit import QuantumCircuit
-from qiskit.circuit import (
-    Instruction,
-    QuantumRegister,
-)
+from qiskit.circuit import QuantumRegister
 from qiskit.circuit.library import HGate, SdgGate
 from qiskit.dagcircuit import DAGCircuit
 from qiskit.quantum_info import SparsePauliOp
@@ -73,11 +70,23 @@ def _combine_pauli_ops(op: SparsePauliOp) -> list[dict[int, str]]:  # noqa: C901
     return combined_settings
 
 
+def _apply_basis_change(
+    mini_dag: DAGCircuit, basis_change: QuantumCircuit, qubit
+) -> None:
+    """Write out a basis change's own gates, rather than one instruction wrapping them.
+
+    A wrapper hides them in its definition, under a name the device has never heard of.
+    """
+    for instruction in basis_change.data:
+        mini_dag.apply_operation_back(instruction.operation, [qubit])
+    mini_dag.global_phase += basis_change.global_phase
+
+
 class _ModifyMeasurementBasis(TransformationPass):
     def __init__(
         self,
         measurement_settings: list[dict[int, str]],
-        ops: dict[str, Instruction] | None = None,
+        ops: dict[str, QuantumCircuit] | None = None,
     ):
 
         self.measurement_settings = measurement_settings
@@ -112,12 +121,12 @@ class _ModifyMeasurementBasis(TransformationPass):
 
                 if ob == "X":
                     if self.ops and "X-meas" in self.ops:
-                        mini_dag.apply_operation_back(self.ops["X-meas"], [register[0]])
+                        _apply_basis_change(mini_dag, self.ops["X-meas"], register[0])
                     else:
                         mini_dag.apply_operation_back(HGate(), [register[0]])
                 elif ob == "Y":
                     if self.ops and "Y-meas" in self.ops:
-                        mini_dag.apply_operation_back(self.ops["Y-meas"], [register[0]])
+                        _apply_basis_change(mini_dag, self.ops["Y-meas"], register[0])
                     else:
                         mini_dag.apply_operation_back(SdgGate(), [register[0]])
                         mini_dag.apply_operation_back(HGate(), [register[0]])
@@ -132,7 +141,7 @@ class _ModifyMeasurementBasis(TransformationPass):
 def _get_obs_subcircuits(
     subcircuits: list[QuantumCircuit],
     measurement_settings: list[dict[int, str]],
-    ops: dict[str, Instruction] | None = None,
+    ops: dict[str, QuantumCircuit] | None = None,
 ) -> list[dict[int, QuantumCircuit]]:
     pms = [
         PassManager([_ModifyMeasurementBasis([setting], ops)])

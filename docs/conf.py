@@ -97,7 +97,7 @@ nb_execution_mode = "off"
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 html_theme = "sphinx_book_theme"
-html_logo = "_static/images/QCut-logo.jpg"
+html_logo = "_static/images/logos/qcut-logo-1024.png"
 html_title = "QCut"
-html_favicon = "_static/images/QCut-logo.jpg"
+html_favicon = "_static/images/logos/qcut-logo.svg"
 html_static_path = ["_static"]
