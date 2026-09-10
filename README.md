@@ -442,11 +442,12 @@ probs = ck.estimate_probabilities(results)
 `run()` and `run_cut_circuit()` take `qubits` in the same way, and hand back the
 distribution rather than expectation values.
 
-This costs `2**k` values for `k` qubits but no extra circuits, since the Z observables it
-needs all commute. See
-[the derivation](https://jooniv.github.io/QCut/theory/Probability_reconstruction.html).
+The whole distribution needs one measurement setting, so the experiment is the size it
+would have been for a single observable however many qubits are asked for. See
+[the derivation](https://jooniv.github.io/QCut/theory/Probability_reconstruction.html)
+for how the distribution is reconstructed.
 
-The result is a dict, so it indexes and plots like one, and carries three views:
+The result is a mapping, so it indexes and plots like a dict, and carries three views:
 
 ```python
 probs['00']                     # 0.8658
@@ -455,6 +456,18 @@ probs.nearest_probabilities()   # closest true distribution, negatives projected
 probs.counts()                  # scaled by the shots the experiment ran at
 probs.counts(shots=1000)        # or by any other shots
 ```
+
+The three dict views report, by default, the ten most likely bitstrings. Pass `top` for a different
+number, or `top=None` for all of them:
+
+```python
+probs.quasi_probabilities(top=50)      # the fifty most likely
+probs.counts(shots=1000, top=None)     # the whole distribution, as before
+```
+
+Note that :code:`counts()` sums to :code:`shots` only with :code:`top=None` and
+Only :code:`quasi_probabilities()` gets cheaper this way since the other two project onto the
+nearest physical distribution first.
 
 Against the same circuit run whole:
 

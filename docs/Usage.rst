@@ -385,11 +385,12 @@ distribution over a chosen set of qubits can still be recovered from them. Pass
 :code:`run()` and :code:`run_cut_circuit()` take :code:`qubits` in the same way, and hand
 back the distribution rather than expectation values.
 
-This costs :code:`2**k` values for :code:`k` qubits but no extra circuits, since the Z
-observables it needs all commute. See
-:doc:`the derivation <theory/Probability_reconstruction>`.
+The whole distribution needs one measurement setting, so the experiment is the size it
+would have been for a single observable however many qubits are asked for. See
+:doc:`the derivation <theory/Probability_reconstruction>`. for how the distribution
+id reconstructed.
 
-The result is a dict, so it indexes and plots like one, and carries three views:
+The result is a mapping, so it indexes and plots like a dict, and carries three views:
 
 .. code:: python
 
@@ -398,6 +399,26 @@ The result is a dict, so it indexes and plots like one, and carries three views:
    probs.nearest_probabilities()   # closest true distribution, negatives projected away
    probs.counts()                  # scaled by the shots the experiment ran at
    probs.counts(shots=1000)        # or by any other shots
+
+The three dict views report, by default, the ten most likely bitstrings. Pass :code:`top` for a different
+number, or :code:`top=None` for all of them:
+
+.. code:: python
+
+   probs.quasi_probabilities(top=50)      # the fifty most likely
+   probs.counts(shots=1000, top=None)     # the whole distribution, as before
+
+Note that :code:`counts()` sums to :code:`shots` only with :code:`top=None` and
+Only :code:`quasi_probabilities()` gets cheaper this way since the other two project onto the
+nearest physical distribution first.
+
+Additionally you can get probabilities of a single bitstring or a marginal distribution over a subset of the qubits:
+
+.. code:: python
+
+   probs.top(100)               # the 100 most likely bitstrings, exactly
+   probs.probability_of('01')   # one bitstring, without the others
+   probs.marginal([0])          # a coarser distribution, summed over the rest
 
 Against the same circuit run whole:
 
