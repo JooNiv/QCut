@@ -5,7 +5,7 @@ import pytest
 from qiskit import QuantumCircuit
 from qiskit.circuit.library import CXGate
 from qiskit.providers.fake_provider import GenericBackendV2
-from qiskit.quantum_info import SparsePauliOp, Statevector
+from qiskit.quantum_info import Pauli, Statevector
 from qiskit_aer import AerSimulator
 
 import QCut as ck
@@ -23,7 +23,7 @@ def _gate_cut():
     plain.cx(1, 2)
     for circuit in (marked, plain):
         circuit.cx(2, 3)
-    return marked, plain, SparsePauliOp(["IIIZ", "IIZI", "ZIII"])
+    return marked, plain, ["IIIZ", "IIZI", "ZIII"]
 
 
 def _wide_gate_cut():
@@ -38,7 +38,7 @@ def _wide_gate_cut():
     plain.cx(2, 3)
     for circuit in (marked, plain):
         circuit.cx(4, 5)
-    return marked, plain, SparsePauliOp(["IIIIIZ", "IIIIZI", "ZIIIII"])
+    return marked, plain, ["IIIIIZ", "IIIIZI", "ZIIIII"]
 
 
 def _communicating():
@@ -52,7 +52,7 @@ def _communicating():
     for circuit in (marked, plain):
         circuit.cx(1, 3)
         circuit.cx(2, 3)
-    return marked, plain, SparsePauliOp(["IIIZ", "IIZI", "IZII"])
+    return marked, plain, ["IIIZ", "IIZI", "IZII"]
 
 
 def _experiment(marked, observables):
@@ -64,8 +64,8 @@ def _experiment(marked, observables):
 def _exact(plain, observables):
     return np.array(
         [
-            float(np.real(Statevector(plain).expectation_value(pauli)))
-            for pauli in observables.paulis
+            float(np.real(Statevector(plain).expectation_value(Pauli(pauli))))
+            for pauli in observables
         ]
     )
 
