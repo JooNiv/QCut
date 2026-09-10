@@ -107,9 +107,7 @@ class QuasiProbabilities(Mapping):
         self._distribution = distribution
         self._width = distribution.width
         self.shots = shots
-        self.qubits = list(
-            range(distribution.width) if qubits is None else qubits
-        )
+        self.qubits = list(range(distribution.width) if qubits is None else qubits)
         return self
 
     @classmethod
@@ -283,9 +281,7 @@ class QuasiProbabilities(Mapping):
         marginal.qubits = list(qubits)
         return marginal
 
-    def quasi_probabilities(
-        self, top: int | None = DEFAULT_TOP
-    ) -> dict[str, float]:
+    def quasi_probabilities(self, top: int | None = DEFAULT_TOP) -> dict[str, float]:
         """The values as reconstructed, negative ones included.
 
         Args:
@@ -304,13 +300,11 @@ class QuasiProbabilities(Mapping):
             return dict(self)
         return self.top(top)
 
-    def nearest_probabilities(
-        self, top: int | None = DEFAULT_TOP
-    ) -> dict[str, float]:
+    def nearest_probabilities(self, top: int | None = DEFAULT_TOP) -> dict[str, float]:
         """The closest true distribution.
 
         The projection is over the whole distribution however few bitstrings are asked
-        for, since the mass clipped off the negative entries has to go somewhere. 
+        for, since the mass clipped off the negative entries has to go somewhere.
         So ``top`` sets how much is reported, not how much is computed.
 
         With ``top=None`` the bitstrings clipped to zero are kept, so the result covers

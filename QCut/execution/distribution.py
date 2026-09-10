@@ -185,9 +185,7 @@ class SeparableDistribution:
             new_bits.append([position for position, _index in held])
             kept = [index for _position, index in held]
             new_modes.append(_summed_over(mode, kept, len(bits)))
-        return SeparableDistribution(
-            len(keep), new_bits, new_modes, self.coefficients
-        )
+        return SeparableDistribution(len(keep), new_bits, new_modes, self.coefficients)
 
 
 def _summed_over(mode: np.ndarray, held: list[int], width: int) -> np.ndarray:
@@ -215,9 +213,7 @@ def _summed_over(mode: np.ndarray, held: list[int], width: int) -> np.ndarray:
 
 
 class _Search:
-    """Branch and bound state for :meth:`SeparableDistribution.top`.
-
-    """
+    """Branch and bound state for :meth:`SeparableDistribution.top`."""
 
     def __init__(self, distribution: SeparableDistribution, count: int) -> None:
         """Init."""

@@ -60,8 +60,7 @@ LAYOUTS = [
     (6, [[0, 1, 5], [2, 3, 4]]),
 ]
 LAYOUT_IDS = [
-    f"w{width}-{len(bits)}modes-{index}"
-    for index, (width, bits) in enumerate(LAYOUTS)
+    f"w{width}-{len(bits)}modes-{index}" for index, (width, bits) in enumerate(LAYOUTS)
 ]
 
 
@@ -149,9 +148,10 @@ def test_top_fills_up_to_count_when_the_support_is_smaller():
 
     top = distribution.top(8)
     assert len(top) == 8
-    assert np.abs(
-        np.array([value for _o, value in top]) - np.sort(table)[::-1][:8]
-    ).max() < EXACT
+    assert (
+        np.abs(np.array([value for _o, value in top]) - np.sort(table)[::-1][:8]).max()
+        < EXACT
+    )
     assert top[0][0] == int(np.argmax(table)), "the one supported outcome leads"
     assert all(value == pytest.approx(distribution.constant) for _o, value in top[1:])
 
