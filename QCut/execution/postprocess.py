@@ -173,6 +173,32 @@ def _bit_layout(
     return layout
 
 
+def _outcome_weights(sub: list, offsets: list[int]) -> np.ndarray:
+    """One subcircuit's weight per outcome of the bits it holds.
+
+    The weight an outcome carries is how often it came up times the sign its qpd
+    measurements had, so it is not a probability, it can be negative, and the entries do
+    not sum to one.
+
+    Args:
+        sub (list): the subcircuit's results within one group.
+        offsets (list[int]): where in the subcircuit's own measurements each of its bits
+            sits, as :func:`_bit_layout` reports them.
+
+    Returns:
+        np.ndarray: ``2**len(offsets)`` weights, indexed so that bit ``t`` of the index
+        is the bit ``offsets[t]`` names.
+    """
+    weights = np.zeros(1 << len(offsets))
+    for res in sub:
+        outcome = 0
+        for bit, offset in enumerate(offsets):
+            if res.measurements[0][offset] < 0:
+                outcome |= 1 << bit
+        weights[outcome] += res.count * np.prod(res.measurements[1])
+    return weights
+
+
 def _outcome_spectrum(
     results_processed: list,
     experiment,
@@ -214,13 +240,7 @@ def _outcome_spectrum(
         group = np.full(width, float(parity * coefficient))
         layout = _bit_layout(subcircuits, positions, experiment.map_qubit)
         for sub, (bits, offsets) in zip(subcircuits, layout):
-            weights = np.zeros(1 << len(bits))
-            for res in sub:
-                outcome = 0
-                for bit, offset in enumerate(offsets):
-                    if res.measurements[0][offset] < 0:
-                        outcome |= 1 << bit
-                weights[outcome] += res.count * np.prod(res.measurements[1])
+            weights = _outcome_weights(sub, offsets)
 
             key = tuple(bits)
             if key not in spread:
