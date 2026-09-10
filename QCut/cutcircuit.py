@@ -10,6 +10,7 @@ from qiskit import QuantumCircuit
 from qiskit.quantum_info import SparsePauliOp
 
 from QCut.cutlocation import CutLocation, SingleQubitCutLocation
+from QCut.execution.probabilities import _all_z_paulis_for_subset
 from QCut.options import CutOptions, resolve
 
 
@@ -131,6 +132,7 @@ class CutExperiment:
         qpd_bits: dict[tuple[int, int, int], tuple[int, int]] | None = None,
         gamma: float | None = None,
         optimal_gamma: float | None = None,
+        uncut_num_qubits: int | None = None,
     ) -> None:
         """Init.
 
@@ -150,6 +152,10 @@ class CutExperiment:
         many were dropped for going unwritten. Post-processing needs both: the first to
         find those bits without relying on how a backend reports its registers, and the
         second to restore the sign the dropped ones carried.
+
+        ``uncut_num_qubits`` is the width of the circuit before it was cut, which the
+        observables of a ``qubits`` experiment span. Only that width is kept, since the
+        observables themselves are built on demand -- see :attr:`observables`.
         """
 
         self.experiments = experiment_circuits
@@ -157,8 +163,9 @@ class CutExperiment:
         self.cut_locations = cut_locations
         self.map_qubit = map_qubit
         self.coefficients = coefficients
-        self.observables = observables
+        self._observables = observables
         self.qubits = qubits
+        self._uncut_num_qubits = uncut_num_qubits
         self.options = resolve(options)
         self._num_draws = num_draws
         self.plan = plan
@@ -166,6 +173,33 @@ class CutExperiment:
         self._gamma = gamma
         self._optimal_gamma = optimal_gamma
         self._can_reconstruct_probabilities = can_reconstruct_probabilities
+
+    @property
+    def observables(self) -> SparsePauliOp | None:
+        """The observables these circuits estimate.
+
+        An experiment built from ``qubits`` is built for every Pauli Z over them, and
+        there are ``2**k`` of those. They all share one measurement setting, so none of
+        them shapes a circuit, and reconstructing the distribution does not go through
+        them either, see :func:`QCut.execution.probabilities._separable_form`. So they
+        are built here, on demand, for whoever does want them: estimating them one at a
+        time with :func:`QCut.estimate_expectation_values` still works.
+
+        Raises:
+            ValueError: the experiment was given ``qubits`` but not the width they span,
+                so the observables cannot be reconstructed.
+        """
+        if self._observables is None and self.qubits is not None:
+            if self._uncut_num_qubits is None:
+                raise ValueError(
+                    "this experiment carries qubits but not the width of the circuit "
+                    "they came from, so its observables cannot be built. Pass "
+                    "uncut_num_qubits, or the observables themselves."
+                )
+            self._observables = _all_z_paulis_for_subset(
+                self._uncut_num_qubits, self.qubits
+            )
+        return self._observables
 
     def assign_parameters(
         self, parameters: dict, inplace=False
@@ -202,7 +236,7 @@ class CutExperiment:
                 backend=self.backend,
                 map_qubit=self.map_qubit,
                 coefficients=self.coefficients,
-                observables=self.observables,
+                observables=self._observables,
                 qubits=self.qubits,
                 options=self.options,
                 num_draws=self._num_draws,
@@ -211,6 +245,7 @@ class CutExperiment:
                 gamma=self._gamma,
                 optimal_gamma=self._optimal_gamma,
                 can_reconstruct_probabilities=self._can_reconstruct_probabilities,
+                uncut_num_qubits=self._uncut_num_qubits,
             )
 
     @property
