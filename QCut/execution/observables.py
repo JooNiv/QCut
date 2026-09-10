@@ -39,7 +39,7 @@ PROJECTORS: dict[str, tuple[str, float]] = {
 PAULI_LETTERS = frozenset("IXYZ")
 
 # Most Pauli terms one observable may expand into. A projector on ``k`` qubits is a sum
-# of ``2**k`` Paulis, and while they all share a single measurement setting 
+# of ``2**k`` Paulis, and while they all share a single measurement setting
 # reading them back does grow with their number. Past this
 # the question being asked is a distribution, and ``qubits`` answers that directly.
 MAX_PROJECTOR_TERMS = 2**16
