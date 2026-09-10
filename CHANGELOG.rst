@@ -2,6 +2,36 @@
 Changelog
 =========
 
+**Version 2.2.0**
+=================
+
+Breaking changes
+----------------
+
+- :code:`quasi_probabilities()`, :code:`nearest_probabilities()` and :code:`counts()`
+  return, by default, the ten most likely bitstrings rather than all of them, most likely first.
+  All three take :code:`top` for a different number and :code:`top=None` for the
+  previous behaviour. Note that :code:`counts()` sums to :code:`shots` only with :code:`top=None` and
+  Only :code:`quasi_probabilities()` gets cheaper this way since the other two project onto the
+  nearest physical distribution first.
+
+Reconstructing a distribution no longer costs :code:`2**k`
+----------------------------------------------------------
+
+- Reconstructing a distribution over :code:`k` qubits is now flat in :code:`k` rather
+  than exponential in it with a proper reconstruction method. See `the 
+  derivation <https://jooniv.github.io/QCut/theory/Probability_reconstruction.html>`__.
+- The distribution is held in that product form, so three new queries never expand it:
+  :code:`top(count)` gives the most likely bitstrings, exactly, by branch and bound
+  (measured at 17 ms and 0.2 MB for the top 100 of 2\ :sup:`24`, against 270 ms and
+  384 MB just to hold the values); :code:`probability_of(bitstring)` gives one value in
+  about 25 microseconds whatever :code:`k` is; and :code:`marginal(qubits)` gives a
+  coarser distribution over a subset. :code:`probabilities()` returns every value as a
+  numpy array.
+- :code:`CutExperiment.observables` is built on demand for an experiment given
+  :code:`qubits`, so nothing pays for the :code:`2**k` Pauli labels unless it asks for
+  them. Estimating them with :code:`estimate_expectation_values()` still works.
+
 **Version 2.1.4**
 =================
 - Small fixes to transpilation on IQM Star backends
