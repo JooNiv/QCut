@@ -100,11 +100,15 @@ Now we can draw our subcircuits.
 
 **5: Define observables and generate experiment circuits**
 
-Observables are defined using the SparsePauliOp class from Qiskit.
+Observables are given the way Qiskit's estimator takes them: a Pauli label, a
+:code:`Pauli`, a :code:`SparsePauliOp`, a :code:`SparseObservable`, a
+:code:`{label: coefficient}` mapping, or any nested sequence of those. The expectation
+values come back shaped like what you pass, so a list of four observables gives four
+values, in order.
 
 .. code:: python
 
-   observables = SparsePauliOp(["IIIIZ", "IIIZI", "IIZII", "IIIZZ"])
+   observables = ["IIIIZ", "IIIZI", "IIZII", "IIIZZ"]
 
    cut_experiment = ck.get_experiment_circuits(cut_circuit, observables)
 
@@ -309,19 +313,15 @@ Comparing against the exact and noisy expectation values of the original circuit
 
 .. code:: python
 
-   obs = [ob.to_label() for ob in observables.paulis]
-
    estimator = Estimator()
    exact_expvals = [e.data.evs for e in
-      estimator.run([(x) for x in zip([circuit] * len(obs), obs)]).result()
+      estimator.run([(x) for x in zip([circuit] * len(observables), observables)]).result()
    ]
 
    tr = transpile(circuit, backend=fake)
 
-   tr_obs = observables.apply_layout(tr.layout)
-
    tr_obs_separate = [
-      SparsePauliOp(pauli.to_label()) for pauli in tr_obs.paulis
+      SparsePauliOp(label).apply_layout(tr.layout) for label in observables
    ]
 
    fake_estimator = BackendEstimator(backend=fake)

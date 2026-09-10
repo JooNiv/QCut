@@ -187,8 +187,12 @@ cut_circuit.subcircuits[2].draw("mpl")
 
 **5: Generate experiment circuits**
 
+Observables are given the way Qiskit's estimator takes them: a Pauli label, a `Pauli`, a
+`SparsePauliOp`, a `SparseObservable`, a `{label: coefficient}` mapping, or any nested
+sequence of those. The expectation values come back shaped like what you pass.
+
 ```python
-observables = SparsePauliOp(["IIIIZ", "IIIZI", "IIZII", "IIIZZ"])
+observables = ["IIIIZ", "IIIZI", "IIZII", "IIIZZ"]
 
 cut_experiment = ck.get_experiment_circuits(cut_circuit, observables)
 
@@ -367,19 +371,15 @@ and `BackendSamplerV2` are both fine.
 Comparing against the exact and noisy expectation values of the original circuit:
 
 ```python
-obs = [ob.to_label() for ob in observables.paulis]
-
 estimator = Estimator()
 exact_expvals = [e.data.evs for e in
-    estimator.run([(x) for x in zip([circuit] * len(obs), obs)]).result()
+    estimator.run([(x) for x in zip([circuit] * len(observables), observables)]).result()
 ]
 
 tr = transpile(circuit, backend=fake)
 
-tr_obs = observables.apply_layout(tr.layout)
-
 tr_obs_separate = [
-    SparsePauliOp(pauli.to_label()) for pauli in tr_obs.paulis
+    SparsePauliOp(label).apply_layout(tr.layout) for label in observables
 ]
 
 fake_estimator = BackendEstimator(backend=fake)
