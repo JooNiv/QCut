@@ -17,7 +17,6 @@ from qiskit.circuit import (
 from qiskit.circuit.library import get_standard_gate_name_mapping
 from qiskit.converters import circuit_to_dag, dag_to_circuit
 from qiskit.primitives import BaseSamplerV2
-from qiskit.quantum_info import SparsePauliOp
 from qiskit_aer import AerSimulator
 
 from QCut.cutcircuit import CutCircuit, CutExperiment
@@ -27,6 +26,10 @@ from QCut.execution.backend_utility import transpile_subcircuits
 from QCut.execution.basis_transform import (
     _combine_pauli_ops,
     _get_obs_subcircuits,
+)
+from QCut.execution.observables import (
+    ObservablesLike,
+    coerce_observables,
 )
 from QCut.execution.postprocess import estimate_expectation_values
 from QCut.execution.probabilities import (
@@ -200,12 +203,12 @@ def _backend_gate_names(backend) -> list[str]:
 
 
 def _check_measurement_spec(
-    observables: SparsePauliOp | None, qubits: list[int] | None
+    observables: ObservablesLike | None, qubits: list[int] | None
 ) -> None:
     """Check that exactly one of observables or qubits was given.
 
     Args:
-        observables (SparsePauliOp): the observables to estimate, if given.
+        observables: the observables to estimate, if given.
         qubits (list[int]): the qubits to reconstruct a distribution over, if given.
 
     Raises:
@@ -220,7 +223,7 @@ def _check_measurement_spec(
 
 def get_experiment_circuits(  # noqa: C901
     cut_circuit: CutCircuit,
-    observables: SparsePauliOp | None = None,
+    observables: ObservablesLike | None = None,
     qubits: list[int] | None = None,
 ) -> CutExperiment:
     """Generate experiment circuits by inserting QPD operations on
@@ -228,7 +231,11 @@ def get_experiment_circuits(  # noqa: C901
 
     Args:
         cut_circuit (CutCircuit): The cut circuit to generate experiment circuits for.
-        observables (SparsePauliOp): The observables to measure.
+        observables: the observables to estimate, taken the way qiskit's estimator
+            takes them -- a label, a ``Pauli``, a ``SparsePauliOp``, a
+            ``SparseObservable``, a ``{label: coefficient}`` mapping, or any nested
+            sequence of those. The expectation values come back shaped like what is
+            given here.
         qubits (list[int]): The qubits to measure.
 
         One of observables or qubits must be provided.
@@ -251,14 +258,14 @@ def get_experiment_circuits(  # noqa: C901
             if cr.name == "meas":
                 num_qubits += cr.size
 
-    if observables is not None and all(
-        len(obs) != num_qubits for obs in observables.paulis
-    ):
-        raise ValueError(
-            f"""ALL observable lengths must match
-            the number of qubits in the original uncut circuit
-            ({num_qubits})."""
-        )
+    # The circuits are built for the Pauli terms behind the observables, not for the
+    # observables themselves: an observable is a weighted sum of terms, and separate
+    # observables share terms, so measuring the distinct terms once covers all of them.
+    # The weights that put the observables back together are kept on the spec, and
+    # applied by the estimator. A ``qubits`` experiment builds no spec at all: its terms
+    # are every Z string over those qubits, and there are ``2**k`` of them, which
+    # nothing below needs. The experiment builds them on demand if it is ever asked.
+    spec = None if qubits is not None else coerce_observables(observables, num_qubits)
 
     check_circuit_type = cut_circuit.backend is not None
 
@@ -285,9 +292,9 @@ def get_experiment_circuits(  # noqa: C901
         measurement_settings = [dict.fromkeys(qubits, "Z")]
     else:
         # _check_measurement_spec has already refused the case where neither the
-        # observables nor the qubits were given, so there are observables here.
-        assert observables is not None
-        measurement_settings = _combine_pauli_ops(observables)
+        # observables nor the qubits were given, so there is a spec here.
+        assert spec is not None
+        measurement_settings = _combine_pauli_ops(spec.terms)
 
     if len(measurement_settings) > 1:
         logger.info(
@@ -579,7 +586,7 @@ def get_experiment_circuits(  # noqa: C901
         cut_locations=cut_circuit.cut_locations,
         map_qubit=cut_circuit.map_qubit,
         coefficients=coefficients,
-        observables=observables,
+        observables=spec,
         qubits=qubits,
         can_reconstruct_probabilities=qubits is not None,
         backend=backend,
@@ -1221,7 +1228,7 @@ def run_experiments(  # noqa: C901
 
 def run_cut_circuit(
     cut_circuit: CutCircuit,
-    observables: SparsePauliOp | None = None,
+    observables: ObservablesLike | None = None,
     backend=AerSimulator(),
     max_batch_size: int = 100,
     options: CutOptions | None = None,
@@ -1234,7 +1241,8 @@ def run_cut_circuit(
     Args:
         cut_circuit (CutCircuit): the split circuit, carrying its placeholder
             operations and cut locations
-        observables (SparsePauliOp): the observables to estimate
+        observables: the observables to estimate, taken as qiskit's estimator takes
+            them. See :func:`get_experiment_circuits`.
         backend: backend to use for running experiment circuits (optional)
         max_batch_size (int): maximum number of circuits submitted per backend.run
             call (optional)
@@ -1250,9 +1258,10 @@ def run_cut_circuit(
         One of observables or qubits must be provided.
 
     Returns:
-        np.ndarray | QuasiProbabilities: one expectation value per observable, in the
-        order given, or, when given ``qubits``, the reconstructed distribution over
-        them.
+        np.ndarray | QuasiProbabilities: one expectation value per observable, shaped
+        like the observables given. A single observable comes back as a
+        zero-dimensional array or, when given ``qubits``, the reconstructed
+        distribution over them.
 
     """
     _check_measurement_spec(observables, qubits)
@@ -1287,7 +1296,7 @@ def run_cut_circuit(
 
 def run(
     circuit: QuantumCircuit,
-    observables: SparsePauliOp | None = None,
+    observables: ObservablesLike | None = None,
     backend=AerSimulator(),
     max_batch_size: int = 100,
     options: CutOptions | None = None,
@@ -1299,7 +1308,8 @@ def run(
 
     Args:
         circuit (QuantumCircuit): circuit with cut experiments
-        observables (SparsePauliOp): the observables to estimate
+        observables: the observables to estimate, taken as qiskit's estimator takes
+            them. See :func:`get_experiment_circuits`.
         backend: backend to use for running experiment circuits (optional)
         max_batch_size (int): maximum number of circuits submitted per backend.run
             call (optional)
@@ -1314,9 +1324,10 @@ def run(
         One of observables or qubits must be provided.
 
     Returns:
-        np.ndarray | QuasiProbabilities: one expectation value per observable, in the
-        order given, or, when given ``qubits``, the reconstructed distribution over
-        them.
+        np.ndarray | QuasiProbabilities: one expectation value per observable, shaped
+        like the observables given.A single observable comes back as a
+        zero-dimensional array or, when given ``qubits``, the reconstructed
+        distribution over them.
 
     """
     _check_measurement_spec(observables, qubits)
