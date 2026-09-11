@@ -499,7 +499,7 @@ def _group_weights(
     parity = float(np.power(-1, wire_cuts + 1))
 
     coefficients: list[float] = []
-    per_group: list[dict[tuple[int, ...], np.ndarray]] = []
+    per_group: list[dict[tuple[int, ...], _SparseRows]] = []
 
     for experiment_run, coefficient in zip(processed, experiment.coefficients):
         # Every Z string shares one measurement setting, so there is only ever one.
