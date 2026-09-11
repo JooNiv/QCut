@@ -1,10 +1,10 @@
 """What the caller asked to measure, turned into the Pauli terms an experiment runs.
 
 Observables are taken the way qiskit's estimator takes them: a label, a ``Pauli``, a
-``SparsePauliOp``, a ``SparseObservable``, a ``{label: coefficient}`` mapping, or any
-nested sequence of those. An array of observables comes back as an array of expectation
-values of the same shape, so a single observable gives a single number and a list of
-``n`` gives ``n``.
+``SparsePauliOp``, a ``SparseObservable`` on the qiskit versions that coerce one, a
+``{label: coefficient}`` mapping, or any nested sequence of those. An array of
+observables comes back as an array of expectation values of the same shape, so a single
+observable gives a single number and a list of ``n`` gives ``n``.
 """
 
 from __future__ import annotations
@@ -22,6 +22,27 @@ try:  # qiskit's own name for "anything an estimator takes as observables"
     )
 except ImportError:  # pragma: no cover, older qiskit does not export the alias
     ObservablesLike = Any
+
+try:
+    from qiskit.quantum_info import SparseObservable
+except ImportError:  # pragma: no cover, qiskit below 1.4 has no such class
+    SparseObservable = None
+
+
+def _coerces_sparse_observables() -> bool:
+    """Whether this qiskit turns a ``SparseObservable`` into observables of its own."""
+    if SparseObservable is None:
+        return False
+    try:
+        ObservablesArray.coerce(SparseObservable.from_label("I"))
+    except Exception:  # noqa: BLE001 - any refusal is a refusal
+        return False
+    return True
+
+
+#: Whether ``SparseObservable`` may be passed as an observable here. Its own qiskit
+#: version decides, and QCut supports versions older than the one that enabled it.
+SUPPORTS_SPARSE_OBSERVABLE = _coerces_sparse_observables()
 
 
 # Every projector a ``SparseObservable`` can carry, as the Pauli it is built from and
@@ -176,6 +197,30 @@ def per_term_observables(op: SparsePauliOp) -> ObservableSpec:
     )
 
 
+def _check_sparse_observables(observables) -> None:
+    """Refuse a ``SparseObservable`` on a qiskit that will not take one.
+
+    Nested sequences are walked, since an array of observables may hold one anywhere.
+
+    Args:
+        observables: whatever the caller passed.
+
+    Raises:
+        ValueError: one was given and this qiskit does not coerce it.
+    """
+    if SparseObservable is None or SUPPORTS_SPARSE_OBSERVABLE:
+        return
+    if isinstance(observables, SparseObservable):
+        raise ValueError(
+            "this qiskit does not take a SparseObservable as an observable; it began "
+            "coercing them in 2.1. Pass a SparsePauliOp, a label, or a "
+            "{label: coefficient} mapping instead, or upgrade qiskit."
+        )
+    if isinstance(observables, (list, tuple)):
+        for item in observables:
+            _check_sparse_observables(item)
+
+
 def coerce_observables(
     observables: ObservablesLike | ObservableSpec, num_qubits: int | None = None
 ) -> ObservableSpec:
@@ -204,6 +249,7 @@ def coerce_observables(
     if isinstance(observables, ObservablesArray):
         array = observables
     else:
+        _check_sparse_observables(observables)
         array = ObservablesArray.coerce(observables)
 
     flat = _flatten(array.tolist(), len(array.shape))

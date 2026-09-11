@@ -14,6 +14,7 @@ import QCut as ck
 from QCut.execution.basis_transform import _combine_pauli_ops
 from QCut.execution.observables import (
     MAX_PROJECTOR_TERMS,
+    SUPPORTS_SPARSE_OBSERVABLE,
     _expand,
     coerce_observables,
     per_term_observables,
@@ -22,11 +23,14 @@ from QCut.execution.observables import (
 SHOTS = 200000
 TOLERANCE = 0.05
 
+# The class turned up in qiskit 1.4 but its estimators would not take one until 2.1,
+# so whether QCut accepts it is a question about this qiskit rather than about QCut,
+# and the two have to be told apart: below 1.4 there is nothing even to pass.
 try:
     from qiskit.quantum_info import SparseObservable
 
     HAS_SPARSE_OBSERVABLE = True
-except ImportError:  # qiskit below 2.0
+except ImportError:  # qiskit below 1.4
     HAS_SPARSE_OBSERVABLE = False
 
 
@@ -198,7 +202,7 @@ def test_the_qubits_path_still_reads_one_value_per_z_string():
     [
         # |0><0| = (I+Z)/2 and |1><1| = (I-Z)/2 on the named qubit, so these read as the
         # probability of that outcome. Written as labels rather than as a
-        # SparseObservable, which is qiskit 2.0 and later only.
+        # SparseObservable, which only qiskit 2.1 and later will coerce.
         ("I00", SparsePauliOp(["III", "IZI", "IIZ", "IZZ"], [0.25] * 4)),
         ("II1", SparsePauliOp(["III", "IIZ"], [0.5, -0.5])),
         ("I+I", SparsePauliOp(["III", "IXI"], [0.5, 0.5])),
@@ -215,7 +219,9 @@ def test_a_projector_label_reads_as_its_pauli_expansion(label, expected):
 
 
 @pytest.mark.sim
-@pytest.mark.skipif(not HAS_SPARSE_OBSERVABLE, reason="needs qiskit 2.0")
+@pytest.mark.skipif(
+    not SUPPORTS_SPARSE_OBSERVABLE, reason="qiskit coerces SparseObservable from 2.1"
+)
 @pytest.mark.parametrize("label", ["I00", "I+0", "r1I", "ZI1"])
 def test_projector_terms_are_expanded_into_paulis(label):
     """``0 1 + - r l`` are supported, by writing each as ``(I +- P)/2``."""
@@ -231,7 +237,9 @@ def test_projector_terms_are_expanded_into_paulis(label):
     assert float(value) == pytest.approx(_exact(plain, as_paulis), abs=TOLERANCE)
 
 
-@pytest.mark.skipif(not HAS_SPARSE_OBSERVABLE, reason="needs qiskit 2.0")
+@pytest.mark.skipif(
+    not SUPPORTS_SPARSE_OBSERVABLE, reason="qiskit coerces SparseObservable from 2.1"
+)
 def test_a_projector_adds_no_measurement_settings():
     """Each character of a projector fixes one qubit's basis, so the sum is one setting.
 
@@ -262,6 +270,20 @@ def test_a_projector_over_too_many_qubits_is_refused():
 # --- errors -------------------------------------------------------------------------
 
 
+@pytest.mark.skipif(
+    not HAS_SPARSE_OBSERVABLE or SUPPORTS_SPARSE_OBSERVABLE,
+    reason="only qiskit 1.4 and 2.0 have the class without coercing it",
+)
+def test_a_sparse_observable_is_refused_where_qiskit_will_not_take_one():
+    """The class exists from qiskit 1.4, but nothing would coerce it until 2.1.
+
+    Left to itself qiskit raises a bare TypeError naming the class, which does not
+    hint that a newer qiskit would have accepted it.
+    """
+    with pytest.raises(ValueError, match="2.1"):
+        coerce_observables(SparseObservable.from_label("ZZI"))
+
+
 def test_observables_must_span_the_whole_circuit():
     marked, _plain = _pair()
     cut_circuit = ck.get_locations_and_subcircuits(marked)
@@ -281,8 +303,12 @@ def test_non_hermitian_coefficients_are_refused():
 
 
 def test_a_letter_outside_the_alphabet_is_refused():
-    """qiskit's own coercion catches this first, and says so clearly enough."""
-    with pytest.raises(ValueError, match="alphabet"):
+    """qiskit's own coercion catches this first, and says so clearly enough.
+
+    What it says is not matched on: the wording changed in qiskit 2.1, and the newer
+    message does not even name the offending letter.
+    """
+    with pytest.raises(ValueError):
         coerce_observables({"ZQ": 1.0})
 
 
