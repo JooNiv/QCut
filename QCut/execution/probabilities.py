@@ -9,10 +9,10 @@ from qiskit.quantum_info import SparsePauliOp
 from qiskit.result import QuasiDistribution
 
 from QCut.cutlocation import SingleQubitCutLocation
-from QCut.execution.distribution import SeparableDistribution
+from QCut.execution.distribution import Mode, SeparableDistribution
 from QCut.execution.postprocess import (
     _bit_layout,
-    _outcome_weights,
+    _outcome_rows,
     _process_results,
 )
 from QCut.execution.qcutresult import RawResult
@@ -414,6 +414,38 @@ def _all_z_paulis_for_subset(
     return SparsePauliOp(paulis[1:])
 
 
+#: One group's measured outcomes for one subcircuit, and the weight each carried.
+_SparseRows = tuple[np.ndarray, np.ndarray]
+
+
+def _stacked(columns: list[_SparseRows], width: int) -> Mode:
+    """One mode from the same subcircuit's rows in each group.
+
+    The groups measured overlapping but not identical sets of outcomes, so the mode
+    holds their union, with a zero wherever a group did not see one.
+
+    Args:
+        columns (list[_SparseRows]): per group, the outcomes it measured and their
+            weights.
+        width (int): how many bits the local outcome spans.
+
+    Returns:
+        Mode: the rows any group measured, one column per group.
+    """
+    present = [idx for idx, _values in columns if idx.size]
+    if not present:
+        return Mode.empty(width, len(columns))
+
+    idx = np.unique(np.concatenate(present))
+    val = np.zeros((idx.size, len(columns)))
+    for group, (group_idx, values) in enumerate(columns):
+        if group_idx.size:
+            val[np.searchsorted(idx, group_idx), group] = values
+
+    keep = np.flatnonzero(np.any(val != 0.0, axis=1))
+    return Mode(idx[keep], val[keep], width)
+
+
 def _separable_form(result: RawResult) -> SeparableDistribution | None:
     """The distribution the results describe, in the form it is actually held in.
 
@@ -429,7 +461,7 @@ def _separable_form(result: RawResult) -> SeparableDistribution | None:
 
     if not per_group:
         return SeparableDistribution(
-            width, [list(range(width))], [np.zeros((1 << width, 0))], np.zeros(0)
+            width, [list(range(width))], [Mode.empty(width, 0)], np.zeros(0)
         )
 
     layout = sorted(per_group[0])
@@ -439,23 +471,23 @@ def _separable_form(result: RawResult) -> SeparableDistribution | None:
     return SeparableDistribution(
         width,
         [list(held) for held in layout],
-        [np.stack([modes[held] for modes in per_group], axis=1) for held in layout],
+        [_stacked([modes[held] for modes in per_group], len(held)) for held in layout],
         np.array(coefficients),
     )
 
 
 def _group_weights(
     result: RawResult,
-) -> tuple[int, list[float], list[dict[tuple[int, ...], np.ndarray]]]:
+) -> tuple[int, list[float], list[dict[tuple[int, ...], _SparseRows]]]:
     """Per group, the weight of each outcome of the bits each subcircuit covers.
 
     Args:
         result (RawResult): results of an experiment built with ``qubits``.
 
     Returns:
-        tuple[int, list[float], list[dict[tuple[int, ...], np.ndarray]]]: the width, one
-        coefficient per contributing group, and that group's modes by the bits they
-        hold.
+        tuple[int, list[float], list[dict[tuple[int, ...], _SparseRows]]]: the width,
+        one coefficient per contributing group, and that group's measured outcomes and
+        their weights, by the bits they hold.
     """
     experiment = result.experiment
     qubits = list(experiment.qubits)
@@ -467,7 +499,7 @@ def _group_weights(
     parity = float(np.power(-1, wire_cuts + 1))
 
     coefficients: list[float] = []
-    per_group: list[dict[tuple[int, ...], np.ndarray]] = []
+    per_group: list[dict[tuple[int, ...], _SparseRows]] = []
 
     for experiment_run, coefficient in zip(processed, experiment.coefficients):
         # Every Z string shares one measurement setting, so there is only ever one.
@@ -475,15 +507,15 @@ def _group_weights(
         if any(len(sub) == 0 for sub in subcircuits):
             continue
         scale = parity * coefficient
-        modes: dict[tuple[int, ...], np.ndarray] = {}
+        modes: dict[tuple[int, ...], tuple[np.ndarray, np.ndarray]] = {}
         for sub, (held, offsets) in zip(
             subcircuits, _bit_layout(subcircuits, qubits, experiment.map_qubit)
         ):
-            weights = _outcome_weights(sub, offsets)
+            idx, values = _outcome_rows(sub, offsets)
             if held:
-                modes[tuple(held)] = weights
+                modes[tuple(held)] = (idx, values)
             else:
-                scale *= float(weights[0])
+                scale *= float(values.sum())
         coefficients.append(scale)
         per_group.append(modes)
 
@@ -505,7 +537,10 @@ def _dense_values(result: RawResult) -> np.ndarray:
         block = SeparableDistribution(
             width,
             [list(held) for held in modes],
-            [weights[:, None] for weights in modes.values()],
+            [
+                Mode(idx, values[:, None], len(held))
+                for held, (idx, values) in modes.items()
+            ],
             np.array([coefficient]),
         )
         accumulated += block.array() - block.constant

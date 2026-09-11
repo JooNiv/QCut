@@ -43,16 +43,18 @@ Reconstructing a distribution no longer costs :code:`2**k`
   pays for the :code:`2**k` Pauli labels unless it asks for them, and the weights
   between them and the terms are never written out at all. Estimating them with
   :code:`estimate_expectation_values()` still works.
+- Reconstruction is now sparse, costing shots rather than :code:`2**num_qubits` per subcircuit.
+- Fixed :code:`top()` skipping unmeasured outcomes
 
 Observables as qiskit's estimator takes them
 --------------------------------------------
 
 - :code:`observables` now takes anything qiskit's estimator takes: a Pauli label, a
-  :code:`Pauli`, a :code:`SparsePauliOp`, a :code:`SparseObservable`, a
+  :code:`Pauli`, a :code:`SparsePauliOp`, a :code:`SparseObservable` (qiskit 2.1+), a
   :code:`{label: coefficient}` mapping, or any nested sequence of those. Coefficients
   are applied rather than ignored.
 - Projector terms are supported: :code:`0 1 + - r l`, whether written as labels or
-  carried by a :code:`SparseObservable`.
+  carried by a :code:`SparseObservable` (qiskit 2.1+).
 
 **Version 2.1.4**
 =================
