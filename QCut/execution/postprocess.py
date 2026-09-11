@@ -173,12 +173,35 @@ def _bit_layout(
     return layout
 
 
-def _outcome_weights(sub: list, offsets: list[int]) -> np.ndarray:
-    """One subcircuit's weight per outcome of the bits it holds.
+def _outcome_rows(sub: list, offsets: list[int]) -> tuple[np.ndarray, np.ndarray]:
+    """One subcircuit's weight for each outcome it actually produced.
 
-    The weight an outcome carries is how often it came up times the sign its qpd
-    measurements had, so it is not a probability, it can be negative, and the entries do
-    not sum to one.
+    Args:
+        sub (list): the subcircuit's results within one group.
+        offsets (list[int]): where in the subcircuit's own measurements each of its bits
+            sits, as :func:`_bit_layout` reports them.
+
+    Returns:
+        tuple[np.ndarray, np.ndarray]: the outcomes carrying a weight, ascending, and
+        their weights. Bit ``t`` of an outcome is the bit ``offsets[t]`` names.
+    """
+    weights: dict[int, float] = {}
+    for res in sub:
+        outcome = 0
+        for bit, offset in enumerate(offsets):
+            if res.measurements[0][offset] < 0:
+                outcome |= 1 << bit
+        weights[outcome] = weights.get(outcome, 0.0) + res.count * np.prod(
+            res.measurements[1]
+        )
+    if not weights:
+        return np.empty(0, dtype=np.intp), np.empty(0)
+    idx = np.fromiter(sorted(weights), dtype=np.intp, count=len(weights))
+    return idx, np.array([weights[int(i)] for i in idx])
+
+
+def _outcome_weights(sub: list, offsets: list[int]) -> np.ndarray:
+    """The same weights written out, for the readers that index them densely.
 
     Args:
         sub (list): the subcircuit's results within one group.
@@ -189,13 +212,9 @@ def _outcome_weights(sub: list, offsets: list[int]) -> np.ndarray:
         np.ndarray: ``2**len(offsets)`` weights, indexed so that bit ``t`` of the index
         is the bit ``offsets[t]`` names.
     """
+    idx, values = _outcome_rows(sub, offsets)
     weights = np.zeros(1 << len(offsets))
-    for res in sub:
-        outcome = 0
-        for bit, offset in enumerate(offsets):
-            if res.measurements[0][offset] < 0:
-                outcome |= 1 << bit
-        weights[outcome] += res.count * np.prod(res.measurements[1])
+    weights[idx] = values
     return weights
 
 
