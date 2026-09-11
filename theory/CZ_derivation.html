@@ -42,7 +42,7 @@
 
     <script src="../_static/jquery.js?v=5d32c60e"></script>
     <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-    <script src="../_static/documentation_options.js?v=670ce57a"></script>
+    <script src="../_static/documentation_options.js?v=74b42baf"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/sphinx-book-theme.js?v=fab101a9"></script>
@@ -56,7 +56,7 @@
     <link rel="prev" title="Theory" href="../Theory.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="2.1.4.post1.dev12+gf721d404c" />
+  <meta name="docsearch:version" content="2.2.0.post1.dev1+gffda938f4" />
   </head>
   
   
@@ -369,8 +369,8 @@
 <section id="factor-the-cz-gate">
 <h2>Factor the CZ gate<a class="headerlink" href="#factor-the-cz-gate" title="Link to this heading">#</a></h2>
 <p>The CZ gate can (up to global phase) be decomposed as:</p>
-<div class="amsmath math notranslate nohighlight" id="equation-fdb7f3aa-7d50-406a-a216-ecc8a7c2a6f7">
-<span id="eq1"></span><span class="eqno">(1)<a class="headerlink" href="#equation-fdb7f3aa-7d50-406a-a216-ecc8a7c2a6f7" title="Permalink to this equation">#</a></span>\[\begin{equation}
+<div class="amsmath math notranslate nohighlight" id="equation-adab615f-4022-4cdc-873e-082ec2ccdcbf">
+<span id="eq1"></span><span class="eqno">(1)<a class="headerlink" href="#equation-adab615f-4022-4cdc-873e-082ec2ccdcbf" title="Permalink to this equation">#</a></span>\[\begin{equation}
 CZ = \exp(i\pi Z \otimes I/4) \cdot \exp(i\pi I \otimes Z/4) \cdot \exp(-i\pi Z \otimes Z/4) 
 \end{equation}\]</div>
 <p>We can immediately see that the first two channels are just local single qubit Z rotations, S gates in this case. The only non-local part is then the third term <span class="math notranslate nohighlight">\(\exp(-i\pi Z \otimes Z/4)\)</span> and so has the form <span class="math notranslate nohighlight">\(\exp(i\theta A_1 \otimes A_2)\)</span> with <span class="math notranslate nohighlight">\(A_1 = A_2 = Z, \theta = -\pi/4\)</span></p>
@@ -378,8 +378,8 @@ CZ = \exp(i\pi Z \otimes I/4) \cdot \exp(i\pi I \otimes Z/4) \cdot \exp(-i\pi Z 
 <section id="apply-lemma-1-from-1">
 <h2>Apply Lemma 1 from <a class="reference internal" href="#cz-ref">[1]</a><a class="headerlink" href="#apply-lemma-1-from-1" title="Link to this heading">#</a></h2>
 <p>The lemma states that we can decompose the super operator <span class="math notranslate nohighlight">\(S(\exp(i\theta A_1 \otimes A_2))\)</span> as:</p>
-<div class="amsmath math notranslate nohighlight" id="equation-da97ca94-4b34-4fa8-b883-1d7630097290">
-<span id="eq2"></span><span class="eqno">(2)<a class="headerlink" href="#equation-da97ca94-4b34-4fa8-b883-1d7630097290" title="Permalink to this equation">#</a></span>\[\begin{equation}
+<div class="amsmath math notranslate nohighlight" id="equation-000bbf22-0a5e-450d-8866-0ef1da65de84">
+<span id="eq2"></span><span class="eqno">(2)<a class="headerlink" href="#equation-000bbf22-0a5e-450d-8866-0ef1da65de84" title="Permalink to this equation">#</a></span>\[\begin{equation}
 \begin{aligned}
 S(\exp(i\theta A_1 \otimes A_2)) &amp;= \cos^2(\theta)S(I \otimes I) + \sin^2(\theta)S(A_1 \otimes A_2) + 1/8 \cos(\theta)\sin(\theta) \\ 
 &amp; \sum_{(\alpha_1, \alpha_2) \in \{\pm 1\}} \alpha_1 \alpha_2 [S((I+\alpha_1A_1) \otimes S(I+i\alpha_2A_2)) + \\
