@@ -50,11 +50,11 @@ Observables as qiskit's estimator takes them
 --------------------------------------------
 
 - :code:`observables` now takes anything qiskit's estimator takes: a Pauli label, a
-  :code:`Pauli`, a :code:`SparsePauliOp`, a :code:`SparseObservable`, a
+  :code:`Pauli`, a :code:`SparsePauliOp`, a :code:`SparseObservable` (qiskit 2.1+), a
   :code:`{label: coefficient}` mapping, or any nested sequence of those. Coefficients
   are applied rather than ignored.
 - Projector terms are supported: :code:`0 1 + - r l`, whether written as labels or
-  carried by a :code:`SparseObservable`.
+  carried by a :code:`SparseObservable` (qiskit 2.1+).
 
 **Version 2.1.4**
 =================
