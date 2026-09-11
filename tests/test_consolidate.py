@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 from qiskit import QuantumCircuit
 from qiskit.circuit.library import CPhaseGate, CZGate, RYYGate, RZZGate
-from qiskit.quantum_info import Operator, SparsePauliOp, Statevector
+from qiskit.quantum_info import Operator, Pauli, Statevector
 from qiskit_aer import AerSimulator
 
 import QCut as ck
@@ -262,7 +262,7 @@ def _run(circuit, observables, options):
 @pytest.mark.sim
 def test_merging_lowers_the_cost_and_keeps_the_answer():
     """Two marked rzz cost gamma 3.16 over 36 groups apart, 2.43 over 6 merged."""
-    observables = SparsePauliOp(["IZ", "ZI", "ZZ"])
+    observables = ["IZ", "ZI", "ZZ"]
 
     def build():
         circuit = QuantumCircuit(2)
@@ -277,7 +277,7 @@ def test_merging_lowers_the_cost_and_keeps_the_answer():
     reference.ry(0.7, 1)
     reference.rzz(0.8, 0, 1)
     state = Statevector(reference)
-    exact = [float(np.real(state.expectation_value(p))) for p in observables.paulis]
+    exact = [float(np.real(state.expectation_value(Pauli(p)))) for p in observables]
 
     off, cuts_off, groups_off = _run(
         build(), observables, CutOptions(consolidate=False)
@@ -309,9 +309,9 @@ def test_find_cuts_consolidates_before_partitioning():
     without = ck.find_cuts(
         circuit.copy(), options=CutOptions(consolidate=False, finder_num_partitions=2)
     )
-    observables = SparsePauliOp(["IIIZ", "IIZI", "IZII", "ZIII"])
+    observables = ["IIIZ", "IIZI", "IZII", "ZIII"]
     state = Statevector(circuit)
-    exact = [float(np.real(state.expectation_value(p))) for p in observables.paulis]
+    exact = [float(np.real(state.expectation_value(Pauli(p)))) for p in observables]
 
     for cut_circuit in (with_merge, without):
         experiment = ck.get_experiment_circuits(cut_circuit, observables)
@@ -327,7 +327,7 @@ def test_options_reach_the_cut_circuit():
     circuit.append(cutCZ(), [0, 1])
     cut_circuit = ck.get_locations_and_subcircuits(circuit, options=options)
     assert cut_circuit.options is options
-    experiment = ck.get_experiment_circuits(cut_circuit, SparsePauliOp(["IZ", "ZI"]))
+    experiment = ck.get_experiment_circuits(cut_circuit, ["IZ", "ZI"])
     assert experiment.options is options
 
 
@@ -405,9 +405,9 @@ def test_auto_keeps_the_answer_on_the_plan_it_picks():
     reference.rzz(1.768, 1, 3)
     reference.ryy(0.758, 0, 2)
 
-    observables = SparsePauliOp(["IIIZ", "IIZI", "IZII", "ZIII"])
+    observables = ["IIIZ", "IIZI", "IZII", "ZIII"]
     state = Statevector(reference)
-    exact = [float(np.real(state.expectation_value(p))) for p in observables.paulis]
+    exact = [float(np.real(state.expectation_value(Pauli(p)))) for p in observables]
 
     values, _, _ = _run(circuit, observables, CutOptions(consolidate="auto"))
     for expected, actual in zip(exact, values):
@@ -465,9 +465,9 @@ def test_find_cuts_auto_is_never_worse_than_either_mode():
 
     assert costs["auto"] <= min(costs["always"], costs["never"]) + 1e-9
 
-    observables = SparsePauliOp(["IIIIIZ", "IIIIZI", "IIIZII", "ZIIIII"])
+    observables = ["IIIIIZ", "IIIIZI", "IIIZII", "ZIIIII"]
     state = Statevector(circuit)
-    exact = [float(np.real(state.expectation_value(p))) for p in observables.paulis]
+    exact = [float(np.real(state.expectation_value(Pauli(p)))) for p in observables]
     options = CutOptions(consolidate="auto", finder_num_partitions=2)
     found = ck.find_cuts(circuit.copy(), options=options)
     experiment = ck.get_experiment_circuits(found, observables)

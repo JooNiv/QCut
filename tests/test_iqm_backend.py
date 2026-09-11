@@ -19,7 +19,7 @@ import numpy as np
 import pytest
 from qiskit import QuantumCircuit
 from qiskit.circuit.library import RZZGate
-from qiskit.quantum_info import SparsePauliOp, Statevector
+from qiskit.quantum_info import Pauli, Statevector
 from qiskit_aer import AerSimulator
 
 import QCut as ck
@@ -93,7 +93,7 @@ def _gate_cut():
         circuit.rzz(0.5, 2, 3)
     marked.append(**cutGate(RZZGate(0.9), 1, 2))
     plain.rzz(0.9, 1, 2)
-    return marked, plain, SparsePauliOp(["IIIZ", "IIZI", "IZII", "ZIII"])
+    return marked, plain, ["IIIZ", "IIZI", "IZII", "ZIII"]
 
 
 def _wire_cut():
@@ -106,7 +106,7 @@ def _wire_cut():
     for circuit in (marked, plain):
         circuit.cx(1, 2)
         circuit.cx(2, 3)
-    return marked, plain, SparsePauliOp(["IIIZ", "IIZI", "IZII", "ZIII"])
+    return marked, plain, ["IIIZ", "IIZI", "IZII", "ZIII"]
 
 
 def _locc_block():
@@ -120,7 +120,7 @@ def _locc_block():
     for circuit in (marked, plain):
         circuit.cx(0, 2)
         circuit.cx(1, 3)
-    return marked, plain, SparsePauliOp(["IIIIIZ", "IIIIZI"])
+    return marked, plain, ["IIIIIZ", "IIIIZI"]
 
 
 def _locc_pair():
@@ -141,7 +141,7 @@ def _locc_pair():
     for circuit in (marked, plain):
         circuit.cx(1, 2)
         circuit.cx(2, 3)
-    return marked, plain, SparsePauliOp(["IIIZ", "IIZI", "IZII", "IIZZ"])
+    return marked, plain, ["IIIZ", "IIZI", "IZII", "IIZZ"]
 
 
 def _rotations_across_a_wire_cut():
@@ -164,7 +164,7 @@ def _rotations_across_a_wire_cut():
         circuit.rzz(1.1, 2, 3)
         for qubit in range(4):
             circuit.rx(0.5, qubit)
-    return marked, plain, SparsePauliOp(["IIZZ", "IZZI", "ZZII", "IIIZ"])
+    return marked, plain, ["IIZZ", "IZZI", "ZZII", "IIIZ"]
 
 
 CASES = {
@@ -226,7 +226,7 @@ def test_transpiling_the_experiments_reaches_the_device(backend):
     marked, plain, observables = _wire_cut()
     state = Statevector(plain)
     exact = np.array(
-        [float(np.real(state.expectation_value(p))) for p in observables.paulis]
+        [float(np.real(state.expectation_value(Pauli(p)))) for p in observables]
     )
 
     experiment = ck.get_experiment_circuits(
@@ -262,7 +262,7 @@ def test_a_cut_experiment_survives_a_real_topology(backend, case, level, use_iqm
     marked, plain, observables = CASES[case]()
     state = Statevector(plain)
     exact = np.array(
-        [float(np.real(state.expectation_value(p))) for p in observables.paulis]
+        [float(np.real(state.expectation_value(Pauli(p)))) for p in observables]
     )
 
     _, values = _run(marked, observables, backend, level, use_iqm)
@@ -407,10 +407,10 @@ def test_an_x_or_y_observable_reaches_the_device(backend):
     Every other case here measures in Z, which needs no basis change at all.
     """
     marked, plain, _z_only = _gate_cut()
-    observables = SparsePauliOp(["IIXX", "YYII", "IIIZ", "IXYI"])
+    observables = ["IIXX", "YYII", "IIIZ", "IXYI"]
     state = Statevector(plain)
     exact = np.array(
-        [float(np.real(state.expectation_value(p))) for p in observables.paulis]
+        [float(np.real(state.expectation_value(Pauli(p)))) for p in observables]
     )
 
     cut_circuit = ck.get_locations_and_subcircuits(marked.copy())
@@ -532,8 +532,8 @@ def test_transpiling_the_experiments_keeps_the_joint_decomposition(backend):
     values = np.array(ck.estimate_expectation_values(results))
     exact = np.array(
         [
-            float(np.real(Statevector(plain).expectation_value(pauli)))
-            for pauli in observables.paulis
+            float(np.real(Statevector(plain).expectation_value(Pauli(pauli))))
+            for pauli in observables
         ]
     )
     assert np.allclose(values, exact, atol=TOLERANCE)
@@ -617,8 +617,8 @@ def test_a_wide_block_can_survive_subcircuit_transpilation(backend, level):
     values = np.array(ck.estimate_expectation_values(results))
     exact = np.array(
         [
-            float(np.real(Statevector(plain).expectation_value(pauli)))
-            for pauli in observables.paulis
+            float(np.real(Statevector(plain).expectation_value(Pauli(pauli))))
+            for pauli in observables
         ]
     )
     assert np.allclose(values, exact, atol=TOLERANCE)

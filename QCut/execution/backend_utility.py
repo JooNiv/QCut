@@ -479,7 +479,7 @@ def transpile_experiments(
         cut_locations=cut_experiment.cut_locations,
         map_qubit=cut_experiment.map_qubit,
         coefficients=cut_experiment.coefficients,
-        observables=cut_experiment.observables,
+        observables=cut_experiment._observables,
         qubits=cut_experiment.qubits,
         options=cut_experiment.options,
         backend=backend,
@@ -488,7 +488,8 @@ def transpile_experiments(
         qpd_bits=cut_experiment.qpd_bits,
         gamma=cut_experiment.gamma,
         optimal_gamma=cut_experiment.optimal_gamma,
-        can_reconstruct_probabilities=cut_experiment.qubits is not None,
+        can_reconstruct_probabilities=cut_experiment.can_reconstruct_probabilities,
+        uncut_num_qubits=cut_experiment._uncut_num_qubits,
     )
 
 

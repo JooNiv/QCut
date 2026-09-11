@@ -2,6 +2,60 @@
 Changelog
 =========
 
+**Version 2.2.0**
+=================
+
+Breaking changes
+----------------
+
+- A :code:`SparsePauliOp` is now **one** observable, the weighted sum of its terms, as
+  it is for :code:`EstimatorV2`. It used to be read as a list of observables, one
+  expectation value per Pauli, with its coefficients ignored. To keep that reading,
+  pass the labels themselves: :code:`SparsePauliOp(["IZ", "ZI"])` becomes
+  :code:`["IZ", "ZI"]`.
+- The expectation values are shaped like the observables given, as an estimator's are,
+  so one observable comes back as a zero-dimensional array and a list of :code:`n` as
+  :code:`(n,)`.
+- :code:`CutExperiment.observables` is now the :code:`ObservablesArray` that was asked
+  for, and has no :code:`len()`, use :code:`.size` or :code:`.shape`. The Pauli terms
+  the circuits actually measure are :code:`CutExperiment.observable_terms`.
+- :code:`quasi_probabilities()`, :code:`nearest_probabilities()` and :code:`counts()`
+  return, by default, the ten most likely bitstrings rather than all of them, most likely first.
+  All three take :code:`top` for a different number and :code:`top=None` for the
+  previous behaviour. Note that :code:`counts()` sums to :code:`shots` only with :code:`top=None` and
+  Only :code:`quasi_probabilities()` gets cheaper this way since the other two project onto the
+  nearest physical distribution first.
+
+Reconstructing a distribution no longer costs :code:`2**k`
+----------------------------------------------------------
+
+- Reconstructing a distribution over :code:`k` qubits is now flat in :code:`k` rather
+  than exponential in it with a proper reconstruction method. See `the 
+  derivation <https://jooniv.github.io/QCut/theory/Probability_reconstruction.html>`__.
+- The distribution is held in that product form, so three new queries never expand it:
+  :code:`top(count)` gives the most likely bitstrings, exactly, by branch and bound
+  (measured at 17 ms and 0.2 MB for the top 100 of 2\ :sup:`24`, against 270 ms and
+  384 MB just to hold the values); :code:`probability_of(bitstring)` gives one value in
+  about 25 microseconds whatever :code:`k` is; and :code:`marginal(qubits)` gives a
+  coarser distribution over a subset. :code:`probabilities()` returns every value as a
+  numpy array.
+- The observables of an experiment given :code:`qubits` are built on demand, so nothing
+  pays for the :code:`2**k` Pauli labels unless it asks for them, and the weights
+  between them and the terms are never written out at all. Estimating them with
+  :code:`estimate_expectation_values()` still works.
+- Reconstruction is now sparse, costing shots rather than :code:`2**num_qubits` per subcircuit.
+- Fixed :code:`top()` skipping unmeasured outcomes
+
+Observables as qiskit's estimator takes them
+--------------------------------------------
+
+- :code:`observables` now takes anything qiskit's estimator takes: a Pauli label, a
+  :code:`Pauli`, a :code:`SparsePauliOp`, a :code:`SparseObservable` (qiskit 2.1+), a
+  :code:`{label: coefficient}` mapping, or any nested sequence of those. Coefficients
+  are applied rather than ignored.
+- Projector terms are supported: :code:`0 1 + - r l`, whether written as labels or
+  carried by a :code:`SparseObservable` (qiskit 2.1+).
+
 **Version 2.1.4**
 =================
 - Small fixes to transpilation on IQM Star backends

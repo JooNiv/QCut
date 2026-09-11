@@ -4,7 +4,7 @@ from pydantic import TypeAdapter, ValidationError
 from qiskit import QuantumCircuit
 from qiskit.circuit import CircuitInstruction, Gate, Parameter
 from qiskit.circuit.library import CXGate
-from qiskit.quantum_info import SparsePauliOp, Statevector
+from qiskit.quantum_info import Pauli, Statevector
 from qiskit_aer import AerSimulator
 from qiskit_aer.primitives import SamplerV2
 
@@ -48,7 +48,7 @@ def test_cut_circuit_assign_parameters():
                     assert True
 
 
-observables = SparsePauliOp(["IIIZ", "IIZI", "IZII", "IIZZ"])
+observables = ["IIIZ", "IIZI", "IZII", "IIZZ"]
 cut_experiment = ck.get_experiment_circuits(cut_circuit, observables)
 
 exp_num_qubits = [1, 1, 3]
@@ -88,7 +88,7 @@ def test_results_carry_their_own_experiment():
     circuit = QuantumCircuit(2)
     circuit.h(0)
     circuit.append(**cutGate(CXGate(), 0, 1))
-    observables = SparsePauliOp(["IZ", "ZI"])
+    observables = ["IZ", "ZI"]
 
     cut_circuit = ck.get_locations_and_subcircuits(circuit)
     experiment = ck.get_experiment_circuits(cut_circuit, observables)
@@ -97,7 +97,7 @@ def test_results_carry_their_own_experiment():
     )
 
     assert results.experiment is experiment
-    assert len(ck.estimate_expectation_values(results)) == len(observables)
+    assert ck.estimate_expectation_values(results).shape == (len(observables),)
 
 
 def test_results_without_an_experiment_say_so():
@@ -121,7 +121,7 @@ def _wire_and_gate_cut():
     for circuit in (marked, plain):
         circuit.cx(1, 2)
         circuit.cx(2, 3)
-    return marked, plain, SparsePauliOp(["IIIZ", "IIZI", "IZII", "ZIII"])
+    return marked, plain, ["IIIZ", "IIZI", "IZII", "ZIII"]
 
 
 def _communicating_pair():
@@ -136,7 +136,7 @@ def _communicating_pair():
     for circuit in (marked, plain):
         circuit.cx(1, 2)
         circuit.cx(2, 3)
-    return marked, plain, SparsePauliOp(["IIIZ", "IIZI", "IZII", "ZIII"])
+    return marked, plain, ["IIIZ", "IIZI", "IZII", "ZIII"]
 
 
 @pytest.mark.sim
@@ -161,7 +161,7 @@ def test_a_sampler_can_run_the_experiment(name, case, options):
     marked, plain, observables = case()
     state = Statevector(plain)
     exact = np.array(
-        [float(np.real(state.expectation_value(p))) for p in observables.paulis]
+        [float(np.real(state.expectation_value(Pauli(p)))) for p in observables]
     )
 
     experiment = ck.get_experiment_circuits(

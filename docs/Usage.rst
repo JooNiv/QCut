@@ -12,7 +12,8 @@ QCut has been built at CSC - IT Center for Science (Finnish IT Center for Scienc
 Creating cut circuits and experiments
 -------------------------------------
 
-**1: Import needed packages**
+Import needed packages
+~~~~~~~~~~~~~~~~~~~~~~
 
 .. code:: python
 
@@ -26,7 +27,8 @@ Creating cut circuits and experiments
    from qiskit.primitives import StatevectorEstimator as Estimator, BackendEstimatorV2 as BackendEstimator
    from iqm.qiskit_iqm import IQMFakeAdonis
 
-**2: Start by defining a QuantumCircuit just like in Qiskit**
+Define a QuantumCircuit just like in Qiskit
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code:: python
 
@@ -43,8 +45,8 @@ Creating cut circuits and experiments
 
 .. image:: _static/images/circ1.png
 
-**3: Insert cuts to the circuit to denote where we want
-to cut the circuit**
+Insert cuts to denote where to cut the circuit
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Note that here we don’t insert any measurements. Measurements will be
 automatically handled by QCut.
@@ -71,8 +73,8 @@ is a single cut rather than a CZ with fix-up gates around it. See
 :doc:`gate cuts <examples/GateCuts>` and :doc:`wire cuts <examples/WireCuts>` for more on
 placing them, and :doc:`Theory` for where the decompositions come from.
 
-**4. Extract cut locations from the marked circuit and split it into
-independent subcircuits.**
+Extract cut locations and split into independent subcircuits
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code:: python
 
@@ -98,13 +100,18 @@ Now we can draw our subcircuits.
 
 .. image:: _static/images/circ11.png
 
-**5: Define observables and generate experiment circuits**
+Define observables and generate experiment circuits
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Observables are defined using the SparsePauliOp class from Qiskit.
+Observables are given the way Qiskit's estimator takes them: a Pauli label, a
+:code:`Pauli`, a :code:`SparsePauliOp`, a :code:`SparseObservable` (qiskit 2.1+), a
+:code:`{label: coefficient}` mapping, or any nested sequence of those. The expectation
+values come back shaped like what you pass, so a list of four observables gives four
+values, in order.
 
 .. code:: python
 
-   observables = SparsePauliOp(["IIIIZ", "IIIZI", "IIZII", "IIIZZ"])
+   observables = ["IIIIZ", "IIIZI", "IIZII", "IIIZZ"]
 
    cut_experiment = ck.get_experiment_circuits(cut_circuit, observables)
 
@@ -309,19 +316,15 @@ Comparing against the exact and noisy expectation values of the original circuit
 
 .. code:: python
 
-   obs = [ob.to_label() for ob in observables.paulis]
-
    estimator = Estimator()
    exact_expvals = [e.data.evs for e in
-      estimator.run([(x) for x in zip([circuit] * len(obs), obs)]).result()
+      estimator.run([(x) for x in zip([circuit] * len(observables), observables)]).result()
    ]
 
    tr = transpile(circuit, backend=fake)
 
-   tr_obs = observables.apply_layout(tr.layout)
-
    tr_obs_separate = [
-      SparsePauliOp(pauli.to_label()) for pauli in tr_obs.paulis
+      SparsePauliOp(label).apply_layout(tr.layout) for label in observables
    ]
 
    fake_estimator = BackendEstimator(backend=fake)
@@ -385,11 +388,12 @@ distribution over a chosen set of qubits can still be recovered from them. Pass
 :code:`run()` and :code:`run_cut_circuit()` take :code:`qubits` in the same way, and hand
 back the distribution rather than expectation values.
 
-This costs :code:`2**k` values for :code:`k` qubits but no extra circuits, since the Z
-observables it needs all commute. See
-:doc:`the derivation <theory/Probability_reconstruction>`.
+The whole distribution needs one measurement setting, so the experiment is the size it
+would have been for a single observable however many qubits are asked for. See
+:doc:`the derivation <theory/Probability_reconstruction>`. for how the distribution
+id reconstructed.
 
-The result is a dict, so it indexes and plots like one, and carries three views:
+The result is a mapping, so it indexes and plots like a dict, and carries three views:
 
 .. code:: python
 
@@ -398,6 +402,26 @@ The result is a dict, so it indexes and plots like one, and carries three views:
    probs.nearest_probabilities()   # closest true distribution, negatives projected away
    probs.counts()                  # scaled by the shots the experiment ran at
    probs.counts(shots=1000)        # or by any other shots
+
+The three dict views report, by default, the ten most likely bitstrings. Pass :code:`top` for a different
+number, or :code:`top=None` for all of them:
+
+.. code:: python
+
+   probs.quasi_probabilities(top=50)      # the fifty most likely
+   probs.counts(shots=1000, top=None)     # the whole distribution, as before
+
+Note that :code:`counts()` sums to :code:`shots` only with :code:`top=None` and
+Only :code:`quasi_probabilities()` gets cheaper this way since the other two project onto the
+nearest physical distribution first.
+
+Additionally you can get probabilities of a single bitstring or a marginal distribution over a subset of the qubits:
+
+.. code:: python
+
+   probs.top(100)               # the 100 most likely bitstrings, exactly
+   probs.probability_of('01')   # one bitstring, without the others
+   probs.marginal([0])          # a coarser distribution, summed over the rest
 
 Against the same circuit run whole:
 

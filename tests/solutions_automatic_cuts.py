@@ -1,5 +1,4 @@
 from qiskit import QuantumCircuit
-from qiskit.quantum_info import SparsePauliOp
 
 qc_1 = QuantumCircuit(3)
 qc_1.x(0)
@@ -55,12 +54,12 @@ cut_sizes = [2, 2, 3, 2, 2, 2]
 """
 
 test_observables = [
-    SparsePauliOp(["IIZ", "IZI", "ZII", "ZIZ", "ZZI", "ZZZ"]),
-    SparsePauliOp(["IIIZ", "IIZI", "IZII", "ZIII", "ZIIZ", "ZZZI", "ZZZZ"]),
-    SparsePauliOp(["IIIZ", "IIZI", "IZII", "ZIII", "ZIIZ", "ZZZI", "ZZZZ"]),
-    SparsePauliOp(["IIIIZ", "IIIZI", "IIZII", "IIZIZ", "ZZIIZ"]),
-    SparsePauliOp(["IIIZ", "IIZI", "IZII", "ZIII", "IZIZ", "ZIZZ"]),
-    SparsePauliOp(["IIZ", "IZI", "ZII", "ZIZ", "IZZ"]),
+    ["IIZ", "IZI", "ZII", "ZIZ", "ZZI", "ZZZ"],
+    ["IIIZ", "IIZI", "IZII", "ZIII", "ZIIZ", "ZZZI", "ZZZZ"],
+    ["IIIZ", "IIZI", "IZII", "ZIII", "ZIIZ", "ZZZI", "ZZZZ"],
+    ["IIIIZ", "IIIZI", "IIZII", "IIZIZ", "ZZIIZ"],
+    ["IIIZ", "IIZI", "IZII", "ZIII", "IZIZ", "ZIZZ"],
+    ["IIZ", "IZI", "ZII", "ZIZ", "IZZ"],
 ]
 
 

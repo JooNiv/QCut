@@ -88,7 +88,8 @@ iqm = ["iqm-client[qiskit]>=33"]
 
 [tool.setuptools.packages.find]
 where = ["."]
-exclude=["tests", "tests.*"]
+include = ["QCut", "QCut.*"]
+exclude = ["tests", "tests.*", "build*", "docs*", "benchmarks*"]
 
 
 [tool.setuptools_scm]

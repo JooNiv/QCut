@@ -1,7 +1,6 @@
 import pytest
 from qiskit import QuantumCircuit
 from qiskit.circuit.library import CXGate, XGate
-from qiskit.quantum_info import SparsePauliOp
 from qiskit_aer import AerSimulator
 
 import QCut as ck
@@ -54,7 +53,7 @@ def test_cut_gate_expectation_values():
 
     backend = AerSimulator()
 
-    observables = SparsePauliOp(["IIIZ", "IIZI", "IZII", "IIZZ"])
+    observables = ["IIIZ", "IIZI", "IZII", "IIZZ"]
 
     cut_experiment = ck.get_experiment_circuits(cut_qc, observables)
 
