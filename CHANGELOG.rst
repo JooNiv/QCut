@@ -43,6 +43,8 @@ Reconstructing a distribution no longer costs :code:`2**k`
   pays for the :code:`2**k` Pauli labels unless it asks for them, and the weights
   between them and the terms are never written out at all. Estimating them with
   :code:`estimate_expectation_values()` still works.
+- Reconstruction is now sparse, costing shots rather than :code:`2**num_qubits` per subcircuit.
+- Fixed :code:`top()` skipping unmeasured outcomes
 
 Observables as qiskit's estimator takes them
 --------------------------------------------
