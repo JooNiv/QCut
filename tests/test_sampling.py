@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 from qiskit import QuantumCircuit
 from qiskit.circuit.library import RZZGate, UnitaryGate
-from qiskit.quantum_info import SparsePauliOp, Statevector, random_unitary
+from qiskit.quantum_info import Pauli, Statevector, random_unitary
 from qiskit_aer import AerSimulator
 
 import QCut as ck
@@ -12,7 +12,7 @@ from QCut import CutOptions, cutGate
 from QCut.errors.qcuterror import QCutError
 from QCut.qpd.qpd_operations import qpd_for_location, sample_qpd_combinations
 
-OBSERVABLES = SparsePauliOp(["IZ", "ZI", "ZZ"])
+OBSERVABLES = ["IZ", "ZI", "ZZ"]
 
 
 def _circuit(gate):
@@ -30,7 +30,7 @@ def _reference(gate):
     circuit.append(gate, [0, 1])
     state = Statevector(circuit)
     return np.array(
-        [float(np.real(state.expectation_value(p))) for p in OBSERVABLES.paulis]
+        [float(np.real(state.expectation_value(Pauli(p)))) for p in OBSERVABLES]
     )
 
 
@@ -65,9 +65,7 @@ def test_auto_samples_once_the_product_is_large():
         exact_groups *= len(qpd_for_location(location))
     assert exact_groups == 58 * 58
 
-    experiment = ck.get_experiment_circuits(
-        cut_circuit, SparsePauliOp(["IIZ", "IZI", "ZII"])
-    )
+    experiment = ck.get_experiment_circuits(cut_circuit, ["IIZ", "IZI", "ZII"])
     assert experiment.sampled
     assert experiment.num_draws == 120
     assert experiment.num_groups <= 120

@@ -1,0 +1,1 @@
+"""QCut error types."""

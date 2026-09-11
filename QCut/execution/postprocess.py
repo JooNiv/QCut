@@ -173,6 +173,51 @@ def _bit_layout(
     return layout
 
 
+def _outcome_rows(sub: list, offsets: list[int]) -> tuple[np.ndarray, np.ndarray]:
+    """One subcircuit's weight for each outcome it actually produced.
+
+    Args:
+        sub (list): the subcircuit's results within one group.
+        offsets (list[int]): where in the subcircuit's own measurements each of its bits
+            sits, as :func:`_bit_layout` reports them.
+
+    Returns:
+        tuple[np.ndarray, np.ndarray]: the outcomes carrying a weight, ascending, and
+        their weights. Bit ``t`` of an outcome is the bit ``offsets[t]`` names.
+    """
+    weights: dict[int, float] = {}
+    for res in sub:
+        outcome = 0
+        for bit, offset in enumerate(offsets):
+            if res.measurements[0][offset] < 0:
+                outcome |= 1 << bit
+        weights[outcome] = weights.get(outcome, 0.0) + res.count * np.prod(
+            res.measurements[1]
+        )
+    if not weights:
+        return np.empty(0, dtype=np.intp), np.empty(0)
+    idx = np.fromiter(sorted(weights), dtype=np.intp, count=len(weights))
+    return idx, np.array([weights[int(i)] for i in idx])
+
+
+def _outcome_weights(sub: list, offsets: list[int]) -> np.ndarray:
+    """The same weights written out, for the readers that index them densely.
+
+    Args:
+        sub (list): the subcircuit's results within one group.
+        offsets (list[int]): where in the subcircuit's own measurements each of its bits
+            sits, as :func:`_bit_layout` reports them.
+
+    Returns:
+        np.ndarray: ``2**len(offsets)`` weights, indexed so that bit ``t`` of the index
+        is the bit ``offsets[t]`` names.
+    """
+    idx, values = _outcome_rows(sub, offsets)
+    weights = np.zeros(1 << len(offsets))
+    weights[idx] = values
+    return weights
+
+
 def _outcome_spectrum(
     results_processed: list,
     experiment,
@@ -214,13 +259,7 @@ def _outcome_spectrum(
         group = np.full(width, float(parity * coefficient))
         layout = _bit_layout(subcircuits, positions, experiment.map_qubit)
         for sub, (bits, offsets) in zip(subcircuits, layout):
-            weights = np.zeros(1 << len(bits))
-            for res in sub:
-                outcome = 0
-                for bit, offset in enumerate(offsets):
-                    if res.measurements[0][offset] < 0:
-                        outcome |= 1 << bit
-                weights[outcome] += res.count * np.prod(res.measurements[1])
+            weights = _outcome_weights(sub, offsets)
 
             key = tuple(bits)
             if key not in spread:
@@ -349,7 +388,9 @@ def estimate_expectation_values(results: RawResult) -> np.ndarray:
 
     Returns:
         np.ndarray:
-            one expectation value per observable, in the order they were given
+            one expectation value per observable, shaped like the observables the
+            experiment was built with, so a single observable comes back as a
+            zero-dimensional array
 
     """
     raw_results = results
@@ -369,15 +410,17 @@ def estimate_expectation_values(results: RawResult) -> np.ndarray:
     )
     parity = np.power(-1, wire_cuts + 1)
 
-    measurement_settings = _combine_pauli_ops(experiment.observables)
+    spec = experiment.observable_spec
+    terms = experiment.observable_terms
+    measurement_settings = _combine_pauli_ops(terms)
 
     result_for_obs = []
 
-    for obs in experiment.observables.paulis:
+    for obs in terms.paulis:
         obs_circuit_info = _get_observable_circuit_index(obs, measurement_settings)
         result_for_obs.append(obs_circuit_info)
 
-    expectation_values = np.zeros(len(experiment.observables))
+    expectation_values = np.zeros(len(terms))
 
     for obs_data in result_for_obs:
         if obs_data["circuit_index"] is None:
@@ -405,4 +448,4 @@ def estimate_expectation_values(results: RawResult) -> np.ndarray:
             parity,
         )
 
-    return expectation_values
+    return spec.combine(expectation_values)

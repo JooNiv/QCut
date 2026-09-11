@@ -20,6 +20,7 @@ from QCut.execution.circuit_knitting import (
     run_cut_circuit,
     run_experiments,
 )
+from QCut.execution.observables import ObservablesLike
 from QCut.execution.parallel import ParallelBackend
 from QCut.execution.postprocess import (
     estimate_expectation_values,
@@ -67,4 +68,5 @@ __all__ = [
     "JobEstimate",
     "RawResult",
     "CircuitResult",
+    "ObservablesLike",
 ]
