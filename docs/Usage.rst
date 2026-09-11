@@ -12,7 +12,8 @@ QCut has been built at CSC - IT Center for Science (Finnish IT Center for Scienc
 Creating cut circuits and experiments
 -------------------------------------
 
-**1: Import needed packages**
+Import needed packages
+~~~~~~~~~~~~~~~~~~~~~~
 
 .. code:: python
 
@@ -26,7 +27,8 @@ Creating cut circuits and experiments
    from qiskit.primitives import StatevectorEstimator as Estimator, BackendEstimatorV2 as BackendEstimator
    from iqm.qiskit_iqm import IQMFakeAdonis
 
-**2: Start by defining a QuantumCircuit just like in Qiskit**
+Define a QuantumCircuit just like in Qiskit
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code:: python
 
@@ -43,8 +45,8 @@ Creating cut circuits and experiments
 
 .. image:: _static/images/circ1.png
 
-**3: Insert cuts to the circuit to denote where we want
-to cut the circuit**
+Insert cuts to denote where to cut the circuit
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Note that here we don’t insert any measurements. Measurements will be
 automatically handled by QCut.
@@ -71,8 +73,8 @@ is a single cut rather than a CZ with fix-up gates around it. See
 :doc:`gate cuts <examples/GateCuts>` and :doc:`wire cuts <examples/WireCuts>` for more on
 placing them, and :doc:`Theory` for where the decompositions come from.
 
-**4. Extract cut locations from the marked circuit and split it into
-independent subcircuits.**
+Extract cut locations and split into independent subcircuits
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code:: python
 
@@ -98,7 +100,8 @@ Now we can draw our subcircuits.
 
 .. image:: _static/images/circ11.png
 
-**5: Define observables and generate experiment circuits**
+Define observables and generate experiment circuits
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Observables are given the way Qiskit's estimator takes them: a Pauli label, a
 :code:`Pauli`, a :code:`SparsePauliOp`, a :code:`SparseObservable`, a
