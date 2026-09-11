@@ -31,7 +31,7 @@ from QCut.execution.basis_transform import (
 from QCut.execution.postprocess import estimate_expectation_values
 from QCut.execution.probabilities import (
     QuasiProbabilities,
-    _all_z_paulis_for_subset,
+    _validate_qubits,
     estimate_probabilities,
 )
 from QCut.execution.qcutresult import CircuitResult, RawResult
@@ -242,9 +242,7 @@ def get_experiment_circuits(  # noqa: C901
     _check_measurement_spec(observables, qubits)
 
     if qubits is not None:
-        observables = _all_z_paulis_for_subset(cut_circuit.uncut_num_qubits, qubits)
-
-    assert observables is not None
+        _validate_qubits(cut_circuit.uncut_num_qubits, qubits)
 
     num_qubits = 0
     for subcircuit in cut_circuit.subcircuits:
@@ -253,10 +251,12 @@ def get_experiment_circuits(  # noqa: C901
             if cr.name == "meas":
                 num_qubits += cr.size
 
-    if all(len(obs) != num_qubits for obs in observables.paulis):
+    if observables is not None and all(
+        len(obs) != num_qubits for obs in observables.paulis
+    ):
         raise ValueError(
-            f"""ALL observable lengths must match 
-            the number of qubits in the original uncut circuit 
+            f"""ALL observable lengths must match
+            the number of qubits in the original uncut circuit
             ({num_qubits})."""
         )
 
@@ -279,7 +279,15 @@ def get_experiment_circuits(  # noqa: C901
         normalised._layout = subcircuit.layout
         subcircuits.append(normalised)
 
-    measurement_settings = _combine_pauli_ops(observables)
+    if qubits is not None:
+        # Z strings all commute, so every one of them is covered by this single
+        # setting so we can just use that directly.
+        measurement_settings = [dict.fromkeys(qubits, "Z")]
+    else:
+        # _check_measurement_spec has already refused the case where neither the
+        # observables nor the qubits were given, so there are observables here.
+        assert observables is not None
+        measurement_settings = _combine_pauli_ops(observables)
 
     if len(measurement_settings) > 1:
         logger.info(
@@ -581,6 +589,7 @@ def get_experiment_circuits(  # noqa: C901
         qpd_bits=qpd_bits,
         gamma=cut_circuit.gamma,
         optimal_gamma=cut_circuit.optimal_gamma,
+        uncut_num_qubits=cut_circuit.uncut_num_qubits,
     )
 
     logger.info(f"Generated {cut_experiment.num_circuits} circuits for the experiment.")
