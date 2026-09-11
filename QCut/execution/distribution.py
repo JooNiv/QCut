@@ -152,7 +152,7 @@ class SeparableDistribution:
             exactly one, which is what makes the terms separable.
         modes (list[Mode | np.ndarray]): per mode, the weight each group gave each of
             its local outcomes, where local bit ``t`` is the outcome bit ``bits[i][t]``.
-            Weights carry the qpd signs. A dense ``(2**len(bits[i]), groups)`` 
+            Weights carry the qpd signs. A dense ``(2**len(bits[i]), groups)``
             array is accepted and kept by index; see :class:`Mode`.
         coefficients (np.ndarray): one per group, carrying the quasiprobability
             coefficient and the shared wire cut parity.
