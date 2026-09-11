@@ -188,7 +188,8 @@ cut_circuit.subcircuits[2].draw("mpl")
 **5: Generate experiment circuits**
 
 Observables are given the way Qiskit's estimator takes them: a Pauli label, a `Pauli`, a
-`SparsePauliOp`, a `SparseObservable`, a `{label: coefficient}` mapping, or any nested
+`SparsePauliOp`, a `SparseObservable` (qiskit 2.1+), a `{label: coefficient}` mapping,
+or any nested
 sequence of those. The expectation values come back shaped like what you pass.
 
 ```python
