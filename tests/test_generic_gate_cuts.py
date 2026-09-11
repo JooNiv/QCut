@@ -11,7 +11,7 @@ from qiskit.circuit.library import (
     UnitaryGate,
     XXPlusYYGate,
 )
-from qiskit.quantum_info import SparsePauliOp, Statevector, random_unitary
+from qiskit.quantum_info import Pauli, Statevector, random_unitary
 from qiskit_aer import AerSimulator
 
 import QCut as ck
@@ -20,7 +20,7 @@ from QCut.errors.qcuterror import QCutError
 from QCut.qpd.qpd_gates import CutTwoQubitGate
 from QCut.qpd.qpd_operations import qpd_for_location
 
-OBSERVABLES = SparsePauliOp(["IZ", "ZI", "ZZ"])
+OBSERVABLES = ["IZ", "ZI", "ZZ"]
 # Shot noise on the reconstructed values, in line with the rest of the suite.
 TOLERANCE = 0.1
 
@@ -32,7 +32,7 @@ def _reference(gate) -> list[float]:
     circuit.ry(0.7, 1)
     circuit.append(gate, [0, 1])
     state = Statevector(circuit)
-    return [float(np.real(state.expectation_value(p))) for p in OBSERVABLES.paulis]
+    return [float(np.real(state.expectation_value(Pauli(p)))) for p in OBSERVABLES]
 
 
 def _cut_and_run(gate):
@@ -212,7 +212,7 @@ def test_automatic_cut_finding_uses_a_generated_qpd():
     location = cut_circuit.cut_locations[0]
     assert location.gate_name == "rzz"
 
-    observables = SparsePauliOp(["IIIZ", "IIZI", "IZII", "ZIII"])
+    observables = ["IIIZ", "IIZI", "IZII", "ZIII"]
     experiment = ck.get_experiment_circuits(cut_circuit, observables)
     assert experiment.num_groups == 6
     theta = float(location.gate.params[0])
@@ -223,8 +223,9 @@ def test_automatic_cut_finding_uses_a_generated_qpd():
     results = ck.run_experiments(experiment, backend=AerSimulator())
     values = ck.estimate_expectation_values(results)
     state = Statevector(circuit)
-    for pauli, actual in zip(observables.paulis, values):
-        assert abs(float(np.real(state.expectation_value(pauli))) - actual) < TOLERANCE
+    for pauli, actual in zip(observables, values):
+        exact = float(np.real(state.expectation_value(Pauli(pauli))))
+        assert abs(exact - actual) < TOLERANCE
 
 
 def test_gate_weight_is_log_gamma_and_handles_unknown_gates():

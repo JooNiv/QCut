@@ -8,7 +8,6 @@ import numpy as np
 import pytest
 from qiskit import QuantumCircuit, QuantumRegister
 from qiskit.circuit import Instruction
-from qiskit.quantum_info import SparsePauliOp
 from qiskit_aer import AerSimulator
 
 import QCut as ck
@@ -159,7 +158,7 @@ def test_the_estimate_uses_probabilities_not_raw_counts():
     circuit.rx(0.4, 2)
     circuit.cx(0, 1)
     circuit.append(ck.cutSWAP(), [1, 2])
-    observables = SparsePauliOp(["IIZ", "IZI", "ZII"])
+    observables = ["IIZ", "IZI", "ZII"]
 
     cut_circuit = ck.get_locations_and_subcircuits(circuit)
     experiment = ck.get_experiment_circuits(cut_circuit, observables)
@@ -202,7 +201,7 @@ def test_a_group_contributes_in_proportion_to_its_coefficient():
     circuit.ry(0.7, 1)
     circuit.cx(0, 1)
     circuit.append(ck.cutSWAP(), [1, 2])
-    observables = SparsePauliOp(["IIZ", "IZI", "ZII"])
+    observables = ["IIZ", "IZI", "ZII"]
 
     cut_circuit = ck.get_locations_and_subcircuits(circuit)
     experiment = ck.get_experiment_circuits(cut_circuit, observables)
@@ -234,7 +233,7 @@ swap_circuit = QuantumCircuit(2)
 swap_circuit.h(0)
 swap_circuit.append(ck.cutSWAP(), [0, 1])
 
-_swap_observables = SparsePauliOp(["IZ", "ZI"])
+_swap_observables = ["IZ", "ZI"]
 _swap_expected = [1.0, 0.0]
 
 
@@ -258,7 +257,7 @@ iswap_circuit = QuantumCircuit(2)
 iswap_circuit.h(0)
 iswap_circuit.append(ck.cutISWAP(), [0, 1])
 
-_iswap_observables = SparsePauliOp(["IZ", "ZI"])
+_iswap_observables = ["IZ", "ZI"]
 _iswap_expected = [1.0, 0.0]
 
 
