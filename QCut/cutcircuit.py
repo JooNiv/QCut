@@ -7,9 +7,16 @@ from __future__ import annotations
 from typing import Iterable
 
 from qiskit import QuantumCircuit
+from qiskit.primitives.containers.observables_array import ObservablesArray
 from qiskit.quantum_info import SparsePauliOp
 
 from QCut.cutlocation import CutLocation, SingleQubitCutLocation
+from QCut.execution.observables import (
+    ObservablesLike,
+    ObservableSpec,
+    coerce_observables,
+    per_term_observables,
+)
 from QCut.execution.probabilities import _all_z_paulis_for_subset
 from QCut.options import CutOptions, resolve
 
@@ -123,7 +130,7 @@ class CutExperiment:
         map_qubit: dict[int, int],
         coefficients: Iterable[float],
         can_reconstruct_probabilities: bool = False,
-        observables: SparsePauliOp | None = None,
+        observables: ObservablesLike | ObservableSpec | None = None,
         qubits: list[int] | None = None,
         backend=None,
         options: CutOptions | None = None,
@@ -156,6 +163,9 @@ class CutExperiment:
         ``uncut_num_qubits`` is the width of the circuit before it was cut, which the
         observables of a ``qubits`` experiment span. Only that width is kept, since the
         observables themselves are built on demand -- see :attr:`observables`.
+
+        ``observables`` is taken the way qiskit's estimator takes them, and is kept as
+        an :class:`QCut.execution.observables.ObservableSpec`.
         """
 
         self.experiments = experiment_circuits
@@ -163,7 +173,9 @@ class CutExperiment:
         self.cut_locations = cut_locations
         self.map_qubit = map_qubit
         self.coefficients = coefficients
-        self._observables = observables
+        self._observables = (
+            None if observables is None else coerce_observables(observables)
+        )
         self.qubits = qubits
         self._uncut_num_qubits = uncut_num_qubits
         self.options = resolve(options)
@@ -175,8 +187,8 @@ class CutExperiment:
         self._can_reconstruct_probabilities = can_reconstruct_probabilities
 
     @property
-    def observables(self) -> SparsePauliOp | None:
-        """The observables these circuits estimate.
+    def observable_spec(self) -> ObservableSpec | None:
+        """The observables and their terms together, with the weights between them.
 
         An experiment built from ``qubits`` is built for every Pauli Z over them, and
         there are ``2**k`` of those. They all share one measurement setting, so none of
@@ -196,10 +208,31 @@ class CutExperiment:
                     "they came from, so its observables cannot be built. Pass "
                     "uncut_num_qubits, or the observables themselves."
                 )
-            self._observables = _all_z_paulis_for_subset(
-                self._uncut_num_qubits, self.qubits
+            self._observables = per_term_observables(
+                _all_z_paulis_for_subset(self._uncut_num_qubits, self.qubits)
             )
         return self._observables
+
+    @property
+    def observables(self) -> ObservablesArray | None:
+        """The observables this experiment estimates, as qiskit's own container.
+
+        Its shape is the shape of the expectation values that come back, so a single
+        observable is a zero-dimensional array and a list of ``n`` is ``(n,)``. Note
+        that this is not what the circuits measure. See :attr:`observable_terms`.
+        """
+        spec = self.observable_spec
+        return None if spec is None else spec.array
+
+    @property
+    def observable_terms(self) -> SparsePauliOp | None:
+        """The distinct Pauli terms the circuits measure, each appearing once.
+
+        An observable is a weighted sum of these, and separate observables share them,
+        so there are usually fewer terms than observables asked for.
+        """
+        spec = self.observable_spec
+        return None if spec is None else spec.terms
 
     def assign_parameters(
         self, parameters: dict, inplace=False

@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 from qiskit import QuantumCircuit
 from qiskit.circuit.library import RZZGate
-from qiskit.quantum_info import SparsePauliOp, Statevector
+from qiskit.quantum_info import Pauli, Statevector
 from qiskit_aer import AerSimulator
 
 import QCut as ck
@@ -158,7 +158,7 @@ def _blocks(n_wires, with_cut=True):
 
 
 def _zs(width):
-    return SparsePauliOp(["I" * (width - 1 - k) + "Z" + "I" * k for k in range(width)])
+    return ["I" * (width - 1 - k) + "Z" + "I" * k for k in range(width)]
 
 
 def _run(circuit, observables, options, shots=2**12):
@@ -171,7 +171,7 @@ def _run(circuit, observables, options, shots=2**12):
 
 def _exact(circuit, observables):
     state = Statevector(circuit)
-    return [float(np.real(state.expectation_value(p))) for p in observables.paulis]
+    return [float(np.real(state.expectation_value(Pauli(p)))) for p in observables]
 
 
 @pytest.mark.parametrize(

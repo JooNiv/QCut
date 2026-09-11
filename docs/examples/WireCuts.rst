@@ -56,7 +56,6 @@ is derived in :doc:`../Theory`.
 .. code:: python
 
    from qiskit import QuantumCircuit
-   from qiskit.quantum_info import SparsePauliOp
    import QCut as ck
    from QCut import cut, CutOptions
 
@@ -72,7 +71,7 @@ is derived in :doc:`../Theory`.
    circuit.cx(1, 2)
    circuit.cx(2, 3)
 
-   observables = SparsePauliOp(["IIIZ", "IIZI", "IZII", "IIZZ"])
+   observables = ["IIIZ", "IIZI", "IZII", "IIZZ"]
 
    cut_circuit = ck.get_locations_and_subcircuits(circuit)
    experiment = ck.get_experiment_circuits(cut_circuit, observables)

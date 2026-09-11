@@ -369,7 +369,9 @@ def estimate_expectation_values(results: RawResult) -> np.ndarray:
 
     Returns:
         np.ndarray:
-            one expectation value per observable, in the order they were given
+            one expectation value per observable, shaped like the observables the
+            experiment was built with, so a single observable comes back as a
+            zero-dimensional array
 
     """
     raw_results = results
@@ -389,15 +391,17 @@ def estimate_expectation_values(results: RawResult) -> np.ndarray:
     )
     parity = np.power(-1, wire_cuts + 1)
 
-    measurement_settings = _combine_pauli_ops(experiment.observables)
+    spec = experiment.observable_spec
+    terms = experiment.observable_terms
+    measurement_settings = _combine_pauli_ops(terms)
 
     result_for_obs = []
 
-    for obs in experiment.observables.paulis:
+    for obs in terms.paulis:
         obs_circuit_info = _get_observable_circuit_index(obs, measurement_settings)
         result_for_obs.append(obs_circuit_info)
 
-    expectation_values = np.zeros(len(experiment.observables))
+    expectation_values = np.zeros(len(terms))
 
     for obs_data in result_for_obs:
         if obs_data["circuit_index"] is None:
@@ -425,4 +429,4 @@ def estimate_expectation_values(results: RawResult) -> np.ndarray:
             parity,
         )
 
-    return expectation_values
+    return spec.combine(expectation_values)

@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 from qiskit import QuantumCircuit
 from qiskit.circuit.library import CXGate
-from qiskit.quantum_info import SparsePauliOp, Statevector
+from qiskit.quantum_info import Statevector
 from qiskit_aer import AerSimulator
 
 import QCut as ck
@@ -252,7 +252,7 @@ def test_every_z_string_shares_one_measurement_setting():
         experiment = ck.get_experiment_circuits(
             ck.get_locations_and_subcircuits(marked), qubits=list(range(width))
         )
-        assert len(experiment.observables) == 2**width - 1
+        assert experiment.observables.size == 2**width - 1
         assert experiment.num_obs_groups == 1
         counts.append(experiment.num_circuits)
 
@@ -262,7 +262,7 @@ def test_every_z_string_shares_one_measurement_setting():
 def test_probabilities_need_an_experiment_built_from_qubits():
     marked, _plain = _bell_with_a_gate_cut()
     experiment = ck.get_experiment_circuits(
-        ck.get_locations_and_subcircuits(marked), observables=SparsePauliOp(["IIZ"])
+        ck.get_locations_and_subcircuits(marked), observables=["IIZ"]
     )
     results = ck.run_experiments(experiment, shots=128, backend=AerSimulator())
 
@@ -278,9 +278,7 @@ def test_observables_and_qubits_are_mutually_exclusive():
     with pytest.raises(ValueError, match="Either observables or qubits"):
         ck.get_experiment_circuits(cut_circuit)
     with pytest.raises(ValueError, match="Only one of observables or qubits"):
-        ck.get_experiment_circuits(
-            cut_circuit, observables=SparsePauliOp(["IIZ"]), qubits=[0]
-        )
+        ck.get_experiment_circuits(cut_circuit, observables=["IIZ"], qubits=[0])
 
 
 @pytest.mark.sim
@@ -310,7 +308,7 @@ def test_the_shorthands_also_need_exactly_one_of_the_two(shorthand):
     with pytest.raises(ValueError, match="Either observables or qubits"):
         getattr(ck, shorthand)(target)
     with pytest.raises(ValueError, match="Only one of observables or qubits"):
-        getattr(ck, shorthand)(target, SparsePauliOp(["IIZ"]), qubits=[0])
+        getattr(ck, shorthand)(target, ["IIZ"], qubits=[0])
 
 
 @pytest.mark.parametrize(
@@ -483,7 +481,7 @@ def test_the_observables_are_only_built_when_something_asks_for_them():
     )
 
     assert experiment._observables is None, "not built while nothing has asked"
-    assert len(experiment.observables) == 2**3 - 1
+    assert experiment.observables.size == 2**3 - 1
     assert experiment._observables is not None, "and kept once it has"
 
 
