@@ -42,7 +42,7 @@
 
     <script src="_static/jquery.js?v=5d32c60e"></script>
     <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-    <script src="_static/documentation_options.js?v=3ddcfa7e"></script>
+    <script src="_static/documentation_options.js?v=670ce57a"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/scripts/sphinx-book-theme.js?v=fab101a9"></script>
@@ -54,7 +54,7 @@
     <link rel="prev" title="QCut documentation" href="index.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="2.1.4.post1.dev9+gc8c23de33" />
+  <meta name="docsearch:version" content="2.1.4.post1.dev12+gf721d404c" />
   </head>
   
   
@@ -177,10 +177,7 @@
 </details></li>
 <li class="toctree-l1"><a class="reference internal" href="Acknowledgement.html">Acknowledgements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="License.html">License</a></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="QCut.html">QCut API reference</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="_autosummary/QCut.html">QCut</a></li>
-</ul>
-</details></li>
+<li class="toctree-l1"><a class="reference internal" href="QCut.html">QCut API reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Changelog.html">Changelog</a></li>
 </ul>
 
@@ -328,6 +325,11 @@
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#creating-cut-circuits-and-experiments">Creating cut circuits and experiments</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#import-needed-packages">Import needed packages</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#define-a-quantumcircuit-just-like-in-qiskit">Define a QuantumCircuit just like in Qiskit</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#insert-cuts-to-denote-where-to-cut-the-circuit">Insert cuts to denote where to cut the circuit</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#extract-cut-locations-and-split-into-independent-subcircuits">Extract cut locations and split into independent subcircuits</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#define-observables-and-generate-experiment-circuits">Define observables and generate experiment circuits</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#what-a-cut-costs">What a cut costs</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cheaper-decompositions">Cheaper decompositions</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#options">Options</a></li>
@@ -364,7 +366,8 @@ with IQM’s qpus and the Finnish Quantum Computing Infrastructure (<a class="re
 <p>QCut has been built at CSC - IT Center for Science (Finnish IT Center for Science)</p>
 <section id="creating-cut-circuits-and-experiments">
 <h2>Creating cut circuits and experiments<a class="headerlink" href="#creating-cut-circuits-and-experiments" title="Link to this heading">#</a></h2>
-<p><strong>1: Import needed packages</strong></p>
+<section id="import-needed-packages">
+<h3>Import needed packages<a class="headerlink" href="#import-needed-packages" title="Link to this heading">#</a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">QCut</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ck</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">QCut</span><span class="w"> </span><span class="kn">import</span> <span class="n">cut</span><span class="p">,</span> <span class="n">cutGate</span><span class="p">,</span> <span class="n">CutOptions</span><span class="p">,</span> <span class="n">find_cuts</span>
@@ -376,7 +379,9 @@ with IQM’s qpus and the Finnish Quantum Computing Infrastructure (<a class="re
 <span class="kn">from</span><span class="w"> </span><span class="nn">iqm.qiskit_iqm</span><span class="w"> </span><span class="kn">import</span> <span class="n">IQMFakeAdonis</span>
 </pre></div>
 </div>
-<p><strong>2: Start by defining a QuantumCircuit just like in Qiskit</strong></p>
+</section>
+<section id="define-a-quantumcircuit-just-like-in-qiskit">
+<h3>Define a QuantumCircuit just like in Qiskit<a class="headerlink" href="#define-a-quantumcircuit-just-like-in-qiskit" title="Link to this heading">#</a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">circuit</span> <span class="o">=</span> <span class="n">QuantumCircuit</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
 
 <span class="k">for</span> <span class="n">qubit</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">):</span>
@@ -390,8 +395,9 @@ with IQM’s qpus and the Finnish Quantum Computing Infrastructure (<a class="re
 </pre></div>
 </div>
 <img alt="_images/circ1.png" src="_images/circ1.png" />
-<p><strong>3: Insert cuts to the circuit to denote where we want
-to cut the circuit</strong></p>
+</section>
+<section id="insert-cuts-to-denote-where-to-cut-the-circuit">
+<h3>Insert cuts to denote where to cut the circuit<a class="headerlink" href="#insert-cuts-to-denote-where-to-cut-the-circuit" title="Link to this heading">#</a></h3>
 <p>Note that here we don’t insert any measurements. Measurements will be
 automatically handled by QCut.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">marked_circuit</span> <span class="o">=</span> <span class="n">QuantumCircuit</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
@@ -413,8 +419,9 @@ be cut, with the decomposition derived from the gate’s KAK coordinates, so the
 is a single cut rather than a CZ with fix-up gates around it. See
 <a class="reference internal" href="examples/GateCuts.html"><span class="doc">gate cuts</span></a> and <a class="reference internal" href="examples/WireCuts.html"><span class="doc">wire cuts</span></a> for more on
 placing them, and <a class="reference internal" href="Theory.html"><span class="doc">Theory</span></a> for where the decompositions come from.</p>
-<p><strong>4. Extract cut locations from the marked circuit and split it into
-independent subcircuits.</strong></p>
+</section>
+<section id="extract-cut-locations-and-split-into-independent-subcircuits">
+<h3>Extract cut locations and split into independent subcircuits<a class="headerlink" href="#extract-cut-locations-and-split-into-independent-subcircuits" title="Link to this heading">#</a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cut_circuit</span> <span class="o">=</span> <span class="n">ck</span><span class="o">.</span><span class="n">get_locations_and_subcircuits</span><span class="p">(</span><span class="n">marked_circuit</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -431,9 +438,15 @@ independent subcircuits.</strong></p>
 </pre></div>
 </div>
 <img alt="_images/circ11.png" src="_images/circ11.png" />
-<p><strong>5: Define observables and generate experiment circuits</strong></p>
-<p>Observables are defined using the SparsePauliOp class from Qiskit.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">observables</span> <span class="o">=</span> <span class="n">SparsePauliOp</span><span class="p">([</span><span class="s2">&quot;IIIIZ&quot;</span><span class="p">,</span> <span class="s2">&quot;IIIZI&quot;</span><span class="p">,</span> <span class="s2">&quot;IIZII&quot;</span><span class="p">,</span> <span class="s2">&quot;IIIZZ&quot;</span><span class="p">])</span>
+</section>
+<section id="define-observables-and-generate-experiment-circuits">
+<h3>Define observables and generate experiment circuits<a class="headerlink" href="#define-observables-and-generate-experiment-circuits" title="Link to this heading">#</a></h3>
+<p>Observables are given the way Qiskit’s estimator takes them: a Pauli label, a
+<code class="code docutils literal notranslate"><span class="pre">Pauli</span></code>, a <code class="code docutils literal notranslate"><span class="pre">SparsePauliOp</span></code>, a <code class="code docutils literal notranslate"><span class="pre">SparseObservable</span></code> (qiskit 2.1+), a
+<code class="code docutils literal notranslate"><span class="pre">{label:</span> <span class="pre">coefficient}</span></code> mapping, or any nested sequence of those. The expectation
+values come back shaped like what you pass, so a list of four observables gives four
+values, in order.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">observables</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;IIIIZ&quot;</span><span class="p">,</span> <span class="s2">&quot;IIIZI&quot;</span><span class="p">,</span> <span class="s2">&quot;IIZII&quot;</span><span class="p">,</span> <span class="s2">&quot;IIIZZ&quot;</span><span class="p">]</span>
 
 <span class="n">cut_experiment</span> <span class="o">=</span> <span class="n">ck</span><span class="o">.</span><span class="n">get_experiment_circuits</span><span class="p">(</span><span class="n">cut_circuit</span><span class="p">,</span> <span class="n">observables</span><span class="p">)</span>
 
@@ -446,6 +459,7 @@ the same split can be reused for several observable sets. Both <code class="code
 <code class="code docutils literal notranslate"><span class="pre">CutExperiment</span></code> implement the <code class="code docutils literal notranslate"><span class="pre">assign_parameters()</span></code> function of
 <code class="code docutils literal notranslate"><span class="pre">Qiskit.QuantumCircuit</span></code>.</p>
 <p>Click <a class="reference download internal" download="" href="_downloads/72b7f72ab949efe38d6bef6ecbc57581/QCutBasicUsage.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">here</span></code></a> to download example notebook.</p>
+</section>
 <section id="what-a-cut-costs">
 <h3>What a cut costs<a class="headerlink" href="#what-a-cut-costs" title="Link to this heading">#</a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">cut_circuit</span><span class="o">.</span><span class="n">gamma</span><span class="p">,</span> <span class="n">cut_circuit</span><span class="o">.</span><span class="n">optimal_gamma</span><span class="p">)</span>
@@ -611,19 +625,15 @@ takes.</p>
 from QCut contain mid-circuit measurements and that sampler refuses those.
 <code class="code docutils literal notranslate"><span class="pre">qiskit_aer.primitives.SamplerV2</span></code> and <code class="code docutils literal notranslate"><span class="pre">BackendSamplerV2</span></code> are both fine.</p>
 <p>Comparing against the exact and noisy expectation values of the original circuit:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">obs</span> <span class="o">=</span> <span class="p">[</span><span class="n">ob</span><span class="o">.</span><span class="n">to_label</span><span class="p">()</span> <span class="k">for</span> <span class="n">ob</span> <span class="ow">in</span> <span class="n">observables</span><span class="o">.</span><span class="n">paulis</span><span class="p">]</span>
-
-<span class="n">estimator</span> <span class="o">=</span> <span class="n">Estimator</span><span class="p">()</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">estimator</span> <span class="o">=</span> <span class="n">Estimator</span><span class="p">()</span>
 <span class="n">exact_expvals</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">evs</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span>
-   <span class="n">estimator</span><span class="o">.</span><span class="n">run</span><span class="p">([(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">([</span><span class="n">circuit</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">obs</span><span class="p">),</span> <span class="n">obs</span><span class="p">)])</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
+   <span class="n">estimator</span><span class="o">.</span><span class="n">run</span><span class="p">([(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">([</span><span class="n">circuit</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">observables</span><span class="p">),</span> <span class="n">observables</span><span class="p">)])</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
 <span class="p">]</span>
 
 <span class="n">tr</span> <span class="o">=</span> <span class="n">transpile</span><span class="p">(</span><span class="n">circuit</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="n">fake</span><span class="p">)</span>
 
-<span class="n">tr_obs</span> <span class="o">=</span> <span class="n">observables</span><span class="o">.</span><span class="n">apply_layout</span><span class="p">(</span><span class="n">tr</span><span class="o">.</span><span class="n">layout</span><span class="p">)</span>
-
 <span class="n">tr_obs_separate</span> <span class="o">=</span> <span class="p">[</span>
-   <span class="n">SparsePauliOp</span><span class="p">(</span><span class="n">pauli</span><span class="o">.</span><span class="n">to_label</span><span class="p">())</span> <span class="k">for</span> <span class="n">pauli</span> <span class="ow">in</span> <span class="n">tr_obs</span><span class="o">.</span><span class="n">paulis</span>
+   <span class="n">SparsePauliOp</span><span class="p">(</span><span class="n">label</span><span class="p">)</span><span class="o">.</span><span class="n">apply_layout</span><span class="p">(</span><span class="n">tr</span><span class="o">.</span><span class="n">layout</span><span class="p">)</span> <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">observables</span>
 <span class="p">]</span>
 
 <span class="n">fake_estimator</span> <span class="o">=</span> <span class="n">BackendEstimator</span><span class="p">(</span><span class="n">backend</span><span class="o">=</span><span class="n">fake</span><span class="p">)</span>
@@ -672,15 +682,31 @@ distribution over a chosen set of qubits can still be recovered from them. Pass
 <p><code class="docutils literal notranslate"><span class="pre">{'00':</span> <span class="pre">0.8658,</span> <span class="pre">'01':</span> <span class="pre">-0.0024,</span> <span class="pre">'10':</span> <span class="pre">0.1041,</span> <span class="pre">'11':</span> <span class="pre">0.0324}</span></code></p>
 <p><code class="code docutils literal notranslate"><span class="pre">run()</span></code> and <code class="code docutils literal notranslate"><span class="pre">run_cut_circuit()</span></code> take <code class="code docutils literal notranslate"><span class="pre">qubits</span></code> in the same way, and hand
 back the distribution rather than expectation values.</p>
-<p>This costs <code class="code docutils literal notranslate"><span class="pre">2**k</span></code> values for <code class="code docutils literal notranslate"><span class="pre">k</span></code> qubits but no extra circuits, since the Z
-observables it needs all commute. See
-<a class="reference internal" href="theory/Probability_reconstruction.html"><span class="doc">the derivation</span></a>.</p>
-<p>The result is a dict, so it indexes and plots like one, and carries three views:</p>
+<p>The whole distribution needs one measurement setting, so the experiment is the size it
+would have been for a single observable however many qubits are asked for. See
+<a class="reference internal" href="theory/Probability_reconstruction.html"><span class="doc">the derivation</span></a>. for how the distribution
+id reconstructed.</p>
+<p>The result is a mapping, so it indexes and plots like a dict, and carries three views:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">probs</span><span class="p">[</span><span class="s1">&#39;00&#39;</span><span class="p">]</span>                     <span class="c1"># 0.8658</span>
 <span class="n">probs</span><span class="o">.</span><span class="n">quasi_probabilities</span><span class="p">()</span>     <span class="c1"># the same values, as a plain dict</span>
 <span class="n">probs</span><span class="o">.</span><span class="n">nearest_probabilities</span><span class="p">()</span>   <span class="c1"># closest true distribution, negatives projected away</span>
 <span class="n">probs</span><span class="o">.</span><span class="n">counts</span><span class="p">()</span>                  <span class="c1"># scaled by the shots the experiment ran at</span>
 <span class="n">probs</span><span class="o">.</span><span class="n">counts</span><span class="p">(</span><span class="n">shots</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>        <span class="c1"># or by any other shots</span>
+</pre></div>
+</div>
+<p>The three dict views report, by default, the ten most likely bitstrings. Pass <code class="code docutils literal notranslate"><span class="pre">top</span></code> for a different
+number, or <code class="code docutils literal notranslate"><span class="pre">top=None</span></code> for all of them:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">probs</span><span class="o">.</span><span class="n">quasi_probabilities</span><span class="p">(</span><span class="n">top</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>      <span class="c1"># the fifty most likely</span>
+<span class="n">probs</span><span class="o">.</span><span class="n">counts</span><span class="p">(</span><span class="n">shots</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">top</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>     <span class="c1"># the whole distribution, as before</span>
+</pre></div>
+</div>
+<p>Note that <code class="code docutils literal notranslate"><span class="pre">counts()</span></code> sums to <code class="code docutils literal notranslate"><span class="pre">shots</span></code> only with <code class="code docutils literal notranslate"><span class="pre">top=None</span></code> and
+Only <code class="code docutils literal notranslate"><span class="pre">quasi_probabilities()</span></code> gets cheaper this way since the other two project onto the
+nearest physical distribution first.</p>
+<p>Additionally you can get probabilities of a single bitstring or a marginal distribution over a subset of the qubits:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">probs</span><span class="o">.</span><span class="n">top</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>               <span class="c1"># the 100 most likely bitstrings, exactly</span>
+<span class="n">probs</span><span class="o">.</span><span class="n">probability_of</span><span class="p">(</span><span class="s1">&#39;01&#39;</span><span class="p">)</span>   <span class="c1"># one bitstring, without the others</span>
+<span class="n">probs</span><span class="o">.</span><span class="n">marginal</span><span class="p">([</span><span class="mi">0</span><span class="p">])</span>          <span class="c1"># a coarser distribution, summed over the rest</span>
 </pre></div>
 </div>
 <p>Against the same circuit run whole:</p>
@@ -781,9 +807,14 @@ and that job’s id, and how a communicating run split its shots between waves.<
     class="page-toc tocsection onthispage">
     <i class="fa-solid fa-list"></i> Contents
   </div>
-  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+  <nav id="pst-page-toc-nav" class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#creating-cut-circuits-and-experiments">Creating cut circuits and experiments</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#import-needed-packages">Import needed packages</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#define-a-quantumcircuit-just-like-in-qiskit">Define a QuantumCircuit just like in Qiskit</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#insert-cuts-to-denote-where-to-cut-the-circuit">Insert cuts to denote where to cut the circuit</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#extract-cut-locations-and-split-into-independent-subcircuits">Extract cut locations and split into independent subcircuits</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#define-observables-and-generate-experiment-circuits">Define observables and generate experiment circuits</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#what-a-cut-costs">What a cut costs</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cheaper-decompositions">Cheaper decompositions</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#options">Options</a></li>

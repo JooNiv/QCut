@@ -8,7 +8,6 @@ hands them the batches in turn.
 .. code:: python
 
    from qiskit import QuantumCircuit
-   from qiskit.quantum_info import SparsePauliOp
    from qiskit.circuit.library import CXGate
    import QCut as ck
    from QCut import ParallelBackend, cutGate
@@ -22,7 +21,7 @@ hands them the batches in turn.
    circuit.cx(4, 5)
 
    cut_circuit = ck.get_locations_and_subcircuits(circuit)
-   experiment = ck.get_experiment_circuits(cut_circuit, SparsePauliOp(["IIIIIZ"]))
+   experiment = ck.get_experiment_circuits(cut_circuit, ["IIIIIZ"])
 
    backend = ParallelBackend([first_device, second_device])
    results = ck.run_experiments(experiment, shots=4096, backend=backend)

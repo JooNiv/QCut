@@ -34,8 +34,10 @@ Installation
 
 For installation a UNIX-like system is currently needed due to pymetis being used for automatic cut finding. On Windows use WSL
 
-| **Pip:**
-| Installation should be done via ``uv``
+Pip
+~~~
+
+Installation should be done via ``uv``
 
 .. code:: bash
 
@@ -47,11 +49,14 @@ If using other than the default Qiskit version (newest) it is recommended to ins
 
 Using uv is the recommended install method.
 
-| **Install from source**
-| It is also possible to use QCut by cloning this repository and
-  including it in your project folder.
+Install from source
+~~~~~~~~~~~~~~~~~~~
 
-**IQM hardware and fake backends**
+It is also possible to use QCut by cloning this repository and
+including it in your project folder.
+
+IQM hardware and fake backends
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 QCut ships an extra for this, so the adapter comes with it:
 

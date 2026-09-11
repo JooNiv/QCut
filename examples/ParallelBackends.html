@@ -42,7 +42,7 @@
 
     <script src="../_static/jquery.js?v=5d32c60e"></script>
     <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-    <script src="../_static/documentation_options.js?v=3ddcfa7e"></script>
+    <script src="../_static/documentation_options.js?v=670ce57a"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/sphinx-book-theme.js?v=fab101a9"></script>
@@ -54,7 +54,7 @@
     <link rel="prev" title="Automatic cuts" href="AutomaticCuts.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="2.1.4.post1.dev9+gc8c23de33" />
+  <meta name="docsearch:version" content="2.1.4.post1.dev12+gf721d404c" />
   </head>
   
   
@@ -177,10 +177,7 @@
 </details></li>
 <li class="toctree-l1"><a class="reference internal" href="../Acknowledgement.html">Acknowledgements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../License.html">License</a></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../QCut.html">QCut API reference</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../_autosummary/QCut.html">QCut</a></li>
-</ul>
-</details></li>
+<li class="toctree-l1"><a class="reference internal" href="../QCut.html">QCut API reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Changelog.html">Changelog</a></li>
 </ul>
 
@@ -344,10 +341,9 @@
   <section id="running-on-several-backends">
 <h1>Running on several backends<a class="headerlink" href="#running-on-several-backends" title="Link to this heading">#</a></h1>
 <p>A cut experiment is a collection of many independent circuits, so it does not have to run on one
-machine. <a class="reference internal" href="../_autosummary/QCut.html#QCut.ParallelBackend" title="QCut.ParallelBackend"><code class="xref py py-class docutils literal notranslate"><span class="pre">ParallelBackend</span></code></a> takes several backends and
+machine. <a class="reference internal" href="../QCut.html#QCut.ParallelBackend" title="QCut.ParallelBackend"><code class="xref py py-class docutils literal notranslate"><span class="pre">ParallelBackend</span></code></a> takes several backends and
 hands them the batches in turn.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit</span><span class="w"> </span><span class="kn">import</span> <span class="n">QuantumCircuit</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit.quantum_info</span><span class="w"> </span><span class="kn">import</span> <span class="n">SparsePauliOp</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">qiskit.circuit.library</span><span class="w"> </span><span class="kn">import</span> <span class="n">CXGate</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">QCut</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ck</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">QCut</span><span class="w"> </span><span class="kn">import</span> <span class="n">ParallelBackend</span><span class="p">,</span> <span class="n">cutGate</span>
@@ -361,7 +357,7 @@ hands them the batches in turn.</p>
 <span class="n">circuit</span><span class="o">.</span><span class="n">cx</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
 
 <span class="n">cut_circuit</span> <span class="o">=</span> <span class="n">ck</span><span class="o">.</span><span class="n">get_locations_and_subcircuits</span><span class="p">(</span><span class="n">circuit</span><span class="p">)</span>
-<span class="n">experiment</span> <span class="o">=</span> <span class="n">ck</span><span class="o">.</span><span class="n">get_experiment_circuits</span><span class="p">(</span><span class="n">cut_circuit</span><span class="p">,</span> <span class="n">SparsePauliOp</span><span class="p">([</span><span class="s2">&quot;IIIIIZ&quot;</span><span class="p">]))</span>
+<span class="n">experiment</span> <span class="o">=</span> <span class="n">ck</span><span class="o">.</span><span class="n">get_experiment_circuits</span><span class="p">(</span><span class="n">cut_circuit</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;IIIIIZ&quot;</span><span class="p">])</span>
 
 <span class="n">backend</span> <span class="o">=</span> <span class="n">ParallelBackend</span><span class="p">([</span><span class="n">first_device</span><span class="p">,</span> <span class="n">second_device</span><span class="p">])</span>
 <span class="n">results</span> <span class="o">=</span> <span class="n">ck</span><span class="o">.</span><span class="n">run_experiments</span><span class="p">(</span><span class="n">experiment</span><span class="p">,</span> <span class="n">shots</span><span class="o">=</span><span class="mi">4096</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="n">backend</span><span class="p">)</span>
@@ -412,7 +408,7 @@ by position. Anything answering that can decide for itself where circuits go.</p
         <span class="k">return</span> <span class="n">backend</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">ready</span><span class="p">,</span> <span class="n">shots</span><span class="o">=</span><span class="n">shots</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span>
 </pre></div>
 </div>
-<p><a class="reference internal" href="../_autosummary/QCut.html#QCut.transpile_circuits" title="QCut.transpile_circuits"><code class="xref py py-func docutils literal notranslate"><span class="pre">transpile_circuits()</span></code></a> is what QCut transpiles with
+<p><a class="reference internal" href="../QCut.html#QCut.transpile_circuits" title="QCut.transpile_circuits"><code class="xref py py-func docutils literal notranslate"><span class="pre">transpile_circuits()</span></code></a> is what QCut transpiles with
 itself, so an IQM device goes through IQM’s own transpiler and a resonator machine gets
 its MOVE routing. It takes a <code class="docutils literal notranslate"><span class="pre">CutCircuit</span></code>, a <code class="docutils literal notranslate"><span class="pre">CutExperiment</span></code> or plain circuits.</p>
 <p>Four things keep it correct:</p>
@@ -479,7 +475,7 @@ smallest of its own, since a batch may land on any of them. Add <code class="doc
     class="page-toc tocsection onthispage">
     <i class="fa-solid fa-list"></i> Contents
   </div>
-  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+  <nav id="pst-page-toc-nav" class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#why-it-can-be-shared">Why it can be shared</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#machines-of-different-sizes">Machines of different sizes</a></li>

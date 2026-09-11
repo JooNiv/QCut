@@ -41,7 +41,7 @@
 
     <script src="../../../_static/jquery.js?v=5d32c60e"></script>
     <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-    <script src="../../../_static/documentation_options.js?v=3ddcfa7e"></script>
+    <script src="../../../_static/documentation_options.js?v=670ce57a"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/scripts/sphinx-book-theme.js?v=fab101a9"></script>
@@ -51,7 +51,7 @@
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="2.1.4.post1.dev9+gc8c23de33" />
+  <meta name="docsearch:version" content="2.1.4.post1.dev12+gf721d404c" />
   </head>
   
   
@@ -176,10 +176,7 @@
 </details></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../Acknowledgement.html">Acknowledgements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../License.html">License</a></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../../../QCut.html">QCut API reference</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../../_autosummary/QCut.html">QCut</a></li>
-</ul>
-</details></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../QCut.html">QCut API reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../Changelog.html">Changelog</a></li>
 </ul>
 
@@ -294,7 +291,7 @@
 
 
 <div class="viewcode-block" id="ParallelBackend">
-<a class="viewcode-back" href="../../../_autosummary/QCut.html#QCut.ParallelBackend">[docs]</a>
+<a class="viewcode-back" href="../../../QCut.html#QCut.ParallelBackend">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">ParallelBackend</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Spread an experiment&#39;s jobs over several backends, one batch each in turn.</span>
 
@@ -323,7 +320,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="ParallelBackend.__init__">
-<a class="viewcode-back" href="../../../_autosummary/QCut.html#QCut.ParallelBackend.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../QCut.html#QCut.ParallelBackend.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">backends</span><span class="p">,</span>
@@ -376,7 +373,7 @@
         <span class="p">)</span>
 
 <div class="viewcode-block" id="ParallelBackend.run">
-<a class="viewcode-back" href="../../../_autosummary/QCut.html#QCut.ParallelBackend.run">[docs]</a>
+<a class="viewcode-back" href="../../../QCut.html#QCut.ParallelBackend.run">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">circuits</span><span class="p">,</span> <span class="n">shots</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1024</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Transpile this batch for the backend whose turn it is, and submit it there.</span>
 

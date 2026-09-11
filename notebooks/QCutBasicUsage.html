@@ -42,7 +42,7 @@
 
     <script src="../_static/jquery.js?v=5d32c60e"></script>
     <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-    <script src="../_static/documentation_options.js?v=3ddcfa7e"></script>
+    <script src="../_static/documentation_options.js?v=670ce57a"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/sphinx-book-theme.js?v=fab101a9"></script>
@@ -54,7 +54,7 @@
     <link rel="prev" title="Notebooks" href="../Notebooks.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="2.1.4.post1.dev9+gc8c23de33" />
+  <meta name="docsearch:version" content="2.1.4.post1.dev12+gf721d404c" />
   </head>
   
   
@@ -177,10 +177,7 @@
 </details></li>
 <li class="toctree-l1"><a class="reference internal" href="../Acknowledgement.html">Acknowledgements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../License.html">License</a></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../QCut.html">QCut API reference</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../_autosummary/QCut.html">QCut</a></li>
-</ul>
-</details></li>
+<li class="toctree-l1"><a class="reference internal" href="../QCut.html">QCut API reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Changelog.html">Changelog</a></li>
 </ul>
 
@@ -462,7 +459,7 @@
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># generate experiment circuits</span>
-<span class="n">observables</span> <span class="o">=</span> <span class="n">SparsePauliOp</span><span class="p">([</span><span class="s2">&quot;IIIIZ&quot;</span><span class="p">,</span> <span class="s2">&quot;IIIZI&quot;</span><span class="p">,</span> <span class="s2">&quot;IIZII&quot;</span><span class="p">,</span> <span class="s2">&quot;IIIZZ&quot;</span><span class="p">])</span>
+<span class="n">observables</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;IIIIZ&quot;</span><span class="p">,</span> <span class="s2">&quot;IIIZI&quot;</span><span class="p">,</span> <span class="s2">&quot;IIZII&quot;</span><span class="p">,</span> <span class="s2">&quot;IIIZZ&quot;</span><span class="p">]</span>
 
 <span class="n">cut_experiment</span> <span class="o">=</span> <span class="n">ck</span><span class="o">.</span><span class="n">get_experiment_circuits</span><span class="p">(</span><span class="n">transpiled</span><span class="p">,</span> <span class="n">observables</span><span class="p">)</span>
 </pre></div>
@@ -489,20 +486,20 @@
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">obs</span> <span class="o">=</span> <span class="p">[</span><span class="n">ob</span><span class="o">.</span><span class="n">to_label</span><span class="p">()</span> <span class="k">for</span> <span class="n">ob</span> <span class="ow">in</span> <span class="n">observables</span><span class="o">.</span><span class="n">paulis</span><span class="p">]</span>
-
-<span class="n">estimator</span> <span class="o">=</span> <span class="n">StatevectorEstimator</span><span class="p">()</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">estimator</span> <span class="o">=</span> <span class="n">StatevectorEstimator</span><span class="p">()</span>
 <span class="n">exact_expvals</span> <span class="o">=</span> <span class="p">[</span>
     <span class="n">e</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">evs</span>
-    <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">estimator</span><span class="o">.</span><span class="n">run</span><span class="p">([(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">([</span><span class="n">circuit</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">obs</span><span class="p">),</span> <span class="n">obs</span><span class="p">)])</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">estimator</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+        <span class="p">[(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">([</span><span class="n">circuit</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">observables</span><span class="p">),</span> <span class="n">observables</span><span class="p">)]</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
 <span class="p">]</span>
 
 
 <span class="n">tr</span> <span class="o">=</span> <span class="n">transpile</span><span class="p">(</span><span class="n">circuit</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="n">fake</span><span class="p">)</span>
 
-<span class="n">tr_obs</span> <span class="o">=</span> <span class="n">observables</span><span class="o">.</span><span class="n">apply_layout</span><span class="p">(</span><span class="n">tr</span><span class="o">.</span><span class="n">layout</span><span class="p">)</span>
-
-<span class="n">tr_obs_separate</span> <span class="o">=</span> <span class="p">[</span><span class="n">SparsePauliOp</span><span class="p">(</span><span class="n">pauli</span><span class="o">.</span><span class="n">to_label</span><span class="p">())</span> <span class="k">for</span> <span class="n">pauli</span> <span class="ow">in</span> <span class="n">tr_obs</span><span class="o">.</span><span class="n">paulis</span><span class="p">]</span>
+<span class="n">tr_obs_separate</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">SparsePauliOp</span><span class="p">(</span><span class="n">label</span><span class="p">)</span><span class="o">.</span><span class="n">apply_layout</span><span class="p">(</span><span class="n">tr</span><span class="o">.</span><span class="n">layout</span><span class="p">)</span> <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">observables</span>
+<span class="p">]</span>
 
 <span class="n">fake_estimator</span> <span class="o">=</span> <span class="n">BackendEstimator</span><span class="p">(</span><span class="n">backend</span><span class="o">=</span><span class="n">fake</span><span class="p">)</span>
 <span class="n">exps</span> <span class="o">=</span> <span class="p">[</span>

@@ -42,7 +42,7 @@
 
     <script src="_static/jquery.js?v=5d32c60e"></script>
     <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-    <script src="_static/documentation_options.js?v=3ddcfa7e"></script>
+    <script src="_static/documentation_options.js?v=670ce57a"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/scripts/sphinx-book-theme.js?v=fab101a9"></script>
@@ -50,10 +50,10 @@
     <link rel="icon" href="_static/qcut-logo.svg"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="prev" title="QCut" href="_autosummary/QCut.html" />
+    <link rel="prev" title="QCut API reference" href="QCut.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="2.1.4.post1.dev9+gc8c23de33" />
+  <meta name="docsearch:version" content="2.1.4.post1.dev12+gf721d404c" />
   </head>
   
   
@@ -176,10 +176,7 @@
 </details></li>
 <li class="toctree-l1"><a class="reference internal" href="Acknowledgement.html">Acknowledgements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="License.html">License</a></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="QCut.html">QCut API reference</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="_autosummary/QCut.html">QCut</a></li>
-</ul>
-</details></li>
+<li class="toctree-l1"><a class="reference internal" href="QCut.html">QCut API reference</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">Changelog</a></li>
 </ul>
 
@@ -326,6 +323,12 @@
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-2-2-0"><strong>Version 2.2.0</strong></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#breaking-changes">Breaking changes</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#reconstructing-a-distribution-no-longer-costs-2-k">Reconstructing a distribution no longer costs <code class="code docutils literal notranslate"><span class="pre">2**k</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#observables-as-qiskit-s-estimator-takes-them">Observables as qiskit’s estimator takes them</a></li>
+</ul>
+</li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-2-1-4"><strong>Version 2.1.4</strong></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-2-1-3"><strong>Version 2.1.3</strong></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-2-1-2"><strong>Version 2.1.2</strong></a></li>
@@ -335,7 +338,7 @@
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-2-0-0"><strong>Version 2.0.0</strong></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#breaking-changes">Breaking changes</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">Breaking changes</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cutting-arbitrary-two-qubit-gates">Cutting arbitrary two-qubit gates</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#joint-cutting-of-parallel-rotation-gates">Joint cutting of parallel rotation gates</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#wire-cuts-with-classical-communication">Wire cuts with classical communication</a></li>
@@ -393,6 +396,63 @@
                   
   <section id="changelog">
 <span id="changes"></span><h1>Changelog<a class="headerlink" href="#changelog" title="Link to this heading">#</a></h1>
+<section id="version-2-2-0">
+<h2><strong>Version 2.2.0</strong><a class="headerlink" href="#version-2-2-0" title="Link to this heading">#</a></h2>
+<section id="breaking-changes">
+<h3>Breaking changes<a class="headerlink" href="#breaking-changes" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>A <code class="code docutils literal notranslate"><span class="pre">SparsePauliOp</span></code> is now <strong>one</strong> observable, the weighted sum of its terms, as
+it is for <code class="code docutils literal notranslate"><span class="pre">EstimatorV2</span></code>. It used to be read as a list of observables, one
+expectation value per Pauli, with its coefficients ignored. To keep that reading,
+pass the labels themselves: <code class="code docutils literal notranslate"><span class="pre">SparsePauliOp([&quot;IZ&quot;,</span> <span class="pre">&quot;ZI&quot;])</span></code> becomes
+<code class="code docutils literal notranslate"><span class="pre">[&quot;IZ&quot;,</span> <span class="pre">&quot;ZI&quot;]</span></code>.</p></li>
+<li><p>The expectation values are shaped like the observables given, as an estimator’s are,
+so one observable comes back as a zero-dimensional array and a list of <code class="code docutils literal notranslate"><span class="pre">n</span></code> as
+<code class="code docutils literal notranslate"><span class="pre">(n,)</span></code>.</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">CutExperiment.observables</span></code> is now the <code class="code docutils literal notranslate"><span class="pre">ObservablesArray</span></code> that was asked
+for, and has no <code class="code docutils literal notranslate"><span class="pre">len()</span></code>, use <code class="code docutils literal notranslate"><span class="pre">.size</span></code> or <code class="code docutils literal notranslate"><span class="pre">.shape</span></code>. The Pauli terms
+the circuits actually measure are <code class="code docutils literal notranslate"><span class="pre">CutExperiment.observable_terms</span></code>.</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">quasi_probabilities()</span></code>, <code class="code docutils literal notranslate"><span class="pre">nearest_probabilities()</span></code> and <code class="code docutils literal notranslate"><span class="pre">counts()</span></code>
+return, by default, the ten most likely bitstrings rather than all of them, most likely first.
+All three take <code class="code docutils literal notranslate"><span class="pre">top</span></code> for a different number and <code class="code docutils literal notranslate"><span class="pre">top=None</span></code> for the
+previous behaviour. Note that <code class="code docutils literal notranslate"><span class="pre">counts()</span></code> sums to <code class="code docutils literal notranslate"><span class="pre">shots</span></code> only with <code class="code docutils literal notranslate"><span class="pre">top=None</span></code> and
+Only <code class="code docutils literal notranslate"><span class="pre">quasi_probabilities()</span></code> gets cheaper this way since the other two project onto the
+nearest physical distribution first.</p></li>
+</ul>
+</section>
+<section id="reconstructing-a-distribution-no-longer-costs-2-k">
+<h3>Reconstructing a distribution no longer costs <code class="code docutils literal notranslate"><span class="pre">2**k</span></code><a class="headerlink" href="#reconstructing-a-distribution-no-longer-costs-2-k" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Reconstructing a distribution over <code class="code docutils literal notranslate"><span class="pre">k</span></code> qubits is now flat in <code class="code docutils literal notranslate"><span class="pre">k</span></code> rather
+than exponential in it with a proper reconstruction method. See <a class="reference external" href="https://jooniv.github.io/QCut/theory/Probability_reconstruction.html">the
+derivation</a>.</p></li>
+<li><p>The distribution is held in that product form, so three new queries never expand it:
+<code class="code docutils literal notranslate"><span class="pre">top(count)</span></code> gives the most likely bitstrings, exactly, by branch and bound
+(measured at 17 ms and 0.2 MB for the top 100 of 2<sup>24</sup>, against 270 ms and
+384 MB just to hold the values); <code class="code docutils literal notranslate"><span class="pre">probability_of(bitstring)</span></code> gives one value in
+about 25 microseconds whatever <code class="code docutils literal notranslate"><span class="pre">k</span></code> is; and <code class="code docutils literal notranslate"><span class="pre">marginal(qubits)</span></code> gives a
+coarser distribution over a subset. <code class="code docutils literal notranslate"><span class="pre">probabilities()</span></code> returns every value as a
+numpy array.</p></li>
+<li><p>The observables of an experiment given <code class="code docutils literal notranslate"><span class="pre">qubits</span></code> are built on demand, so nothing
+pays for the <code class="code docutils literal notranslate"><span class="pre">2**k</span></code> Pauli labels unless it asks for them, and the weights
+between them and the terms are never written out at all. Estimating them with
+<code class="code docutils literal notranslate"><span class="pre">estimate_expectation_values()</span></code> still works.</p></li>
+<li><p>Reconstruction is now sparse, costing shots rather than <code class="code docutils literal notranslate"><span class="pre">2**num_qubits</span></code> per subcircuit.</p></li>
+<li><p>Fixed <code class="code docutils literal notranslate"><span class="pre">top()</span></code> skipping unmeasured outcomes</p></li>
+</ul>
+</section>
+<section id="observables-as-qiskit-s-estimator-takes-them">
+<h3>Observables as qiskit’s estimator takes them<a class="headerlink" href="#observables-as-qiskit-s-estimator-takes-them" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p><code class="code docutils literal notranslate"><span class="pre">observables</span></code> now takes anything qiskit’s estimator takes: a Pauli label, a
+<code class="code docutils literal notranslate"><span class="pre">Pauli</span></code>, a <code class="code docutils literal notranslate"><span class="pre">SparsePauliOp</span></code>, a <code class="code docutils literal notranslate"><span class="pre">SparseObservable</span></code> (qiskit 2.1+), a
+<code class="code docutils literal notranslate"><span class="pre">{label:</span> <span class="pre">coefficient}</span></code> mapping, or any nested sequence of those. Coefficients
+are applied rather than ignored.</p></li>
+<li><p>Projector terms are supported: <code class="code docutils literal notranslate"><span class="pre">0</span> <span class="pre">1</span> <span class="pre">+</span> <span class="pre">-</span> <span class="pre">r</span> <span class="pre">l</span></code>, whether written as labels or
+carried by a <code class="code docutils literal notranslate"><span class="pre">SparseObservable</span></code> (qiskit 2.1+).</p></li>
+</ul>
+</section>
+</section>
 <section id="version-2-1-4">
 <h2><strong>Version 2.1.4</strong><a class="headerlink" href="#version-2-1-4" title="Link to this heading">#</a></h2>
 <ul class="simple">
@@ -465,8 +525,8 @@ public, and the types the public functions return are importable from <code clas
 </section>
 <section id="version-2-0-0">
 <h2><strong>Version 2.0.0</strong><a class="headerlink" href="#version-2-0-0" title="Link to this heading">#</a></h2>
-<section id="breaking-changes">
-<h3>Breaking changes<a class="headerlink" href="#breaking-changes" title="Link to this heading">#</a></h3>
+<section id="id1">
+<h3>Breaking changes<a class="headerlink" href="#id1" title="Link to this heading">#</a></h3>
 <ul class="simple">
 <li><p><code class="code docutils literal notranslate"><span class="pre">RawResult</span></code> no longer takes a <code class="code docutils literal notranslate"><span class="pre">samples</span></code> argument. It is now
 <code class="code docutils literal notranslate"><span class="pre">RawResult(results,</span> <span class="pre">shots,</span> <span class="pre">experiment=None)</span></code> and carries the experiment itself.</p></li>
@@ -987,12 +1047,12 @@ call. A target that batches on its own account, such as
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="_autosummary/QCut.html"
+       href="QCut.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">QCut</p>
+        <p class="prev-next-title">QCut API reference</p>
       </div>
     </a>
 </div>
@@ -1011,8 +1071,14 @@ call. A target that batches on its own account, such as
     class="page-toc tocsection onthispage">
     <i class="fa-solid fa-list"></i> Contents
   </div>
-  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+  <nav id="pst-page-toc-nav" class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-2-2-0"><strong>Version 2.2.0</strong></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#breaking-changes">Breaking changes</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#reconstructing-a-distribution-no-longer-costs-2-k">Reconstructing a distribution no longer costs <code class="code docutils literal notranslate"><span class="pre">2**k</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#observables-as-qiskit-s-estimator-takes-them">Observables as qiskit’s estimator takes them</a></li>
+</ul>
+</li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-2-1-4"><strong>Version 2.1.4</strong></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-2-1-3"><strong>Version 2.1.3</strong></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-2-1-2"><strong>Version 2.1.2</strong></a></li>
@@ -1022,7 +1088,7 @@ call. A target that batches on its own account, such as
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#version-2-0-0"><strong>Version 2.0.0</strong></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#breaking-changes">Breaking changes</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">Breaking changes</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cutting-arbitrary-two-qubit-gates">Cutting arbitrary two-qubit gates</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#joint-cutting-of-parallel-rotation-gates">Joint cutting of parallel rotation gates</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#wire-cuts-with-classical-communication">Wire cuts with classical communication</a></li>

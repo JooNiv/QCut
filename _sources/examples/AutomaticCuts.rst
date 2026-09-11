@@ -9,7 +9,6 @@ Under the hood QCut uses `pymetis <https://github.com/inducer/pymetis>`__  to fi
 .. code:: python
 
    from qiskit import QuantumCircuit
-   from qiskit.quantum_info import SparsePauliOp
    import QCut as ck
    from QCut import find_cuts, CutOptions
 
@@ -21,7 +20,7 @@ Under the hood QCut uses `pymetis <https://github.com/inducer/pymetis>`__  to fi
    for qubit in range(6):
        circuit.rx(0.6, qubit)
 
-   observables = SparsePauliOp(["IIIIZZ", "IIIZZI", "IZZIII", "ZZIIII"])
+   observables = ["IIIIZZ", "IIIZZI", "IZZIII", "ZZIIII"]
 
    options = CutOptions(
       finder_num_partitions=2,

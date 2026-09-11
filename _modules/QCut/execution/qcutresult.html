@@ -41,7 +41,7 @@
 
     <script src="../../../_static/jquery.js?v=5d32c60e"></script>
     <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-    <script src="../../../_static/documentation_options.js?v=3ddcfa7e"></script>
+    <script src="../../../_static/documentation_options.js?v=670ce57a"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/scripts/sphinx-book-theme.js?v=fab101a9"></script>
@@ -51,7 +51,7 @@
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="2.1.4.post1.dev9+gc8c23de33" />
+  <meta name="docsearch:version" content="2.1.4.post1.dev12+gf721d404c" />
   </head>
   
   
@@ -176,10 +176,7 @@
 </details></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../Acknowledgement.html">Acknowledgements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../License.html">License</a></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../../../QCut.html">QCut API reference</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../../_autosummary/QCut.html">QCut</a></li>
-</ul>
-</details></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../QCut.html">QCut API reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../Changelog.html">Changelog</a></li>
 </ul>
 
@@ -319,7 +316,7 @@
 
 
 <div class="viewcode-block" id="CircuitResult">
-<a class="viewcode-back" href="../../../_autosummary/QCut.html#QCut.CircuitResult">[docs]</a>
+<a class="viewcode-back" href="../../../QCut.html#QCut.CircuitResult">[docs]</a>
 <span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">CircuitResult</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;One subcircuit&#39;s result within one group, before it is turned into counts.</span>
@@ -341,7 +338,7 @@
     <span class="n">label_filter</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">tuple</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">tuple</span><span class="p">)</span>
 
 <div class="viewcode-block" id="CircuitResult.raw_counts">
-<a class="viewcode-back" href="../../../_autosummary/QCut.html#QCut.CircuitResult.raw_counts">[docs]</a>
+<a class="viewcode-back" href="../../../QCut.html#QCut.CircuitResult.raw_counts">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">raw_counts</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Counts as measured, brought to the nominal shot count.&quot;&quot;&quot;</span>
         <span class="n">counts</span> <span class="o">=</span> <span class="n">_counts_from</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">result</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
@@ -351,7 +348,7 @@
 
 
 <div class="viewcode-block" id="CircuitResult.counts">
-<a class="viewcode-back" href="../../../_autosummary/QCut.html#QCut.CircuitResult.counts">[docs]</a>
+<a class="viewcode-back" href="../../../QCut.html#QCut.CircuitResult.counts">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">counts</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;What this group takes from the circuit: rescaled, then label-selected.&quot;&quot;&quot;</span>
         <span class="n">counts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">raw_counts</span><span class="p">()</span>
@@ -401,7 +398,7 @@
 
 
 <div class="viewcode-block" id="RawResult">
-<a class="viewcode-back" href="../../../_autosummary/QCut.html#QCut.RawResult">[docs]</a>
+<a class="viewcode-back" href="../../../QCut.html#QCut.RawResult">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">RawResult</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Simple wrapper class for raw experiment results. Stores the raw results, the shot</span>
@@ -411,7 +408,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="RawResult.__init__">
-<a class="viewcode-back" href="../../../_autosummary/QCut.html#QCut.RawResult.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../QCut.html#QCut.RawResult.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">results</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">CircuitResult</span><span class="p">]]],</span>
@@ -434,7 +431,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shots</span>
 
 <div class="viewcode-block" id="RawResult.result">
-<a class="viewcode-back" href="../../../_autosummary/QCut.html#QCut.RawResult.result">[docs]</a>
+<a class="viewcode-back" href="../../../QCut.html#QCut.RawResult.result">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">result</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">CircuitResult</span><span class="p">]]]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get raw results for all experiments, as ``[group][observable][subcircuit]``.</span>

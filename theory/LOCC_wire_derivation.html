@@ -42,7 +42,7 @@
 
     <script src="../_static/jquery.js?v=5d32c60e"></script>
     <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-    <script src="../_static/documentation_options.js?v=3ddcfa7e"></script>
+    <script src="../_static/documentation_options.js?v=670ce57a"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/sphinx-book-theme.js?v=fab101a9"></script>
@@ -56,7 +56,7 @@
     <link rel="prev" title="Deriving Optimal QPD for Wire Cuts" href="Wire_derivation.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="2.1.4.post1.dev9+gc8c23de33" />
+  <meta name="docsearch:version" content="2.1.4.post1.dev12+gf721d404c" />
   </head>
   
   
@@ -179,10 +179,7 @@
 </details></li>
 <li class="toctree-l1"><a class="reference internal" href="../Acknowledgement.html">Acknowledgements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../License.html">License</a></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../QCut.html">QCut API reference</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../_autosummary/QCut.html">QCut</a></li>
-</ul>
-</details></li>
+<li class="toctree-l1"><a class="reference internal" href="../QCut.html">QCut API reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Changelog.html">Changelog</a></li>
 </ul>
 
@@ -445,7 +442,6 @@ L_\infty = \{(0 \mid y)\}
 <p>The circuit count improvement is real and large, 28 against 64 at two wires, 120 against 512 at three.</p>
 <p>The shot cost is more subtle, and the ideal <span class="math notranslate nohighlight">\(\gamma\)</span> overstates it. The protocol assumes the prepared state can follow the measured outcome <strong>shot by shot</strong>. Batched runs have to emulate that, so a group’s measuring side is read from only the shots whose label matched, rescaled by <span class="math notranslate nohighlight">\(2^n\)</span>. Its variance is then <span class="math notranslate nohighlight">\(2^n/N\)</span> rather than <span class="math notranslate nohighlight">\(1/N\)</span>, and only the sharing of that circuit between the channel’s <span class="math notranslate nohighlight">\(2^n\)</span> groups pays for the difference. It pays for it exactly, leaving nothing over, the measuring side comes out at parity, not ahead.</p>
 <p>That is why the realised gain falls short of the ideal <span class="math notranslate nohighlight">\(\gamma\)</span>. The <span class="math notranslate nohighlight">\(\gamma\)</span> of a decomposition bounds the shot cost on the assumption that every term’s per-shot estimator is capped at one. The local terms are products of two unconditioned Pauli expectations and sit far below that cap, while the rescaling above puts the communicating terms near it, so the two decompositions approach their own bounds by different margins and the ratio of the <span class="math notranslate nohighlight">\(\gamma\)</span>s overpredicts the ratio of the costs.</p>
-<p>How far short is circuit dependent and this page does not put a number on it. Measurements taken by sampling the estimator’s variance were too noisy to support one — repeats of a single configuration moved by factors approaching two — and settling it wants the variance evaluated in closed form from exact term values rather than sampled. What is not in doubt is that a single wire costs more in shots than the local tables while saving only a quarter of the circuits, and that blocks of two and more save on shots, circuits and jobs together.</p>
 <p>That is why <code class="docutils literal notranslate"><span class="pre">wire_cut_communication</span></code> defaults to <code class="docutils literal notranslate"><span class="pre">&quot;auto&quot;</span></code>, which uses communication only for blocks of two or more wires.</p>
 <p>Removing the <span class="math notranslate nohighlight">\(2^n\)</span> rescaling altogether would need genuine per-shot feed-forward between the two halves, mid-circuit measurement with the preparation conditioned on it, which is not efficient on current hardware.</p>
 </section>
@@ -503,7 +499,7 @@ L_\infty = \{(0 \mid y)\}
     class="page-toc tocsection onthispage">
     <i class="fa-solid fa-list"></i> Contents
   </div>
-  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+  <nav id="pst-page-toc-nav" class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#why-local-operations-cannot-do-better">Why local operations cannot do better</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-construction">The construction</a><ul class="nav section-nav flex-column">

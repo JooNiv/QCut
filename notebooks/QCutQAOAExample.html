@@ -42,7 +42,7 @@
 
     <script src="../_static/jquery.js?v=5d32c60e"></script>
     <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-    <script src="../_static/documentation_options.js?v=3ddcfa7e"></script>
+    <script src="../_static/documentation_options.js?v=670ce57a"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/sphinx-book-theme.js?v=fab101a9"></script>
@@ -54,7 +54,7 @@
     <link rel="prev" title="QCut Basic Usage" href="QCutBasicUsage.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="2.1.4.post1.dev9+gc8c23de33" />
+  <meta name="docsearch:version" content="2.1.4.post1.dev12+gf721d404c" />
   </head>
   
   
@@ -177,10 +177,7 @@
 </details></li>
 <li class="toctree-l1"><a class="reference internal" href="../Acknowledgement.html">Acknowledgements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../License.html">License</a></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../QCut.html">QCut API reference</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../_autosummary/QCut.html">QCut</a></li>
-</ul>
-</details></li>
+<li class="toctree-l1"><a class="reference internal" href="../QCut.html">QCut API reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Changelog.html">Changelog</a></li>
 </ul>
 
@@ -365,7 +362,7 @@
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/c8f6c57c26f9d99c3e9c69d1b590666f43ea475d701306f2cadf2decb327bc5c.png" src="../_images/c8f6c57c26f9d99c3e9c69d1b590666f43ea475d701306f2cadf2decb327bc5c.png" />
+<img alt="../_images/576bc7ce87567688823284e032d5ef46207d723bd96c611d9308c5e43c558b19.png" src="../_images/576bc7ce87567688823284e032d5ef46207d723bd96c611d9308c5e43c558b19.png" />
 </div>
 </div>
 <div class="cell docutils container">
@@ -446,7 +443,7 @@
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/ae35d97a861a851bd7ed23e321f7c96a2b14d26f29eeb4d23e6074187898f8be.png" src="../_images/ae35d97a861a851bd7ed23e321f7c96a2b14d26f29eeb4d23e6074187898f8be.png" />
+<img alt="../_images/3554e0feee4f114049ccf3ef058107e49573a0e038280d9d82589b8443297c58.png" src="../_images/3554e0feee4f114049ccf3ef058107e49573a0e038280d9d82589b8443297c58.png" />
 </div>
 </div>
 <div class="cell docutils container">
@@ -458,7 +455,7 @@
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/8c72cc19d78edd1f0a3e396289a7418c7221b2b6e77d3d45d88385a1d07ca083.png" src="../_images/8c72cc19d78edd1f0a3e396289a7418c7221b2b6e77d3d45d88385a1d07ca083.png" />
+<img alt="../_images/e58146ea5a48f48ba1e8c80f55d72ad26fc257c01b171828e58b4a685d6bb91d.png" src="../_images/e58146ea5a48f48ba1e8c80f55d72ad26fc257c01b171828e58b4a685d6bb91d.png" />
 </div>
 </div>
 <div class="cell docutils container">
@@ -530,14 +527,9 @@
         <span class="c1"># run the experiments, apply the {0,1} -&gt; [-1,1] post-processing function</span>
         <span class="n">results</span> <span class="o">=</span> <span class="n">ck</span><span class="o">.</span><span class="n">run_experiments</span><span class="p">(</span><span class="n">p_cut_experiment</span><span class="p">,</span> <span class="n">shots</span><span class="o">=</span><span class="mi">2</span><span class="o">**</span><span class="mi">12</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="n">backend</span><span class="p">)</span>
 
-        <span class="n">reconstructed_expvals</span> <span class="o">=</span> <span class="n">ck</span><span class="o">.</span><span class="n">estimate_expectation_values</span><span class="p">(</span>
-            <span class="n">results</span>
-        <span class="p">)</span>
+        <span class="n">reconstructed_expval</span> <span class="o">=</span> <span class="n">ck</span><span class="o">.</span><span class="n">estimate_expectation_values</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
 
-        <span class="c1"># Calculate the hamiltonian expectation value</span>
-        <span class="n">f</span> <span class="o">=</span> <span class="n">hamiltonian</span><span class="p">[</span><span class="s2">&quot;const&quot;</span><span class="p">]</span>
-        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">reconstructed_expvals</span><span class="p">,</span> <span class="n">hamiltonian</span><span class="p">[</span><span class="s2">&quot;coefs&quot;</span><span class="p">]):</span>
-            <span class="n">f</span> <span class="o">+=</span> <span class="n">i</span> <span class="o">*</span> <span class="n">j</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="n">hamiltonian</span><span class="p">[</span><span class="s2">&quot;const&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="nb">float</span><span class="p">(</span><span class="n">reconstructed_expval</span><span class="p">)</span>
         <span class="k">global</span> <span class="n">exps_cut</span>
         <span class="n">exps_cut</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">exps_cut</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">f</span>
@@ -566,9 +558,9 @@
 <div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> message: Return from COBYLA because the trust region radius reaches its lower bound.
  success: True
   status: 0
-     fun: -1.8798828125
-       x: [ 3.467e+00 -1.853e+00]
-    nfev: 32
+     fun: -1.775390625
+       x: [ 3.417e+00 -1.948e+00]
+    nfev: 30
    maxcv: 0.0
 </pre></div>
 </div>
@@ -591,9 +583,9 @@
 <div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> message: Return from COBYLA because the trust region radius reaches its lower bound.
  success: True
   status: 0
-     fun: -1.8325386047363281
-       x: [ 2.780e+00 -2.894e+00]
-    nfev: 31
+     fun: -1.8179985284805298
+       x: [ 4.408e+00 -2.774e+00]
+    nfev: 34
    maxcv: 0.0
 </pre></div>
 </div>
@@ -615,7 +607,7 @@
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/18b42a8bb61c951b66fc65c4a0a255205f73d3c8fb1d46b2b71ca1f65208e1f8.png" src="../_images/18b42a8bb61c951b66fc65c4a0a255205f73d3c8fb1d46b2b71ca1f65208e1f8.png" />
+<img alt="../_images/fd9a9c92710d10b81cf5bc02b3601ff1eabfdd500bf18f7c2b419636d14cb531.png" src="../_images/fd9a9c92710d10b81cf5bc02b3601ff1eabfdd500bf18f7c2b419636d14cb531.png" />
 </div>
 </div>
 <div class="cell docutils container">
@@ -634,7 +626,7 @@
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/97dd2a15e2b472f44ebe9c0350cf548b3b3209d924e7113e163801f5b72e2f34.png" src="../_images/97dd2a15e2b472f44ebe9c0350cf548b3b3209d924e7113e163801f5b72e2f34.png" />
+<img alt="../_images/37284ded01faffe8e71ebda5a9e9c764d9faf2d29f9fa74bdc2d8ca56ff94dce.png" src="../_images/37284ded01faffe8e71ebda5a9e9c764d9faf2d29f9fa74bdc2d8ca56ff94dce.png" />
 </div>
 </div>
 <div class="cell docutils container">
@@ -651,13 +643,18 @@
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/87760cfe5b805926146187e0fb8c7dcde37d1ce67f850989bc37328507ffc6f4.png" src="../_images/87760cfe5b805926146187e0fb8c7dcde37d1ce67f850989bc37328507ffc6f4.png" />
+<img alt="../_images/49576a2b807f39b67d5d17e590b2a254408a3deaf9eb03bd607fa60cda1e613e.png" src="../_images/49576a2b807f39b67d5d17e590b2a254408a3deaf9eb03bd607fa60cda1e613e.png" />
 </div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">uncut_counts</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">uncut_solution_circuit</span><span class="p">,</span> <span class="n">shots</span><span class="o">=</span><span class="mi">2</span><span class="o">**</span><span class="mi">12</span><span class="p">)</span><span class="o">.</span><span class="n">result</span><span class="p">()</span><span class="o">.</span><span class="n">get_counts</span><span class="p">()</span>
-<span class="n">cut_counts</span> <span class="o">=</span> <span class="n">ck</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">cut_solution_circuit</span><span class="p">,</span> <span class="n">shots</span><span class="o">=</span><span class="mi">2</span><span class="o">**</span><span class="mi">12</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="n">sim</span><span class="p">,</span> <span class="n">qubits</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span><span class="o">.</span><span class="n">counts</span><span class="p">()</span>
+
+<span class="n">top_uncut_counts</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">uncut_counts</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">item</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)[:</span><span class="mi">20</span><span class="p">])</span>
+
+<span class="n">cut_dist</span> <span class="o">=</span> <span class="n">ck</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">cut_solution_circuit</span><span class="p">,</span> <span class="n">shots</span><span class="o">=</span><span class="mi">2</span><span class="o">**</span><span class="mi">12</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="n">sim</span><span class="p">,</span> <span class="n">qubits</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
+
+<span class="n">cut_counts</span> <span class="o">=</span> <span class="n">cut_dist</span><span class="o">.</span><span class="n">top</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -665,12 +662,12 @@
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit.visualization</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_histogram</span>
-<span class="n">plot_histogram</span><span class="p">([</span><span class="n">uncut_counts</span><span class="p">,</span> <span class="n">cut_counts</span><span class="p">],</span> <span class="n">legend</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;uncut&quot;</span><span class="p">,</span> <span class="s2">&quot;cut&quot;</span><span class="p">],</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span> <span class="n">sort</span><span class="o">=</span><span class="s2">&quot;desc&quot;</span><span class="p">)</span>
+<span class="n">plot_histogram</span><span class="p">([</span><span class="n">top_uncut_counts</span><span class="p">,</span> <span class="n">cut_counts</span><span class="p">],</span> <span class="n">legend</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;uncut&quot;</span><span class="p">,</span> <span class="s2">&quot;cut&quot;</span><span class="p">],</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span> <span class="n">sort</span><span class="o">=</span><span class="s2">&quot;desc&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/89bff3a07e682ced70dea1c674846a7168525dadb6fb810f9db7157d3d8a35f4.png" src="../_images/89bff3a07e682ced70dea1c674846a7168525dadb6fb810f9db7157d3d8a35f4.png" />
+<img alt="../_images/140e75128387ee47e312846076d5d40618f0dae70781d39ab327d8a8dc061e14.png" src="../_images/140e75128387ee47e312846076d5d40618f0dae70781d39ab327d8a8dc061e14.png" />
 </div>
 </div>
 <p>Only solution states have a high probability in both the cut and uncut cases</p>
