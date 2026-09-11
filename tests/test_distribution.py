@@ -7,7 +7,7 @@ The point is that the cheap queries agree with the dense table they avoid buildi
 import numpy as np
 import pytest
 
-from QCut.execution.distribution import SeparableDistribution
+from QCut.execution.distribution import Mode, SeparableDistribution
 
 #: Exact-arithmetic comparisons. The queries and the table are the same sum in a
 #: different order, so they agree to rounding; measured worst case over the cases below
@@ -221,3 +221,111 @@ def test_an_experiment_where_every_group_was_dropped_is_uniform():
     assert distribution.array() == pytest.approx(np.full(8, 1 / 8))
     assert distribution.value(3) == pytest.approx(1 / 8)
     assert distribution.top(4) == [(outcome, 1 / 8) for outcome in range(4)]
+
+
+# --- unmeasured outcomes and the sparsity that follows -------------------------------
+
+
+def _brute_force(distribution):
+    """Every value, read one at a time, so ``top`` has something independent to meet."""
+    return np.array(
+        [distribution.value(outcome) for outcome in range(1 << distribution.width)]
+    )
+
+
+@pytest.mark.parametrize("seed", range(40))
+def test_top_agrees_with_brute_force_when_outcomes_go_unmeasured(seed):
+    """Outcomes nothing measured are still outcomes, and can belong in the top.
+
+    A mode holds only the outcomes some group measured, so most of the table is made of
+    outcomes that carry no row at all. They all have the same value, and once the
+    measured ones run out they are what the rest of the list is made of. Reconstructing
+    a distribution from few shots is exactly the case that gets there, so this is
+    checked against every value rather than against the search's own reasoning.
+    """
+    rng = np.random.default_rng(seed)
+    width = int(rng.integers(2, 9))
+    split = int(rng.integers(1, width)) if width > 1 else width
+    bits = [list(range(split)), list(range(split, width))]
+    bits = [held for held in bits if held]
+    groups = int(rng.integers(1, 4))
+
+    modes = []
+    for held in bits:
+        mode = rng.normal(size=(1 << len(held), groups))
+        # Knock out most rows, as a low shot count does.
+        mode[rng.random(mode.shape[0]) < 0.7] = 0.0
+        modes.append(mode)
+
+    distribution = SeparableDistribution(width, bits, modes, rng.normal(size=groups))
+    exact = np.sort(_brute_force(distribution))[::-1]
+
+    for count in (1, 2, 5, 1 << width):
+        count = min(count, 1 << width)
+        found = distribution.top(count)
+        assert [value for _outcome, value in found] == pytest.approx(
+            list(exact[:count]), abs=EXACT
+        )
+        assert len({outcome for outcome, _value in found}) == count, "outcomes repeat"
+
+
+def test_a_mode_keeps_only_the_outcomes_that_carry_a_weight():
+    """The rows are what the search walks, so the zeros must not be among them."""
+    dense = np.zeros((16, 2))
+    dense[3] = [1.0, -2.0]
+    dense[11] = [0.5, 0.5]
+
+    distribution = SeparableDistribution(4, [[0, 1, 2, 3]], [dense], np.ones(2))
+    mode = distribution.modes[0]
+
+    assert list(mode.idx) == [3, 11]
+    assert len(mode) == 16, "it still spans every outcome"
+    assert mode[3] == pytest.approx([1.0, -2.0])
+    assert mode[7] == pytest.approx([0.0, 0.0]), "an unmeasured outcome reads as zero"
+    assert mode[3, 1] == pytest.approx(-2.0)
+    assert list(mode.missing())[:4] == [0, 1, 2, 4]
+    assert mode.dense() == pytest.approx(dense)
+
+
+def test_a_wide_mode_costs_its_rows_rather_than_its_width():
+    """The point of the whole representation: 2**40 outcomes, two of them measured.
+
+    The weights are negative because a measured outcome's weight enters the value with
+    a minus sign, so it takes a negative weight to make one of them likely. The other
+    :math:`2^{40} - 2` outcomes sit at ``constant``, and the search has to find the
+    measured one among them without walking any of them.
+    """
+    mode = Mode(np.array([1, 1 << 39]), np.array([[-1.0], [-2.0]]), 40)
+    distribution = SeparableDistribution(40, [list(range(40))], [mode], np.ones(1))
+
+    assert mode.val.nbytes < 1000, "nothing proportional to 2**40 was built"
+    assert distribution.value(distribution._flip(1)) == pytest.approx(
+        distribution.constant + 1.0
+    )
+
+    best, second = distribution.top(2)
+    assert best[1] == pytest.approx(distribution.constant + 2.0)
+    assert second[1] == pytest.approx(distribution.constant + 1.0)
+
+
+def test_marginalising_keeps_the_rows_sparse():
+    """Summing bits away must not write the mode out on the way."""
+    mode = Mode(np.array([0b0001, 0b1000]), np.array([[1.0], [3.0]]), 20)
+    distribution = SeparableDistribution(20, [list(range(20))], [mode], np.ones(1))
+
+    reduced = distribution.marginal([0, 1])
+
+    assert reduced.width == 2
+    assert list(reduced.modes[0].idx) == [0, 1], "0b1000 folds onto 0, 0b0001 onto 1"
+    assert reduced.modes[0].val.ravel() == pytest.approx([3.0, 1.0])
+
+
+def test_rows_that_cancel_to_nothing_are_dropped():
+    """A stored row of zeros would read as measured, and it is not."""
+    mode = Mode(np.array([0b00, 0b10]), np.array([[1.0], [-1.0]]), 2)
+    distribution = SeparableDistribution(2, [[0, 1]], [mode], np.ones(1))
+
+    reduced = distribution.marginal([0])
+
+    assert reduced.modes[0].idx.size == 0, "1.0 and -1.0 summed away to nothing"
+    assert reduced.array() == pytest.approx(np.full(2, 0.5))
