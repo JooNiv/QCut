@@ -23,7 +23,12 @@ from qiskit.circuit.library import (
     iSwapGate,
 )
 from qiskit.providers.fake_provider import GenericBackendV2
-from qiskit.quantum_info import Operator, SparsePauliOp, Statevector, random_unitary
+from qiskit.quantum_info import (
+    Operator,
+    Pauli,
+    Statevector,
+    random_unitary,
+)
 from qiskit_aer import AerSimulator
 
 import QCut as ck
@@ -299,12 +304,12 @@ def _two_partition_circuit(thetas, cut=True, marker=None):
     return circuit
 
 
-OBSERVABLES = SparsePauliOp(["IIIZ", "IIZI", "IZII", "ZIII", "IIZZ", "ZZII"])
+OBSERVABLES = ["IIIZ", "IIZI", "IZII", "ZIII", "IIZZ", "ZZII"]
 
 
 def _exact(circuit):
     state = Statevector(circuit)
-    return [float(np.real(state.expectation_value(p))) for p in OBSERVABLES.paulis]
+    return [float(np.real(state.expectation_value(Pauli(p)))) for p in OBSERVABLES]
 
 
 def _run(circuit, options):
@@ -532,9 +537,16 @@ def _three_gate_circuit(thetas, cut=True):
     return circuit
 
 
-SIX_QUBIT_OBSERVABLES = SparsePauliOp(
-    ["IIIIIZ", "IIIIZI", "IIIZII", "IIZIII", "IZIIII", "ZIIIII", "IIIIZZ", "ZZIIII"]
-)
+SIX_QUBIT_OBSERVABLES = [
+    "IIIIIZ",
+    "IIIIZI",
+    "IIIZII",
+    "IIZIII",
+    "IZIIII",
+    "ZIIIII",
+    "IIIIZZ",
+    "ZZIIII",
+]
 
 
 @pytest.mark.slow
@@ -548,7 +560,7 @@ def test_three_parallel_gates_run_end_to_end():
     thetas = [0.9, 1.3, 0.5]
     state = Statevector(_three_gate_circuit(thetas, cut=False))
     exact = [
-        float(np.real(state.expectation_value(p))) for p in SIX_QUBIT_OBSERVABLES.paulis
+        float(np.real(state.expectation_value(Pauli(p)))) for p in SIX_QUBIT_OBSERVABLES
     ]
 
     cut_circuit = ck.get_locations_and_subcircuits(
@@ -613,7 +625,7 @@ def test_find_cuts_bundles_the_cuts_it_chooses():
     circuit = _triangles_circuit()
     state = Statevector(circuit)
     exact = [
-        float(np.real(state.expectation_value(p))) for p in SIX_QUBIT_OBSERVABLES.paulis
+        float(np.real(state.expectation_value(Pauli(p)))) for p in SIX_QUBIT_OBSERVABLES
     ]
 
     seen = {}

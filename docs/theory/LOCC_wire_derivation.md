@@ -78,8 +78,6 @@ The shot cost is more subtle, and the ideal $\gamma$ overstates it. The protocol
 
 That is why the realised gain falls short of the ideal $\gamma$. The $\gamma$ of a decomposition bounds the shot cost on the assumption that every term's per-shot estimator is capped at one. The local terms are products of two unconditioned Pauli expectations and sit far below that cap, while the rescaling above puts the communicating terms near it, so the two decompositions approach their own bounds by different margins and the ratio of the $\gamma$s overpredicts the ratio of the costs.
 
-How far short is circuit dependent and this page does not put a number on it. Measurements taken by sampling the estimator's variance were too noisy to support one — repeats of a single configuration moved by factors approaching two — and settling it wants the variance evaluated in closed form from exact term values rather than sampled. What is not in doubt is that a single wire costs more in shots than the local tables while saving only a quarter of the circuits, and that blocks of two and more save on shots, circuits and jobs together.
-
 That is why `wire_cut_communication` defaults to `"auto"`, which uses communication only for blocks of two or more wires.
 
 Removing the $2^n$ rescaling altogether would need genuine per-shot feed-forward between the two halves, mid-circuit measurement with the preparation conditioned on it, which is not efficient on current hardware.

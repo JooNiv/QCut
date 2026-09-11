@@ -1,6 +1,0 @@
-﻿QCut
-====
-
-.. automodule:: QCut
-
-   
