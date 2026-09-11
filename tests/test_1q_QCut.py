@@ -3,7 +3,6 @@
 import numpy as np
 import pytest
 from qiskit import QuantumCircuit
-from qiskit.quantum_info import SparsePauliOp
 from qiskit_aer import AerSimulator
 
 import QCut as ck
@@ -74,7 +73,7 @@ def test_results_exist() -> None:
 
     cut_circuit = get_locations_and_subcircuits(circ)
 
-    obs = SparsePauliOp.from_list([("ZZ", 1)])
+    obs = ["ZZ"]
 
     cut_experiment = ck.get_experiment_circuits(cut_circuit, obs)
 

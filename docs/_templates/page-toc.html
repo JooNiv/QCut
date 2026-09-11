@@ -1,0 +1,27 @@
+{#
+  Overrides sphinx_book_theme/components/page-toc.html.
+
+  The book theme copies this component from the pydata theme only to make the
+  title configurable, but its copy drops the `bd-toc-nav` class that the pydata
+  theme puts on the <nav>. That class is what `data-bs-spy`/`data-bs-target` on
+  <body> points at, so without it Bootstrap ScrollSpy finds no target: no TOC
+  link is ever marked active, the pydata script that mirrors `.active` onto the
+  parent <li> matches nothing, and the CSS rule that expands the active
+  section's subsections (`.bd-toc .nav > .active > ul`) never applies.
+
+  Restoring the class re-enables both the current-heading highlight and the
+  expansion of the active section. Drop this file if the book theme fixes its
+  copy upstream.
+-#}
+{% set page_toc = generate_toc_html() %}
+{%- if page_toc | length >= 1 %}
+{%- set page_navigation_heading_id = unique_html_id("pst-page-navigation-heading") -%}
+  <div
+    id="{{ page_navigation_heading_id }}"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> {{ translate(theme_toc_title) }}
+  </div>
+  <nav id="pst-page-toc-nav" class="bd-toc-nav page-toc" aria-labelledby="{{ page_navigation_heading_id }}">
+    {{ page_toc }}
+  </nav>
+{%- endif %}

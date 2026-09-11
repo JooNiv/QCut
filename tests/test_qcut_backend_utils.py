@@ -3,7 +3,7 @@ import pytest
 from qiskit import QuantumCircuit
 from qiskit.circuit.library import CXGate
 from qiskit.providers.fake_provider import GenericBackendV2
-from qiskit.quantum_info import SparsePauliOp, Statevector
+from qiskit.quantum_info import Pauli, Statevector
 
 import QCut as ck
 from QCut import cut, cutGate
@@ -67,7 +67,7 @@ def test_transpile_experiments():
 
     cut_circuit = ck.get_locations_and_subcircuits(cut_copy)
 
-    exp_circuits = ck.get_experiment_circuits(cut_circuit, SparsePauliOp("ZZZZ"))
+    exp_circuits = ck.get_experiment_circuits(cut_circuit, ["ZZZZ"])
 
     transpiled = ck.transpile_experiments(exp_circuits, backend, optimization_level=3)
 
@@ -111,7 +111,7 @@ def test_transpiled_subcircuits_build_experiments(basis_gates):
     cut_circuit = ck.get_locations_and_subcircuits(cut_circ.copy())
     transpiled = ck.transpile_subcircuits(cut_circuit, generic, optimization_level=3)
 
-    experiments = ck.get_experiment_circuits(transpiled, SparsePauliOp("ZZZZ"))
+    experiments = ck.get_experiment_circuits(transpiled, ["ZZZZ"])
 
     assert experiments.num_circuits > 0
 
@@ -125,7 +125,7 @@ def test_transpiled_subcircuits_give_correct_expectation_value():
     uncut.cx(0, 1)
     uncut.cx(1, 2)
     uncut.cx(2, 3)
-    exact = np.real(Statevector(uncut).expectation_value(SparsePauliOp("ZZZZ")))
+    exact = np.real(Statevector(uncut).expectation_value(Pauli("ZZZZ")))
 
     to_cut = QuantumCircuit(4)
     to_cut.h(0)
@@ -136,7 +136,7 @@ def test_transpiled_subcircuits_give_correct_expectation_value():
 
     cut_circuit = ck.get_locations_and_subcircuits(to_cut)
     transpiled = ck.transpile_subcircuits(cut_circuit, generic, optimization_level=3)
-    experiments = ck.get_experiment_circuits(transpiled, SparsePauliOp("ZZZZ"))
+    experiments = ck.get_experiment_circuits(transpiled, ["ZZZZ"])
     results = ck.run_experiments(experiments, shots=20000)
 
     assert np.allclose(ck.estimate_expectation_values(results), exact, atol=0.1)
