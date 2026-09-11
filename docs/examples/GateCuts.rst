@@ -41,7 +41,6 @@ in :doc:`../Theory`.
 
    from qiskit import QuantumCircuit
    from qiskit.circuit.library import RZZGate
-   from qiskit.quantum_info import SparsePauliOp
    import QCut as ck
    from QCut import cutGate, CutOptions
 
@@ -55,7 +54,7 @@ in :doc:`../Theory`.
    circuit.append(**cutGate(RZZGate(0.7), 1, 2))
    circuit.append(**cutGate(RZZGate(0.9), 0, 3))
 
-   observables = SparsePauliOp(["IIIZ", "IIZI", "IZII", "ZIII"])
+   observables = ["IIIZ", "IIZI", "IZII", "ZIII"]
 
    cut_circuit = ck.get_locations_and_subcircuits(circuit)
    experiment = ck.get_experiment_circuits(cut_circuit, observables)
